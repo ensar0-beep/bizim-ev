@@ -112,6 +112,7 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 /* Sık eklenenler */
 .sugg{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 2px 2px}
 .sugg small{color:var(--muted);font-weight:600;font-size:.8rem;margin-right:2px}
+.row.shop{min-height:64px}.row.shop .t{font-size:1.08rem}
 .sugg button{min-height:40px;padding:0 12px;border-radius:999px;background:var(--sunk);font-weight:600;font-size:.9rem;display:inline-flex;align-items:center;gap:4px}
 /* Görev kutlaması ve çocuklar için haftalık yıldız */
 .cf{position:absolute;width:8px;height:10px;border-radius:2px;pointer-events:none;z-index:40}
@@ -417,7 +418,7 @@ const ICAT=[
  ['Spor & Hobi','bike',['bisiklet','top','raket','scooter','paten','kamp','çadır','oyun','puzzle','lego','gitar','kask','yoga','dambıl']],
  ['Sağlık & Bakım','heart',['ilaç','vitamin','tansiyon','şampuan','krem','diş fırçası','gözlük','termometre','tıraş','saç kurutma','tartı']],
  ['Hediye','gift',['hediye','doğum günü']],
- ['Market','cart',['süt','ekmek','peynir','yumurta','deterjan','çay','kahve','meyve','sebze','et','tavuk']]
+ ['Market','cart',['süt','ekmek','peynir','yumurta','deterjan','çay','kahve','meyve','sebze','et','tavuk','domates','salatalık','patates','soğan','muz','elma','limon','zeytin','yoğurt','tereyağ','makarna','pirinç','bulgur','mercimek','şeker','salça','tuvalet kağıdı','peçete','sabun','kıyma','balık','kurabiye','çamaşır suyu']]
 ];
 const CAT_ICON=Object.fromEntries(ICAT.map(([c,i])=>[c,i]));CAT_ICON['Diğer']='tag';
 const guessCat=name=>{const n=low(name);for(const[c,,ks]of ICAT)if(ks.some(k=>n.includes(k)))return c;return 'Diğer'};
@@ -489,7 +490,13 @@ function seed(){
    ['evyen','Çalışma masası','zeynep','yakinda','120 cm, odaya sığmalı','ayse'],
    ['evyen','Salon perdesi','ev','biara','2 kanat, 260 cm boy','fatma'],
    ['evyen','Çocuk odası halısı','can','biara','160×230','ayse'],
-   ['evyen','Çamaşır makinesi','ev','acil','9 kg, A enerji sınıfı','mehmet']
+   ['evyen','Çamaşır makinesi','ev','acil','9 kg, A enerji sınıfı','mehmet'],
+   ['genel','Ekmek','ev','acil','Tam buğday','fatma'],
+   ['genel','Domates','ev','yakinda','1 kg','ayse'],
+   ['genel','Muz','can','yakinda','','can'],
+   ['genel','Deterjan','ev','yakinda','Sıvı, 3 lt','mehmet'],
+   ['okul','Kurabiye','can','yakinda','Beslenme çantası için','can'],
+   ['evyen','Çamaşır suyu','ev','biara','','fatma']
   ].map(([list,name,forWho,pri,note,by,done],i)=>({id:uid(),list,name,for:forWho,pri,note,by,done:!!done,cat:guessCat(name),at:now-(i+1)*3*H})),
   wishes:[
    ['yer','Kapadokya','Balon turu için erken kalkmak lazım','mehmet',['mehmet','ayse','zeynep','can']],
@@ -508,6 +515,7 @@ function seed(){
    ['mekan','Çiya Sofrası','Kadıköy, mezeleri meşhur','fatma',['fatma','ayse','mehmet']],
    ['mekan','Moda sahilinde kahvaltı','Pazar sabahı','zeynep',['zeynep']]
   ].map(([type,title,note,by,want,dn],i)=>({id:uid(),type,title,note,by,want,at:now-(i+2)*26*H,done:!!dn,doneAt:dn?new Date(d(dn.d)).getTime():null,doneWith:dn?dn.with:[],mood:dn?dn.mood:'',planned:''})),
+  freq:[['Süt',22,3,4],['Ekmek',25,2,1],['Yumurta',12,6,3],['Yoğurt',11,4,2],['Domates',10,5,2],['Peynir',9,7,8],['Zeytin',8,10,4],['Tavuk',7,7,9],['Çay',6,20,22],['Tuvalet kağıdı',6,14,6],['Elma',5,8,3],['Makarna',5,12,3]].map(([name,n,every,l])=>({id:fid(name),name,n,every,last:now-l*864e5})),
   ann:{text:'Bu akşam misafir gelecek.',by:'ayse',at:Math.min(annAt.getTime(),now-30*60e3),until:null},
   activity:[
    {id:uid(),who:'mehmet',text:'Alınacaklar listesine dizüstü bilgisayar ekledi',at:now-20*60e3},
@@ -523,12 +531,12 @@ function seed(){
 // Firebase Realtime Database adresi. Boşsa uygulama yalnızca "örnek aile" modunda çalışır.
 const FB_URL='https://bizimev-96297-default-rtdb.firebaseio.com';
 const KEY='bizim-ev.v1';
-const COLS=['members','events','tasks','lists','items','wishes','activity'];
+const COLS=['members','events','tasks','lists','items','wishes','activity','freq'];
 let store;
 try{store=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{}},store&&typeof store==='object'?store:{});
 let S=null,baseC={};
-const UI={joinFor:null,joinShown:false,tab:'today',cal:'flow',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,lmode:'buy',wt:'all',wdone:false,net:'online',err:null};
+const UI={shop:null,shopAt:0,joinFor:null,joinShown:false,tab:'today',cal:'flow',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,lmode:'buy',wt:'all',wdone:false,net:'online',err:null};
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
 const meId=()=>store.mode==='demo'?store.demoMe:store.me;
 const M=id=>(S&&S.members.find(m=>m.id===id))||{id,name:'Eski üye',color:'#8A8178',role:'adult',rel:''};
@@ -569,9 +577,10 @@ function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
   case 'events':x.title=str(x.title);if(!okDate(x.date))x.date=T();x.time=okTime(x.time)?x.time:'';x.members=idList(x.members);if(!CATS[x.cat])x.cat='aile';if(!REM[x.rem])x.rem='none';if(!REP[x.repeat])x.repeat='none';x.loc=str(x.loc);x.desc=str(x.desc);break;
   case 'tasks':x.title=str(x.title);if(!okDate(x.due))x.due=T();x.time=okTime(x.time)?x.time:'';x.rot=idList(x.rot);if(!TREP[x.repeat])x.repeat='none';x.done=!!x.done;break;
   case 'lists':x.name=str(x.name)||'Liste';if(!P[x.icon])x.icon='tag';break;
-  case 'items':x.name=str(x.name)||'?';x.note=str(x.note);x.cat=str(x.cat)||'Diğer';if(!PRI[x.pri])x.pri='yakinda';x.for=str(x.for);x.list=str(x.list);x.done=!!x.done;break;
+  case 'items':x.name=str(x.name)||'?';x.note=str(x.note);x.cat=str(x.cat)||'Diğer';if(!PRI[x.pri])x.pri='yakinda';x.for=str(x.for);x.list=str(x.list);x.done=!!x.done;x.doneAt=+x.doneAt||0;break;
   case 'wishes':x.title=str(x.title)||'?';x.note=str(x.note);if(!WT[x.type])x.type='yer';x.want=idList(x.want);x.doneWith=idList(x.doneWith);if(!MOODS.includes(x.mood))x.mood='';x.planned=okDate(x.planned)?x.planned:'';x.done=!!x.done;break;
-  case 'activity':x.text=str(x.text);x.at=+x.at||0;break}
+  case 'activity':x.text=str(x.text);x.at=+x.at||0;break;
+  case 'freq':x.name=str(x.name)||'?';x.n=Math.max(0,+x.n||0);x.every=Math.max(0,+x.every||0);x.last=+x.last||0;break}
  return x}
 function flat(s){const o={};if(!s)return o;for(const c of COLS)for(const x of s[c]||[])o[c+'/'+x.id]=x;if(s.ann)o.ann=s.ann;if(s.meta)o.meta=s.meta;return o}
 function unflat(o){const s={meta:o.meta||{},ann:o.ann&&typeof o.ann==='object'?Object.assign({},o.ann,{text:str(o.ann.text)}):null};for(const c of COLS)s[c]=[];
@@ -793,6 +802,7 @@ function vCal(){
 
 function vLists(){
  if(UI.lmode==='wish')return vWishes();
+ if(UI.shop&&S.items.some(i=>i.cat===UI.shop))return vShop();UI.shop=null;
  if(!S.lists.length)return `<div class="hdr"><h1>Listeler</h1></div>${modeSeg()}<div class="group">${emptyBox('Henüz liste yok','Alınacak şeyleri toplamak için bir liste oluştur.',`<br><button class="btn primary" data-act="newList"${lock(can('list.manage'),PARENT)}>${I('plus','sm')}Liste oluştur</button>`)}</div>`;
  if(!S.lists.find(l=>l.id===UI.list))UI.list=S.lists[0].id;
  const L=S.lists.find(l=>l.id===UI.list),its=S.items.filter(i=>i.list===L.id),pend=its.filter(i=>!i.done),done=its.filter(i=>i.done);
@@ -802,10 +812,12 @@ function vLists(){
   <span class="m"><span>${I(CAT_ICON[i.cat]||'tag','sm')}${esc(i.cat)}</span>${i.for?`<span class="who">${i.for==='ev'?I('home','sm'):av(i.for,'xs')}${esc(forName(i.for))}</span>`:''}</span></button>
   ${I('chevR','sm')}</div>`;
  const groups=Object.keys(PRI).map(k=>[k,pend.filter(i=>i.pri===k).sort((a,b)=>b.at-a.at)]).filter(([,a])=>a.length);
+ const mk=S.items.filter(i=>!i.done&&i.cat==='Market').length;
  return `<div class="hdr"><div class="h"><h1>Listeler</h1></div><button class="btn ghost sm" data-act="newList"${lock(can('list.manage'),PARENT)}>${I('plus','sm')}Yeni liste</button></div>${modeSeg()}
  <div class="chips" role="tablist" aria-label="Listeler">${S.lists.map(l=>{const n=S.items.filter(i=>i.list===l.id&&!i.done).length;return `<button class="chip plain" role="tab" data-act="pickList" data-id="${l.id}" aria-pressed="${l.id===L.id}" aria-selected="${l.id===L.id}">${esc(l.name)}${n?` <span class="n">${n}</span>`:''}</button>`}).join('')}</div>
  <form class="addbar" data-form="addItem" autocomplete="off"><label class="sr" for="item-input">${esc(L.name)} listesine ekle</label><input id="item-input" placeholder="Ne alınacak? örn. Spor ayakkabı" enterkeyhint="done"><button class="btn primary" aria-label="Ekle">${I('plus')}</button></form>
  <div class="sugg" id="sugg">${suggHTML('')}</div>
+ ${mk?`<button class="btn soft block" data-act="shopStart" data-v="Market" style="margin-top:10px">${I('cart','sm')}Marketteyim · bütün listelerden ${mk} ürün</button>`:''}
  ${groups.length?groups.map(([k,arr])=>`<div class="catlbl" style="display:flex;align-items:center;gap:8px"><span class="tag ${PRI[k][1]}" style="text-transform:none;letter-spacing:0">${PRI[k][0]}</span><span>${arr.length}</span></div><div class="group">${arr.map(row).join('')}</div>`).join(''):`<div class="group" style="margin-top:14px">${emptyBox(done.length?'Hepsi alındı 🎉':'Liste boş',done.length?'Bu listede bekleyen bir şey kalmadı.':'Alınması gereken ilk şeyi yukarıya yaz.')}</div>`}
  ${done.length?`<div class="donebar"><button class="link" data-act="toggleDone" aria-expanded="${UI.doneOpen}">${I('chevD','sm')}Alınanlar (${done.length})</button><button class="link" data-act="clearDone">Alınanları temizle</button></div>${UI.doneOpen?`<div class="group">${done.map(row).join('')}</div>`:''}`:''}
  ${can('list.manage')&&S.lists.length>1?`<div style="text-align:center;margin-top:26px"><button class="link" style="color:var(--danger)" data-act="delList">${I('trash','sm')}“${esc(L.name)}” listesini sil</button></div>`:''}`}
@@ -1013,10 +1025,33 @@ function quickItem(){const lid=UI.list&&S.lists.find(l=>l.id===UI.list)?UI.list:
  <p class="note" style="margin-top:8px">${I('info','sm')}<span>Art arda ekleyebilirsin. Kategori otomatik seçilir; beden, numara gibi ayrıntıları sonra ürüne dokunarak eklersin.</span></p><div id="qi-added"></div>`)}
 
 // Sık alınanlar: listede bekleyenler hariç, yazdıkça süzülür. Önce genel market ürünleri, sonra ailenin daha önce aldıkları.
-const COMMON=['Süt','Ekmek','Yumurta','Peynir','Domates','Zeytin','Çay','Kahve','Deterjan','Tuvalet kağıdı','Meyve','Tavuk'];
+// Alışveriş hafızası (freq): her eklenen ürün sayılır; öneriler en çok eklenenlerden gelir.
+// Hafıza boşken (yeni aile) genel market ürünleri gösterilir.
+const COMMON=['Süt','Ekmek','Yumurta','Peynir','Domates','Zeytin','Çay','Deterjan'];
+const fid=n=>{let h=5381;const k=low(n.trim());for(let i=0;i<k.length;i++)h=(h*33^k.charCodeAt(i))>>>0;return 'f'+h.toString(36)+k.length};
+// İki ekleme arası gün ortalaması da tutulur (ileride "zamanı gelenler" için).
+function remember(nm){S.freq=S.freq||[];const id=fid(nm),f=S.freq.find(x=>x.id===id),now=Date.now();
+ if(!f){S.freq.push({id,name:nm,n:1,every:0,last:now});return}
+ const gap=(now-f.last)/864e5;f.n++;if(gap>.5)f.every=f.every?Math.round((f.every*.7+gap*.3)*10)/10:Math.round(gap*10)/10;f.last=now;f.name=nm}
 function suggHTML(q){const L=UI.list,have=new Set(S.items.filter(i=>i.list===L&&!i.done).map(i=>low(i.name)));q=low(q.trim());
- const pool=[...new Set([...COMMON,...S.items.filter(i=>i.done).map(i=>i.name)])].filter(n=>!have.has(low(n))&&(!q||low(n).includes(q))&&low(n)!==q).slice(0,8);
- return pool.length?`<small>${q?'Öneriler':'Sık eklenenler'}</small>${pool.map(n=>`<button type="button" data-act="sugAdd" data-v="${esc(n)}">${I('plus','sm')}${esc(n)}</button>`).join('')}`:''}
+ const fr=(S.freq||[]).filter(f=>f.n>=2);
+ const pool=(fr.length?[...fr].sort((a,b)=>b.n-a.n).map(f=>f.name):COMMON).filter(n=>!have.has(low(n))&&(!q||low(n).includes(q))&&low(n)!==q).slice(0,8);
+ return pool.length?`<small>${q?'Öneriler':fr.length?'En çok eklediklerin':'Sık alınanlar'}</small>${pool.map(n=>`<button type="button" data-act="sugAdd" data-v="${esc(n)}">${I('plus','sm')}${esc(n)}</button>`).join('')}`:''}
+// Alışveriş modu: seçilen mağaza türündeki (kategori) ürünler bütün listelerden tek ekranda; market için reyonlara göre
+const REYON=[['Temizlik & kağıt',['deterjan','tuvalet kağıdı','peçete','sabun','çamaşır suyu','bulaşık']],['Meyve & sebze',['domates','salatalık','patates','soğan','muz','elma','limon','meyve','sebze','biber','marul']],['Süt & kahvaltılık',['süt','peynir','yumurta','zeytin','yoğurt','tereyağ','bal','reçel']],['Et & tavuk',['et','tavuk','kıyma','balık','sucuk']],['Fırın & temel gıda',['ekmek','makarna','pirinç','bulgur','mercimek','şeker','salça','çay','kahve','kurabiye','un']]];
+function reyonOf(name){const n=low(name),w=n.split(/\s+/);for(const [r,ks] of REYON)if(ks.some(k=>k.includes(' ')?n.includes(k):w.some(x=>x.startsWith(k))))return r;return 'Diğer'}
+const catsOf=arr=>{const c={};arr.forEach(i=>c[i.cat]=(c[i.cat]||0)+1);return Object.entries(c).sort((a,b)=>(a[0]==='Market'?-1:b[0]==='Market'?1:b[1]-a[1]))};
+function vShop(){const cat=UI.shop,all=S.items.filter(i=>i.cat===cat);const pend=all.filter(i=>!i.done),inCart=all.filter(i=>i.done&&(i.doneAt||0)>=UI.shopAt);
+ const lname=id=>(S.lists.find(l=>l.id===id)||{}).name||'';
+ const row=i=>`<div class="row item shop${i.done?' done':''}" data-sw="item" data-id="${i.id}"><button class="chk" data-act="toggleItem" data-id="${i.id}" aria-pressed="${i.done}" aria-label="${esc(i.name)}: ${i.done?'sepetten çıkar':'sepete koydum'}"><span>${I('check','sm')}</span></button>
+  <button class="body tap" style="text-align:left" data-act="openItem" data-id="${i.id}"><span class="t">${esc(i.name)}</span><span class="m">${i.note?`<span style="color:var(--fg)">${esc(i.note)}</span>`:''}${S.lists.length>1?`<span>${esc(lname(i.list))}</span>`:''}${i.for&&i.for!=='ev'?`<span class="who">${av(i.for,'xs')}${esc(first(M(i.for).name))}</span>`:''}</span></button></div>`;
+ const groups={};pend.forEach(i=>{const g=cat==='Market'?reyonOf(i.name):lname(i.list);(groups[g]=groups[g]||[]).push(i)});
+ const order=cat==='Market'?[...REYON.map(r=>r[0]),'Diğer']:Object.keys(groups);
+ const stores=catsOf(S.items.filter(i=>!i.done));
+ return `<div class="hdr"><div class="h"><h1>${cat==='Market'?'Marketteyim':esc(cat)}</h1><div class="sub">Bütün listelerden ${pend.length} ürün bekliyor</div></div><button class="btn primary sm" data-act="shopEnd">Bitir</button></div>
+ <div class="chips" role="group" aria-label="Neredesin?">${stores.map(([c,n])=>`<button class="chip plain" data-act="shopCat" data-v="${esc(c)}" aria-pressed="${c===cat}">${esc(c)} <span class="n">${n}</span></button>`).join('')}</div>
+ ${pend.length?order.filter(g=>groups[g]).map(g=>`<div class="catlbl">${esc(g)} · ${groups[g].length}</div><div class="group">${groups[g].map(row).join('')}</div>`).join(''):`<div class="group" style="margin-top:14px">${emptyBox('Hepsi sepette 🎉','Bu alışverişte alınacak başka bir şey kalmadı.')}</div>`}
+ ${inCart.length?`<div class="catlbl">Sepette · ${inCart.length}</div><div class="group">${inCart.map(row).join('')}</div>`:''}`}
 // Bu hafta tamamlanan görev sayısı = yıldız (çocuk hesaplarında görünür)
 const weekStars=()=>{const from=parse(monday(T())).getTime();return S.tasks.filter(x=>x.done&&x.doneBy===meId()&&(x.doneAt||0)>=from).length};
 const starsHTML=()=>{const n=weekStars();return `<div class="stars">⭐ ${n?`Bu hafta ${n} yıldız`:'Bu hafta ilk yıldızını kazan: bir görevini bitir'}</div>`};
@@ -1033,7 +1068,7 @@ function startSw(s){const r=s.r;r.classList.add('swiping');const bg=document.cre
 function addItemTo(list,raw){raw=raw.trim();if(!raw)return null;
  const nm=up(raw[0])+raw.slice(1);
  const it={id:uid(),list,name:nm,for:'',pri:'yakinda',note:'',by:meId(),done:false,cat:guessCat(nm),at:Date.now()};
- S.items.push(it);log(`${S.lists.find(l=>l.id===list).name} listesine ${low(nm)} ekledi`);return it}
+ S.items.push(it);remember(nm);log(`${S.lists.find(l=>l.id===list).name} listesine ${low(nm)} ekledi`);return it}
 
 /* ---------- Eylemler ---------- */
 const A={
@@ -1178,7 +1213,10 @@ const A={
  // Listeler
  goList:d=>{UI.list=d.id;UI.tab='lists';render()},
  pickList:d=>{UI.list=d.id;UI.doneOpen=false;render(true)},
- toggleItem:d=>{const i=S.items.find(x=>x.id===d.id);if(!i)return;i.done=!i.done;i.doneBy=meId();if(i.done)log(`${low(i.name)} aldı`);render(true)},
+ shopStart:d=>{UI.shop=d.v;UI.shopAt=Date.now();render()},
+ shopCat:d=>{UI.shop=d.v;render(true)},
+ shopEnd:()=>{const n=S.items.filter(i=>i.done&&(i.doneAt||0)>=UI.shopAt).length;UI.shop=null;render();toast(n?`Alışveriş bitti · ${n} ürün alındı`:'Alışveriş modu kapandı')},
+ toggleItem:d=>{const i=S.items.find(x=>x.id===d.id);if(!i)return;i.done=!i.done;i.doneAt=i.done?Date.now():null;i.doneBy=meId();if(i.done)log(`${low(i.name)} aldı`);render(true)},
  lmode:d=>{UI.lmode=d.v;render(true)},
  goWishes:()=>{UI.tab='lists';UI.lmode='wish';render()},
  wt:d=>{UI.wt=d.v;render(true)},
