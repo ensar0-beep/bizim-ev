@@ -95,6 +95,27 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .swg{display:flex;flex-wrap:wrap;gap:10px}
 .swg button{width:44px;height:44px;border-radius:999px;background:var(--c);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:inset 0 0 0 3px var(--surface);border:2px solid transparent}
 .swg button[aria-pressed="true"]{border-color:var(--c)}
+/* Alt sayfa açıkken bildirim üstteki boşlukta (sayfa en fazla ekranın 72px altına kadar uzar) */
+.sheet{max-height:min(92%,calc(100% - 72px))}
+.toast.top{top:10px;bottom:auto}
+/* Alt sayfayı çizgiden ya da başlığından tutup aşağı çekerek kapatma */
+.sheet .grip{box-sizing:content-box;padding:10px 60px 6px;margin:0 auto;background-clip:content-box;cursor:grab}
+/* Satırı kaydırma: sağ = tamam, sol = sil */
+.group{position:relative}
+.row[data-sw]{touch-action:pan-y}
+.row.swiping{z-index:1;background:var(--surface)}
+.swbg{position:absolute;left:0;right:0;z-index:0;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-weight:700;font-size:.9rem}
+.swbg span{display:inline-flex;align-items:center;gap:6px;opacity:.55;transition:opacity .15s,transform .15s}
+.swbg.ok{background:var(--accent);color:var(--on-accent)}.swbg.ok span+span{visibility:hidden}
+.swbg.del{background:var(--danger);color:var(--surface)}.swbg.del span:first-child{visibility:hidden}
+.swbg.hot span{opacity:1;transform:scale(1.08)}
+/* Sık eklenenler */
+.sugg{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 2px 2px}
+.sugg small{color:var(--muted);font-weight:600;font-size:.8rem;margin-right:2px}
+.sugg button{min-height:40px;padding:0 12px;border-radius:999px;background:var(--sunk);font-weight:600;font-size:.9rem;display:inline-flex;align-items:center;gap:4px}
+/* Görev kutlaması ve çocuklar için haftalık yıldız */
+.cf{position:absolute;width:8px;height:10px;border-radius:2px;pointer-events:none;z-index:40}
+.stars{display:inline-flex;align-items:center;gap:6px;background:var(--warn-soft);color:var(--warn);font-weight:700;padding:6px 12px;border-radius:999px;font-size:.9rem;margin:0 0 12px}
 .avedit{position:relative;display:inline-flex;border-radius:999px;flex:none}
 .avedit .pen{position:absolute;right:-4px;bottom:-4px;width:26px;height:26px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--surface)}
 .avedit .pen .i{width:14px;height:14px}
@@ -507,7 +528,7 @@ let store;
 try{store=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{}},store&&typeof store==='object'?store:{});
 let S=null,baseC={};
-const UI={tab:'today',cal:'flow',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,lmode:'buy',wt:'all',wdone:false,net:'online',err:null};
+const UI={joinFor:null,joinShown:false,tab:'today',cal:'flow',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,lmode:'buy',wt:'all',wdone:false,net:'online',err:null};
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
 const meId=()=>store.mode==='demo'?store.demoMe:store.me;
 const M=id=>(S&&S.members.find(m=>m.id===id))||{id,name:'Eski üye',color:'#8A8178',role:'adult',rel:''};
@@ -597,7 +618,9 @@ function connect(){
 }
 function remote(){setNet('online');clearTimeout(rq);rq=setTimeout(()=>{
  if(!store.R||!store.R.meta){UI.err='missing';render();return}
- UI.err=null;fromRemote();save();render(true);checkReminders()},40)}
+ UI.err=null;fromRemote();save();render(true);checkReminders();
+ // Yeni katılan kişi: veriler gelince avatar ve renk seçimi bir kez açılır
+ if(UI.joinFor&&!UI.joinShown&&S.members.some(m=>m.id===UI.joinFor)){UI.joinShown=true;A.avPick({id:UI.joinFor})}},40)}
 let netT=null;
 function setNet(v){UI.net=v;clearTimeout(netT);if(v==='online')renderNet();else netT=setTimeout(renderNet,1500)}
 function renderNet(){const b=document.getElementById('netbar');if(!b)return;const n=Object.keys(store.pending||{}).length;
@@ -639,7 +662,7 @@ function evRow(e,day){const c=e.members.length>=S.members.length&&S.members.leng
   <span class="body"><span class="t">${esc(e.title)}</span><span class="m"><span>${I(CATS[e.cat][1],'sm')}${CATS[e.cat][0]}</span>${e.loc?`<span>${I('pin','sm')}${esc(e.loc)}</span>`:''}</span></span>
   ${isAll(e)?famBadge():avs(e.members)}<span class="sr">Katılanlar: ${isAll(e)?'Bütün aile':e.members.map(x=>M(x).name).join(', ')}</span></button>`}
 function taskRow(t){const late=!t.done&&t.due<T();const nx=nextIn(t);const ok=can('task.complete',t);
- return `<div class="row${t.done?' done':''}">
+ return `<div class="row${t.done?' done':''}" data-sw="task" data-id="${t.id}">
   <button class="chk" data-act="toggleTask" data-id="${t.id}" aria-pressed="${t.done}" aria-label="${esc(t.title)}: ${t.done?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}><span>${I('check','sm')}</span></button>
   <button class="body tap" style="text-align:left" data-act="openTask" data-id="${t.id}">
    <span class="t">${esc(t.title)}</span>
@@ -663,7 +686,7 @@ function tasksOn(day,c){const t=T();
   .sort((a,b)=>tkKey(a,day)<tkKey(b,day)?-1:1)}
 const dayData=(day,c)=>({evs:evsOn(day,c),tks:tasksOn(day,c)});
 function cTaskRow(t){const late=!t.done&&t.due<T();const ok=can('task.complete',t);
- return `<div class="row ctask${t.done?' done':''}">
+ return `<div class="row ctask${t.done?' done':''}" data-sw="task" data-id="${t.id}">
   ${t.time?`<span class="time">${hm(t.time)}</span>`:`<span class="time ad">Gün<br>içinde</span>`}
   <span class="mbar dash" style="--c:${M(t.assignee).color}"></span>
   <button class="body tap" style="text-align:left" data-act="openTask" data-id="${t.id}"><span class="t">${esc(t.title)}</span>
@@ -729,7 +752,7 @@ function vToday(){
  return `<div class="hdr"><div class="h"><h1>${g}, ${esc(first(m.name))} 👋</h1><div class="sub">${long(t)}</div></div>
   <button class="icon-btn" data-act="who" aria-label="Kişi değiştir">${av(m.id)}</button></div>
  ${demoBar()}${inviteCard()}
- ${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>`:''}
+ ${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>${starsHTML()}`:''}
  ${ann?`<section class="ann" aria-label="Aile duyurusu"><span class="ic">${I('mega')}</span><div class="body"><div class="txt">“${esc(ann.text)}”</div><div class="meta">${esc(M(ann.by).name)} · ${ago(ann.at)==='az önce'?'az önce':(iso(new Date(ann.at))===t?'bugün '+clock(ann.at):ago(ann.at))}</div></div>
    ${can('announce')?`<button class="icon-btn" data-act="annEdit" aria-label="Duyuruyu düzenle">${I('edit')}</button>`:''}</section>`
   :(can('announce')?`<button class="ann-empty" data-act="annEdit">${I('mega')}<span>Aileye kısa bir duyuru yaz</span></button>`:'')}
@@ -773,7 +796,7 @@ function vLists(){
  if(!S.lists.length)return `<div class="hdr"><h1>Listeler</h1></div>${modeSeg()}<div class="group">${emptyBox('Henüz liste yok','Alınacak şeyleri toplamak için bir liste oluştur.',`<br><button class="btn primary" data-act="newList"${lock(can('list.manage'),PARENT)}>${I('plus','sm')}Liste oluştur</button>`)}</div>`;
  if(!S.lists.find(l=>l.id===UI.list))UI.list=S.lists[0].id;
  const L=S.lists.find(l=>l.id===UI.list),its=S.items.filter(i=>i.list===L.id),pend=its.filter(i=>!i.done),done=its.filter(i=>i.done);
- const row=i=>`<div class="row item${i.done?' done':''}"><button class="chk" data-act="toggleItem" data-id="${i.id}" aria-pressed="${i.done}" aria-label="${esc(i.name)}: ${i.done?'alınmadı olarak işaretle':'alındı olarak işaretle'}"><span>${I('check','sm')}</span></button>
+ const row=i=>`<div class="row item${i.done?' done':''}" data-sw="item" data-id="${i.id}"><button class="chk" data-act="toggleItem" data-id="${i.id}" aria-pressed="${i.done}" aria-label="${esc(i.name)}: ${i.done?'alınmadı olarak işaretle':'alındı olarak işaretle'}"><span>${I('check','sm')}</span></button>
   <button class="body tap" style="text-align:left" data-act="openItem" data-id="${i.id}"><span class="t">${esc(i.name)}</span>
   ${i.note?`<span class="m" style="color:var(--fg)">${esc(i.note)}</span>`:''}
   <span class="m"><span>${I(CAT_ICON[i.cat]||'tag','sm')}${esc(i.cat)}</span>${i.for?`<span class="who">${i.for==='ev'?I('home','sm'):av(i.for,'xs')}${esc(forName(i.for))}</span>`:''}</span></button>
@@ -782,6 +805,7 @@ function vLists(){
  return `<div class="hdr"><div class="h"><h1>Listeler</h1></div><button class="btn ghost sm" data-act="newList"${lock(can('list.manage'),PARENT)}>${I('plus','sm')}Yeni liste</button></div>${modeSeg()}
  <div class="chips" role="tablist" aria-label="Listeler">${S.lists.map(l=>{const n=S.items.filter(i=>i.list===l.id&&!i.done).length;return `<button class="chip plain" role="tab" data-act="pickList" data-id="${l.id}" aria-pressed="${l.id===L.id}" aria-selected="${l.id===L.id}">${esc(l.name)}${n?` <span class="n">${n}</span>`:''}</button>`}).join('')}</div>
  <form class="addbar" data-form="addItem" autocomplete="off"><label class="sr" for="item-input">${esc(L.name)} listesine ekle</label><input id="item-input" placeholder="Ne alınacak? örn. Spor ayakkabı" enterkeyhint="done"><button class="btn primary" aria-label="Ekle">${I('plus')}</button></form>
+ <div class="sugg" id="sugg">${suggHTML('')}</div>
  ${groups.length?groups.map(([k,arr])=>`<div class="catlbl" style="display:flex;align-items:center;gap:8px"><span class="tag ${PRI[k][1]}" style="text-transform:none;letter-spacing:0">${PRI[k][0]}</span><span>${arr.length}</span></div><div class="group">${arr.map(row).join('')}</div>`).join(''):`<div class="group" style="margin-top:14px">${emptyBox(done.length?'Hepsi alındı 🎉':'Liste boş',done.length?'Bu listede bekleyen bir şey kalmadı.':'Alınması gereken ilk şeyi yukarıya yaz.')}</div>`}
  ${done.length?`<div class="donebar"><button class="link" data-act="toggleDone" aria-expanded="${UI.doneOpen}">${I('chevD','sm')}Alınanlar (${done.length})</button><button class="link" data-act="clearDone">Alınanları temizle</button></div>${UI.doneOpen?`<div class="group">${done.map(row).join('')}</div>`:''}`:''}
  ${can('list.manage')&&S.lists.length>1?`<div style="text-align:center;margin-top:26px"><button class="link" style="color:var(--danger)" data-act="delList">${I('trash','sm')}“${esc(L.name)}” listesini sil</button></div>`:''}`}
@@ -842,7 +866,7 @@ function vTasks(){
   list.sort((a,b)=>(a.due+(a.time||'99')).localeCompare(b.due+(b.time||'99')));
   body=G.map(([n,fn])=>{const a=list.filter(fn);return a.length?`<div class="sec-h" style="margin-top:20px"><h2 class="sec"${n==='Geciken'?' style="color:var(--danger)"':''}>${n}</h2><small style="color:var(--muted)">${a.length}</small></div><div class="group">${a.map(taskRow).join('')}</div>`:''}).join('')
    ||`<div class="group" style="margin-top:16px">${emptyBox(f==='mine'?'Sana atanmış görev yok':'Hiç görev yok','Ev işlerini paylaştırmak için ilk görevi ekle.',`<br><button class="btn primary sm" data-act="newTask">${I('plus','sm')}Görev ekle</button>`)}</div>`}
- return `<div class="hdr"><div class="h"><h1>Görevler</h1></div><button class="btn primary sm" data-act="newTask">${I('plus','sm')}Ekle</button></div>
+ return `<div class="hdr"><div class="h"><h1>Görevler</h1></div><button class="btn primary sm" data-act="newTask">${I('plus','sm')}Ekle</button></div>${isChild()?starsHTML():''}
  <div class="seg" role="group" aria-label="Süz">${[['mine','Bana atanan'],['all','Herkes'],['done','Tamamlanan']].map(([k,n])=>`<button data-act="tf" data-v="${k}" aria-pressed="${f===k}">${n}</button>`).join('')}</div>${body}`}
 
 function vFamily(){
@@ -907,11 +931,18 @@ function applyPrefs(){const r=document.documentElement;const t=store.prefs.theme
 let lastFocus=null;
 function sheet(title,body){lastFocus=document.activeElement;
  document.getElementById('layer').innerHTML=`<div class="scrim" data-act="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t"><div class="grip" aria-hidden="true"></div><div class="sh"><h3 id="sh-t">${title}</h3><button class="icon-btn" data-act="close" aria-label="Kapat">${I('x')}</button></div><div class="sb">${body}</div></div>`;
- setTimeout(()=>{const f=document.querySelector('.sheet [autofocus]')||document.querySelector('.sheet .icon-btn');f&&f.focus()},60)}
-function close(){document.getElementById('layer').innerHTML='';lastFocus&&document.body.contains(lastFocus)&&lastFocus.focus()}
+ setTimeout(()=>{const f=document.querySelector('.sheet [autofocus]')||document.querySelector('.sheet .icon-btn');f&&f.focus()},60);dragSheet();const t=document.querySelector('.toast');t&&t.classList.add('top')}
+function close(){document.getElementById('layer').innerHTML='';UI.joinFor=null;const t=document.querySelector('.toast');t&&t.classList.remove('top');lastFocus&&document.body.contains(lastFocus)&&lastFocus.focus()}
+function dragSheet(){const sh=document.querySelector('.sheet');if(!sh)return;let y0=null,dy=0,t0=0;
+ const scrim=()=>document.querySelector('.scrim');
+ const start=e=>{if(e.target.closest('button'))return;y0=e.clientY;dy=0;t0=Date.now();sh.style.animation='none';sh.style.transition='none';e.currentTarget.setPointerCapture(e.pointerId)};
+ const move=e=>{if(y0==null)return;dy=Math.max(0,e.clientY-y0);sh.style.transform=`translateY(${dy}px)`;const s=scrim();if(s)s.style.opacity=String(1-Math.min(dy/sh.offsetHeight,1)*.8)};
+ const end=()=>{if(y0==null)return;y0=null;const fast=dy>40&&dy/(Date.now()-t0)>.6;sh.style.transition='transform .2s ease';
+  if(dy>110||fast){sh.style.transform='translateY(100%)';setTimeout(close,190)}else{sh.style.transform='';const s=scrim();if(s){s.style.transition='opacity .2s';s.style.opacity=''}}};
+ sh.querySelectorAll('.grip,.sh').forEach(h=>{h.style.touchAction='none';h.addEventListener('pointerdown',start);h.addEventListener('pointermove',move);h.addEventListener('pointerup',end);h.addEventListener('pointercancel',end)})}
 let tt;
 function toast(msg,undo,label){const w=document.getElementById('toastwrap');clearTimeout(tt);
- w.innerHTML=`<div class="toast"><span class="msg">${esc(msg)}</span>${undo?`<button data-act="undo">${label||'Geri al'}</button>`:''}</div>`;
+ w.innerHTML=`<div class="toast${document.querySelector('.sheet')?' top':''}"><span class="msg">${esc(msg)}</span>${undo?`<button data-act="undo">${label||'Geri al'}</button>`:''}</div>`;
  if(undo&&undo.before&&!undo.after)undo.after=clone(flat(S));
  toast.undo=undo;tt=setTimeout(()=>{w.innerHTML='';toast.undo=null},undo?6000:3000)}
 // Geri al: yalnızca bu işlemin değiştirdiği kayıtları eski hâline döndürür, arada başkalarının yaptıklarına dokunmaz.
@@ -981,6 +1012,24 @@ function quickItem(){const lid=UI.list&&S.lists.find(l=>l.id===UI.list)?UI.list:
  <form class="addbar" data-form="quickItem" autocomplete="off"><label class="sr" for="qi-input">Ne alınacak?</label><input id="qi-input" placeholder="örn. Kışlık mont" autofocus enterkeyhint="done"><button class="btn primary" aria-label="Ekle">${I('plus')}</button></form>
  <p class="note" style="margin-top:8px">${I('info','sm')}<span>Art arda ekleyebilirsin. Kategori otomatik seçilir; beden, numara gibi ayrıntıları sonra ürüne dokunarak eklersin.</span></p><div id="qi-added"></div>`)}
 
+// Sık alınanlar: listede bekleyenler hariç, yazdıkça süzülür. Önce genel market ürünleri, sonra ailenin daha önce aldıkları.
+const COMMON=['Süt','Ekmek','Yumurta','Peynir','Domates','Zeytin','Çay','Kahve','Deterjan','Tuvalet kağıdı','Meyve','Tavuk'];
+function suggHTML(q){const L=UI.list,have=new Set(S.items.filter(i=>i.list===L&&!i.done).map(i=>low(i.name)));q=low(q.trim());
+ const pool=[...new Set([...COMMON,...S.items.filter(i=>i.done).map(i=>i.name)])].filter(n=>!have.has(low(n))&&(!q||low(n).includes(q))&&low(n)!==q).slice(0,8);
+ return pool.length?`<small>${q?'Öneriler':'Sık eklenenler'}</small>${pool.map(n=>`<button type="button" data-act="sugAdd" data-v="${esc(n)}">${I('plus','sm')}${esc(n)}</button>`).join('')}`:''}
+// Bu hafta tamamlanan görev sayısı = yıldız (çocuk hesaplarında görünür)
+const weekStars=()=>{const from=parse(monday(T())).getTime();return S.tasks.filter(x=>x.done&&x.doneBy===meId()&&(x.doneAt||0)>=from).length};
+const starsHTML=()=>{const n=weekStars();return `<div class="stars">⭐ ${n?`Bu hafta ${n} yıldız`:'Bu hafta ilk yıldızını kazan: bir görevini bitir'}</div>`};
+function confetti(x,y){if(calm())return;const ph=document.getElementById('phone'),pr=ph.getBoundingClientRect(),cs=S.members.map(m=>m.color);
+ for(let i=0;i<22;i++){const p=document.createElement('i');p.className='cf';p.style.left=(x-pr.left)+'px';p.style.top=(y-pr.top)+'px';p.style.background=cs[i%cs.length];ph.appendChild(p);
+  const a=-Math.PI/2+(Math.random()-.5)*2.2,v=70+Math.random()*90,dx=Math.cos(a)*v,dy=Math.sin(a)*v;
+  p.animate([{transform:'translate(0,0) rotate(0)',opacity:1},{transform:`translate(${dx}px,${dy}px) rotate(${Math.random()*360}deg)`,opacity:1,offset:.6},{transform:`translate(${dx*1.2}px,${dy+90}px) rotate(${Math.random()*720}deg)`,opacity:0}],{duration:900+Math.random()*300,easing:'cubic-bezier(.2,.7,.4,1)'}).finished.then(()=>p.remove())}}
+function celebrate(id){const b=document.querySelector(`[data-act="toggleTask"][data-id="${id}"]`),ph=document.getElementById('phone').getBoundingClientRect();
+ let x=ph.left+ph.width/2,y=ph.top+ph.height/2;if(b){const r=b.getBoundingClientRect();x=Math.min(Math.max(r.left+r.width/2,ph.left+30),ph.right-30);y=Math.min(Math.max(r.top+r.height/2,ph.top+60),ph.bottom-60)}
+ confetti(x,y);try{navigator.vibrate&&navigator.vibrate(18)}catch(e){}}
+let SW=null,swallow=false;
+function startSw(s){const r=s.r;r.classList.add('swiping');const bg=document.createElement('div');bg.className='swbg';bg.style.top=r.offsetTop+'px';bg.style.height=r.offsetHeight+'px';
+ bg.innerHTML=`<span>${I('check','sm')}${r.classList.contains('done')?'Geri al':r.dataset.sw==='item'?'Alındı':'Tamam'}</span><span>Sil${I('trash','sm')}</span>`;r.parentElement.insertBefore(bg,r);s.bg=bg}
 function addItemTo(list,raw){raw=raw.trim();if(!raw)return null;
  const nm=up(raw[0])+raw.slice(1);
  const it={id:uid(),list,name:nm,for:'',pri:'yakinda',note:'',by:meId(),done:false,cat:guessCat(nm),at:Date.now()};
@@ -1056,9 +1105,10 @@ const A={
   <div class="flabel" style="margin:0 0 8px">${self?'Rengin':'Rengi'}</div>
   <div class="swg" role="group" aria-label="Renk">${COLORS.map((c,i)=>`<button type="button" data-act="setColor" data-id="${m.id}" data-v="${c}" style="--c:${c}" aria-pressed="${m.color===c}" aria-label="Renk ${i+1}">${m.color===c?I('check','sm'):''}</button>`).join('')}</div>
   <div class="flabel" style="margin:18px 0 8px">Avatar</div>
-  <div class="avg" role="group" aria-label="Avatar">${AVATARS.map(([k,n])=>b(k,n)).join('')}${b('','Baş harf')}</div></div>`;
+  <div class="avg" role="group" aria-label="Avatar">${AVATARS.map(([k,n])=>b(k,n)).join('')}${b('','Baş harf')}</div>${UI.joinFor===m.id?`<button class="btn primary block" data-act="joinDone" style="margin-top:18px">Devam</button>`:''}</div>`;
   // Seçim yaparken sayfa yeniden açılıp kaymasın: açıksa yalnızca içi yenilenir.
-  if(open&&open.dataset.id===m.id)open.outerHTML=body;else sheet(self?'Avatarın ve rengin':esc(m.name)+' için avatar',body)},
+  if(open&&open.dataset.id===m.id)open.outerHTML=body;else sheet(UI.joinFor===m.id?'Avatarını ve rengini seç':self?'Avatarın ve rengin':esc(m.name)+' için avatar',body)},
+ joinDone:()=>{const m=me();close();toast(`Hoş geldin ${first(m.name)}!`)},
  setAv:d=>{const m=S.members.find(x=>x.id===d.id);if(!m||!AVN(d.v)&&d.v)return;const u=snap();m.avatar=d.v||'';
   log(m.id===meId()?'avatarını değiştirdi':`${m.name} için avatarı değiştirdi`);render(true);A.avPick({id:m.id});refocus('setAv',d.v);toast(d.v?`Avatar: ${AVN(d.v)}`:'Baş harf kullanılıyor',u)},
  setColor:d=>{const m=S.members.find(x=>x.id===d.id);if(!m||!COLORS.includes(d.v))return;const u=snap();m.color=d.v;
@@ -1107,9 +1157,10 @@ const A={
  // Görevler
  tf:d=>{UI.tf=d.v;render(true)},
  newTask:()=>taskForm(null),
+ sugAdd:d=>{const it=addItemTo(UI.list,d.v);if(!it)return;render(true);toast(`${it.name} eklendi`)},
  toggleTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const u=snap();
   if(t.done){t.done=false;delete t.doneAt;log(`“${t.title}” görevini yeniden açtı`);render(true);toast('Görev yeniden açıldı',u);return}
-  t.done=true;t.doneAt=Date.now();t.doneBy=meId();let msg='Görev tamamlandı';
+  celebrate(t.id);t.done=true;t.doneAt=Date.now();t.doneBy=meId();let msg=isChild()?'Görev tamamlandı ⭐':'Görev tamamlandı';
   if(t.repeat!=='none'){const nx=nextIn(t)||t.assignee;S.tasks.push({...t,id:uid(),done:false,doneAt:undefined,due:nextDue(t.due,t.repeat),assignee:nx});if(nextIn(t))msg+=` · Sırada ${M(nx).name}`}
   log(`“${t.title}” görevini tamamladı`);render(true);toast(msg,u)},
  openTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const ok=can('task.edit',t),nx=nextIn(t);
@@ -1181,7 +1232,7 @@ const FORMS={
    const now=Date.now(),mid=uid(),lid=uid(),aid=uid();
    const fam0={meta:{name:fam,createdAt:now,by:mid,v:1},members:{[mid]:{name,rel,role:'admin',color:COLORS[0],at:now}},lists:{[lid]:{name:'Alınacaklar',icon:'tag',at:now}},activity:{[aid]:{who:mid,text:'aileyi oluşturdu',at:now}}};
    await fbSend(code,'PUT',fam0);
-   Object.assign(store,{mode:'family',code,me:mid,R:fam0,pending:{}});UI.tab='today';UI.err=null;fromRemote();close();render();connect();toast('Aile oluşturuldu')}
+   Object.assign(store,{mode:'family',code,me:mid,R:fam0,pending:{}});UI.tab='today';UI.err=null;fromRemote();close();render();connect();toast('Aile oluşturuldu');UI.joinFor=mid;UI.joinShown=true;A.avPick({id:mid})}
   catch(e){busy(g('cf-btn'));err('Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.')}},
  join:async()=>{const g=id=>document.getElementById(id);const code=g('jf-code').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
   const err=t=>{g('jf-err').textContent=t;g('jf-err').hidden=false};
@@ -1235,7 +1286,7 @@ function busy(btn,label){if(!btn)return;if(label){btn.dataset.t=btn.textContent;
 function joinWho(){const j=F.join;
  sheet(esc(j.meta.name||'Aile'),`<p style="margin:0 0 12px">Hoş geldin! Listede sen hangisisin?</p><div class="people">${j.members.map(m=>`<button data-act="joinAs" data-id="${m.id}"><span class="av" style="--c:${m.color}" aria-hidden="true">${esc(up(m.name[0]))}</span><span><b>${esc(m.name)}</b><small>${ROLES[m.role]}${m.rel?' · '+esc(m.rel):''}</small></span></button>`).join('')}</div>
  <button class="btn soft block" style="margin-top:12px" data-act="joinNewSheet">${I('plus','sm')}Listede yokum, beni ekle</button>`)}
-function enterFamily(code,id){Object.assign(store,{mode:'family',code,me:id,R:null,pending:{}});S=null;UI.err=null;UI.tab='today';close();save();render();connect()}
+function enterFamily(code,id){Object.assign(store,{mode:'family',code,me:id,R:null,pending:{}});S=null;UI.err=null;UI.tab='today';close();UI.joinFor=id;UI.joinShown=false;save();render();connect()}
 function copyText(t,msg){const fallback=()=>{const el=document.getElementById('fam-code');if(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}toast('Kopyalanamadı, kodu elle seçebilirsin')};
  try{navigator.clipboard.writeText(t).then(()=>toast(msg),fallback)}catch(e){fallback()}}
 let swReg=null,installEvt=null;
@@ -1257,7 +1308,22 @@ document.addEventListener('submit',e=>{const f=e.target.dataset.form;if(f&&FORMS
 document.addEventListener('change',e=>{
  if(e.target.id==='ev-allday'){const t=document.getElementById('ev-time');t.disabled=e.target.checked}
  if(e.target.id==='tk-rot'){const a=document.getElementById('rot-area');a.hidden=!e.target.checked;if(e.target.checked){if(!F.rot.length)F.rot=[F.assignee];const r=document.getElementById('tk-rep');if(r.value==='none')r.value='weekly';document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true})}}});
-document.addEventListener('input',e=>{if(e.target.id==='an-text')document.getElementById('an-count').textContent=e.target.value.length+'/140'});
+document.addEventListener('input',e=>{if(e.target.id==='an-text')document.getElementById('an-count').textContent=e.target.value.length+'/140';
+ if(e.target.id==='item-input'){const g=document.getElementById('sugg');if(g)g.innerHTML=suggHTML(e.target.value)}});
+// Satırı yatay kaydırma: sağ = tamam/alındı, sol = sil. Dikey hareket sayfa kaydırmaya bırakılır.
+document.addEventListener('pointerdown',e=>{const r=e.target.closest('[data-sw]');if(!r||e.button>0||r.closest('.sheet'))return;SW={r,x0:e.clientX,y0:e.clientY,dx:0,on:false,pid:e.pointerId}},true);
+document.addEventListener('pointermove',e=>{if(!SW||e.pointerId!==SW.pid)return;const dx=e.clientX-SW.x0,dy=e.clientY-SW.y0;
+ if(!SW.on){if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){SW=null;return}if(Math.abs(dx)<10)return;SW.on=true;startSw(SW)}
+ SW.dx=dx;SW.r.style.transform=`translateX(${dx}px)`;SW.bg.className='swbg '+(dx>0?'ok':'del')+(Math.abs(dx)>90?' hot':'')});
+function endSw(){if(!SW)return;const s=SW;SW=null;if(!s.on)return;swallow=true;setTimeout(()=>swallow=false,350);
+ const r=s.r,kind=r.dataset.sw,id=r.dataset.id,right=s.dx>0;r.style.transition='transform .2s ease';
+ const reset=()=>{r.style.transform='';r.style.transition='';r.classList.remove('swiping');s.bg.remove()};
+ let block='';if(kind==='task'){const t=S.tasks.find(x=>x.id===id);if(t&&right&&!can('task.complete',t))block='Bu görev başkasına atanmış.';if(t&&!right&&!can('task.edit',t))block=PARENT}
+ if(Math.abs(s.dx)<=90||block){r.style.transform='translateX(0)';setTimeout(reset,200);if(block&&Math.abs(s.dx)>90)toast(block);return}
+ r.style.transform=`translateX(${right?'':'-'}100%)`;
+ setTimeout(()=>{reset();if(kind==='task')right?A.toggleTask({id}):A.delTask({id});else right?A.toggleItem({id}):A.delItem({id})},190)}
+['pointerup','pointercancel','mouseup','touchend'].forEach(t=>document.addEventListener(t,endSw,true));
+document.addEventListener('click',e=>{if(swallow){e.stopPropagation();e.preventDefault();swallow=false}},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.sheet'))close()});
 
 window.addEventListener('online',()=>{setNet('reconnecting');flush();if(es&&es.readyState===2)connect()});
