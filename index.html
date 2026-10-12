@@ -909,6 +909,19 @@ function memChips(){const child=isChild(),msg='Çocuk hesapları yalnızca kendi
  if(all&&!F.pick)return fam+`<button type="button" class="link" data-act="fPick">Kişileri tek tek seç</button>`;
  return fam+chipsHTML('fMem',F.members,child?{lockMsg:msg}:null)}
 const memRefresh=()=>{const e=document.getElementById('ev-mem');if(e)e.innerHTML=memChips()};
+// Kişiler kalpli evin içine uçar (ya da evden çıkar); kutunun yüksekliği yumuşakça değişir.
+const calm=()=>matchMedia('(prefers-reduced-motion: reduce)').matches||!Element.prototype.animate;
+const homePt=box=>{const h=box.querySelector('.famchip .fam').getBoundingClientRect();return [h.left+h.width/2,h.top+h.height/2]};
+function boxResize(box,h0){const h1=box.offsetHeight;if(h0!==h1)box.animate([{height:h0+'px'},{height:h1+'px'}],{duration:260,easing:'ease-out'})}
+function flyIn(){const box=document.getElementById('ev-mem');const chips=box?[...box.querySelectorAll('[data-act=fMem]')]:[];
+ if(!chips.length||calm()){memRefresh();return}
+ const [hx,hy]=homePt(box);box.style.pointerEvents='none';chips.forEach(c=>c.setAttribute('aria-pressed','true'));
+ const an=chips.map((c,i)=>{const r=c.getBoundingClientRect();return c.animate([{transform:'none',opacity:1},{transform:`translate(${hx-r.left-r.width/2}px,${hy-r.top-r.height/2}px) scale(.12)`,opacity:.2}],{duration:460,delay:i*60,easing:'cubic-bezier(.55,0,.8,.3)',fill:'forwards'})});
+ an[an.length-1].finished.then(()=>{const h0=box.offsetHeight;memRefresh();box.style.pointerEvents='';boxResize(box,h0);
+  const f=box.querySelector('.famchip .fam');f&&f.animate([{transform:'scale(1)'},{transform:'scale(1.45) rotate(-8deg)'},{transform:'scale(.92)'},{transform:'scale(1)'}],{duration:520,easing:'ease-out'})})}
+function flyOut(){const box=document.getElementById('ev-mem');if(!box)return;const h0=box.offsetHeight;memRefresh();if(calm())return;
+ const [hx,hy]=homePt(box);boxResize(box,h0);
+ [...box.querySelectorAll('[data-act=fMem]')].forEach((c,i)=>{const r=c.getBoundingClientRect();c.animate([{transform:`translate(${hx-r.left-r.width/2}px,${hy-r.top-r.height/2}px) scale(.12)`,opacity:0},{transform:'none',opacity:1}],{duration:440,delay:i*55,easing:'cubic-bezier(.2,.7,.3,1)',fill:'backwards'})})}
 function chipsHTML(kind,sel,opts){return S.members.map(m=>{const on=sel.includes(m.id);const ord=opts&&opts.ord&&on?`<span class="ord">${sel.indexOf(m.id)+1}</span>`:'';return `<button type="button" class="chip" data-act="${kind}" data-id="${m.id}" aria-pressed="${on}"${opts&&opts.lockMsg?lock(false,opts.lockMsg):''}>${ord||av(m.id,'xs')}${esc(first(m.name))}</button>`}).join('')}
 function eventForm(e,day,pre){const child=isChild();
  F={members:e?[...e.members]:pre&&pre.members&&!child?[...pre.members]:[meId()],edit:e?e.id:null,fromWish:pre&&pre.wish||null};
@@ -1053,8 +1066,8 @@ const A={
  editEvent:d=>eventForm(S.events.find(x=>x.id===d.id)),
  delEvent:d=>{const u=snap(),e=S.events.find(x=>x.id===d.id);S.events=S.events.filter(x=>x.id!==d.id);log(`“${e.title}” etkinliğini sildi`);close();render(true);toast('Etkinlik silindi',u)},
  fMem:d=>{F.members=F.members.includes(d.id)?F.members.filter(x=>x!==d.id):[...F.members,d.id];memRefresh()},
- fAll:()=>{const all=S.members.every(m=>F.members.includes(m.id));F.members=all?[meId()]:S.members.map(m=>m.id);F.pick=false;memRefresh()},
- fPick:()=>{F.pick=true;memRefresh()},
+ fAll:()=>{const all=S.members.every(m=>F.members.includes(m.id));F.members=all?[meId()]:S.members.map(m=>m.id);F.pick=false;all?flyOut():flyIn()},
+ fPick:()=>{F.pick=true;flyOut()},
  fAs:d=>{F.assignee=d.id;if(document.getElementById('tk-rot')?.checked&&!F.rot.includes(d.id))F.rot.unshift(d.id);document.getElementById('tk-as').innerHTML=chipsHTML('fAs',[F.assignee])},
  fRot:d=>{F.rot=F.rot.includes(d.id)?F.rot.filter(x=>x!==d.id):[...F.rot,d.id];document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true});if(F.rot[0]){F.assignee=F.rot[0];document.getElementById('tk-as').innerHTML=chipsHTML('fAs',[F.assignee])}},
  // Görevler
