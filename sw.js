@@ -35,7 +35,7 @@ self.addEventListener("fetch", (e) => {
   // GitHub Pages sayfayı 10 dk önbelleğe aldırıyor; "no-cache" ile her açılışta sunucuya sorulur.
   if (req.mode === "navigate" || (sameOrigin && url.pathname.endsWith("/index.html"))) {
     e.respondWith(
-      fetch(req.url, { cache: "no-cache", credentials: "same-origin" })
+      fetch(req, { cache: "no-cache" })
         .then((res) => {
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put("./index.html", copy));
