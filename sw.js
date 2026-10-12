@@ -4,13 +4,14 @@
   2) Firebase isteklerine dokunmaz; eşitleme her zaman doğrudan sunucuyla yapılır.
   Yeni sürüm yayınlarken CACHE adını artır.
 */
-const CACHE = "bizim-ev-v3";
+const CACHE = "bizim-ev-v4";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icons/icon-192.png",
   "./icons/icon-512.png", "./icons/favicon.svg", "./icons/apple-touch-icon.png"];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)));
+  // cache: "reload" — tarayıcının HTTP önbelleğindeki eski kopyayı değil, sunucudakini al.
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: "reload" })))));
   self.skipWaiting();
 });
 
@@ -31,9 +32,10 @@ self.addEventListener("fetch", (e) => {
   if (!sameOrigin && !FONT_HOSTS.includes(url.hostname)) return; // Firebase ve diğerleri: dokunma
 
   // Sayfanın kendisi: önce ağ (yeni sürüm gelsin), olmazsa önbellek.
+  // GitHub Pages sayfayı 10 dk önbelleğe aldırıyor; "no-cache" ile her açılışta sunucuya sorulur.
   if (req.mode === "navigate" || (sameOrigin && url.pathname.endsWith("/index.html"))) {
     e.respondWith(
-      fetch(req)
+      fetch(req.url, { cache: "no-cache", credentials: "same-origin" })
         .then((res) => {
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put("./index.html", copy));
