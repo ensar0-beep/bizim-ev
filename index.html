@@ -85,6 +85,19 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .avs{display:flex;flex:none}
 .avs .av{box-shadow:0 0 0 2px var(--surface)}
 .avs .av+.av{margin-left:-8px}
+/* Avatar görseli: kişinin renginin açık tonu üstünde, renkli halkayla */
+.av.pic{overflow:hidden;background:color-mix(in srgb,var(--c) 16%,var(--surface));border:2px solid var(--c)}
+.av.pic img{width:100%;height:100%;object-fit:cover;object-position:50% 100%;display:block;transform:translateY(6%) scale(1.06)}
+.avg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.avg button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:16px;border:1.5px solid var(--line);font-size:.72rem;font-weight:600;color:var(--muted);min-height:44px}
+.avg button .av{width:3rem;height:3rem;font-size:1.1rem}
+.avg button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.swg{display:flex;flex-wrap:wrap;gap:10px}
+.swg button{width:44px;height:44px;border-radius:999px;background:var(--c);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:inset 0 0 0 3px var(--surface);border:2px solid transparent}
+.swg button[aria-pressed="true"]{border-color:var(--c)}
+.avedit{position:relative;display:inline-flex;border-radius:999px;flex:none}
+.avedit .pen{position:absolute;right:-4px;bottom:-4px;width:26px;height:26px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--surface)}
+.avedit .pen .i{width:14px;height:14px}
 .who{display:inline-flex;align-items:center;gap:6px}
 
 /* Bugün */
@@ -394,11 +407,11 @@ const forName=f=>f==='ev'?'Ev için':f?M(f).name+' için':'';
 
 /* ---------- Örnek veri ---------- */
 const MEMBERS=[
- {id:'ayse',name:'Ayşe',role:'admin',rel:'Anne',color:'#C2502F',big:false},
- {id:'mehmet',name:'Mehmet',role:'adult',rel:'Baba',color:'#2F6DB5',big:false},
- {id:'zeynep',name:'Zeynep',role:'child',rel:'Kızı, 15 yaşında',color:'#8B4FB8',big:false},
- {id:'can',name:'Can',role:'child',rel:'Oğlu, 9 yaşında',color:'#9A5B00',big:false},
- {id:'fatma',name:'Fatma Nine',role:'adult',rel:'Babaanne',color:'#2B8467',big:true}
+ {id:'ayse',avatar:'anne',name:'Ayşe',role:'admin',rel:'Anne',color:'#C2502F',big:false},
+ {id:'mehmet',avatar:'baba-sakalli',name:'Mehmet',role:'adult',rel:'Baba',color:'#2F6DB5',big:false},
+ {id:'zeynep',avatar:'kiz-genc',name:'Zeynep',role:'child',rel:'Kızı, 15 yaşında',color:'#8B4FB8',big:false},
+ {id:'can',avatar:'erkek-cocuk',name:'Can',role:'child',rel:'Oğlu, 9 yaşında',color:'#9A5B00',big:false},
+ {id:'fatma',avatar:'babaanne',name:'Fatma Nine',role:'adult',rel:'Babaanne',color:'#2B8467',big:true}
 ];
 function seed(){
  const t=T(),d=n=>add(t,n),now=Date.now(),H=3600e3;
@@ -500,7 +513,13 @@ const meId=()=>store.mode==='demo'?store.demoMe:store.me;
 const M=id=>(S&&S.members.find(m=>m.id===id))||{id,name:'Eski üye',color:'#8A8178',role:'adult',rel:''};
 const me=()=>M(meId());
 const isChild=()=>me().role==='child';
-const av=(id,cls)=>{const m=M(id);return `<span class="av${cls?' '+cls:''}" style="--c:${m.color}" aria-hidden="true">${esc(up((m.name||'?')[0]))}</span>`};
+// Avatar seçilmişse görsel (avatars/ klasörü), seçilmemişse baş harf.
+const AVATARS=[['anne','Anne'],['anne-basortulu','Başörtülü'],['baba','Gözlüklü'],['baba-sakalli','Sakallı'],['kiz-genc','Genç kız'],['erkek-genc','Genç erkek'],['kiz-cocuk','Kız çocuk'],['erkek-cocuk','Erkek çocuk'],['babaanne','Nine'],['dede','Dede'],['bebek','Bebek'],['kopek','Köpek']];
+const AVN=k=>(AVATARS.find(a=>a[0]===k)||[,''])[1];
+const avFace=(k,name,color,cls)=>k?`<span class="av pic${cls?' '+cls:''}" style="--c:${color}" aria-hidden="true"><img src="avatars/${k}.webp" alt="" decoding="async"></span>`
+ :`<span class="av${cls?' '+cls:''}" style="--c:${color}" aria-hidden="true">${esc(up((name||'?')[0]))}</span>`;
+const av=(id,cls)=>{const m=M(id);return avFace(m.avatar,m.name,m.color,cls)};
+const refocus=(act,v)=>{const b=document.querySelector(`#avp [data-act="${act}"][data-v="${v}"]`);b&&b.focus({preventScroll:true})};
 const avs=ids=>`<span class="avs">${ids.slice(0,4).map(i=>av(i,'xs')).join('')}</span>`;
 const log=text=>{S.activity.unshift({id:uid(),who:meId(),text,at:Date.now()});S.activity=S.activity.slice(0,40)};
 const first=n=>n.split(' ')[0];
@@ -525,7 +544,7 @@ const str=v=>typeof v==='string'?v:'';
 const idList=v=>(Array.isArray(v)?v:v&&typeof v==='object'?Object.values(v):[]).filter(x=>typeof x==='string'&&okId(x));
 function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
  switch(c){
-  case 'members':x.name=str(x.name)||'?';x.rel=str(x.rel);if(!ROLES[x.role])x.role='adult';if(!/^#[0-9a-fA-F]{6}$/.test(x.color||''))x.color='#8A8178';break;
+  case 'members':x.name=str(x.name)||'?';x.rel=str(x.rel);if(!ROLES[x.role])x.role='adult';if(!/^#[0-9a-fA-F]{6}$/.test(x.color||''))x.color='#8A8178';if(!AVN(x.avatar))x.avatar='';break;
   case 'events':x.title=str(x.title);if(!okDate(x.date))x.date=T();x.time=okTime(x.time)?x.time:'';x.members=idList(x.members);if(!CATS[x.cat])x.cat='aile';if(!REM[x.rem])x.rem='none';if(!REP[x.repeat])x.repeat='none';x.loc=str(x.loc);x.desc=str(x.desc);break;
   case 'tasks':x.title=str(x.title);if(!okDate(x.due))x.due=T();x.time=okTime(x.time)?x.time:'';x.rot=idList(x.rot);if(!TREP[x.repeat])x.repeat='none';x.done=!!x.done;break;
   case 'lists':x.name=str(x.name)||'Liste';if(!P[x.icon])x.icon='tag';break;
@@ -1010,7 +1029,8 @@ const A={
  // Üyeler
  openMember:d=>{const m=M(d.id),t=T();const up7=[];for(let i=0;i<14;i++){const c=add(t,i);S.events.filter(e=>occurs(e,c)&&e.members.includes(m.id)).sort(sortEv).forEach(e=>up7.push([e,c]))}
   const tk=S.tasks.filter(x=>!x.done&&x.assignee===m.id).sort((a,b)=>a.due.localeCompare(b.due));const adm=can('member.manage'),self=m.id===meId();
-  sheet(esc(m.name),`<div style="display:flex;gap:14px;align-items:center;margin-bottom:12px">${av(m.id,'lg')}<div><b style="font-size:1.1rem">${esc(m.name)}</b><div style="color:var(--muted)">${esc(m.rel)}</div><span class="tag cat" style="margin-top:4px">${ROLES[m.role]}</span></div></div>
+  const face=adm||self?`<button class="avedit" data-act="avPick" data-id="${m.id}" aria-label="Avatarı ve rengi değiştir">${av(m.id,'lg')}<span class="pen">${I('edit')}</span></button>`:av(m.id,'lg');
+  sheet(esc(m.name),`<div style="display:flex;gap:14px;align-items:center;margin-bottom:12px">${face}<div><b style="font-size:1.1rem">${esc(m.name)}</b><div style="color:var(--muted)">${esc(m.rel)}</div><span class="tag cat" style="margin-top:4px">${ROLES[m.role]}</span></div></div>
   ${m.role==='child'?`<p class="note">${I('info','sm')}<span>Çocuk hesabında ekran sadeleşir: yalnızca kendi görev ve etkinlikleri görünür, başkasına görev veremez.</span></p>`:''}
   <div class="flabel" style="margin:14px 0 8px">Rol</div><div class="seg" style="margin-bottom:6px">${Object.entries(ROLES).map(([k,n])=>`<button data-act="setRole" data-id="${m.id}" data-v="${k}" aria-pressed="${m.role===k}"${lock(adm&&!self,adm?'Kendi rolünü değiştiremezsin.':ADMIN())}>${n}</button>`).join('')}</div>
   <div class="sec-h" style="margin-top:18px"><h2 class="sec">Yaklaşan etkinlikler</h2></div><div class="group">${up7.slice(0,5).map(([e,c])=>`<div class="row"><span class="time ad">${rel(c)}<br>${e.time?hm(e.time):'Tüm gün'}</span><span class="body"><span class="t">${esc(e.title)}</span></span></div>`).join('')||emptyBox('Önümüzdeki iki hafta boş','')}</div>
@@ -1023,12 +1043,26 @@ const A={
   <div class="field"><span class="flabel">Hesap türü</span><div class="seg"><button type="button" data-act="fRole" data-v="adult" aria-pressed="true">Yetişkin</button><button type="button" data-act="fRole" data-v="child" aria-pressed="false">Çocuk</button></div></div>
   <p class="note">${I('info','sm')}<span>Telefonu olmayanları da ekleyebilirsin; görev ve etkinliklere atanırlar. Kendi telefonundan katılırsa listeden kendini seçer.</span></p>
   <button class="btn primary block">Ekle</button></form>`)},
- memberEditSheet:d=>{const m=M(d.id);F.edit=m.id;F.color=m.color;sheet('Üyeyi düzenle',`<form data-form="memberEdit" autocomplete="off">
+ memberEditSheet:d=>{const m=M(d.id);F.edit=m.id;sheet('Üyeyi düzenle',`<form data-form="memberEdit" autocomplete="off">
   <div class="field"><label for="me-name">Adı</label><input class="inp" id="me-name" value="${esc(m.name)}"></div>
   <div class="field"><label for="me-rel">Ailede kim?</label><input class="inp" id="me-rel" value="${esc(m.rel)}"></div>
-  <div class="field"><span class="flabel">Rengi</span><div class="chips" style="flex-wrap:wrap" id="me-color">${COLORS.map(c=>`<button type="button" class="chip plain" data-act="fColor" data-v="${c}" aria-pressed="${m.color===c}" aria-label="Renk ${c}" style="padding:0 10px"><span class="av xs" style="--c:${c}">${esc(up(m.name[0]))}</span></button>`).join('')}</div></div>
+  <button type="button" class="btn ghost block sm" data-act="avPick" data-id="${m.id}" style="margin-bottom:14px">${av(m.id,'xs')}Avatarı ve rengi değiştir</button>
   <button class="btn primary block">Kaydet</button></form>`)},
- fColor:(d,el)=>{F.color=d.v;el.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
+ // Avatar ve renk: kişinin kendisi ya da yönetici seçer, dokununca hemen kaydolur.
+ avPick:d=>{const m=M(d.id);if(!(can('member.manage')||m.id===meId()))return;const self=m.id===meId();
+  const b=(k,n)=>`<button type="button" data-act="setAv" data-id="${m.id}" data-v="${k}" aria-pressed="${(m.avatar||'')===k}" aria-label="${n}">${avFace(k,m.name,m.color)}<span>${n}</span></button>`;
+  const open=document.getElementById('avp');
+  const body=`<div id="avp" data-id="${m.id}"><p class="note" style="margin:0 0 14px">Seçtiğin avatar ve renk ailedeki herkesin ekranında ${self?'adının':'onun adının'} yanında görünür.</p>
+  <div class="flabel" style="margin:0 0 8px">${self?'Rengin':'Rengi'}</div>
+  <div class="swg" role="group" aria-label="Renk">${COLORS.map((c,i)=>`<button type="button" data-act="setColor" data-id="${m.id}" data-v="${c}" style="--c:${c}" aria-pressed="${m.color===c}" aria-label="Renk ${i+1}">${m.color===c?I('check','sm'):''}</button>`).join('')}</div>
+  <div class="flabel" style="margin:18px 0 8px">Avatar</div>
+  <div class="avg" role="group" aria-label="Avatar">${AVATARS.map(([k,n])=>b(k,n)).join('')}${b('','Baş harf')}</div></div>`;
+  // Seçim yaparken sayfa yeniden açılıp kaymasın: açıksa yalnızca içi yenilenir.
+  if(open&&open.dataset.id===m.id)open.outerHTML=body;else sheet(self?'Avatarın ve rengin':esc(m.name)+' için avatar',body)},
+ setAv:d=>{const m=S.members.find(x=>x.id===d.id);if(!m||!AVN(d.v)&&d.v)return;const u=snap();m.avatar=d.v||'';
+  log(m.id===meId()?'avatarını değiştirdi':`${m.name} için avatarı değiştirdi`);render(true);A.avPick({id:m.id});refocus('setAv',d.v);toast(d.v?`Avatar: ${AVN(d.v)}`:'Baş harf kullanılıyor',u)},
+ setColor:d=>{const m=S.members.find(x=>x.id===d.id);if(!m||!COLORS.includes(d.v))return;const u=snap();m.color=d.v;
+  log(m.id===meId()?'rengini değiştirdi':`${m.name} için rengi değiştirdi`);render(true);A.avPick({id:m.id});refocus('setColor',d.v);toast('Renk değişti',u)},
  memberDelAsk:d=>{const m=M(d.id);sheet(`${esc(m.name)} aileden çıkarılsın mı?`,`<p>Eklediği etkinlik, görev ve listeler kalır. Ona atanmış görevler “Eski üye” olarak görünür; istersen başkasına atayabilirsin.</p><div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" data-act="memberDel" data-id="${m.id}">Çıkar</button></div>`)},
  memberDel:d=>{const u=snap(),m=S.members.find(x=>x.id===d.id);if(!m)return;S.members=S.members.filter(x=>x.id!==d.id);log(`${m.name} adlı üyeyi aileden çıkardı`);close();render(true);toast(`${m.name} aileden çıkarıldı`,u)},
 
@@ -1166,7 +1200,7 @@ const FORMS={
  memberAdd:()=>{const name=document.getElementById('ma-name').value.trim();if(!name)return;const rel=document.getElementById('ma-rel').value.trim();
   const u=snap();S.members.push({id:uid(),name,rel,role:F.role||'adult',color:freeColor(S.members.map(m=>m.color)),at:Date.now()});log(`${name} adlı üyeyi ekledi`);close();render(true);toast(`${name} eklendi`,u)},
  memberEdit:()=>{const m=S.members.find(x=>x.id===F.edit);if(!m)return;const name=document.getElementById('me-name').value.trim();if(!name)return;
-  const u=snap();Object.assign(m,{name,rel:document.getElementById('me-rel').value.trim(),color:F.color||m.color});log(`${name} bilgilerini güncelledi`);close();render(true);toast('Kaydedildi',u)},
+  const u=snap();Object.assign(m,{name,rel:document.getElementById('me-rel').value.trim()});log(`${name} bilgilerini güncelledi`);close();render(true);toast('Kaydedildi',u)},
  event:()=>{const g=id=>document.getElementById(id);const title=g('ev-title').value.trim();if(!title){g('ev-err').hidden=false;g('ev-title').focus();return}
   if(!F.members.length)F.members=[meId()];
   const o={title,date:g('ev-date').value||T(),time:g('ev-allday').checked?'':g('ev-time').value,members:F.members,cat:g('ev-cat').value,loc:g('ev-loc').value.trim(),rem:g('ev-rem').value,repeat:g('ev-rep').value,desc:g('ev-desc').value.trim()};
