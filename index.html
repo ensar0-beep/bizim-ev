@@ -282,6 +282,10 @@ details.more[open] summary svg{transform:rotate(180deg)}
 .strip .days b{font-size:1.02rem;width:1.9rem;height:1.9rem;display:flex;align-items:center;justify-content:center;border-radius:999px}
 .strip .days button[aria-current="date"] b{background:var(--coral);color:var(--on-coral)}
 .strip .days button[aria-pressed="true"]{background:var(--accent-soft)}
+.fam{width:2rem;height:2rem;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex:none;background:var(--coral-soft);color:var(--coral)}
+.fam svg{width:1.2rem;height:1.2rem}
+.chip .fam{width:1.6rem;height:1.6rem}
+.chip .fam svg{width:1rem;height:1rem}
 </style>
 </head>
 <body>
@@ -338,6 +342,7 @@ const P={
  film:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4M3 12h18"/>',
  fork:'<path d="M5 2v7a3 3 0 0 0 6 0V2M8 2v20M17 2c-2 1.5-3 4-3 7s1 4 3 4v9"/>',
  gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
+ homeheart:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M12 18s-3.2-1.9-3.2-4a1.7 1.7 0 0 1 3.2-.8 1.7 1.7 0 0 1 3.2.8c0 2.1-3.2 4-3.2 4z"/>',
  board:'<rect x="5" y="4" width="14" height="17.5" rx="2"/><path d="M9 2.5h6v3H9zM8.5 10.5h7M8.5 14h7M8.5 17.5h4"/>',
  sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>'
 };
@@ -605,12 +610,15 @@ const nextIn=t=>t.rot&&t.rot.length>1?t.rot[(t.rot.indexOf(t.assignee)+1)%t.rot.
 const annVisible=()=>S.ann&&(!S.ann.until||Date.now()<S.ann.until);
 
 /* ---------- Bileşenler ---------- */
+// Bütün ailenin katıldığı etkinlik: avatar yığını yerine tek kalpli ev ikonu.
+const isAll=e=>S.members.length>1&&S.members.every(m=>e.members.includes(m.id));
+const famBadge=()=>`<span class="fam" aria-hidden="true">${I('homeheart')}</span>`;
 function evRow(e,day){const c=e.members.length>=S.members.length&&S.members.length>1?'var(--accent)':M(e.members[0]).color;
  return `<button class="row tap" data-act="openEvent" data-id="${e.id}" data-d="${day}">
   ${e.time?`<span class="time">${hm(e.time)}</span>`:`<span class="time ad">Tüm<br>gün</span>`}
   <span class="mbar" style="--c:${c}"></span>
   <span class="body"><span class="t">${esc(e.title)}</span><span class="m"><span>${I(CATS[e.cat][1],'sm')}${CATS[e.cat][0]}</span>${e.loc?`<span>${I('pin','sm')}${esc(e.loc)}</span>`:''}</span></span>
-  ${avs(e.members)}<span class="sr">Katılanlar: ${e.members.map(x=>M(x).name).join(', ')}</span></button>`}
+  ${isAll(e)?famBadge():avs(e.members)}<span class="sr">Katılanlar: ${isAll(e)?'Bütün aile':e.members.map(x=>M(x).name).join(', ')}</span></button>`}
 function taskRow(t){const late=!t.done&&t.due<T();const nx=nextIn(t);const ok=can('task.complete',t);
  return `<div class="row${t.done?' done':''}">
   <button class="chk" data-act="toggleTask" data-id="${t.id}" aria-pressed="${t.done}" aria-label="${esc(t.title)}: ${t.done?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}><span>${I('check','sm')}</span></button>
@@ -894,6 +902,13 @@ const snap=()=>{const before=clone(flat(S));const f=()=>{if(!S)return;const cur=
 
 /* ---------- Formlar ---------- */
 let F={};
+// "Bütün aile" tek dokunuşla herkesi seçer; herkes seçiliyken kişi çipleri gizlenir ("Kişileri tek tek seç" ile açılır).
+function memChips(){const child=isChild(),msg='Çocuk hesapları yalnızca kendi etkinliğini ekleyebilir.';
+ const all=S.members.length>1&&S.members.every(m=>F.members.includes(m.id));
+ const fam=`<button type="button" class="chip famchip" data-act="fAll" aria-pressed="${all}"${lock(!child,msg)}>${famBadge()}Bütün aile</button>`;
+ if(all&&!F.pick)return fam+`<button type="button" class="link" data-act="fPick">Kişileri tek tek seç</button>`;
+ return fam+chipsHTML('fMem',F.members,child?{lockMsg:msg}:null)}
+const memRefresh=()=>{const e=document.getElementById('ev-mem');if(e)e.innerHTML=memChips()};
 function chipsHTML(kind,sel,opts){return S.members.map(m=>{const on=sel.includes(m.id);const ord=opts&&opts.ord&&on?`<span class="ord">${sel.indexOf(m.id)+1}</span>`:'';return `<button type="button" class="chip" data-act="${kind}" data-id="${m.id}" aria-pressed="${on}"${opts&&opts.lockMsg?lock(false,opts.lockMsg):''}>${ord||av(m.id,'xs')}${esc(first(m.name))}</button>`}).join('')}
 function eventForm(e,day,pre){const child=isChild();
  F={members:e?[...e.members]:pre&&pre.members&&!child?[...pre.members]:[meId()],edit:e?e.id:null,fromWish:pre&&pre.wish||null};
@@ -903,7 +918,7 @@ function eventForm(e,day,pre){const child=isChild();
  <div class="two"><div class="field"><label for="ev-date">Tarih</label><input class="inp" type="date" id="ev-date" value="${v.date}"></div>
  <div class="field"><label for="ev-time">Saat</label><input class="inp" type="time" id="ev-time" value="${v.time}"${e&&!e.time?' disabled':''}></div></div>
  <label class="check"><input type="checkbox" id="ev-allday"${e&&!e.time?' checked':''}>Tüm gün sürüyor</label>
- <div class="field"><span class="flabel">Kimler katılacak?</span><div class="chips" style="flex-wrap:wrap" id="ev-mem">${chipsHTML('fMem',F.members,child?{lockMsg:'Çocuk hesapları yalnızca kendi etkinliğini ekleyebilir.'}:null)}</div></div>
+ <div class="field"><span class="flabel">Kimler katılacak?</span><div class="chips" style="flex-wrap:wrap" id="ev-mem">${memChips()}</div></div>
  <details class="more"${e&&(e.loc||e.desc||e.repeat!=='none')?' open':''}><summary>Daha fazla seçenek ${I('chevD','sm')}</summary>
   <div class="field"><label for="ev-cat">Kategori</label><select class="inp" id="ev-cat">${Object.entries(CATS).map(([k,[n]])=>`<option value="${k}"${v.cat===k?' selected':''}>${n}</option>`).join('')}</select></div>
   <div class="field"><label for="ev-loc">Konum</label><input class="inp" id="ev-loc" value="${esc(v.loc)}" placeholder="örn. Kadıköy"></div>
@@ -1030,14 +1045,16 @@ const A={
    <div>${I('clock')}<span><b>${long(d.d||e.date)}</b><br>${e.time?hm(e.time):'Tüm gün'}${e.repeat!=='none'?` · ${REP[e.repeat]}`:''}</span></div>
    ${e.loc?`<div>${I('pin')}<span>${esc(e.loc)}</span></div>`:''}
    <div>${I(CATS[e.cat][1])}<span>${CATS[e.cat][0]}</span></div>
-   <div>${I('users')}<span style="display:flex;flex-wrap:wrap;gap:8px">${e.members.map(x=>`<span class="who">${av(x,'xs')}${esc(M(x).name)}</span>`).join('')}</span></div>
+   <div>${I('users')}<span style="display:flex;flex-wrap:wrap;gap:8px">${isAll(e)?`<span class="who">${famBadge()}<b>Bütün aile</b></span>`:e.members.map(x=>`<span class="who">${av(x,'xs')}${esc(M(x).name)}</span>`).join('')}</span></div>
    <div>${I('bell')}<span>${e.rem==='none'?'Hatırlatma yok':REM[e.rem]+' hatırlatılacak'}</span></div>
    ${e.desc?`<div>${I('edit')}<span>${esc(e.desc)}</span></div>`:''}
    <div style="color:var(--muted);font-size:.875rem">${av(e.by,'xs')}<span>${esc(M(e.by).name)} ekledi</span></div></div>
    <div class="actions"><button class="btn danger" data-act="delEvent" data-id="${e.id}"${lock(ok,PARENT)}>${I('trash','sm')}Sil</button><button class="btn soft" data-act="editEvent" data-id="${e.id}"${lock(ok,PARENT)}>${I('edit','sm')}Düzenle</button></div>`)},
  editEvent:d=>eventForm(S.events.find(x=>x.id===d.id)),
  delEvent:d=>{const u=snap(),e=S.events.find(x=>x.id===d.id);S.events=S.events.filter(x=>x.id!==d.id);log(`“${e.title}” etkinliğini sildi`);close();render(true);toast('Etkinlik silindi',u)},
- fMem:(d,el)=>{F.members=F.members.includes(d.id)?F.members.filter(x=>x!==d.id):[...F.members,d.id];el.setAttribute('aria-pressed',F.members.includes(d.id))},
+ fMem:d=>{F.members=F.members.includes(d.id)?F.members.filter(x=>x!==d.id):[...F.members,d.id];memRefresh()},
+ fAll:()=>{const all=S.members.every(m=>F.members.includes(m.id));F.members=all?[meId()]:S.members.map(m=>m.id);F.pick=false;memRefresh()},
+ fPick:()=>{F.pick=true;memRefresh()},
  fAs:d=>{F.assignee=d.id;if(document.getElementById('tk-rot')?.checked&&!F.rot.includes(d.id))F.rot.unshift(d.id);document.getElementById('tk-as').innerHTML=chipsHTML('fAs',[F.assignee])},
  fRot:d=>{F.rot=F.rot.includes(d.id)?F.rot.filter(x=>x!==d.id):[...F.rot,d.id];document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true});if(F.rot[0]){F.assignee=F.rot[0];document.getElementById('tk-as').innerHTML=chipsHTML('fAs',[F.assignee])}},
  // Görevler
