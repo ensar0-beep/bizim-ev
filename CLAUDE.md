@@ -23,6 +23,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Sync (family mode).** Firebase layout: `families/{CODE}/{meta, ann, members/{id}, events/{id}, tasks/{id}, lists/{id}, items/{id}, wishes/{id}, activity/{id}}`. `render()` ends with `commit()`, which flattens `S` to `collection/id` paths (`flat()`), diffs each record against the last known version (`baseC`, canonical JSON via `canon()`), queues changed/removed paths in `store.pending`, and `flush()` sends them in one multi-path `PATCH`. Failed sends retry with backoff and on the `online` event. Incoming changes arrive via `EventSource` on the family path (`connect()`); `put`/`patch` events are applied to `store.R`, then `fromRemote()` rebuilds `S` from `store.R` plus `store.pending`. Remote data is untrusted: `norm()` validates every record (ids, dates, enums, colors) before it reaches the templates — keep that in place when adding fields, and always `esc()` user text.
 
+**Shared tasks.** A task can have several people in `who` (`assignee` stays `who[0]`, rotation uses it). By default one of them finishing completes it; with `all` each person ticks their own part (`dn`) and it completes when everyone has. Use `ws(t)` / `isFor(t,id)` instead of reading `assignee` directly.
+
 **Undo.** `snap()` captures the flattened state before a change; `toast(msg, undo)` captures the state after it. Undo reverts only the paths that this change touched, so it doesn't clobber edits from other phones.
 
 **Roles** (`can()`): admin / adult / child. They shape the UI (child view shows only own items, can't assign others) but are not security — anyone with the family code can read and write that family. `database.rules.json` only blocks listing all families.
