@@ -198,6 +198,10 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .pgrid .link{align-self:center;grid-column:span 4;justify-self:start}
 .pgrid .kbr{display:none}
 .calpg{margin-top:12px}
+/* Aile sekmesi: ayarlar sayfası grupları, davet/ekle satırlarının simgesi */
+.setsec{font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:18px 6px 6px}
+.setsec:first-child{margin-top:4px}
+.av.addav{background:var(--accent-soft);color:var(--accent-ink)}
 /* Tarih ve saat: telefonun kendi seçicisi görünmez katman olarak üstte; görünen yazıyı biz yazarız, böylece iPhone'da kutu taşmaz */
 .two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .dtp{position:relative;display:flex;align-items:center;gap:8px;min-height:50px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);padding:0 12px;font-weight:600;min-width:0;overflow:hidden;color:var(--fg)}
@@ -384,6 +388,7 @@ const P={
  cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
  cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h9a1.5 1.5 0 0 0 1.5-1.1L21.5 7H6"/>',
  tasks:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="m8 12 3 3 5-6"/>',
+ gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.3c1.9.8 3 2.8 3 5.7"/>',
  plus:'<path d="M12 5v14M5 12h14"/>', x:'<path d="M18 6 6 18M6 6l12 12"/>', check:'<path d="M20 6 9 17l-5-5"/>',
  chevL:'<path d="m15 18-6-6 6-6"/>', chevU:'<path d="m18 15-6-6-6 6"/>', chevR:'<path d="m9 18 6-6-6-6"/>', chevD:'<path d="m6 9 6 6 6-6"/>',
@@ -958,35 +963,36 @@ function vTasks(){
  return `<div class="hdr"><div class="h"><h1>Görevler</h1></div><button class="btn primary sm" data-act="newTask">${I('plus','sm')}Ekle</button></div>${isChild()?starsHTML():''}
  <div class="seg" role="group" aria-label="Süz">${[['mine','Bana atanan'],['all','Herkes'],['done','Tamamlanan']].map(([k,n])=>`<button data-act="tf" data-v="${k}" aria-pressed="${f===k}">${n}</button>`).join('')}</div>${body}`}
 
-function vFamily(){
- const m=me(),adm=can('member.manage'),demo=store.mode==='demo';
- const np='Notification' in window?Notification.permission:'unsupported';
+// Aile sekmesi: kişiler, davet satırı ve son 3 değişiklik. Ayarlar sağ üstteki dişlide, gruplu bir sayfada.
+// Duyuru ayarlarda yok; Bugün ekranından değiştirilir.
+function famCtx(){const np='Notification' in window?Notification.permission:'unsupported';
  const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
- const ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
- const n=Object.keys(store.pending).length;
+ const ios=/iPhone|iPad|iPod/.test(navigator.userAgent),n=Object.keys(store.pending).length;
  const sync=UI.net==='online'?(n?`${n} değişiklik gönderiliyor`:'Bağlı, her şey güncel'):(n?`Çevrimdışı, ${n} değişiklik bekliyor`:'Bağlantı bekleniyor');
- const sub=t=>`<br><span style="color:var(--muted);font-size:.875rem">${t}</span>`;
- return `<div class="hdr"><div class="h"><h1>Aile</h1><div class="sub">${esc(S.meta.name||'Ailemiz')} · ${S.members.length} kişi</div></div>${adm?`<button class="btn ghost sm" data-act="memberAddSheet">${I('plus','sm')}Üye ekle</button>`:''}</div>
- ${demoBar()}
- <div class="group">${S.members.map(x=>{const k=S.tasks.filter(t=>!t.done&&isFor(t,x.id)).length;return `<button class="row tap" data-act="openMember" data-id="${x.id}">${av(x.id)}<span class="body"><span class="t">${esc(x.name)}${x.id===m.id?' <span class="qty">(sen)</span>':''}</span><span class="m">${x.rel?`<span>${esc(x.rel)}</span>`:''}<span class="tag cat">${ROLES[x.role]}</span>${k?`<span>${k} görev</span>`:''}</span></span>${I('chevR')}</button>`}).join('')}</div>
- <div class="sec-h"><h2 class="sec">Aileye davet et</h2></div>
- <div class="invite">${adm?`<div class="flabel">Aile kodu</div><div class="code" id="fam-code">${demo?'ÖRNE-KKOD':fmtCode(store.code)}</div>
+ return {m:me(),adm:can('member.manage'),demo:store.mode==='demo',np,standalone,ios,sync,sub:t=>`<br><span style="color:var(--muted);font-size:.875rem">${t}</span>`}}
+const feedHTML=k=>`<div class="group feed">${S.activity.length?S.activity.slice(0,k).map(a=>`<div class="row">${av(a.who,'xs')}<span class="body"><span style="display:block"><b>${esc(M(a.who).name)}</b> ${esc(a.text)}</span><span class="m">${ago(a.at)}</span></span></div>`).join(''):emptyBox('Henüz değişiklik yok','Ailenden biri bir şey eklediğinde burada görünür.')}</div>`;
+function famSettingsHTML(){const {m,demo,np,standalone,ios,sync,sub}=famCtx();
+ return `<div class="setsec">Görünüm</div><div class="group">
+  <div class="setrow"><span id="lbl-big"><b>Büyük yazı</b>${sub('Sadece bu cihazda')}</span><button class="switch" role="switch" aria-labelledby="lbl-big" aria-checked="${!!store.prefs.big}" data-act="bigToggle"></button></div>
+  <div class="setrow" style="flex-wrap:wrap"><b>Tema</b><div class="seg" style="flex:1;min-width:220px">${themeSeg()}</div></div></div>
+ <div class="setsec">Bildirimler</div><div class="group">
+  <div class="setrow"><span><b>Hatırlatmalar</b>${sub(np==='granted'?'Açık. Bildirim şimdilik uygulama açıkken gelir.':np==='denied'?'Bildirimler bu cihazda kapalı. Tarayıcı ayarlarından açabilirsin.':np==='unsupported'?(ios&&!standalone?'iPhone\'da bildirim için önce uygulamayı ana ekrana ekle.':'Bu tarayıcı bildirim desteklemiyor.'):'Etkinlik hatırlatmaları için izin ver.')}</span>${np==='default'?'<button class="btn ghost sm" data-act="askNotify">İzin ver</button>':''}</div></div>
+ <div class="setsec">Bu cihaz</div><div class="group">
+  <div class="setrow"><span><b>Bu cihazda</b>${sub(esc(m.name))}</span><button class="btn ghost sm" data-act="who">Değiştir</button></div>
+  ${standalone?'':`<div class="setrow"><span><b>Telefona yükle</b>${sub(installEvt?'Bizim Ev ana ekranında uygulama gibi açılır.':ios?'Safari\'de Paylaş düğmesine, sonra “Ana Ekrana Ekle”ye dokun.':'Tarayıcı menüsünden “Ana ekrana ekle”yi seç.')}</span>${installEvt?'<button class="btn ghost sm" data-act="install">Yükle</button>':''}</div>`}
+  ${demo?'':`<div class="setrow"><span><b>Eşitleme</b>${sub(sync)}</span></div>`}</div>
+ <div class="group" style="margin-top:16px">
+  <div class="setrow"><span><b>${demo?'Örnek aileden çık':'Bu cihazdan çık'}</b>${sub(demo?'Kendi aileni kurmak ya da bir aileye katılmak için.':'Ailenin bilgileri silinmez, kodla tekrar girebilirsin.')}</span><button class="btn danger sm" data-act="leaveAsk">Çık</button></div></div>`}
+function famInviteHTML(){const {adm,demo}=famCtx();return `<div class="invite">${adm?`<div class="flabel">Aile kodu</div><div class="code" id="fam-code">${demo?'ÖRNE-KKOD':fmtCode(store.code)}</div>
   <div style="color:var(--muted);font-size:.9rem;margin-top:4px">${demo?'Örnek ailede davet çalışmaz. Kendi aileni kurduğunda burada gerçek kodun yazar.':'Bizim Ev\'i açan kişi “Aile koduyla katıl” deyip bu kodu yazar. Bağlantıyı gönderirsen kod kendiliğinden dolar.'}</div>
   <div class="row2"><button class="btn primary sm" data-act="share">${I('link','sm')}Davet gönder</button><button class="btn soft sm" data-act="copyCode">${I('copy','sm')}Kodu kopyala</button></div>`
-  :`<div style="display:flex;gap:10px;align-items:center">${I('lock')}<span>Yeni üye davetini aile yöneticisi yapar. ${esc(ADMIN().replace('Bunu yalnızca ','').replace(' yapabilir.',''))} ile konuş.</span></div>`}</div>
- <div class="sec-h"><h2 class="sec">Son değişiklikler</h2></div>
- <div class="group feed">${S.activity.length?S.activity.slice(0,8).map(a=>`<div class="row">${av(a.who,'xs')}<span class="body"><span style="display:block"><b>${esc(M(a.who).name)}</b> ${esc(a.text)}</span><span class="m">${ago(a.at)}</span></span></div>`).join(''):emptyBox('Henüz değişiklik yok','Ailenden biri bir şey eklediğinde burada görünür.')}</div>
- <div class="sec-h"><h2 class="sec">Ayarlar</h2></div>
- <div class="group">
-  <div class="setrow"><span><b>Bu cihazda</b>${sub(esc(m.name))}</span><button class="btn ghost sm" data-act="who">Değiştir</button></div>
-  <div class="setrow"><span id="lbl-big"><b>Büyük yazı</b>${sub('Sadece bu cihazda')}</span><button class="switch" role="switch" aria-labelledby="lbl-big" aria-checked="${!!store.prefs.big}" data-act="bigToggle"></button></div>
-  <div class="setrow" style="flex-wrap:wrap"><b>Tema</b><div class="seg" style="flex:1;min-width:220px">${themeSeg()}</div></div>
-  <div class="setrow"><span><b>Duyuru</b>${sub(annVisible()?'“'+esc(S.ann.text)+'”':'Şu an duyuru yok')}</span><button class="btn ghost sm" data-act="annEdit"${lock(can('announce'),PARENT)}>Değiştir</button></div>
-  <div class="setrow"><span><b>Hatırlatmalar</b>${sub(np==='granted'?'Açık. Bildirim şimdilik uygulama açıkken gelir.':np==='denied'?'Bildirimler bu cihazda kapalı. Tarayıcı ayarlarından açabilirsin.':np==='unsupported'?(ios&&!standalone?'iPhone\'da bildirim için önce uygulamayı ana ekrana ekle.':'Bu tarayıcı bildirim desteklemiyor.'):'Etkinlik hatırlatmaları için izin ver.')}</span>${np==='default'?'<button class="btn ghost sm" data-act="askNotify">İzin ver</button>':''}</div>
-  ${standalone?'':`<div class="setrow"><span><b>Telefona yükle</b>${sub(installEvt?'Bizim Ev ana ekranında uygulama gibi açılır.':ios?'Safari\'de Paylaş düğmesine, sonra “Ana Ekrana Ekle”ye dokun.':'Tarayıcı menüsünden “Ana ekrana ekle”yi seç.')}</span>${installEvt?'<button class="btn ghost sm" data-act="install">Yükle</button>':''}</div>`}
-  ${demo?'':`<div class="setrow"><span><b>Eşitleme</b>${sub(sync)}</span></div>`}
-  <div class="setrow"><span><b>${demo?'Örnek aileden çık':'Bu cihazdan çık'}</b>${sub(demo?'Kendi aileni kurmak ya da bir aileye katılmak için.':'Ailenin bilgileri silinmez, kodla tekrar girebilirsin.')}</span><button class="btn danger sm" data-act="leaveAsk">Çık</button></div>
- </div>`}
+  :`<div style="display:flex;gap:10px;align-items:center">${I('lock')}<span>Yeni üye davetini aile yöneticisi yapar. ${esc(ADMIN().replace('Bunu yalnızca ','').replace(' yapabilir.',''))} ile konuş.</span></div>`}</div>`}
+function vFamily(){const {m,adm}=famCtx();
+ return `<div class="hdr"><div class="h"><h1>Aile</h1><div class="sub">${esc(S.meta.name||'Ailemiz')} · ${S.members.length} kişi</div></div><button class="icon-btn" data-act="famSettings" aria-label="Ayarlar">${I('gear')}</button></div>
+ ${demoBar()}
+ <div class="group">${S.members.map(x=>{const k=S.tasks.filter(t=>!t.done&&isFor(t,x.id)).length;return `<button class="row tap" data-act="openMember" data-id="${x.id}">${av(x.id)}<span class="body"><span class="t">${esc(x.name)}${x.id===m.id?' <span class="qty">(sen)</span>':''}</span><span class="m">${x.rel?`<span>${esc(x.rel)}</span>`:''}<span class="tag cat">${ROLES[x.role]}</span>${k?`<span>${k} görev</span>`:''}</span></span>${I('chevR')}</button>`}).join('')}${adm?`<button class="row tap" data-act="famInvite"><span class="av addav">${I('plus','sm')}</span><span class="body"><span class="t" style="color:var(--accent-ink)">Aileye davet et</span><span class="m"><span>Kod ya da bağlantı gönder</span></span></span>${I('chevR')}</button><button class="row tap" data-act="memberAddSheet"><span class="av addav">${I('user','sm')}</span><span class="body"><span class="t" style="color:var(--accent-ink)">Telefonu olmayan birini ekle</span><span class="m"><span>Görev ve etkinliklere atanabilir</span></span></span>${I('chevR')}</button>`:''}</div>
+ <div class="sec-h"><h2 class="sec">Son değişiklikler</h2>${S.activity.length>3?`<button class="link" data-act="famFeed">Tümü ${I('chevR','sm')}</button>`:''}</div>
+ ${feedHTML(3)}`}
 const themeSeg=()=>[['system','Sistem'],['light','Açık'],['dark','Koyu']].map(([k,n])=>`<button data-act="theme" data-v="${k}" aria-pressed="${store.prefs.theme===k}">${n}</button>`).join('');
 
 function vLoading(){const b=(h,w,mt)=>`<div class="sk" style="height:${h}px;width:${w||'100%'};margin-top:${mt||10}px"></div>`;
@@ -1009,6 +1015,7 @@ function render(keepScroll){
  else if(!S){html=vLoading();nav.hidden=false}
  else{html={today:vToday,cal:vCal,lists:vLists,tasks:vTasks,family:vFamily}[UI.tab]();nav.hidden=false}
  sc.innerHTML=html;
+ const ss=document.getElementById('setsheet');if(ss&&S)ss.innerHTML=famSettingsHTML();
  sc.scrollTop=keepScroll?y:0;
  if(keep){const el=document.getElementById(keep.id);if(el){el.value=keep.v;el.focus();try{el.setSelectionRange(keep.s,keep.s)}catch(e){}}}
  if(!nav.hidden)nav.innerHTML=TABS.map(([k,n,i])=>{const badge=k==='lists'&&S?S.items.filter(x=>!x.done).length:0;return `<button data-act="tab" data-tab="${k}"${UI.tab===k?' aria-current="page"':''}><span class="pill">${I(i)}</span>${n}${badge?`<span class="sr">, ${badge} bekleyen</span>`:''}</button>`}).join('');
@@ -1208,6 +1215,9 @@ const A={
  theme:d=>{store.prefs.theme=d.v;render(true)},
  bigToggle:()=>{store.prefs.big=!store.prefs.big;render(true)},
  askNotify:()=>askNotify(),
+ famSettings:()=>sheet('Ayarlar',`<div id="setsheet">${famSettingsHTML()}</div>`),
+ famInvite:()=>sheet('Aileye davet et',famInviteHTML()),
+ famFeed:()=>sheet('Son değişiklikler',feedHTML(40)),
  install:()=>{if(installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;render(true)})}},
  share:()=>{if(store.mode!=='family'){toast('Örnek ailede davet gönderilemez.');return}
   const url=inviteUrl(),text=`${S.meta.name||'Ailemiz'} Bizim Ev'de. Katılmak için bağlantıyı aç ya da aile kodunu yaz: ${fmtCode(store.code)}`;
