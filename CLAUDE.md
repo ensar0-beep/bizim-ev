@@ -25,6 +25,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Shared tasks.** A task can have several people in `who` (`assignee` stays `who[0]`, rotation uses it). By default one of them finishing completes it; with `all` each person ticks their own part (`dn`) and it completes when everyone has. Use `ws(t)` / `isFor(t,id)` instead of reading `assignee` directly.
 
+**Places in wishes.** For `mekan`/`yer` wishes, `wish.place = {n, a, u}` (name, address, Google Maps link). It arrives through the manifest `share_target` (Google Maps → Paylaş → Bizim Ev opens `./?text=…`, parsed by `parsePlace()` at boot) or a pasted link in the wish form. No Maps API key: detail buttons use plain Google Maps URLs (`mapsUrl`, `dirUrl`). `okMapsUrl()` only accepts https Google Maps hosts; `norm()` drops anything else.
+
 **Undo.** `snap()` captures the flattened state before a change; `toast(msg, undo)` captures the state after it. Undo reverts only the paths that this change touched, so it doesn't clobber edits from other phones.
 
 **Roles** (`can()`): admin / adult / child. They shape the UI (child view shows only own items, can't assign others) but are not security — anyone with the family code can read and write that family. `database.rules.json` only blocks listing all families.
