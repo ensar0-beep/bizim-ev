@@ -182,6 +182,27 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .chip{min-height:44px;padding:0 14px 0 8px;border-radius:999px;border:1.5px solid var(--line);display:inline-flex;align-items:center;gap:8px;font-weight:600;white-space:nowrap;background:var(--surface);flex:none}
 .chip.plain{padding:0 16px}
 .kbr{flex-basis:100%;height:0}
+/* Kişi seçimi: yuvarlak avatar, isim altta; çocuklar alt satırda biraz küçük. Seçilende yeşil halka ve tik. */
+.pgrid{display:flex;flex-wrap:wrap;gap:10px 4px;align-items:flex-start}
+.pgrid .pp{display:flex;flex-direction:column;align-items:center;gap:6px;width:66px;font-size:.8rem;font-weight:600;color:var(--muted);padding:4px 0 2px;border-radius:14px;position:relative;line-height:1.15;text-align:center}
+.pgrid .pp .av,.pgrid .pp .fam{width:3rem;height:3rem;font-size:1.05rem;box-shadow:0 0 0 2px var(--surface),0 0 0 3.5px var(--line);transition:box-shadow .15s}
+.pgrid .pp .fam svg{width:1.5rem;height:1.5rem}
+.pgrid .pp.kid .av{width:2.6rem;height:2.6rem}
+.pgrid .pp[aria-pressed="true"]{color:var(--fg)}
+.pgrid .pp[aria-pressed="true"] .av,.pgrid .pp[aria-pressed="true"] .fam{box-shadow:0 0 0 2px var(--surface),0 0 0 4.5px var(--accent)}
+.pgrid .pp .ck{position:absolute;top:0;right:6px;width:20px;height:20px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--surface)}
+.pgrid .pp[aria-pressed="true"] .ck{display:flex}
+.pgrid .pp .ck .i{width:12px;height:12px}
+.pgrid .link{align-self:center}
+/* Tarih ve saat: telefonun kendi seçicisi görünmez katman olarak üstte; görünen yazıyı biz yazarız, böylece iPhone'da kutu taşmaz */
+.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.dtp{position:relative;display:flex;align-items:center;gap:8px;min-height:50px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);padding:0 12px;font-weight:600;min-width:0;overflow:hidden;color:var(--fg)}
+.dtp .i{color:var(--muted);flex:none}
+.dtp .v{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.dtp .v.ph{color:var(--muted);font-weight:500}
+.dtp input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;border:0;padding:0;-webkit-appearance:none;appearance:none;cursor:pointer}
+.dtp:focus-within{border-color:var(--accent)}
+.dtp.off{opacity:.45}
 .chip.kid{min-height:40px;font-size:.9rem;padding-right:12px}
 .chip.kid .av{width:1.3rem;height:1.3rem}
 .chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
@@ -899,7 +920,7 @@ function wpRefresh(){const b=document.getElementById('wf-place');if(!b)return;b.
 function wishDoneForm(w){F={wid:w.id,with:[...(w.want.length?w.want:[meId()])],mood:'😊'};
  sheet('Nasıldı?',`<form data-form="wishDone">
  <p style="margin:0 0 12px"><b>${esc(w.title)}</b></p>
- <div class="field"><label for="wd-date">Ne zaman?</label><input class="inp" type="date" id="wd-date" value="${w.planned&&w.planned<=T()?w.planned:T()}"></div>
+ <div class="field"><label for="wd-date">Ne zaman?</label>${dtBox('wd-date','date',w.planned&&w.planned<=T()?w.planned:T())}</div>
  <div class="field"><span class="flabel">Kimler vardı?</span><div class="chips" style="flex-wrap:wrap" id="wd-with">${chipsHTML('fWith',F.with)}</div></div>
  <div class="field"><span class="flabel">Tek kelimeyle</span><div class="moods" id="wd-mood">${MOODS.map(m=>`<button type="button" data-act="fMood" data-v="${m}" aria-pressed="${F.mood===m}" aria-label="${m}">${m}</button>`).join('')}</div></div>
  <button class="btn primary block">${I('check','sm')}Yaptık olarak kaydet</button></form>`)}
@@ -1013,11 +1034,22 @@ const snap=()=>{const before=clone(flat(S));const f=()=>{if(!S)return;const cur=
 /* ---------- Formlar ---------- */
 let F={};
 // "Bütün aile" tek dokunuşla herkesi seçer; herkes seçiliyken kişi çipleri gizlenir ("Kişileri tek tek seç" ile açılır).
+// Avatar ızgarası: etkinlikte "Kimler katılacak?", görevde "Kim yapacak?"
+function faceGrid(kind,sel,lockMsg){const ck=`<span class="ck">${I('check','sm')}</span>`;
+ const one=m=>`<button type="button" class="pp${m.role==='child'?' kid':''}" data-act="${kind}" data-id="${m.id}" aria-pressed="${sel.includes(m.id)}"${lockMsg?lock(false,lockMsg):''}>${av(m.id)}${ck}${esc(first(m.name))}${m.role==='child'?'<span class="sr">, çocuk</span>':''}</button>`;
+ const ad=S.members.filter(m=>m.role!=='child'),ki=S.members.filter(m=>m.role==='child');
+ return ad.map(one).join('')+(ad.length&&ki.length?'<span class="kbr" aria-hidden="true"></span>':'')+ki.map(one).join('')}
+// Tarih/saat kutusu: kimlikler (ev-date, tk-time…) aynı kalır, formlar değeri yine input'tan okur
+const dTxt=s=>{if(!s)return '';const r=rel(s),d=parse(s);return r==='Bugün'||r==='Yarın'?`${r}, ${d.getDate()} ${MON[d.getMonth()].slice(0,3)}`:r};
+const dtBox=(id,type,val,off)=>`<label class="dtp${off?' off':''}">${I(type==='date'?'cal':'clock','sm')}<span class="v${val?'':' ph'}">${type==='date'?dTxt(val):val?hm(val):'Saat seç'}</span><input type="${type}" id="${id}" value="${val}"${off?' disabled':''}></label>`;
+const dtHTML=(p,date,time,off,dl,tl)=>`<div class="two"><div class="field"><label for="${p}-date">${dl}</label>${dtBox(p+'-date','date',date)}</div><div class="field"><label for="${p}-time">${tl}</label>${dtBox(p+'-time','time',time,off)}</div></div>`;
+function dtSync(inp){const l=inp.closest('.dtp');if(!l)return;const v=l.querySelector('.v');
+ if(inp.type==='date'){v.textContent=dTxt(inp.value);v.classList.toggle('ph',!inp.value)}else{v.textContent=inp.value?hm(inp.value):'Saat seç';v.classList.toggle('ph',!inp.value)}}
 function memChips(){const child=isChild(),msg='Çocuk hesapları yalnızca kendi etkinliğini ekleyebilir.';
  const all=S.members.length>1&&S.members.every(m=>F.members.includes(m.id));
- const fam=`<button type="button" class="chip famchip" data-act="fAll" aria-pressed="${all}"${lock(!child,msg)}>${famBadge()}Bütün aile</button>`;
+ const fam=`<button type="button" class="pp famchip" data-act="fAll" aria-pressed="${all}"${lock(!child,msg)}>${famBadge()}<span class="ck">${I('check','sm')}</span>Bütün aile</button>`;
  if(all&&!F.pick)return fam+`<button type="button" class="link" data-act="fPick">Kişileri tek tek seç</button>`;
- return fam+chipsHTML('fMem',F.members,child?{lockMsg:msg}:null)}
+ return fam+faceGrid('fMem',F.members,child?msg:'')}
 const memRefresh=()=>{const e=document.getElementById('ev-mem');if(e)e.innerHTML=memChips()};
 // Kişiler kalpli evin içine uçar (ya da evden çıkar); kutunun yüksekliği yumuşakça değişir.
 const calm=()=>matchMedia('(prefers-reduced-motion: reduce)').matches||!Element.prototype.animate;
@@ -1044,10 +1076,9 @@ function eventForm(e,day,pre){const child=isChild();
  const v=e||Object.assign({title:'',date:day||T(),time:'',loc:'',desc:'',cat:'aile',rem:'h1',repeat:'none'},pre||{});
  sheet(e?'Etkinliği düzenle':pre?'Plana dök':'Yeni etkinlik',`<form data-form="event" autocomplete="off">
  <div class="field"><label for="ev-title">Ne var?</label><input class="inp" id="ev-title" value="${esc(v.title)}" placeholder="örn. Dişçi randevusu" autofocus><span class="err" id="ev-err" hidden>Etkinliğe bir ad ver.</span></div>
- <div class="two"><div class="field"><label for="ev-date">Tarih</label><input class="inp" type="date" id="ev-date" value="${v.date}"></div>
- <div class="field"><label for="ev-time">Saat</label><input class="inp" type="time" id="ev-time" value="${v.time}"${e&&!e.time?' disabled':''}></div></div>
+ ${dtHTML('ev',v.date,v.time,e&&!e.time,'Tarih','Saat')}
  <label class="check"><input type="checkbox" id="ev-allday"${e&&!e.time?' checked':''}>Tüm gün sürüyor</label>
- <div class="field"><span class="flabel">Kimler katılacak?</span><div class="chips" style="flex-wrap:wrap" id="ev-mem">${memChips()}</div></div>
+ <div class="field"><span class="flabel">Kimler katılacak?</span><div class="pgrid" id="ev-mem">${memChips()}</div></div>
  <details class="more"${e&&(e.loc||e.desc||e.repeat!=='none')?' open':''}><summary>Daha fazla seçenek ${I('chevD','sm')}</summary>
   <div class="field"><label for="ev-cat">Kategori</label><select class="inp" id="ev-cat">${Object.entries(CATS).map(([k,[n]])=>`<option value="${k}"${v.cat===k?' selected':''}>${n}</option>`).join('')}</select></div>
   <div class="field"><label for="ev-loc">Konum</label><input class="inp" id="ev-loc" value="${esc(v.loc)}" placeholder="örn. Kadıköy"></div>
@@ -1059,7 +1090,7 @@ function eventForm(e,day,pre){const child=isChild();
  <button class="btn primary block">${e?'Kaydet':'Etkinliği ekle'}</button></form>`)}
 function asHTML(){const child=isChild(),lk=child?{lockMsg:'Başkasına görev vermeyi annen ya da baban yapabilir.'}:null,n=F.who.length;
  const nt=t=>`<p class="note" style="margin:8px 0 0">${I('info','sm')}<span>${t}</span></p>`;
- let h=`<div class="chips" style="flex-wrap:wrap">${chipsHTML('fAs',F.who,lk)}</div>`;
+ let h=`<div class="pgrid">${faceGrid('fAs',F.who,lk&&lk.lockMsg)}</div>`;
  if(child)return h;
  const rc=document.getElementById('tk-rot'),names=esc(F.who.map(x=>first(M(x).name)).join(', '));
  if(rc&&rc.checked)return h;
@@ -1074,8 +1105,7 @@ function taskForm(t,day){const child=isChild();
  sheet(t?'Görevi düzenle':'Yeni görev',`<form data-form="task" autocomplete="off">
  <div class="field"><label for="tk-title">Ne yapılacak?</label><input class="inp" id="tk-title" value="${esc(v.title)}" placeholder="örn. Çöpü çıkar" autofocus><span class="err" id="tk-err" hidden>Göreve bir ad ver.</span></div>
  <div class="field"><span class="flabel">Kim yapacak?</span><div id="tk-as">${asHTML()}</div></div>
- <div class="two"><div class="field"><label for="tk-date">Son gün</label><input class="inp" type="date" id="tk-date" value="${v.due}"></div>
- <div class="field"><label for="tk-time">Saat (isteğe bağlı)</label><input class="inp" type="time" id="tk-time" value="${v.time}"></div></div>
+ ${dtHTML('tk',v.due,v.time,false,'Son gün','Saat (isteğe bağlı)')}
  <details class="more"${t&&(t.repeat!=='none')?' open':''}><summary>Daha fazla seçenek ${I('chevD','sm')}</summary>
   <div class="field"><label for="tk-rep">Tekrar</label><select class="inp" id="tk-rep">${Object.entries(TREP).map(([k,n])=>`<option value="${k}"${v.repeat===k?' selected':''}>${n}</option>`).join('')}</select></div>
   ${child?'':`<label class="check"><input type="checkbox" id="tk-rot"${F.rot.length>1?' checked':''}>Sırayla yapılsın</label>
@@ -1427,8 +1457,12 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if
  const f=A[el.dataset.act];if(f){e.preventDefault();f(el.dataset,el,e)}});
 document.addEventListener('submit',e=>{const f=e.target.dataset.form;if(f&&FORMS[f]){e.preventDefault();FORMS[f]()}});
 document.addEventListener('change',e=>{
- if(e.target.id==='ev-allday'){const t=document.getElementById('ev-time');t.disabled=e.target.checked}
+ if(e.target.id==='ev-allday'){const t=document.getElementById('ev-time');t.disabled=e.target.checked;const l=t.closest('.dtp');l&&l.classList.toggle('off',e.target.checked)}
+ if(e.target.matches('.dtp input'))dtSync(e.target);
  if(e.target.id==='tk-rot'){const a=document.getElementById('rot-area');a.hidden=!e.target.checked;F.who=[F.who[0]];asRefresh();if(e.target.checked){if(!F.rot.length)F.rot=[F.who[0]];const r=document.getElementById('tk-rep');if(r.value==='none')r.value='weekly';document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true})}}});
+document.addEventListener('input',e=>{if(e.target.matches&&e.target.matches('.dtp input'))dtSync(e.target)});
+// Masaüstü tarayıcıda görünmez tarih kutusuna tıklayınca seçici açılsın (telefonda zaten açılır)
+document.addEventListener('click',e=>{const i=e.target.closest&&e.target.closest('.dtp input');if(i&&!i.disabled&&i.showPicker){try{i.showPicker()}catch(x){}}});
 document.addEventListener('input',e=>{if(e.target.id==='an-text')document.getElementById('an-count').textContent=e.target.value.length+'/140';
  if(e.target.id==='item-input'){const g=document.getElementById('sugg');if(g)g.innerHTML=suggHTML(e.target.value)}});
 // Satırı yatay kaydırma: sağ = tamam/alındı, sol = sil. Dikey hareket sayfa kaydırmaya bırakılır.
