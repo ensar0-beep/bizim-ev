@@ -121,6 +121,8 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .avedit .pen{position:absolute;right:-4px;bottom:-4px;width:26px;height:26px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--surface)}
 .avedit .pen .i{width:14px;height:14px}
 .who{display:inline-flex;align-items:center;gap:6px}
+.who .avs{margin-right:2px}
+.av.wait{opacity:.4;filter:grayscale(1)}
 
 /* Bugün */
 .ann{background:var(--coral-soft);border-radius:var(--r-lg);padding:16px 16px 14px;display:flex;gap:12px;align-items:flex-start}
@@ -472,6 +474,8 @@ function seed(){
    {id:uid(),title:'Doğum günü pastasını sipariş et',assignee:'ayse',due:d(3),time:'',repeat:'none',rot:[],by:'mehmet',done:false},
    {id:uid(),title:'Arabayı muayeneye götür',assignee:'mehmet',due:d(5),time:'09:30',repeat:'none',rot:[],by:'mehmet',done:false},
    {id:uid(),title:'Kışlıkları dolaptan çıkar',assignee:'fatma',due:d(9),time:'',repeat:'none',rot:[],by:'ayse',done:false},
+   {id:uid(),title:'Haftalık market alışverişi',assignee:'ayse',who:['ayse','mehmet'],due:d(0),time:'18:30',repeat:'weekly',rot:[],by:'ayse',done:false},
+   {id:uid(),title:'Bayram öncesi odaları topla',assignee:'zeynep',who:['zeynep','can'],all:true,dn:['zeynep'],due:d(1),time:'',repeat:'none',rot:[],by:'ayse',done:false},
    {id:uid(),title:'Kütüphane kitaplarını iade et',assignee:'can',due:d(-1),time:'',repeat:'none',rot:[],by:'ayse',done:true,doneAt:now-20*H,doneBy:'can'}
   ],
   lists:[{id:'genel',name:'Alınacaklar',icon:'tag'},{id:'okul',name:'Okul dönemi',icon:'book'},{id:'evyen',name:'Ev yenileme',icon:'sofa'}],
@@ -575,7 +579,7 @@ function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
  switch(c){
   case 'members':x.name=str(x.name)||'?';x.rel=str(x.rel);if(!ROLES[x.role])x.role='adult';if(!/^#[0-9a-fA-F]{6}$/.test(x.color||''))x.color='#8A8178';if(!AVN(x.avatar))x.avatar='';break;
   case 'events':x.title=str(x.title);if(!okDate(x.date))x.date=T();x.time=okTime(x.time)?x.time:'';x.members=idList(x.members);if(!CATS[x.cat])x.cat='aile';if(!REM[x.rem])x.rem='none';if(!REP[x.repeat])x.repeat='none';x.loc=str(x.loc);x.desc=str(x.desc);break;
-  case 'tasks':x.title=str(x.title);if(!okDate(x.due))x.due=T();x.time=okTime(x.time)?x.time:'';x.rot=idList(x.rot);if(!TREP[x.repeat])x.repeat='none';x.done=!!x.done;break;
+  case 'tasks':x.title=str(x.title);if(!okDate(x.due))x.due=T();x.time=okTime(x.time)?x.time:'';x.rot=idList(x.rot);x.assignee=typeof x.assignee==='string'&&okId(x.assignee)?x.assignee:'';x.who=idList(x.who);x.dn=idList(x.dn);x.all=!!x.all;if(!TREP[x.repeat])x.repeat='none';x.done=!!x.done;break;
   case 'lists':x.name=str(x.name)||'Liste';if(!P[x.icon])x.icon='tag';break;
   case 'items':x.name=str(x.name)||'?';x.note=str(x.note);x.cat=str(x.cat)||'Diğer';if(!PRI[x.pri])x.pri='yakinda';x.for=str(x.for);x.list=str(x.list);x.done=!!x.done;x.doneAt=+x.doneAt||0;break;
   case 'wishes':x.title=str(x.title)||'?';x.note=str(x.note);if(!WT[x.type])x.type='yer';x.want=idList(x.want);x.doneWith=idList(x.doneWith);if(!MOODS.includes(x.mood))x.mood='';x.planned=okDate(x.planned)?x.planned:'';x.done=!!x.done;break;
@@ -643,8 +647,8 @@ function can(a,o){const m=me(),r=m.role;
  switch(a){
   case 'event.edit':return r!=='child'||(o.by===m.id&&o.members.length===1&&o.members[0]===m.id);
   case 'task.assign':return r!=='child';
-  case 'task.complete':return r!=='child'||o.assignee===m.id;
-  case 'task.edit':return r!=='child'||(o.by===m.id&&o.assignee===m.id);
+  case 'task.complete':return r!=='child'||isFor(o,m.id);
+  case 'task.edit':return r!=='child'||(o.by===m.id&&ws(o).length===1&&isFor(o,m.id));
   case 'list.manage':return r!=='child';
   case 'announce':return r!=='child';
   case 'member.manage':return r==='admin';
@@ -658,6 +662,17 @@ const sortEv=(a,b)=>(a.time||'00:00').localeCompare(b.time||'00:00');
 function eventsOn(day,onlyMine){return S.events.filter(e=>occurs(e,day)&&(UI.filter.length===0||e.members.some(x=>UI.filter.includes(x)))&&(!onlyMine||e.members.includes(meId()))).sort(sortEv)}
 const nextDue=(due,rep)=>{const d=parse(due);if(rep==='daily')d.setDate(d.getDate()+1);else if(rep==='weekly')d.setDate(d.getDate()+7);else if(rep==='monthly')d.setMonth(d.getMonth()+1);return iso(d)};
 const nextIn=t=>t.rot&&t.rot.length>1?t.rot[(t.rot.indexOf(t.assignee)+1)%t.rot.length]:null;
+// Bir görevi birden fazla kişi üstlenebilir (who). Varsayılan: içlerinden biri yapınca biter.
+// all: herkes kendi payını işaretler (dn), hepsi yapınca biter. assignee her zaman who[0]; sıra (rot) bunu kullanır.
+const ws=t=>t.who&&t.who.length?t.who:[t.assignee];
+const isFor=(t,id)=>ws(t).includes(id);
+const allRule=t=>!!t.all&&ws(t).length>1;
+const myTick=t=>t.done||allRule(t)&&(t.dn||[]).includes(meId());
+function whoHTML(t,full){const w=ws(t),nm=x=>esc(full?M(x).name:first(M(x).name));
+ if(w.length<2)return `<span class="who">${av(w[0],'xs')}${nm(w[0])}</span>`;
+ if(t.done&&t.doneBy&&!allRule(t))return `<span class="who">${av(t.doneBy,'xs')}${nm(t.doneBy)} yaptı</span>`;
+ if(allRule(t)){const dn=t.dn||[];return `<span class="who"><span class="avs">${w.map(x=>av(x,'xs'+(dn.includes(x)||t.done?'':' wait'))).join('')}</span>${t.done?'Hepsi yaptı':dn.length+'/'+w.length+' yaptı'}</span>`}
+ return `<span class="who">${avs(w)}${w.map(nm).join(' ya da ')}</span>`}
 const annVisible=()=>S.ann&&(!S.ann.until||Date.now()<S.ann.until);
 
 /* ---------- Bileşenler ---------- */
@@ -672,10 +687,10 @@ function evRow(e,day){const c=e.members.length>=S.members.length&&S.members.leng
   ${isAll(e)?famBadge():avs(e.members)}<span class="sr">Katılanlar: ${isAll(e)?'Bütün aile':e.members.map(x=>M(x).name).join(', ')}</span></button>`}
 function taskRow(t){const late=!t.done&&t.due<T();const nx=nextIn(t);const ok=can('task.complete',t);
  return `<div class="row${t.done?' done':''}" data-sw="task" data-id="${t.id}">
-  <button class="chk" data-act="toggleTask" data-id="${t.id}" aria-pressed="${t.done}" aria-label="${esc(t.title)}: ${t.done?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}><span>${I('check','sm')}</span></button>
+  <button class="chk" data-act="toggleTask" data-id="${t.id}" aria-pressed="${myTick(t)}" aria-label="${esc(t.title)}: ${myTick(t)?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}><span>${I('check','sm')}</span></button>
   <button class="body tap" style="text-align:left" data-act="openTask" data-id="${t.id}">
    <span class="t">${esc(t.title)}</span>
-   <span class="m"><span class="who">${av(t.assignee,'xs')}${esc(M(t.assignee).name)}</span>
+   <span class="m">${whoHTML(t,true)}
    ${t.done?`<span>${t.doneAt?ago(t.doneAt):''}</span>`:`<span>${I('clock','sm')}${rel(t.due)}${t.time?' '+hm(t.time):''}</span>`}
    ${late?'<span class="tag late">Gecikti</span>':''}
    ${t.repeat!=='none'&&!t.done?`<span>${I('repeat','sm')}${TREP[t.repeat]}</span>`:''}
@@ -690,17 +705,17 @@ const evsOn=(day,c)=>S.events.filter(e=>occurs(e,day)&&(!c.mine||e.members.inclu
 const doneDay=x=>{const n=+x.doneAt;return Number.isFinite(n)&&n>0?iso(new Date(n)):x.due};
 const tkKey=(x,day)=>!x.done&&x.due<day?' ':(x.time||'~');
 function tasksOn(day,c){const t=T();
- return S.tasks.filter(x=>(!c.mine||x.assignee===meId())&&(!c.filter.length||c.filter.includes(x.assignee))
+ return S.tasks.filter(x=>(!c.mine||isFor(x,meId()))&&(!c.filter.length||ws(x).some(y=>c.filter.includes(y)))
   &&(x.done?doneDay(x)===day:(x.due===day||(day===t&&x.due<t))))
   .sort((a,b)=>tkKey(a,day)<tkKey(b,day)?-1:1)}
 const dayData=(day,c)=>({evs:evsOn(day,c),tks:tasksOn(day,c)});
 function cTaskRow(t){const late=!t.done&&t.due<T();const ok=can('task.complete',t);
  return `<div class="row ctask${t.done?' done':''}" data-sw="task" data-id="${t.id}">
   ${t.time?`<span class="time">${hm(t.time)}</span>`:`<span class="time ad">Gün<br>içinde</span>`}
-  <span class="mbar dash" style="--c:${M(t.assignee).color}"></span>
+  <span class="mbar dash" style="--c:${ws(t).length>1?'var(--accent)':M(t.assignee).color}"></span>
   <button class="body tap" style="text-align:left" data-act="openTask" data-id="${t.id}"><span class="t">${esc(t.title)}</span>
-   <span class="m"><span>${I('tasks','sm')}Görev</span><span class="who">${av(t.assignee,'xs')}${esc(first(M(t.assignee).name))}</span>${late?`<span class="tag late">Gecikti · ${rel(t.due)}</span>`:''}${t.repeat!=='none'&&!t.done?`<span>${I('repeat','sm')}${TREP[t.repeat]}</span>`:''}</span></button>
-  <button class="chk" data-act="toggleTask" data-id="${t.id}" aria-pressed="${t.done}" aria-label="${esc(t.title)}: ${t.done?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}><span>${I('check','sm')}</span></button></div>`}
+   <span class="m"><span>${I('tasks','sm')}Görev</span>${whoHTML(t)}${late?`<span class="tag late">Gecikti · ${rel(t.due)}</span>`:''}${t.repeat!=='none'&&!t.done?`<span>${I('repeat','sm')}${TREP[t.repeat]}</span>`:''}</span></button>
+  <button class="chk" data-act="toggleTask" data-id="${t.id}" aria-pressed="${myTick(t)}" aria-label="${esc(t.title)}: ${myTick(t)?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}><span>${I('check','sm')}</span></button></div>`}
 function dayHead(day,{evs,tks}){const d=parse(day),t=T();const r=day===t?'Bugün':day===add(t,1)?'Yarın':day===add(t,-1)?'Dün':'';
  const c=[evs.length&&evs.length+' etkinlik',tks.length&&tks.length+' görev'].filter(Boolean).join(' · ')||'Boş';
  return `<div class="dhead"><span class="dnum" aria-hidden="true"><b>${d.getDate()}</b><small>${MON[d.getMonth()].slice(0,3)}</small></span><span class="h"><b>${r?r+' · ':''}${DAYS[d.getDay()]}</b><small>${c}</small></span><button class="dadd" data-act="addOn" data-d="${day}" aria-label="${long(day)} için ekle">${I('plus')}</button></div>`}
@@ -871,7 +886,7 @@ function itemForm(i){F={for:i.for||'',pri:i.pri||'yakinda',edit:i.id};
 
 function vTasks(){
  const t=T(),mine=meId();let f=UI.tf;
- let list=S.tasks.filter(x=>f==='done'?x.done:!x.done&&(f==='all'||x.assignee===mine));
+ let list=S.tasks.filter(x=>f==='done'?x.done:!x.done&&(f==='all'||isFor(x,mine)));
  let body='';
  if(f==='done'){list.sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));body=list.length?`<div class="group">${list.map(taskRow).join('')}</div>`:`<div class="group">${emptyBox('Henüz tamamlanan görev yok','Tamamladığın görevler burada görünür.')}</div>`}
  else{const G=[['Geciken',x=>x.due<t],['Bugün',x=>x.due===t],['Yarın',x=>x.due===add(t,1)],['Bu hafta',x=>x.due>add(t,1)&&x.due<=add(t,7)],['Daha sonra',x=>x.due>add(t,7)]];
@@ -891,7 +906,7 @@ function vFamily(){
  const sub=t=>`<br><span style="color:var(--muted);font-size:.875rem">${t}</span>`;
  return `<div class="hdr"><div class="h"><h1>Aile</h1><div class="sub">${esc(S.meta.name||'Ailemiz')} · ${S.members.length} kişi</div></div>${adm?`<button class="btn ghost sm" data-act="memberAddSheet">${I('plus','sm')}Üye ekle</button>`:''}</div>
  ${demoBar()}
- <div class="group">${S.members.map(x=>{const k=S.tasks.filter(t=>!t.done&&t.assignee===x.id).length;return `<button class="row tap" data-act="openMember" data-id="${x.id}">${av(x.id)}<span class="body"><span class="t">${esc(x.name)}${x.id===m.id?' <span class="qty">(sen)</span>':''}</span><span class="m">${x.rel?`<span>${esc(x.rel)}</span>`:''}<span class="tag cat">${ROLES[x.role]}</span>${k?`<span>${k} görev</span>`:''}</span></span>${I('chevR')}</button>`}).join('')}</div>
+ <div class="group">${S.members.map(x=>{const k=S.tasks.filter(t=>!t.done&&isFor(t,x.id)).length;return `<button class="row tap" data-act="openMember" data-id="${x.id}">${av(x.id)}<span class="body"><span class="t">${esc(x.name)}${x.id===m.id?' <span class="qty">(sen)</span>':''}</span><span class="m">${x.rel?`<span>${esc(x.rel)}</span>`:''}<span class="tag cat">${ROLES[x.role]}</span>${k?`<span>${k} görev</span>`:''}</span></span>${I('chevR')}</button>`}).join('')}</div>
  <div class="sec-h"><h2 class="sec">Aileye davet et</h2></div>
  <div class="invite">${adm?`<div class="flabel">Aile kodu</div><div class="code" id="fam-code">${demo?'ÖRNE-KKOD':fmtCode(store.code)}</div>
   <div style="color:var(--muted);font-size:.9rem;margin-top:4px">${demo?'Örnek ailede davet çalışmaz. Kendi aileni kurduğunda burada gerçek kodun yazar.':'Bizim Ev\'i açan kişi “Aile koduyla katıl” deyip bu kodu yazar. Bağlantıyı gönderirsen kod kendiliğinden dolar.'}</div>
@@ -1003,12 +1018,23 @@ function eventForm(e,day,pre){const child=isChild();
   <div class="field"><label for="ev-desc">Not</label><textarea class="inp" id="ev-desc" placeholder="Hatırlanması gerekenler">${esc(v.desc)}</textarea></div>
  </details>
  <button class="btn primary block">${e?'Kaydet':'Etkinliği ekle'}</button></form>`)}
+function asHTML(){const child=isChild(),lk=child?{lockMsg:'Başkasına görev vermeyi annen ya da baban yapabilir.'}:null,n=F.who.length;
+ const nt=t=>`<p class="note" style="margin:8px 0 0">${I('info','sm')}<span>${t}</span></p>`;
+ let h=`<div class="chips" style="flex-wrap:wrap">${chipsHTML('fAs',F.who,lk)}</div>`;
+ if(child)return h;
+ const rc=document.getElementById('tk-rot'),names=esc(F.who.map(x=>first(M(x).name)).join(', '));
+ if(rc&&rc.checked)return h;
+ if(n>1)h+=`<div class="seg" style="margin-top:10px" role="group" aria-label="Görev ne zaman biter">${[['0','Biri yapınca biter'],['1','Herkes yapınca biter']].map(([v,l])=>`<button type="button" data-act="fAllRule" data-v="${v}" aria-pressed="${!!F.all===(v==='1')}" style="font-size:.88rem">${l}</button>`).join('')}</div>`
+  +nt(F.all?`${names}: her biri kendi payını işaretler, hepsi yapınca görev biter.`:`${names}: içlerinden biri yapınca görev biter.`);
+ else h+=nt('Birden fazla kişi seçebilirsin.');
+ return h}
+const asRefresh=()=>{const e=document.getElementById('tk-as');if(e)e.innerHTML=asHTML()};
 function taskForm(t,day){const child=isChild();
- F={assignee:t?t.assignee:meId(),rot:t&&t.rot?[...t.rot]:[],edit:t?t.id:null};
+ F={who:t?[...ws(t)].filter(Boolean):[meId()],all:t?!!t.all:false,rot:t&&t.rot?[...t.rot]:[],edit:t?t.id:null};if(!F.who.length)F.who=[meId()];
  const v=t||{title:'',due:day||T(),time:'',repeat:'none',note:''};
  sheet(t?'Görevi düzenle':'Yeni görev',`<form data-form="task" autocomplete="off">
  <div class="field"><label for="tk-title">Ne yapılacak?</label><input class="inp" id="tk-title" value="${esc(v.title)}" placeholder="örn. Çöpü çıkar" autofocus><span class="err" id="tk-err" hidden>Göreve bir ad ver.</span></div>
- <div class="field"><span class="flabel">Kim yapacak?</span><div class="chips" style="flex-wrap:wrap" id="tk-as">${chipsHTML('fAs',[F.assignee],child?{lockMsg:'Başkasına görev vermeyi annen ya da baban yapabilir.'}:null)}</div></div>
+ <div class="field"><span class="flabel">Kim yapacak?</span><div id="tk-as">${asHTML()}</div></div>
  <div class="two"><div class="field"><label for="tk-date">Son gün</label><input class="inp" type="date" id="tk-date" value="${v.due}"></div>
  <div class="field"><label for="tk-time">Saat (isteğe bağlı)</label><input class="inp" type="time" id="tk-time" value="${v.time}"></div></div>
  <details class="more"${t&&(t.repeat!=='none')?' open':''}><summary>Daha fazla seçenek ${I('chevD','sm')}</summary>
@@ -1112,7 +1138,7 @@ const A={
  copyCode:()=>{if(store.mode!=='family'){toast('Örnek ailede gerçek kod yok.');return}copyText(fmtCode(store.code),'Kod kopyalandı')},
  // Üyeler
  openMember:d=>{const m=M(d.id),t=T();const up7=[];for(let i=0;i<14;i++){const c=add(t,i);S.events.filter(e=>occurs(e,c)&&e.members.includes(m.id)).sort(sortEv).forEach(e=>up7.push([e,c]))}
-  const tk=S.tasks.filter(x=>!x.done&&x.assignee===m.id).sort((a,b)=>a.due.localeCompare(b.due));const adm=can('member.manage'),self=m.id===meId();
+  const tk=S.tasks.filter(x=>!x.done&&isFor(x,m.id)).sort((a,b)=>a.due.localeCompare(b.due));const adm=can('member.manage'),self=m.id===meId();
   const face=adm||self?`<button class="avedit" data-act="avPick" data-id="${m.id}" aria-label="Avatarı ve rengi değiştir">${av(m.id,'lg')}<span class="pen">${I('edit')}</span></button>`:av(m.id,'lg');
   sheet(esc(m.name),`<div style="display:flex;gap:14px;align-items:center;margin-bottom:12px">${face}<div><b style="font-size:1.1rem">${esc(m.name)}</b><div style="color:var(--muted)">${esc(m.rel)}</div><span class="tag cat" style="margin-top:4px">${ROLES[m.role]}</span></div></div>
   ${m.role==='child'?`<p class="note">${I('info','sm')}<span>Çocuk hesabında ekran sadeleşir: yalnızca kendi görev ve etkinlikleri görünür, başkasına görev veremez.</span></p>`:''}
@@ -1187,25 +1213,35 @@ const A={
  fMem:d=>{F.members=F.members.includes(d.id)?F.members.filter(x=>x!==d.id):[...F.members,d.id];memRefresh()},
  fAll:()=>{const all=S.members.every(m=>F.members.includes(m.id));F.members=all?[meId()]:S.members.map(m=>m.id);F.pick=false;all?flyOut():flyIn()},
  fPick:()=>{F.pick=true;flyOut()},
- fAs:d=>{F.assignee=d.id;if(document.getElementById('tk-rot')?.checked&&!F.rot.includes(d.id))F.rot.unshift(d.id);document.getElementById('tk-as').innerHTML=chipsHTML('fAs',[F.assignee])},
- fRot:d=>{F.rot=F.rot.includes(d.id)?F.rot.filter(x=>x!==d.id):[...F.rot,d.id];document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true});if(F.rot[0]){F.assignee=F.rot[0];document.getElementById('tk-as').innerHTML=chipsHTML('fAs',[F.assignee])}},
+ fAs:d=>{const rc=document.getElementById('tk-rot');
+  if(rc&&rc.checked)F.who=[d.id];else F.who=F.who.includes(d.id)?(F.who.length>1?F.who.filter(x=>x!==d.id):F.who):[...F.who,d.id];
+  if(rc&&rc.checked&&!F.rot.includes(F.who[0]))F.rot.unshift(F.who[0]);asRefresh()},
+ fAllRule:d=>{F.all=d.v==='1';asRefresh()},
+ fRot:d=>{F.rot=F.rot.includes(d.id)?F.rot.filter(x=>x!==d.id):[...F.rot,d.id];document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true});if(F.rot[0]){F.who=[F.rot[0]];asRefresh()}},
  // Görevler
  tf:d=>{UI.tf=d.v;render(true)},
  newTask:()=>taskForm(null),
  sugAdd:d=>{const it=addItemTo(UI.list,d.v);if(!it)return;render(true);toast(`${it.name} eklendi`)},
  toggleTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const u=snap();
-  if(t.done){t.done=false;delete t.doneAt;log(`“${t.title}” görevini yeniden açtı`);render(true);toast('Görev yeniden açıldı',u);return}
+  if(t.done){t.done=false;delete t.doneAt;t.dn=[];log(`“${t.title}” görevini yeniden açtı`);render(true);toast('Görev yeniden açıldı',u);return}
+  const mm=meId();
+  if(allRule(t)&&isFor(t,mm)){t.dn=[...(t.dn||[])];
+   if(t.dn.includes(mm)){t.dn=t.dn.filter(x=>x!==mm);render(true);toast('İşaretin kaldırıldı',u);return}
+   t.dn.push(mm);if(t.dn.length<ws(t).length){celebrate(t.id);log(`“${t.title}” görevinde kendi payını yaptı`);render(true);
+    toast(`Senin payın tamam · ${ws(t).filter(x=>!t.dn.includes(x)).map(x=>first(M(x).name)).join(', ')} bekleniyor`,u);return}}
   celebrate(t.id);t.done=true;t.doneAt=Date.now();t.doneBy=meId();let msg=isChild()?'Görev tamamlandı ⭐':'Görev tamamlandı';
-  if(t.repeat!=='none'){const nx=nextIn(t)||t.assignee;S.tasks.push({...t,id:uid(),done:false,doneAt:undefined,due:nextDue(t.due,t.repeat),assignee:nx});if(nextIn(t))msg+=` · Sırada ${M(nx).name}`}
+  if(t.repeat!=='none'){const nx=nextIn(t)||t.assignee;S.tasks.push({...t,id:uid(),done:false,doneAt:undefined,doneBy:undefined,dn:[],due:nextDue(t.due,t.repeat),assignee:nx,who:nextIn(t)?[nx]:[...ws(t)]});if(nextIn(t))msg+=` · Sırada ${M(nx).name}`}
   log(`“${t.title}” görevini tamamladı`);render(true);toast(msg,u)},
  openTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const ok=can('task.edit',t),nx=nextIn(t);
   sheet(esc(t.title),`<div class="dl">
-   <div>${I('user')}<span class="who">${av(t.assignee,'xs')}<b>${esc(M(t.assignee).name)}</b></span></div>
+   <div>${I(ws(t).length>1?'users':'user')}<span>${ws(t).length>1?`<span style="display:flex;flex-wrap:wrap;gap:8px">${ws(t).map(x=>`<span class="who">${av(x,'xs')}<b>${esc(M(x).name)}</b>${allRule(t)&&(t.dn||[]).includes(x)?' ✓':''}</span>`).join('')}</span>
+    <span style="display:block;margin-top:4px;color:var(--muted);font-size:.875rem">${t.done&&t.doneBy&&!allRule(t)?esc(M(t.doneBy).name)+' yaptı':allRule(t)?'Her biri kendi payını işaretler, hepsi yapınca biter.':'İçlerinden biri yapınca görev biter.'}</span>`
+    :`<span class="who">${av(t.assignee,'xs')}<b>${esc(M(t.assignee).name)}</b></span>`}</span></div>
    <div>${I('clock')}<span>${t.done?'Tamamlandı · '+ago(t.doneAt):long(t.due)+(t.time?' · '+hm(t.time):'')}${!t.done&&t.due<T()?' <span class="tag late">Gecikti</span>':''}</span></div>
    ${t.repeat!=='none'?`<div>${I('repeat')}<span>${TREP[t.repeat]}${t.rot.length>1?`<br><span style="color:var(--muted)">Sırayla: ${t.rot.map(x=>esc(M(x).name)).join(' → ')}</span>`:''}</span></div>`:''}
    ${nx?`<div>${I('chevR')}<span>Sıradaki: <b>${esc(M(nx).name)}</b></span></div>`:''}
    <div style="color:var(--muted);font-size:.875rem">${av(t.by,'xs')}<span>${esc(M(t.by).name)} oluşturdu</span></div></div>
-   <button class="btn primary block" data-act="toggleTask2" data-id="${t.id}"${lock(can('task.complete',t),'Bu görev başkasına atanmış.')}>${I('check','sm')}${t.done?'Yeniden aç':'Tamamlandı'}</button>
+   <button class="btn primary block" data-act="toggleTask2" data-id="${t.id}"${lock(can('task.complete',t),'Bu görev başkasına atanmış.')}>${I('check','sm')}${t.done?'Yeniden aç':allRule(t)&&isFor(t,meId())?((t.dn||[]).includes(meId())?'Payımı geri al':'Benim payım tamam'):'Tamamlandı'}</button>
    <div class="actions"><button class="btn danger" data-act="delTask" data-id="${t.id}"${lock(ok,PARENT)}>${I('trash','sm')}Sil</button><button class="btn soft" data-act="editTask" data-id="${t.id}"${lock(ok,PARENT)}>${I('edit','sm')}Düzenle</button></div>`)},
  toggleTask2:d=>{close();A.toggleTask(d)},
  editTask:d=>taskForm(S.tasks.find(x=>x.id===d.id)),
@@ -1299,10 +1335,11 @@ const FORMS={
  task:()=>{const g=id=>document.getElementById(id);const title=g('tk-title').value.trim();if(!title){g('tk-err').hidden=false;g('tk-title').focus();return}
   const rotOn=g('tk-rot')&&g('tk-rot').checked,rep=g('tk-rep').value;
   if(rotOn&&(F.rot.length<2||rep==='none')){g('rot-err').hidden=false;return}
-  const o={title,assignee:rotOn?F.rot[0]:F.assignee,due:g('tk-date').value||T(),time:g('tk-time').value,repeat:rep,rot:rotOn?F.rot:[]};
+  const who=rotOn?[F.rot[0]]:(F.who.length?[...F.who]:[meId()]),nm=who.map(x=>first(M(x).name)).join(who.length>2?', ':' ve ');
+  const o={title,assignee:who[0],who,all:who.length>1&&!!F.all,due:g('tk-date').value||T(),time:g('tk-time').value,repeat:rep,rot:rotOn?F.rot:[]};
   const u=snap();
-  if(F.edit){const ex=S.tasks.find(x=>x.id===F.edit);if(!ex){close();toast('Bu görev başka bir cihazda silinmiş.');return}Object.assign(ex,o);log(`“${title}” görevini güncelledi`)}else{S.tasks.push({id:uid(),by:meId(),done:false,...o});log(o.assignee===meId()?`“${title}” görevini ekledi`:`${M(o.assignee).name} için “${title}” görevini ekledi`)}
-  close();render(true);toast(F.edit?'Görev güncellendi':`Görev ${M(o.assignee).name} için eklendi`,u)},
+  if(F.edit){const ex=S.tasks.find(x=>x.id===F.edit);if(!ex){close();toast('Bu görev başka bir cihazda silinmiş.');return}Object.assign(ex,o);ex.dn=(ex.dn||[]).filter(y=>who.includes(y));log(`“${title}” görevini güncelledi`)}else{S.tasks.push({id:uid(),by:meId(),done:false,dn:[],...o});log(who.length===1&&who[0]===meId()?`“${title}” görevini ekledi`:`${nm} için “${title}” görevini ekledi`)}
+  close();render(true);toast(F.edit?'Görev güncellendi':`Görev ${nm} için eklendi`,u)},
  addItem:()=>{const inp=document.getElementById('item-input');const it=addItemTo(UI.list,inp.value);if(!it)return;inp.value='';render(true);const n=document.getElementById('item-input');n&&n.focus();toast(`${it.name} eklendi · ${it.cat}`,()=>itemForm(it),'Ayrıntı ekle')},
  quickItem:()=>{const inp=document.getElementById('qi-input');const it=addItemTo(F.list,inp.value);if(!it)return;inp.value='';inp.focus();
   document.getElementById('qi-added').insertAdjacentHTML('afterbegin',`<div class="note">${I('check','sm')}<span>${esc(it.name)} → ${esc(S.lists.find(l=>l.id===F.list).name)} (${esc(it.cat)})</span></div>`);render(true)},
@@ -1345,7 +1382,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if
 document.addEventListener('submit',e=>{const f=e.target.dataset.form;if(f&&FORMS[f]){e.preventDefault();FORMS[f]()}});
 document.addEventListener('change',e=>{
  if(e.target.id==='ev-allday'){const t=document.getElementById('ev-time');t.disabled=e.target.checked}
- if(e.target.id==='tk-rot'){const a=document.getElementById('rot-area');a.hidden=!e.target.checked;if(e.target.checked){if(!F.rot.length)F.rot=[F.assignee];const r=document.getElementById('tk-rep');if(r.value==='none')r.value='weekly';document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true})}}});
+ if(e.target.id==='tk-rot'){const a=document.getElementById('rot-area');a.hidden=!e.target.checked;F.who=[F.who[0]];asRefresh();if(e.target.checked){if(!F.rot.length)F.rot=[F.who[0]];const r=document.getElementById('tk-rep');if(r.value==='none')r.value='weekly';document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true})}}});
 document.addEventListener('input',e=>{if(e.target.id==='an-text')document.getElementById('an-count').textContent=e.target.value.length+'/140';
  if(e.target.id==='item-input'){const g=document.getElementById('sugg');if(g)g.innerHTML=suggHTML(e.target.value)}});
 // Satırı yatay kaydırma: sağ = tamam/alındı, sol = sil. Dikey hareket sayfa kaydırmaya bırakılır.
