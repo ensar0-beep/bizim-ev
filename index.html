@@ -197,6 +197,7 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .pgrid .pp .ck .i{width:12px;height:12px}
 .pgrid .link{align-self:center;grid-column:span 4;justify-self:start}
 .pgrid .kbr{display:none}
+.calpg{margin-top:12px}
 /* Tarih ve saat: telefonun kendi seçicisi görünmez katman olarak üstte; görünen yazıyı biz yazarız, böylece iPhone'da kutu taşmaz */
 .two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .dtp{position:relative;display:flex;align-items:center;gap:8px;min-height:50px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);padding:0 12px;font-weight:600;min-width:0;overflow:hidden;color:var(--fg)}
@@ -841,6 +842,10 @@ function vToday(){
  <div class="sec-h"><h2 class="sec">Alınacaklar</h2><button class="link" data-act="tab" data-tab="lists">Tümü ${I('chevR','sm')}</button></div>
  <div class="group">${lists.map(({l,n,u})=>`<button class="row tap" data-act="goList" data-id="${l.id}"><span class="icon-btn" style="width:40px;height:40px;background:var(--sunk);color:var(--fg)">${I(l.icon)}</span><span class="body"><span class="t">${esc(l.name)}</span><span class="m">${n?`<span>${n} şey bekliyor</span>`:'<span>Hepsi alındı</span>'}${u?`<span class="tag late">${u} acil</span>`:''}</span></span>${I('chevR')}</button>`).join('')||emptyBox('Henüz liste yok','')}</div>`}
 
+// Takvimde kimin takvimi: Bütün aile (süzgeç yok) ya da seçilen kişiler; formlardaki avatar ızgarası
+function calFilterHTML(){const f=UI.filter,ck=`<span class="ck">${I('check','sm')}</span>`;
+ const ord=[...S.members.filter(m=>m.role!=='child'),...S.members.filter(m=>m.role==='child')];
+ return `<div class="pgrid calpg" role="group" aria-label="Kimin takvimi"><button class="pp famchip" data-act="calFilter" data-id="" aria-pressed="${!f.length}">${famBadge()}${ck}Bütün aile</button>${ord.map(m=>`<button class="pp${m.role==='child'?' kid':''}" data-act="calFilter" data-id="${m.id}" aria-pressed="${f.includes(m.id)}">${av(m.id)}${ck}${esc(first(m.name))}</button>`).join('')}</div>`}
 function vCal(){
  const v=UI.cal,c={mine:false,filter:UI.filter};let body='',nav='',addDay=T();
  if(v==='month'){const d=UI.calDate,dd=parse(d);addDay=d;
@@ -862,7 +867,7 @@ function vCal(){
  return `<div class="hdr"><div class="h"><h1>Takvim</h1></div><button class="btn primary sm" data-act="addOn" data-d="${addDay}">${I('plus','sm')}Ekle</button></div>
  <div class="seg" role="group" aria-label="Görünüm">${[['flow','Akış'],['month','Ay']].map(([k,n])=>`<button data-act="calView" data-v="${k}" aria-pressed="${v===k}">${n}</button>`).join('')}</div>
  ${nav}
- <div class="chips" role="group" aria-label="Kişiye göre süz" style="margin-top:10px"><button class="chip plain" data-act="calFilter" data-id="" aria-pressed="${UI.filter.length===0}">Herkes</button>${S.members.map(m=>`<button class="chip" data-act="calFilter" data-id="${m.id}" aria-pressed="${UI.filter.includes(m.id)}">${av(m.id,'xs')}${esc(first(m.name))}</button>`).join('')}</div>
+ ${calFilterHTML()}
  ${body}`}
 
 function vLists(){
@@ -1093,9 +1098,9 @@ function eventForm(e,day,pre){const child=isChild();
  <button class="btn primary block">${e?'Kaydet':'Etkinliği ekle'}</button></form>`)}
 function asHTML(){const child=isChild(),lk=child?{lockMsg:'Başkasına görev vermeyi annen ya da baban yapabilir.'}:null,n=F.who.length;
  const nt=t=>`<p class="note" style="margin:8px 0 0">${I('info','sm')}<span>${t}</span></p>`;
- let h=`<div class="pgrid">${faceGrid('fAs',F.who,lk&&lk.lockMsg)}</div>`;
+ let h=`<div class="pgrid"><button type="button" class="pp famchip" data-act="fAsAll" aria-pressed="${S.members.every(m=>F.who.includes(m.id))}"${lk?lock(false,lk.lockMsg):''}>${famBadge()}<span class="ck">${I('check','sm')}</span>Bütün aile</button>${faceGrid('fAs',F.who,lk&&lk.lockMsg)}</div>`;
  if(child)return h;
- const rc=document.getElementById('tk-rot'),names=esc(F.who.map(x=>first(M(x).name)).join(', '));
+ const rc=document.getElementById('tk-rot'),names=S.members.every(m=>F.who.includes(m.id))?'Bütün aile':esc(F.who.map(x=>first(M(x).name)).join(', '));
  if(rc&&rc.checked)return h;
  if(n>1)h+=`<div class="seg" style="margin-top:10px" role="group" aria-label="Görev ne zaman biter">${[['0','Biri yapınca biter'],['1','Herkes yapınca biter']].map(([v,l])=>`<button type="button" data-act="fAllRule" data-v="${v}" aria-pressed="${!!F.all===(v==='1')}" style="font-size:.88rem">${l}</button>`).join('')}</div>`
   +nt(F.all?`${names}: her biri kendi payını işaretler, hepsi yapınca görev biter.`:`${names}: içlerinden biri yapınca görev biter.`);
@@ -1288,6 +1293,8 @@ const A={
  fAs:d=>{const rc=document.getElementById('tk-rot');
   if(rc&&rc.checked)F.who=[d.id];else F.who=F.who.includes(d.id)?(F.who.length>1?F.who.filter(x=>x!==d.id):F.who):[...F.who,d.id];
   if(rc&&rc.checked&&!F.rot.includes(F.who[0]))F.rot.unshift(F.who[0]);asRefresh()},
+ fAsAll:()=>{const rc=document.getElementById('tk-rot');if(rc&&rc.checked){toast('Sırayla yapılan görevde tek kişi seçilir');return}
+  const all=S.members.every(m=>F.who.includes(m.id));F.who=all?[meId()]:S.members.map(m=>m.id);asRefresh()},
  fAllRule:d=>{F.all=d.v==='1';asRefresh()},
  fRot:d=>{F.rot=F.rot.includes(d.id)?F.rot.filter(x=>x!==d.id):[...F.rot,d.id];document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true});if(F.rot[0]){F.who=[F.rot[0]];asRefresh()}},
  // Görevler
@@ -1413,7 +1420,7 @@ const FORMS={
  task:()=>{const g=id=>document.getElementById(id);const title=g('tk-title').value.trim();if(!title){g('tk-err').hidden=false;g('tk-title').focus();return}
   const rotOn=g('tk-rot')&&g('tk-rot').checked,rep=g('tk-rep').value;
   if(rotOn&&(F.rot.length<2||rep==='none')){g('rot-err').hidden=false;return}
-  const who=rotOn?[F.rot[0]]:(F.who.length?[...F.who]:[meId()]),nm=who.map(x=>first(M(x).name)).join(who.length>2?', ':' ve ');
+  const who=rotOn?[F.rot[0]]:(F.who.length?[...F.who]:[meId()]),nm=S.members.length>1&&S.members.every(m=>who.includes(m.id))?'Bütün aile':who.map(x=>first(M(x).name)).join(who.length>2?', ':' ve ');
   const o={title,assignee:who[0],who,all:who.length>1&&!!F.all,due:g('tk-date').value||T(),time:g('tk-time').value,repeat:rep,rot:rotOn?F.rot:[]};
   const u=snap();
   if(F.edit){const ex=S.tasks.find(x=>x.id===F.edit);if(!ex){close();toast('Bu görev başka bir cihazda silinmiş.');return}Object.assign(ex,o);ex.dn=(ex.dn||[]).filter(y=>who.includes(y));log(`“${title}” görevini güncelledi`)}else{S.tasks.push({id:uid(),by:meId(),done:false,dn:[],...o});log(who.length===1&&who[0]===meId()?`“${title}” görevini ekledi`:`${nm} için “${title}” görevini ekledi`)}
