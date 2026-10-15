@@ -739,7 +739,7 @@ const FB_URL='https://bizimev-96297-default-rtdb.firebaseio.com';
 // Firebase Web API anahtarı. Doluysa her telefon ilk açılışta görünmez bir kimlik (anonim giriş) alır,
 // kendini ailenin uids listesine yazar ve veritabanı yalnızca o kimliklere açılır. Boşsa kimlik katmanı
 // devre dışı kalır ve uygulama eskisi gibi yalnızca aile koduyla çalışır.
-const FB_KEY='';
+const FB_KEY='AIzaSyB6cyMIu_2Q5T1cAXTzDFPmXlPs0CWzQpg';
 // Kimlik uç noktaları ayrı duruyor ki yerel testte sahte sunucuya yöneltilebilsin.
 const IDP_URL='https://identitytoolkit.googleapis.com/v1/accounts:signUp';
 const TOK_URL='https://securetoken.googleapis.com/v1/token';
@@ -824,7 +824,8 @@ function setAt(root,path,val){const ks=path.split('/').filter(Boolean);if(!ks.le
 const myUid=()=>(store.auth&&store.auth.uid)||'';
 const jpost=async(url,body)=>{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return{ok:r.ok,status:r.status,j:await r.json().catch(()=>null)}};
 let authP=null;
-function authTok(){if(!FB_KEY)return Promise.resolve('');return authP||(authP=doAuth().finally(()=>{authP=null}))}
+// Kimlik alınamazsa (ağ, sunucu) istek jetonsuz gider; bir sonraki istekte yeniden denenir.
+function authTok(){if(!FB_KEY)return Promise.resolve('');return authP||(authP=doAuth().catch(()=>'').finally(()=>{authP=null}))}
 async function doAuth(){
  const a=store.auth;
  if(a&&a.tok&&a.exp>Date.now()+120000)return a.tok;
@@ -840,7 +841,7 @@ const dbUrl=(p,t,q)=>`${FB_URL}/${p}.json`+qAuth(t)+(q?(t?'&':'?')+q:'');
 async function fbGet(code,p){const r=await fetch(fbUrl(code,p,await authTok()));if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
 async function fbSend(code,method,body,p){const r=await fetch(fbUrl(code,p,await authTok()),{method,body:JSON.stringify(body)});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
 // Bu cihazı ailenin kimlik listesine yaz (katılma ve her açılışta; aynı değer tekrar yazılırsa bir şey değişmez)
-const claimUid=(code,mid)=>FB_KEY?fbSend(code,'PUT',mid,'/uids/'+myUid()):Promise.resolve();
+const claimUid=(code,mid)=>FB_KEY&&myUid()?fbSend(code,'PUT',mid,'/uids/'+myUid()):Promise.resolve();
 /* Ailenin özel avatarları: önce hangi id'ler var diye bakılır (shallow), eksik olanlar tek tek indirilip
    yerelde saklanır. Böylece her açılışta bütün görseller yeniden inmez. */
 let avLoading=false;
