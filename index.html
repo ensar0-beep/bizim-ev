@@ -120,6 +120,51 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 /* Görev kutlaması ve çocuklar için haftalık yıldız */
 .cf{position:absolute;width:8px;height:10px;border-radius:2px;pointer-events:none;z-index:40}
 .stars{display:inline-flex;align-items:center;gap:6px;background:var(--warn-soft);color:var(--warn);font-weight:700;padding:6px 12px;border-radius:999px;font-size:.9rem;margin:0 0 12px}
+/* Takvim: üst çubuk, akış günleri, ay ayrıntısı, tatil etiketleri */
+.ctop{display:flex;align-items:center;gap:8px;margin:2px 0 10px}
+.ctop h1{flex:1}
+.ctop .add,.add.rnd{width:42px;height:42px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.cvw{display:flex;background:var(--sunk);border-radius:999px;padding:3px;gap:2px}
+.cvw button{width:40px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.cvw button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.cbar{display:flex;gap:6px;margin-bottom:6px;overflow-x:auto;scrollbar-width:none}.cbar>*{flex:none}
+.cwho,.ctg{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 12px 0 8px;border-radius:999px;background:var(--surface);border:1.5px solid var(--line);font-weight:600;font-size:.88rem}
+.cwho .fam{transform:scale(.75);margin:-4px}
+.cwho .avs .av{width:1.4rem;height:1.4rem}
+.cwho.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.ctg{padding:0 12px;color:var(--muted)}
+.ctg[aria-pressed="true"],.ctg.on{color:var(--accent-ink);border-color:var(--accent);background:var(--accent-soft)}
+.cday{margin-bottom:12px}
+.cdh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:4px 4px 6px}
+.cdh b{font-family:var(--f-display);font-size:1.05rem}
+.cdh>span{color:var(--muted);font-size:.85rem}
+.cday.today .cdh b{color:var(--coral)}
+.cemp{color:var(--muted);font-size:.82rem;padding:2px 4px 12px 4px}
+.ctk{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:4px 14px 4px 12px;text-align:left;position:relative;color:var(--muted);font-weight:600;font-size:.9rem}
+.cr+.ctk::before{content:"";position:absolute;top:0;left:4.6rem;right:0;border-top:1px solid var(--line)}
+.ctk .ck0{width:3rem;display:flex;justify-content:flex-end}
+.ctk .b{flex:1;min-width:0;padding-left:1.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ctk em{color:var(--danger);font-style:normal}
+.ctk .avs .av{width:1.4rem;height:1.4rem}
+.cmore{color:var(--muted);text-align:center;font-size:.85rem;padding:14px 0 24px}
+.hol{display:inline-flex;align-items:center;gap:4px;font-size:.74rem;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--sunk);color:var(--muted)}
+.hol.resmi{background:var(--danger-soft);color:var(--danger)}
+.hol.okul{background:var(--warn-soft);color:var(--warn)}
+.mdet{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;background:var(--surface);border-radius:var(--r-lg);padding:6px;box-shadow:var(--shadow)}
+.mdet .dow{font-size:.7rem;color:var(--muted);text-align:center;padding:4px 0;font-weight:600}
+.mdet .d{min-height:74px;border-radius:10px;display:flex;flex-direction:column;align-items:stretch;gap:2px;padding:3px 2px;min-width:0;text-align:left}
+.mdet .d .num{align-self:center;font-weight:700;font-size:.85rem;font-variant-numeric:tabular-nums;width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;border-radius:999px}
+.mdet .d.today .num{background:var(--coral);color:#fff}
+.mdet .d.out{opacity:.35}
+.mdet .d.rh .num{color:var(--danger)}
+.mdet .d[aria-pressed="true"]{background:var(--accent-soft)}
+.mdet .mb{display:block;font-size:.6rem;font-weight:600;line-height:1.25;padding:1px 3px;border-radius:4px;background:color-mix(in srgb,var(--c) 18%,var(--surface));border-left:2px solid var(--c);white-space:nowrap;overflow:hidden;text-overflow:clip}
+.mdet .mb.hb{--c:var(--danger);background:var(--danger-soft);color:var(--danger)}
+.mdet .mb.hb.okul{--c:var(--warn);background:var(--warn-soft);color:var(--warn)}
+.mdet .mb.hb.gun{--c:var(--muted);background:var(--sunk);color:var(--muted)}
+.mdet .mm,.mdet .mt{font-size:.6rem;color:var(--muted);font-weight:700;padding-left:3px}
+.cr.past{opacity:.5}
+.cdh .cadd{margin-left:auto;width:36px;height:36px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);align-self:center}
+.cprev{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:40px;color:var(--muted);font-weight:600;font-size:.88rem;margin-bottom:8px}
 /* Profilim: ortada büyük avatar, altında kısa özet */
 .pfh{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:4px 0 16px}
 .pfh .avedit{margin-bottom:8px}
@@ -484,7 +529,7 @@ a.btn{text-decoration:none}
 (function(){
 'use strict';
 /* ---------- İkonlar ---------- */
-const P={sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
+const P={listb:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>',sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
  today:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
  cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
  cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h9a1.5 1.5 0 0 0 1.5-1.1L21.5 7H6"/>',
@@ -983,7 +1028,7 @@ function syncBack(){const st=history.state&&history.state.bz;
  if(store.mode&&S&&UI.tab!=='today'){if(!st)history.pushState({bz:1},'')}
  else if(st)history.back()}
 window.addEventListener('popstate',()=>{if(document.querySelector('.sheet'))close();if(UI.tab!=='today'){UI.tab='today';render()}});
-function afterRender(){trackStrip();bindWheel();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
+function afterRender(){trackStrip();bindWheel();bindMore();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
 const emptyBox=(title,text,btn)=>`<div class="empty"><b>${title}</b>${text}${btn||''}</div>`;
 
 /* ---------- Konuşur gibi ekleme ----------
@@ -1106,29 +1151,51 @@ function vToday(){
 function calFilterHTML(){const f=UI.filter,ck=`<span class="ck">${I('check','sm')}</span>`;
  const ord=[...S.members.filter(m=>m.role!=='child'),...S.members.filter(m=>m.role==='child')];
  return `<div class="pgrid calpg" role="group" aria-label="Kimin takvimi"><button class="pp famchip" data-act="calFilter" data-id="" aria-pressed="${!f.length}">${famBadge()}${ck}Bütün aile</button>${ord.map(m=>`<button class="pp${m.role==='child'?' kid':''}" data-act="calFilter" data-id="${m.id}" aria-pressed="${f.includes(m.id)}">${av(m.id)}${ck}${esc(first(m.name))}</button>`).join('')}</div>`}
-function vCal(){
- const v=UI.cal,c={mine:false,filter:UI.filter};let body='',nav='',addDay=T();
- if(v==='month'){const d=UI.calDate,dd=parse(d);addDay=d;
-  const first=iso(new Date(dd.getFullYear(),dd.getMonth(),1)),last=iso(new Date(dd.getFullYear(),dd.getMonth()+1,0)),start=monday(first);let cells='';
-  for(let i=0;i<42;i++){const x=add(start,i),cd=parse(x),evs=evsOn(x,c),tk=tasksOn(x,c).filter(y=>!y.done).length;
-   const dots=evs.slice(0,3).map(e=>`<i style="--c:${M(e.members[0]).color}"></i>`).join('')+(tk?'<i class="tk"></i>':'');
-   cells+=`<button class="d${cd.getMonth()!==dd.getMonth()?' out':''}${x===T()?' today':''}" aria-pressed="${x===d}" data-act="pickDay" data-d="${x}" aria-label="${long(x)}, ${evs.length?evs.length+' etkinlik':'etkinlik yok'}${tk?', '+tk+' görev':''}"><span class="num">${cd.getDate()}</span><span class="dots">${dots}</span></button>`}
-  // Ayın günleri ızgaranın altında sırayla akar; içinde bulunulan ayda bugünden başlar.
-  const t=T(),from=!UI.mAll&&t>first&&t<=last?t:first,hid=daysBetween(first,from);
-  nav=`<div class="calnav"><button class="icon-btn" data-act="calMove" data-n="-1" aria-label="Önceki ay">${I('chevL')}</button><div class="title" aria-live="polite">${MON[dd.getMonth()]} ${dd.getFullYear()}</div><button class="icon-btn" data-act="calMove" data-n="1" aria-label="Sonraki ay">${I('chevR')}</button><button class="btn ghost sm" data-act="calToday">Bugün</button></div>`;
-  body=`<div class="month">${DOW.map(x=>`<div class="dow" aria-hidden="true">${x}</div>`).join('')}${cells}</div>
-  <div class="sec-h"><h2 class="sec">${MON[dd.getMonth()]} günleri</h2></div>
-  ${hid?`<button class="btn ghost block sm" data-act="mAll" style="margin-bottom:14px">${I('chevU','sm')}Ayın önceki ${hid} gününü göster</button>`:''}
-  ${flowHTML(from,daysBetween(from,last)+1,c)}`}
- else body=strip(monday(UI.sel||T()),UI.sel||T(),{act:'goDay',head:true,ctx:c,mode:'week'})
-   +`<button class="btn ghost block sm" data-act="agPrev" style="margin-bottom:14px">${I('chevU','sm')}Önceki günleri göster</button>`
-   +flowHTML(UI.agStart,UI.agN,c)
-   +`<button class="btn ghost block sm" data-act="agMore" style="margin-top:16px">${I('chevD','sm')}Sonraki 2 haftayı göster</button>`;
- return `<div class="hdr"><div class="h"><h1>Takvim</h1></div><button class="btn primary sm" data-act="addOn" data-d="${addDay}">${I('plus','sm')}Ekle</button></div>
- <div class="seg" role="group" aria-label="Görünüm">${[['flow','Akış'],['month','Ay']].map(([k,n])=>`<button data-act="calView" data-v="${k}" aria-pressed="${v===k}">${n}</button>`).join('')}</div>
- ${nav}
- ${calFilterHTML()}
- ${body}`}
+// Türkiye takvimi: resmî tatiller (Diyanet takvimine göre bayramlar) ve MEB 2026-2027 çalışma takvimi. Yeni yıl gelince listeyi güncelle.
+const HOL=(()=>{const h={},put=(d,t,k)=>{(h[d]=h[d]||[]).push([t,k])},span=(a,b,t,k)=>{for(let d=a;d<=b;d=add(d,1)){const w=parse(d).getDay();if(w&&w!==6)put(d,t,k)}};
+ [['2026-10-28','Cumhuriyet Bayramı arifesi · yarım gün'],['2026-10-29','Cumhuriyet Bayramı'],['2027-01-01','Yılbaşı'],['2027-03-08','Ramazan Bayramı arifesi · yarım gün'],['2027-03-09','Ramazan Bayramı · 1. gün'],['2027-03-10','Ramazan Bayramı · 2. gün'],['2027-03-11','Ramazan Bayramı · 3. gün'],
+  ['2027-04-23','Ulusal Egemenlik ve Çocuk Bayramı'],['2027-05-01','Emek ve Dayanışma Günü'],['2027-05-15','Kurban Bayramı arifesi · yarım gün'],['2027-05-16','Kurban Bayramı · 1. gün'],['2027-05-17','Kurban Bayramı · 2. gün'],['2027-05-18','Kurban Bayramı · 3. gün'],['2027-05-19','Kurban Bayramı · 4. gün · Gençlik ve Spor Bayramı'],
+  ['2027-07-15','Demokrasi ve Millî Birlik Günü'],['2027-08-30','Zafer Bayramı'],['2027-10-28','Cumhuriyet Bayramı arifesi · yarım gün'],['2027-10-29','Cumhuriyet Bayramı']].forEach(([d,t])=>put(d,t,'resmi'));
+ put('2026-11-10',"Atatürk'ü Anma Günü",'gun');put('2026-11-24','Öğretmenler Günü','gun');put('2027-11-10',"Atatürk'ü Anma Günü",'gun');put('2027-11-24','Öğretmenler Günü','gun');
+ span('2026-11-16','2026-11-20','Okullarda ara tatil','okul');put('2027-01-22','Karne günü','okul');span('2027-01-25','2027-02-05','Yarıyıl tatili','okul');
+ span('2027-03-08','2027-03-12','Okullarda ara tatil','okul');put('2027-06-25','Karne günü · okullar kapanıyor','okul');return h})();
+const hol=d=>{const a=HOL[d];if(!a)return null;const r=a.find(x=>x[1]==='resmi')||a[0];return [a.map(x=>x[0]).join(' · '),r[1]]};
+// Ay hücresine sığan kısa ad
+const holShort=t=>t.split(' · ')[0].replace('Okullarda ara tatil','Ara tatil').replace("Atatürk'ü Anma Günü",'10 Kasım').replace('Öğretmenler Günü','Öğretmenler').replace(/^(Cumhuriyet|Ramazan|Kurban) Bayramı arifesi$/,'Arife').replace(/^(Ramazan|Kurban) Bayramı$/,'Bayram').replace('Cumhuriyet Bayramı','Cumhuriyet').replace('Ulusal Egemenlik ve Çocuk Bayramı','23 Nisan').replace('Emek ve Dayanışma Günü','1 Mayıs').replace('Demokrasi ve Millî Birlik Günü','15 Temmuz').replace('Yarıyıl tatili','Yarıyıl');
+const holChip=d=>{const h=hol(d);return h?`<span class="hol ${h[1]}">${h[1]==='resmi'?'🇹🇷 ':h[1]==='okul'?'🎒 ':''}${esc(h[0])}</span>`:''};
+const evPast=(e,day)=>day<T()||day===T()&&!!e.time&&toMin(e.time)+60<=nowMin();
+// Takvim: Akış (gün gün, tek satırlık satırlar, görevler katlanır) ve Ay (hücrelerde etkinlik adları). Sağ üstteki iki simgeyle geçilir.
+function calTop(){const f=UI.filter,who=!f.length?'Herkes':f.length===1?first(M(f[0]).name):f.length+' kişi',k=UI.cal==='month'?'month':'flow';
+ return `<div class="ctop"><h1>Takvim</h1><div class="cvw" role="group" aria-label="Görünüm"><button data-act="calView" data-v="flow" aria-pressed="${k==='flow'}" aria-label="Akış">${I('listb')}</button><button data-act="calView" data-v="month" aria-pressed="${k==='month'}" aria-label="Ay">${I('cal')}</button></div><button class="add" data-act="tdAdd" aria-label="Ekle">${I('plus')}</button></div>
+ <div class="cbar"><button class="cwho${f.length?' on':''}" data-act="calWho">${f.length?avs(f.slice(0,3)):famBadge()}<span>${esc(who)}</span>${I('chevD','sm')}</button>
+ ${k==='flow'?`<button class="ctg" data-act="ctkAll" aria-pressed="${!!UI.ctk}">${UI.ctk?I('check','sm'):I('tasks','sm')}Görevler</button>`:''}</div>`}
+function ctkLine(d,tks){if(!tks.length)return '';const t=T();
+ if(UI.ctk||(UI.ctkOpen||{})[d])return tks.sort((a,b)=>tkKey(a,d)<tkKey(b,d)?-1:1).map(x=>crow('t',x,d)).join('')+(UI.ctk?'':`<button class="ctk" data-act="ctkDay" data-d="${d}"><span class="ck0">${I('chevU','sm')}</span><span class="b">Görevleri gizle</span></button>`);
+ const who=[...new Set(tks.flatMap(x=>ws(x)))];
+ return `<button class="ctk" data-act="ctkDay" data-d="${d}"><span class="ck0">${I('tasks','sm')}</span><span class="b">${tks.length} görev${tks.some(x=>x.due<t)?' · <em>geciken var</em>':''}</span>${avs(who.slice(0,3))}${I('chevR','sm')}</button>`}
+function calFlow(c){const t=T();let h='',run=null;
+ const flush=()=>{if(!run)return;h+=`<div class="dblock cemp" data-from="${run[0]}" data-to="${run[1]}">${run[0]===run[1]?shortD(run[0]):shortD(run[0])+' – '+shortD(run[1])} · boş</div>`;run=null};
+ for(let i=0;i<UI.agN;i++){const d=add(UI.agStart,i),evs=evsOn(d,c),tks=tasksOn(d,c).filter(x=>!x.done);
+  if(!evs.length&&!tks.length&&!hol(d)&&d!==t){run=run?[run[0],d]:[d,d];continue}flush();
+  const dd=parse(d),nm=d===t?'Bugün':d===add(t,1)?'Yarın':d===add(t,-1)?'Dün':DAYS[dd.getDay()];
+  const rows=evs.map(e=>crow('e',e,d,evPast(e,d))).join('')+ctkLine(d,tks);
+  h+=`<section class="dblock cday${d===t?' today':''}" data-from="${d}" data-to="${d}" aria-label="${long(d)}"><div class="cdh"><b>${nm}</b><span>${dd.getDate()} ${MON[dd.getMonth()]}</span>${holChip(d)}<button class="cadd" data-act="addOn" data-d="${d}" aria-label="${long(d)} için ekle">${I('plus','sm')}</button></div><div class="cl">${rows||`<div class="tlempty" style="padding:14px">Plan yok 🌿</div>`}</div></section>`}
+ flush();
+ return strip(monday(UI.sel||t),UI.sel||t,{act:'goDay',head:true,ctx:c,mode:'week'})
+  +(UI.agStart>add(t,-60)?`<button class="cprev" data-act="agPrev">${I('chevU','sm')}Önceki günler</button>`:'')+h+`<div id="cmore" class="cmore">Daha fazla gün yükleniyor…</div>`}
+function calMonth(c){const d=UI.calDate,dd=parse(d),t=T(),f1=iso(new Date(dd.getFullYear(),dd.getMonth(),1)),last=iso(new Date(dd.getFullYear(),dd.getMonth()+1,0)),start=monday(f1);
+ const sel=UI.cbSel&&UI.cbSel>=f1&&UI.cbSel<=last?UI.cbSel:(t>=f1&&t<=last?t:f1);let cells='';const wk=Math.ceil((daysBetween(start,last)+1)/7);
+ for(let i=0;i<wk*7;i++){const x=add(start,i),cd=parse(x),out=cd.getMonth()!==dd.getMonth(),evs=out?[]:evsOn(x,c),tk=out?0:tasksOn(x,c).filter(y=>!y.done).length,h=out?null:hol(x);
+  const bars=[...(h?[`<span class="mb hb ${h[1]}">${esc(holShort(h[0]))}</span>`]:[]),...evs.map(e=>`<span class="mb" style="--c:${evColor(e)}">${esc(e.title)}</span>`)];
+  const more=bars.length>3?bars.length-2:0;
+  cells+=`<button class="d${out?' out':''}${x===t?' today':''}${h&&h[1]==='resmi'?' rh':''}" aria-pressed="${x===sel}" data-act="cbDay" data-d="${x}" aria-label="${long(x)}${h?', '+h[0]:''}${evs.length?', '+evs.length+' etkinlik':''}${tk?', '+tk+' görev':''}"><span class="num">${cd.getDate()}</span>${(more?bars.slice(0,2):bars).join('')}${more?`<span class="mm">+${more}</span>`:''}${tk&&!more&&bars.length<3?`<span class="mt">✓${tk}</span>`:''}</button>`}
+ const evs=evsOn(sel,c),tks=tasksOn(sel,c).filter(x=>!x.done),sd=parse(sel);
+ return `<div class="calnav"><button class="icon-btn" data-act="calMove" data-n="-1" aria-label="Önceki ay">${I('chevL')}</button><div class="title" aria-live="polite">${MON[dd.getMonth()]} ${dd.getFullYear()}</div><button class="icon-btn" data-act="calMove" data-n="1" aria-label="Sonraki ay">${I('chevR')}</button><button class="btn ghost sm" data-act="cbToday">Bugün</button></div>
+ <div class="mdet">${DOW.map(x=>`<div class="dow" aria-hidden="true">${x}</div>`).join('')}${cells}</div>
+ <div class="cdh" style="margin-top:16px"><b>${sel===t?'Bugün':DAYS[sd.getDay()]}</b><span>${sd.getDate()} ${MON[sd.getMonth()]}</span>${holChip(sel)}<button class="cadd" data-act="addOn" data-d="${sel}" aria-label="${long(sel)} için ekle">${I('plus','sm')}</button></div>
+ <div class="cl">${evs.map(e=>crow('e',e,sel,evPast(e,sel))).join('')+ctkLine(sel,tks)||`<div class="tlempty" style="padding:14px">Bu gün boş 🌿</div>`}</div>`}
+function vCal(){const c={mine:false,filter:UI.filter};return calTop()+(UI.cal==='month'?calMonth(c):calFlow(c))}
+function bindMore(){const m=document.getElementById('cmore');if(!m||!window.IntersectionObserver)return;const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){io.disconnect();UI.agN+=14;render()}});io.observe(m)}
 
 function vLists(){
  if(UI.lmode==='wish')return vWishes();
@@ -1249,8 +1316,8 @@ const famOrd=()=>[...S.members.filter(x=>x.role!=='child'),...S.members.filter(x
 // Ortadaki kişinin bu ayki programı: bugünden ay sonuna kadar planı olan günler alt alta (Apple Takvim liste görünümü gibi).
 // Bitmiş görevler ve bugün saati geçmiş etkinlikler gösterilmez; boş günler atlanır.
 // Ay listesinde tek satırlık sade satır: saat · nokta ya da onay halkası · başlık · avatar
-function crow(k,x,day){const t=T();
- if(k==='e')return `<div class="cr" style="--c:${evColor(x)}"><span class="tm${x.time?'':' mu'}">${x.time?hm(x.time):'Tüm gün'}</span><span class="mk"><span class="dot"></span></span>
+function crow(k,x,day,past){const t=T();
+ if(k==='e')return `<div class="cr${past?' past':''}" style="--c:${evColor(x)}"><span class="tm${x.time?'':' mu'}">${x.time?hm(x.time):'Tüm gün'}</span><span class="mk"><span class="dot"></span></span>
   <button class="ti" data-act="openEvent" data-id="${x.id}" data-d="${day}"><b>${esc(x.title)}</b>${x.loc?`<small>${esc(x.loc)}</small>`:''}</button><span class="who">${whoMini(x.members)}</span></div>`;
  const late=!x.done&&x.due<t,ok=can('task.complete',x);
  return `<div class="cr" style="--c:${ws(x).length>1?'var(--accent)':M(ws(x)[0]).color}"><span class="tm${late?' late':x.time?'':' mu'}">${late?rel(x.due):x.time?hm(x.time):'Gün içi'}</span><span class="mk"><button class="ck" data-act="toggleTask" data-id="${x.id}" aria-pressed="${myTick(x)}" aria-label="${esc(x.title)}: ${myTick(x)?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}>${I('check','sm')}</button></span>
@@ -1585,7 +1652,13 @@ const A={
  memberDel:d=>{const u=snap(),m=S.members.find(x=>x.id===d.id);if(!m)return;S.members=S.members.filter(x=>x.id!==d.id);log(`${m.name} adlı üyeyi aileden çıkardı`);close();render(true);toast(`${m.name} aileden çıkarıldı`,u)},
 
  // Takvim
- calView:d=>{UI.cal=d.v;render()},
+ calView:d=>{UI.cal=d.v;if(d.v==='month'&&!UI.cbSel)UI.cbSel=T();document.getElementById('screen').scrollTop=0;render()},
+ calWho:()=>sheet('Kimin takvimi?',`<div id="cwho">${calFilterHTML().replace(/data-act="calFilter"/g,'data-act="calF2"')}</div><button class="btn primary block" data-act="close" style="margin-top:16px">Tamam</button>`),
+ calF2:d=>{A.calFilter(d);const w=document.getElementById('cwho');if(w)w.innerHTML=calFilterHTML().replace(/data-act="calFilter"/g,'data-act="calF2"')},
+ ctkAll:()=>{UI.ctk=!UI.ctk;render()},
+ ctkDay:d=>{UI.ctkOpen=UI.ctkOpen||{};UI.ctkOpen[d.d]=!UI.ctkOpen[d.d];render()},
+ cbDay:d=>{UI.cbSel=d.d;render()},
+ cbToday:()=>{UI.calDate=UI.cbSel=T();render()},
  calMove:d=>{const dd=parse(UI.calDate);dd.setDate(1);dd.setMonth(dd.getMonth()+(+d.n));UI.calDate=iso(dd);UI.mAll=false;render(true)},
  calToday:()=>{UI.calDate=T();UI.mAll=false;UI.pending=T();render(true)},
  pickDay:d=>{const a=parse(d.d),b=parse(UI.calDate);if(a.getMonth()!==b.getMonth()||a.getFullYear()!==b.getFullYear())UI.mAll=false;if(d.d<T())UI.mAll=true;UI.calDate=d.d;UI.pending=d.d;render(true)},
