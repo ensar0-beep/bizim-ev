@@ -693,7 +693,11 @@ const me=()=>M(meId());
 const isChild=()=>me().role==='child';
 // Avatar seçilmişse görsel (avatars/ klasörü), seçilmemişse baş harf.
 const AVATARS=[['anne','Anne'],['anne-basortulu','Başörtülü'],['baba','Gözlüklü'],['baba-sakalli','Sakallı'],['kiz-genc','Genç kız'],['erkek-genc','Genç erkek'],['kiz-cocuk','Kız çocuk'],['erkek-cocuk','Erkek çocuk'],['babaanne','Nine'],['dede','Dede'],['bebek','Bebek'],['kopek','Köpek']];
-const AVN=k=>(AVATARS.find(a=>a[0]===k)||[,''])[1];
+// Aileye özel avatarlar (avatars/<aile>/): yalnızca o ailenin seçicisinde görünür; kayıtlı seçim her yerde geçerli kalır.
+const OZEL_AV={ayas:{ad:'Ayas',kisi:{Ensar:[['ayas/ensar-1','Camel ceket'],['ayas/ensar-2','Krem kazak'],['ayas/ensar-3','Kot ceket'],['ayas/ensar-4','Yeşil kapüşonlu'],['ayas/ensar-5','Bordo kazak'],['ayas/ensar-6','Mavi gömlek']]}}};
+const OZEL_LIST=Object.values(OZEL_AV).flatMap(f=>Object.entries(f.kisi).flatMap(([n,l])=>l.map(([k,t])=>[k,`${n} · ${t}`])));
+const ozelAile=()=>Object.keys(OZEL_AV).find(k=>store.mode!=='demo'&&low((S&&S.meta&&S.meta.name)||'').includes(k))||null;
+const AVN=k=>(AVATARS.find(a=>a[0]===k)||OZEL_LIST.find(a=>a[0]===k)||[,''])[1];
 const avFace=(k,name,color,cls)=>k?`<span class="av pic${cls?' '+cls:''}" style="--c:${color}" aria-hidden="true"><img src="avatars/${k}.webp" alt="" decoding="async"></span>`
  :`<span class="av${cls?' '+cls:''}" style="--c:${color}" aria-hidden="true">${esc(up((name||'?')[0]))}</span>`;
 const av=(id,cls)=>{const m=M(id);return avFace(m.avatar,m.name,m.color,cls)};
@@ -1486,6 +1490,7 @@ const A={
   <div class="flabel" style="margin:0 0 8px">${self?'Rengin':'Rengi'}</div>
   <div class="swg" role="group" aria-label="Renk">${COLORS.map((c,i)=>`<button type="button" data-act="setColor" data-id="${m.id}" data-v="${c}" style="--c:${c}" aria-pressed="${m.color===c}" aria-label="Renk ${i+1}">${m.color===c?I('check','sm'):''}</button>`).join('')}</div>
   <div class="flabel" style="margin:18px 0 8px">Avatar</div>
+  ${(()=>{const f=ozelAile();return f?Object.entries(OZEL_AV[f].kisi).map(([n,l])=>`<div class="flabel" style="margin:0 0 8px">${esc(OZEL_AV[f].ad)} ailesine özel · ${esc(n)}</div><div class="avg" role="group" aria-label="${esc(n)} avatarları" style="margin-bottom:16px">${l.map(([k,t])=>b(k,t)).join('')}</div>`).join(''):''})()}
   <div class="avg" role="group" aria-label="Avatar">${AVATARS.map(([k,n])=>b(k,n)).join('')}${b('','Baş harf')}</div>${UI.joinFor===m.id?`<button class="btn primary block" data-act="joinDone" style="margin-top:18px">Devam</button>`:''}</div>`;
   // Seçim yaparken sayfa yeniden açılıp kaymasın: açıksa yalnızca içi yenilenir.
   if(open&&open.dataset.id===m.id)open.outerHTML=body;else sheet(UI.joinFor===m.id?'Avatarını ve rengini seç':self?'Avatarın ve rengin':esc(m.name)+' için avatar',body)},
