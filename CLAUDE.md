@@ -29,6 +29,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Undo.** `snap()` captures the flattened state before a change; `toast(msg, undo)` captures the state after it. Undo reverts only the paths that this change touched, so it doesn't clobber edits from other phones.
 
+**Device identity.** With `FB_KEY` (Firebase Web API key) set, every device signs up anonymously once (`authTok()`, refresh token in `store.auth`), writes itself into `families/{CODE}/uids/{uid}` (`claimUid`, `ensureUid` on every boot) and appends `?auth=<idToken>` to every REST and `EventSource` request. `database.rules.v2.json` then opens a family only to the uids listed under it (`meta`/`members` stay readable so the join screen works). `database.rules.gecis.json` is the interim set: families as before, plus the `avatars` node. Rollout order: set `FB_KEY` → every phone opens the app once → paste the stricter rules in the console. With `FB_KEY` empty everything falls back to the old code-only behaviour.
+
+**Family avatars.** Family photos are not in the repo; they live under `avatars/{CODE}/{id} = {n,t,d}` (`d` = 256px webp data URL) and are readable only by the family's uids. `loadAv()` fetches the id list (`?shallow=true`) and downloads only missing ones into `store.av` (image) / `store.avi` (person, label); `save()` drops that cache first if localStorage is full. Avatar keys are `ozel/<id>`; `norm()` rewrites the old `ayas/<id>` values. `yukle.html` is the upload page (same origin, reuses the app's identity from localStorage): resizes photos to 256px webp, uploads, deletes, and has a one-time button to move the old repo avatars across.
+
 **Roles** (`can()`): admin / adult / child. They shape the UI (child view shows only own items, can't assign others) but are not security — anyone with the family code can read and write that family. `database.rules.json` only blocks listing all families.
 
 **Reminders** are best-effort: `checkReminders()` runs every 30 s while the app is open and shows a notification (via the service worker registration) for the current member's events. Real push would need a server.
