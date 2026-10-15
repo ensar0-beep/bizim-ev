@@ -118,6 +118,16 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 /* Görev kutlaması ve çocuklar için haftalık yıldız */
 .cf{position:absolute;width:8px;height:10px;border-radius:2px;pointer-events:none;z-index:40}
 .stars{display:inline-flex;align-items:center;gap:6px;background:var(--warn-soft);color:var(--warn);font-weight:700;padding:6px 12px;border-radius:999px;font-size:.9rem;margin:0 0 12px}
+/* Profilim: ortada büyük avatar, altında kısa özet */
+.pfh{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:4px 0 16px}
+.pfh .avedit{margin-bottom:8px}
+.pfh .av.xl{width:5.5rem;height:5.5rem;box-shadow:0 0 0 4px var(--surface),0 0 0 6px color-mix(in srgb,var(--c) 40%,transparent)}
+.pfh b{font-family:var(--f-display);font-size:1.45rem}
+.pfh>span{color:var(--muted);font-size:.92rem}
+.pfs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.pfs div{background:var(--surface);border-radius:var(--r-md);padding:12px 8px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.pfs b{display:block;font-family:var(--f-display);font-size:1.5rem}
+.pfs span{display:block;color:var(--muted);font-size:.74rem;line-height:1.25;margin-top:2px}
 .avedit{position:relative;display:inline-flex;border-radius:999px;flex:none}
 .avedit .pen{position:absolute;right:-4px;bottom:-4px;width:26px;height:26px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--surface)}
 .avedit .pen .i{width:14px;height:14px}
@@ -1023,7 +1033,7 @@ function homeRows(){const p=S.items.filter(i=>!i.done),u=p.filter(i=>i.pri==='ac
 function vToday(){
  const m=me(),child=isChild(),t=T(),h=new Date().getHours();
  const g=h<5?'İyi geceler':h<12?'Günaydın':h<18?'İyi günler':'İyi akşamlar';
- return `<div class="th"><div class="h"><div class="ov">${long(t)}</div><h1>${g}, ${esc(first(m.name))}</h1></div><button class="add" data-act="tdAdd" aria-label="Ekle">${I('plus')}</button><button class="icon-btn" data-act="who" aria-label="Kişi değiştir">${av(m.id)}</button></div>
+ return `<div class="th"><div class="h"><div class="ov">${long(t)}</div><h1>${g}, ${esc(first(m.name))}</h1></div><button class="add" data-act="tdAdd" aria-label="Ekle">${I('plus')}</button><button class="icon-btn" data-act="myProfile" aria-label="Profilim">${av(m.id)}</button></div>
  ${demoBar()}${inviteCard()}
  ${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>${starsHTML()}`:''}
  ${annNote()}
@@ -1461,6 +1471,16 @@ const A={
   if(navigator.share)navigator.share({title:'Bizim Ev',text,url}).catch(()=>{});else copyText(text+'\n'+url,'Davet metni kopyalandı')},
  copyCode:()=>{if(store.mode!=='family'){toast('Örnek ailede gerçek kod yok.');return}copyText(fmtCode(store.code),'Kod kopyalandı')},
  // Üyeler
+ // Sağ üstteki avatar: kendi profilin (Apple hesap kartı gibi). Kişi değiştirme Ayarlar > Bu cihazda'da.
+ myProfile:()=>{const m=me(),t=T(),w0=add(t,-6);
+  const done=S.tasks.filter(x=>x.done&&(x.doneBy===m.id||(!x.doneBy&&isFor(x,m.id)))&&x.doneAt&&iso(new Date(+x.doneAt))>=w0).length;
+  let ev=0;for(let i=0;i<7;i++){const d=add(t,i);ev+=S.events.filter(e=>occurs(e,d)&&e.members.includes(m.id)).length}
+  const open=S.tasks.filter(x=>!x.done&&isFor(x,m.id)).length;
+  const row=(act,ic,tx,sub)=>`<button class="row tap" data-act="${act}" data-id="${m.id}"><span class="icon-btn" style="width:40px;height:40px;background:var(--sunk);color:var(--fg)">${I(ic)}</span><span class="body"><span class="t">${tx}</span>${sub?`<span class="m"><span>${sub}</span></span>`:''}</span>${I('chevR')}</button>`;
+  sheet('Profilim',`<div class="pfh" style="--c:${m.color}"><button class="avedit" data-act="avPick" data-id="${m.id}" aria-label="Avatarımı ve rengimi değiştir">${av(m.id,'xl')}<span class="pen">${I('edit')}</span></button>
+   <b>${esc(m.name)}</b><span>${esc(m.rel||'')}${m.rel?' · ':''}${ROLES[m.role]}</span></div>
+   <div class="pfs"><div><b>${done}</b><span>bu hafta yaptığın görev</span></div><div><b>${open}</b><span>bekleyen görevin</span></div><div><b>${ev}</b><span>7 günde etkinliğin</span></div></div>
+   <div class="group">${row('avPick','user','Avatarım ve rengim','Herkesin ekranında adının yanında görünür')}${row('memberEditSheet','edit','Adım ve ailedeki yerim',esc(m.name)+(m.rel?' · '+esc(m.rel):''))}${row('famSettings','gear','Ayarlar','Tema, yazı boyu, bildirimler, bu cihaz')}</div>`)},
  openMember:d=>{const m=M(d.id),t=T();const up7=[];for(let i=0;i<14;i++){const c=add(t,i);S.events.filter(e=>occurs(e,c)&&e.members.includes(m.id)).sort(sortEv).forEach(e=>up7.push([e,c]))}
   const tk=S.tasks.filter(x=>!x.done&&isFor(x,m.id)).sort((a,b)=>a.due.localeCompare(b.due));const adm=can('member.manage'),self=m.id===meId();
   const face=adm||self?`<button class="avedit" data-act="avPick" data-id="${m.id}" aria-label="Avatarı ve rengi değiştir">${av(m.id,'lg')}<span class="pen">${I('edit')}</span></button>`:av(m.id,'lg');
