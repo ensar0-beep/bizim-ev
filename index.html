@@ -311,6 +311,26 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .cr .ti small{display:block;color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 .cr .who{display:flex;align-items:center}
 .cr .who .fam{transform:scale(.8)}
+/* Konuşur gibi ekleme */
+.sain{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 16px;border-radius:18px;background:var(--surface);border:1.5px solid var(--accent);color:var(--accent-ink)}
+.sain input{flex:1;min-width:0;border:0;background:none;font-size:1.08rem;color:var(--fg);outline:none;min-height:52px}
+.saex{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.saex>span{width:100%;color:var(--muted);font-size:.82rem;margin-bottom:2px}
+.saex .chip{font-size:.85rem;min-height:36px}
+.sap{margin-top:12px;background:var(--surface);border-radius:var(--r-lg);padding:12px 14px 14px;box-shadow:var(--shadow)}
+.sakind{margin:0 0 10px}
+.sakind button{min-height:36px;font-size:.88rem}
+.sat{font-family:var(--f-display);font-size:1.3rem;font-weight:700;line-height:1.25;margin:2px 2px 10px}
+.sacs{display:flex;flex-wrap:wrap;gap:6px}
+.sac{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px 0 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);font-weight:600;font-size:.88rem}
+.sac .avs .av{width:1.4rem;height:1.4rem}
+.sac .fam{transform:scale(.75);margin:-4px}
+.sac.dim{background:var(--sunk);color:var(--muted);font-weight:500}
+.saact{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.saact .btn[disabled]{opacity:.45}
+.saalt{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.saalt>span{color:var(--muted);font-size:.82rem;margin-right:4px}
+.saalt .chip{min-height:38px;font-size:.88rem;gap:6px}
 .wdots{display:flex;justify-content:center;gap:6px;margin:4px 0 2px}
 .wdots i{width:7px;height:7px;border-radius:999px;background:var(--line);transition:width .2s,background .2s}
 .wdots i.on{width:20px;background:var(--c)}
@@ -452,7 +472,7 @@ a.btn{text-decoration:none}
 (function(){
 'use strict';
 /* ---------- İkonlar ---------- */
-const P={
+const P={sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
  today:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
  cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
  cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h9a1.5 1.5 0 0 0 1.5-1.1L21.5 7H6"/>',
@@ -507,7 +527,7 @@ const parse=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
 const add=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return iso(d)};
 const T=()=>iso(new Date());
 const long=s=>{const d=parse(s);return `${d.getDate()} ${MON[d.getMonth()]} ${DAYS[d.getDay()]}`};
-const rel=s=>{const t=T();if(s===t)return 'Bugün';if(s===add(t,1))return 'Yarın';if(s===add(t,-1))return 'Dün';const d=parse(s);return `${d.getDate()} ${MON[d.getMonth()].slice(0,3)} ${DAYS[d.getDay()].slice(0,3)}`};
+const rel=s=>{const t=T();if(s===t)return 'Bugün';if(s===add(t,1))return 'Yarın';if(s===add(t,-1))return 'Dün';const d=parse(s);return `${d.getDate()} ${MON[d.getMonth()].slice(0,3)} ${DOW[(d.getDay()+6)%7]}`};
 const hm=t=>t?t.replace(':','.'):'';
 const monday=s=>{const d=parse(s);return add(s,-((d.getDay()+6)%7))};
 const ago=ts=>{const m=Math.round((Date.now()-ts)/60000);if(m<1)return 'az önce';if(m<60)return m+' dk önce';const h=Math.round(m/60);if(h<24&&iso(new Date(ts))===T())return h+' sa önce';const d=new Date(ts);if(iso(d)===add(T(),-1))return 'dün '+pad(d.getHours())+'.'+pad(d.getMinutes());return rel(iso(d))};
@@ -892,6 +912,89 @@ window.addEventListener('popstate',()=>{if(document.querySelector('.sheet'))clos
 function afterRender(){trackStrip();bindWheel();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
 const emptyBox=(title,text,btn)=>`<div class="empty"><b>${title}</b>${text}${btn||''}</div>`;
 
+/* ---------- Konuşur gibi ekleme ----------
+ "Cumartesi 14.00 Zeynep yüzme, Caddebostan" → tarih, saat, kişi, kategori, yer. Sunucu yok; telefonda kurallarla çözülür.
+ Örnek alınan uygulamalar: Fantastical ve Things'in doğal dil girişi, Todoist'in hızlı ekleme. */
+const NL_W="a-zçğıöşü0-9",NL_B=`(?<![${NL_W}])`,NL_E=`(?![${NL_W}])`,NL_SX="(?:'?[a-zçğıöşü]*)";
+const NL_DAYS=['pazar','pazartesi','salı','çarşamba','perşembe','cuma','cumartesi'];
+const NL_DRE='(pazartesi|cumartesi|pazar|salı|sali|çarşamba|carsamba|perşembe|persembe|cuma)';
+const NL_MON=['ocak','şubat','mart','nisan','mayıs','haziran','temmuz','ağustos','eylül','ekim','kasım','aralık'];
+const nlDay=w=>NL_DAYS.indexOf({sali:'salı',carsamba:'çarşamba',persembe:'perşembe'}[w]||w);
+const nlNext=(from,dw,incl)=>{const d=parse(from).getDay();let n=(dw-d+7)%7;if(!n&&!incl)n=7;return add(from,n)};
+const NL_TASK=['çıkar','öde','topla','bitir','yap','yıka','temizle','ara','götür','getir','hazırla','sula','boşalt','imzala','gönder','yatır','düzelt','tamir','ayarla','besle','ütüle','sil','sipariş','iade','kes','dök','değiştir','yenile','kaydol','başvur','oku','çalış','izle'];
+const NL_CAT=[['dogum',/doğum gün|yaş gün/],['saglik',/doktor|dişçi|diş |hastane|aşı|muayene|eczane|kontrol|tahlil|göz|psikolog|fizyoterap/],['okul',/okul|veli|öğretmen|ödev|sınav|karne|servis|etüt|dershane/],['kisisel',/yüzme|maç|antrenman|basketbol|futbol|voleybol|piyano|gitar|kurs|spor|yoga|pilates|kuaför|berber|satranç|bale|dans|resim/]];
+function parseNL(raw){const T0=T(),o=[...(' '+raw+' ')],s=[...(' '+low(raw)+' ')],r={date:null,time:'',members:[],repeat:'none',loc:'',hit:{}};
+ let L=s.join('');
+ const cut=(re,fn)=>{const g=new RegExp(re,'g');let m;const rs=[];while((m=g.exec(L))){if(fn(m)!==false)rs.push([m.index,m.index+m[0].length]);if(!m[0].length)g.lastIndex++}
+  rs.forEach(([a,b])=>{for(let i=a;i<b;i++){s[i]=' ';o[i]=' '}});L=s.join('');return rs.length};
+ // tekrar
+ cut(NL_B+'her gün'+NL_SX+NL_E,()=>{r.repeat='daily'});
+ cut(NL_B+'her '+NL_DRE+NL_SX+'(?: günü)?'+NL_E,m=>{r.repeat='weekly';r.date=nlNext(T0,nlDay(m[1]),true)});
+ cut(NL_B+'her hafta'+NL_SX+NL_E,()=>{r.repeat='weekly'});
+ cut(NL_B+'her ay'+NL_E,()=>{r.repeat='monthly'});
+ cut(NL_B+'her (?:yıl|sene)'+NL_E,()=>{r.repeat='yearly'});
+ // tarih
+ cut(NL_B+'(\\d{1,2})\\s*('+NL_MON.join('|')+')'+NL_SX+'(?:\\s*(20\\d\\d))?'+NL_E,m=>{const y=+m[3]||new Date().getFullYear();let d=iso(new Date(y,NL_MON.indexOf(m[2]),+m[1]));if(!m[3]&&d<T0)d=iso(new Date(y+1,NL_MON.indexOf(m[2]),+m[1]));r.date=d});
+ cut(NL_B+'ayın (\\d{1,2})'+NL_SX+NL_E,m=>{const n=new Date();let d=iso(new Date(n.getFullYear(),n.getMonth(),+m[1]));if(d<T0)d=iso(new Date(n.getFullYear(),n.getMonth()+1,+m[1]));r.date=d});
+ cut(NL_B+'haftaya '+NL_DRE+NL_SX+'(?: günü)?'+NL_E,m=>{r.date=add(monday(T0),7+(nlDay(m[1])+6)%7)});
+ cut(NL_B+'bugün'+NL_SX+NL_E,()=>{r.date=T0});
+ cut(NL_B+'yarın'+NL_SX+NL_E,()=>{r.date=add(T0,1)});
+ cut(NL_B+'(?:öbür|ertesi) gün'+NL_SX+NL_E,()=>{r.date=add(T0,2)});
+ cut(NL_B+'(\\d{1,2}) gün sonra'+NL_E,m=>{r.date=add(T0,+m[1])});
+ cut(NL_B+'hafta ?sonu'+NL_SX+NL_E,()=>{const d=parse(T0).getDay();r.date=d===6||d===0?T0:nlNext(T0,6)});
+ cut(NL_B+'haftaya'+NL_E,()=>{if(!r.date)r.date=add(T0,7)});
+ if(r.repeat!=='weekly'||!r.date)cut(NL_B+NL_DRE+NL_SX+'(?: günü)?'+NL_E,m=>{if(r.date)return false;r.date=nlNext(T0,nlDay(m[1]),true)});
+ // saat
+ let part=null;
+ cut(NL_B+'(sabah|öğleden sonra|öğlen|öğle|akşam|gece)'+NL_SX+NL_E,m=>{part=m[1]});
+ let h=null,mi=0;
+ cut(NL_B+'(\\d{1,2})[.:](\\d{2})'+NL_SX+NL_E,m=>{if(h!==null||+m[1]>23||+m[2]>59)return false;h=+m[1];mi=+m[2]});
+ cut(NL_B+'saat (\\d{1,2})'+NL_SX+NL_E,m=>{if(h!==null||+m[1]>23)return false;h=+m[1]});
+ if(h===null)cut(NL_B+"(\\d{1,2})'?(?:de|da|te|ta)"+NL_E,m=>{if(+m[1]>23)return false;h=+m[1]});
+ cut(NL_B+'saat'+NL_E,()=>{});
+ if(h!==null){if(h<12&&/akşam|gece|öğleden sonra/.test(part||''))h+=12;if(h<8&&!part)h+=12;r.time=String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0')}
+ else if(part)r.time={sabah:'09:00','öğlen':'12:00','öğle':'12:00','öğleden sonra':'15:00','akşam':'19:00',gece:'21:00'}[part];
+ // kişiler
+ if(cut(NL_B+'(?:bütün aile|tüm aile|hepimiz|hep beraber|hep birlikte|ailece|aile olarak)'+NL_SX+NL_E,()=>{}))r.members=S.members.map(x=>x.id);
+ const al=[];S.members.forEach(x=>{al.push([low(first(x.name)),x.id]);const w=low((x.rel||'').split(/[ ,]/)[0]);if(['anne','baba','babaanne','anneanne','dede','nine','abla','abi','ağabey'].includes(w))al.push([w,x.id])});
+ al.sort((a,b)=>b[0].length-a[0].length).forEach(([n,id])=>{
+  const g=new RegExp(NL_B+n+"('?[a-zçğıöşü]*)"+NL_E,'g');let m;
+  while((m=g.exec(L))){if(!r.members.includes(id))r.members.push(id);
+   if(/^'?n?[ıiuü]n$/.test(m[1])&&!/^(anne|baba)/.test(n))continue; // "Zeynep'in doğum günü" adı başlıkta kalır
+   for(let i=m.index;i<m.index+m[0].length;i++){s[i]=' ';o[i]=' '}L=s.join('')}});
+ // yer: virgülden sonrası ya da "Kadıköy'de"
+ let O=o.join('');const k=O.lastIndexOf(',');
+ if(k>0&&O.slice(k+1).trim()){r.loc=O.slice(k+1).trim().replace(/[.!]+$/,'');O=O.slice(0,k)}
+ if(!r.loc)O=O.replace(/([A-ZÇĞİÖŞÜ][^\s',]*(?:\s[A-ZÇĞİÖŞÜ][^\s',]*)*)'(?:de|da|te|ta)(?=[\s,.]|$)/,(a,b)=>{r.loc=b;return ' '});
+ let ti=O.replace(/\s+/g,' ').replace(/^[\s,.;:–-]+|[\s,.;:–-]+$/g,'').replace(/\s+(ve|ile)$/,'');
+ const lt=low(ti);
+ // tür: alınacak · görev · etkinlik
+ let kind='e';
+ if(!r.time&&/(?:^|\s)(al|alalım|alınacak|alın|lazım|almak|alınsın)$/.test(lt)&&!/randevu/.test(lt)){kind='i';ti=ti.replace(/\s+\S+$/,'')}
+ else{const lw=lt.split(' ').pop();if(NL_TASK.some(v=>lw.startsWith(v))||/randevu al|sipariş et|iade et/.test(lt))kind='t'}
+ r.kind=kind;r.title=ti?up(ti[0])+ti.slice(1):'';
+ const all=low(raw);r.cat=r.members.length>1&&r.members.length===S.members.length?'aile':'aile';
+ for(const[c,re]of NL_CAT)if(re.test(' '+all+' ')){r.cat=c;break}
+ if(r.cat==='aile'&&r.members.length===1)r.cat='kisisel';
+ if(r.cat==='dogum'&&r.members.length===1&&kind==='e'){const n=first(M(r.members[0]).name);if(!low(r.title).includes(low(n)))r.title=gen(n)+' '+low(r.title||'doğum günü')}
+ return r}
+function saHTML(){const inp=document.getElementById('sa-in'),v=inp?inp.value.trim():'';
+ if(!v)return `<div class="saex"><span>Örnekler, dokununca dener:</span>${['Cumartesi 14.00 Zeynep yüzme, Caddebostan','Yarın akşam 7\'de bütün aile yemek','Can her salı çöpü çıkar','Süt ve ekmek al','Haftaya perşembe 10.30 dişçi, Kadıköy','25 Kasım babaanne doğum günü'].map(x=>`<button type="button" class="chip plain" data-act="saEx" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>`;
+ const p=parseNL(v),k=F.saKind||p.kind;F.sa=p;
+ const d=p.date||T(),dd=parse(d),dl=`${rel(d)===long(d)||!['Bugün','Yarın','Dün'].includes(rel(d))?dd.getDate()+' '+MON[dd.getMonth()].slice(0,3)+' '+DOW[(dd.getDay()+6)%7]:rel(d)}`;
+ const who=p.members.length?p.members:[meId()],allF=S.members.length>1&&who.length===S.members.length;
+ const c=(ic,tx,ok,lab)=>`<span class="sac${ok?'':' dim'}" title="${lab}">${I(ic,'sm')}<span>${tx}</span></span>`;
+ const pp=`<span class="sac">${allF?famBadge():avs(who.slice(0,3))}<span>${allF?'Bütün aile':who.map(x=>esc(first(M(x).name))).join(', ')}</span></span>`;
+ let ch='';
+ if(k==='i'){const cat=guessCat(p.title||v);ch=c('cart',S.lists[0]?esc(S.lists[0].name):'Alınacaklar',true,'Liste')+c('tag',esc(cat),true,'Kategori')+(p.members.length===1?`<span class="sac">${av(p.members[0],'xs')}<span>${esc(first(M(p.members[0]).name))} için</span></span>`:'')}
+ else{ch=c('cal',dl,!!p.date,'Tarih')+c('clock',p.time?hm(p.time):k==='e'?'Tüm gün':'Saat yok',!!p.time,'Saat')+pp
+  +(k==='e'?c(CATS[p.cat][1],CATS[p.cat][0],true,'Kategori')+(p.loc?c('pin',esc(p.loc),true,'Yer'):''):'')
+  +(p.repeat!=='none'?c('repeat',(k==='t'?TREP:REP)[p.repeat]||REP[p.repeat],true,'Tekrar'):'')}
+ return `<div class="sap"><div class="seg sakind" role="group" aria-label="Ne ekleniyor">${[['e','Etkinlik'],['t','Görev'],['i','Alınacak']].map(([x,n])=>`<button type="button" data-act="saKind" data-v="${x}" aria-pressed="${k===x}">${n}</button>`).join('')}</div>
+  <div class="sat">${p.title?esc(p.title):'<span style="color:var(--muted)">Başlık yaz…</span>'}</div><div class="sacs">${ch}</div>
+  <div class="saact"><button type="button" class="btn ghost sm" data-act="saMore">Ayrıntı</button><button class="btn primary sm"${p.title?'':' disabled'}>${I('plus','sm')}Ekle</button></div></div>`}
+const saUpd=()=>{const b=document.getElementById('sa-prev');if(b)b.innerHTML=saHTML()};
+
 /* ---------- Ekranlar ---------- */
 // Bugün (Özet): üstte selam ve tek bir +, aile duyurusu not olarak, sıradaki etkinlik, önümüzdeki günler, en altta Evde.
 const nowMin=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
@@ -1201,7 +1304,7 @@ function chipsHTML(kind,sel,opts){
 function eventForm(e,day,pre){const child=isChild();
  F={members:e?[...e.members]:pre&&pre.members&&!child?[...pre.members]:[meId()],edit:e?e.id:null,fromWish:pre&&pre.wish||null};
  const v=e||Object.assign({title:'',date:day||T(),time:'',loc:'',desc:'',cat:'aile',rem:'h1',repeat:'none'},pre||{});
- sheet(e?'Etkinliği düzenle':pre?'Plana dök':'Yeni etkinlik',`<form data-form="event" autocomplete="off">
+ sheet(e?'Etkinliği düzenle':pre&&pre.wish?'Plana dök':'Yeni etkinlik',`<form data-form="event" autocomplete="off">
  <div class="field"><label for="ev-title">Ne var?</label><input class="inp" id="ev-title" value="${esc(v.title)}" placeholder="örn. Dişçi randevusu" autofocus><span class="err" id="ev-err" hidden>Etkinliğe bir ad ver.</span></div>
  ${dtHTML('ev',v.date,v.time,e&&!e.time,'Tarih','Saat')}
  <label class="check"><input type="checkbox" id="ev-allday"${e&&!e.time?' checked':''}>Tüm gün sürüyor</label>
@@ -1331,7 +1434,18 @@ const A={
  famInvite:()=>sheet('Aileye davet et',famInviteHTML()),
  wPick:(d,el)=>{const w=document.getElementById('wheel');if(!w)return;if(el.classList.contains('mid')){A.openMember(d);return}
   w.scrollTo({left:el.offsetLeft+el.offsetWidth/2-w.clientWidth/2,behavior:calm()?'auto':'smooth'})},
- tdAdd:()=>sheet('Ne eklemek istersin?',`<div class="group">${[['newEvent','cal','Etkinlik','Takvime bir plan'],['newTask','tasks','Görev','Birine ya da kendine iş'],['quickItem','tag','Alınacak','Listeye bir şey'],...(can('announce')?[['annEdit','mega','Duyuru','Bütün aileye kısa not']]:[])].map(([a,i,n,sub])=>`<button class="row tap" data-act="${a}"><span class="icon-btn" style="width:40px;height:40px;background:var(--accent-soft);color:var(--accent-ink)">${I(i)}</span><span class="body"><span class="t">${n}</span><span class="m"><span>${sub}</span></span></span>${I('chevR')}</button>`).join('')}</div>`),
+ tdAdd:()=>{F={saKind:null};sheet('Ne eklemek istersin?',`<form data-form="smartAdd" autocomplete="off"><label class="sr" for="sa-in">Ne eklemek istersin?</label>
+  <div class="sain">${I('sparkle','sm')}<input id="sa-in" placeholder="örn. Cumartesi 14.00 Zeynep yüzme" autofocus enterkeyhint="done"></div>
+  <div id="sa-prev">${saHTML()}</div></form>
+  <div class="saalt"><span>ya da adım adım:</span>${[['newEvent','cal','Etkinlik'],['newTask','tasks','Görev'],['quickItem','tag','Alınacak'],...(can('announce')?[['annEdit','mega','Duyuru']]:[])].map(([a,i,n])=>`<button class="chip plain" data-act="${a}">${I(i,'sm')}${n}</button>`).join('')}</div>`)},
+ saEx:d=>{const i=document.getElementById('sa-in');if(!i)return;i.value=d.v;F.saKind=null;saUpd();i.focus()},
+ saKind:d=>{F.saKind=d.v;saUpd()},
+ saMore:()=>{const p=F.sa;if(!p)return;const k=F.saKind||p.kind;
+  if(k==='e')return eventForm(null,p.date||T(),{title:p.title,time:p.time,members:p.members.length?p.members:[meId()],cat:p.cat,loc:p.loc,repeat:p.repeat});
+  if(k==='i'){quickItem();const q=document.getElementById('qi-input');if(q)q.value=p.title;return}
+  taskForm(null,p.date||T());const g=id=>document.getElementById(id);g('tk-title').value=p.title;if(p.time)g('tk-time').value=p.time;if(TREP[p.repeat])g('tk-rep').value=p.repeat;
+  if(p.members.length){F.who=[...p.members];F.many=p.members.length>1;const a=g('tk-as');if(a)a.innerHTML=asHTML()}
+  document.querySelectorAll('.dtp input,.dtr input').forEach(x=>{try{dtSync(x)}catch(e){}})},
  annOpen:()=>{if(can('announce'))return A.annEdit();const a=S.ann;sheet('Aile duyurusu',`<section class="ann"><span class="ic">${I('mega')}</span><div class="body"><div class="txt">“${esc(a.text)}”</div><div class="meta">${esc(M(a.by).name)} · ${ago(a.at)}</div></div></section>`)},
  famFeed:()=>sheet('Son değişiklikler',feedHTML(40)),
  install:()=>{if(installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;render(true)})}},
@@ -1537,6 +1651,11 @@ const FORMS={
   const u=snap();S.members.push({id:uid(),name,rel,role:F.role||'adult',color:freeColor(S.members.map(m=>m.color)),at:Date.now()});log(`${name} adlı üyeyi ekledi`);close();render(true);toast(`${name} eklendi`,u)},
  memberEdit:()=>{const m=S.members.find(x=>x.id===F.edit);if(!m)return;const name=document.getElementById('me-name').value.trim();if(!name)return;
   const u=snap();Object.assign(m,{name,rel:document.getElementById('me-rel').value.trim()});log(`${name} bilgilerini güncelledi`);close();render(true);toast('Kaydedildi',u)},
+ smartAdd:()=>{const v=(document.getElementById('sa-in')||{}).value||'';if(!v.trim())return;const p=parseNL(v),k=F.saKind||p.kind;if(!p.title)return;const u=snap();
+  const who=p.members.length?p.members:[meId()],nm=S.members.length>1&&who.length===S.members.length?'Bütün aile':who.map(x=>first(M(x).name)).join(who.length>2?', ':' ve ');
+  if(k==='i'){const it=addItemTo(S.lists[0].id,p.title);if(p.members.length===1)it.for=p.members[0];close();render(true);toast(`${it.name} Alınacaklar'a eklendi`,u);return}
+  if(k==='t'){S.tasks.push({id:uid(),by:meId(),done:false,dn:[],title:p.title,assignee:who[0],who,all:false,due:p.date||T(),time:p.time,repeat:TREP[p.repeat]?p.repeat:'none',rot:[]});log(`${nm} için “${p.title}” görevini ekledi`);close();render(true);toast(`Görev ${nm} için eklendi`,u);return}
+  const o={title:p.title,date:p.date||T(),time:p.time,members:who,cat:p.cat,loc:p.loc,rem:'h1',repeat:p.repeat,desc:''};S.events.push({id:uid(),by:meId(),...o});log(`“${p.title}” etkinliğini ekledi`);close();render(true);askNotify();toast(`${rel(o.date)} için eklendi`,u)},
  event:()=>{const g=id=>document.getElementById(id);const title=g('ev-title').value.trim();if(!title){g('ev-err').hidden=false;g('ev-title').focus();return}
   if(!F.members.length)F.members=[meId()];
   const o={title,date:g('ev-date').value||T(),time:g('ev-allday').checked?'':g('ev-time').value,members:F.members,cat:g('ev-cat').value,loc:g('ev-loc').value.trim(),rem:g('ev-rem').value,repeat:g('ev-rep').value,desc:g('ev-desc').value.trim()};
@@ -1597,6 +1716,7 @@ document.addEventListener('change',e=>{
  if(e.target.matches('.dtp input'))dtSync(e.target);
  if(e.target.id==='tk-rot'){const a=document.getElementById('rot-area');a.hidden=!e.target.checked;F.who=[F.who[0]];asRefresh();if(e.target.checked){if(!F.rot.length)F.rot=[F.who[0]];const r=document.getElementById('tk-rep');if(r.value==='none')r.value='weekly';document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true})}}});
 document.addEventListener('input',e=>{if(e.target.matches&&e.target.matches('.dtp input'))dtSync(e.target)});
+document.addEventListener('input',e=>{if(e.target.id==='sa-in'){F.saKind=null;saUpd()}});
 // Masaüstü tarayıcıda görünmez tarih kutusuna tıklayınca seçici açılsın (telefonda zaten açılır)
 document.addEventListener('click',e=>{const i=e.target.closest&&e.target.closest('.dtp input');if(i&&!i.disabled&&i.showPicker){try{i.showPicker()}catch(x){}}});
 document.addEventListener('input',e=>{if(e.target.id==='an-text')document.getElementById('an-count').textContent=e.target.value.length+'/140';
