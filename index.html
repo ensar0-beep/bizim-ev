@@ -44,7 +44,7 @@
 html.big{font-size:125%}
 html,body{height:100%;margin:0}
 [hidden]{display:none!important}
-body{background:var(--stage);color:var(--fg);font-family:var(--f-body);font-size:1rem;line-height:1.45;-webkit-font-smoothing:antialiased}
+body{position:fixed;inset:0;overflow:hidden;overscroll-behavior:none;background:var(--stage);color:var(--fg);font-family:var(--f-body);font-size:1rem;line-height:1.45;-webkit-font-smoothing:antialiased}
 *{box-sizing:border-box}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0;padding:0}
@@ -54,6 +54,8 @@ svg.i.sm{width:1.05rem;height:1.05rem}
 
 .stage{height:100%;display:flex;justify-content:center;align-items:center}
 .phone{position:relative;width:100%;height:100%;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+/* Telefonda sayfa kaymasın; klavye kapandıktan sonra bir boşluk kalırsa da sayfayla aynı renkte görünsün */
+@media (max-width:639px){body{background:var(--bg)}}
 @media (min-width:640px){.phone{width:400px;height:min(860px,calc(100% - 48px));border-radius:36px;box-shadow:var(--shadow),0 0 0 10px var(--surface),0 0 0 11px var(--line)}}
 
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;padding:calc(20px + env(safe-area-inset-top,0px)) 18px 110px;scroll-behavior:smooth}
@@ -1765,6 +1767,11 @@ function endSw(){if(!SW)return;const s=SW;SW=null;if(!s.on)return;swallow=true;s
 document.addEventListener('click',e=>{if(swallow){e.stopPropagation();e.preventDefault();swallow=false}},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.sheet'))close()});
 
+// iOS klavye kapandıktan sonra sayfayı kaymış bırakabiliyor (üstte boşluk, alt menü ekran dışında); geri yerine oturt
+const unshift=()=>{const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;if(window.scrollY||document.documentElement.scrollTop||document.body.scrollTop){window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0}};
+document.addEventListener('focusout',()=>setTimeout(unshift,120));
+window.visualViewport&&window.visualViewport.addEventListener('resize',()=>setTimeout(unshift,120));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)unshift()});
 window.addEventListener('online',()=>{setNet('reconnecting');flush();if(es&&es.readyState===2)connect()});
 window.addEventListener('offline',()=>setNet('offline'));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){checkReminders();if(store.mode==='family'&&(!es||es.readyState===2))connect();if(S)render(true)}});
