@@ -694,7 +694,7 @@ const isChild=()=>me().role==='child';
 // Avatar seçilmişse görsel (avatars/ klasörü), seçilmemişse baş harf.
 const AVATARS=[['anne','Anne'],['anne-basortulu','Başörtülü'],['baba','Gözlüklü'],['baba-sakalli','Sakallı'],['kiz-genc','Genç kız'],['erkek-genc','Genç erkek'],['kiz-cocuk','Kız çocuk'],['erkek-cocuk','Erkek çocuk'],['babaanne','Nine'],['dede','Dede'],['bebek','Bebek'],['kopek','Köpek']];
 // Aileye özel avatarlar (avatars/<aile>/): yalnızca o ailenin seçicisinde görünür; kayıtlı seçim her yerde geçerli kalır.
-const OZEL_AV={ayas:{ad:'Ayas',kisi:{Ensar:[['ayas/ensar-1','Camel ceket'],['ayas/ensar-2','Krem kazak'],['ayas/ensar-3','Kot ceket'],['ayas/ensar-4','Yeşil kapüşonlu'],['ayas/ensar-5','Bordo kazak'],['ayas/ensar-6','Mavi gömlek']]}}};
+const OZEL_AV={ayas:{ad:'Ayas',kisi:{Ensar:[['ayas/ensar-1','Camel ceket'],['ayas/ensar-2','Krem kazak'],['ayas/ensar-3','Kot ceket'],['ayas/ensar-4','Yeşil kapüşonlu'],['ayas/ensar-5','Bordo kazak'],['ayas/ensar-6','Mavi gömlek']],'Müşerref':[['ayas/muserref-1','Deri ceket'],['ayas/muserref-2','Vizon eşarp'],['ayas/muserref-3','Yeşil eşarp'],['ayas/muserref-4','Bordo bluz'],['ayas/muserref-5','Lacivert eşarp'],['ayas/muserref-6','Krem eşarp'],['ayas/muserref-7','Antrasit eşarp'],['ayas/muserref-8','Zümrüt blazer']]}}};
 const OZEL_LIST=Object.values(OZEL_AV).flatMap(f=>Object.entries(f.kisi).flatMap(([n,l])=>l.map(([k,t])=>[k,`${n} · ${t}`])));
 const ozelAile=()=>Object.keys(OZEL_AV).find(k=>store.mode!=='demo'&&low((S&&S.meta&&S.meta.name)||'').includes(k))||null;
 const AVN=k=>(AVATARS.find(a=>a[0]===k)||OZEL_LIST.find(a=>a[0]===k)||[,''])[1];
