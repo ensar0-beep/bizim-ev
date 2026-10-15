@@ -289,6 +289,28 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .wcard .rl{color:var(--muted);font-size:.85rem}
 .wcard .you{position:absolute;top:12px;right:12px;font-size:.75rem;font-weight:600;color:var(--muted);background:var(--surface);border-radius:999px;padding:2px 8px}
 .wcard.mid{box-shadow:0 0 0 2px var(--c),var(--shadow)}
+.wday{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.wday .wd{flex:none;width:40px;display:flex;flex-direction:column;align-items:center;padding-top:12px;line-height:1.1}
+.wday .wd b{font-family:var(--f-display);font-size:1.35rem}
+.wday .wd small{color:var(--muted);font-size:.72rem;font-weight:600}
+.wday .cl{flex:1;min-width:0}
+.cr{display:grid;grid-template-columns:3rem 1.5rem minmax(0,1fr) auto;align-items:center;gap:0 8px;min-height:52px;padding:4px 12px 4px 8px;position:relative}
+.cr+.cr::before{content:"";position:absolute;top:0;left:4.4rem;right:0;border-top:1px solid var(--line)}
+.cr .tm{font-variant-numeric:tabular-nums;font-weight:600;font-size:.92rem;text-align:right}
+.cr .tm.mu{color:var(--muted);font-weight:500;font-size:.8rem}
+.cr .tm.late{color:var(--danger);font-size:.8rem}
+.cr .mk{display:flex;align-items:center;justify-content:center}
+.cr .dot{width:10px;height:10px;border-radius:999px;background:var(--c)}
+.cr .ck{width:44px;height:44px;margin:-11px;display:flex;align-items:center;justify-content:center;color:transparent;padding:0}
+.cr .ck::before{content:"";position:absolute;width:22px;height:22px;border-radius:999px;border:2px solid color-mix(in srgb,var(--c) 70%,var(--line));box-sizing:border-box}
+.cr .ck[aria-pressed="true"]::before{background:var(--accent);border-color:var(--accent)}
+.cr .ck[aria-pressed="true"]{color:var(--on-accent)}
+.cr .ck .i{width:14px;height:14px;position:relative}
+.cr .ti{text-align:left;min-width:0;display:block;padding:6px 0}
+.cr .ti b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr .ti small{display:block;color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.cr .who{display:flex;align-items:center}
+.cr .who .fam{transform:scale(.8)}
 .wdots{display:flex;justify-content:center;gap:6px;margin:4px 0 2px}
 .wdots i{width:7px;height:7px;border-radius:999px;background:var(--line);transition:width .2s,background .2s}
 .wdots i.on{width:20px;background:var(--c)}
@@ -1044,9 +1066,23 @@ function famInviteHTML(){const {adm,demo}=famCtx();return `<div class="invite">$
 // Ortadaki kişinin bugünü altta görünür; yandaki karta dokunmak onu ortaya getirir, ortadakine dokunmak profili açar.
 const gen=n=>{const v=[...low(n)].reverse().find(c=>'aeıioöuü'.includes(c))||'e',h={a:'ı',ı:'ı',e:'i',i:'i',o:'u',u:'u',ö:'ü',ü:'ü'}[v];return n+'’'+('aeıioöuü'.includes(low(n).slice(-1))?'n':'')+h+'n'};
 const famOrd=()=>[...S.members.filter(x=>x.role!=='child'),...S.members.filter(x=>x.role==='child')];
-function wselHTML(id){const x=M(id),t=T(),dd=dayData(t,{mine:false,filter:[id]}),n=dd.evs.length+dd.tks.filter(k=>!k.done).length;
- return `<div class="sec-h"><h2 class="sec">${esc(gen(first(x.name)))} bugünü${n?` <span class="qty">· ${n}</span>`:''}</h2><button class="link" data-act="openMember" data-id="${id}">Profil ${I('chevR','sm')}</button></div>
- ${dd.evs.length||dd.tks.length?dayBody(t,dd):`<div class="group">${emptyBox(`Bugün ${esc(first(x.name))} için bir şey yok 🌿`,'Planlanmış etkinlik ya da görev yok.')}</div>`}`}
+// Ortadaki kişinin bu ayki programı: bugünden ay sonuna kadar planı olan günler alt alta (Apple Takvim liste görünümü gibi).
+// Bitmiş görevler ve bugün saati geçmiş etkinlikler gösterilmez; boş günler atlanır.
+// Ay listesinde tek satırlık sade satır: saat · nokta ya da onay halkası · başlık · avatar
+function crow(k,x,day){const t=T();
+ if(k==='e')return `<div class="cr" style="--c:${evColor(x)}"><span class="tm${x.time?'':' mu'}">${x.time?hm(x.time):'Tüm gün'}</span><span class="mk"><span class="dot"></span></span>
+  <button class="ti" data-act="openEvent" data-id="${x.id}" data-d="${day}"><b>${esc(x.title)}</b>${x.loc?`<small>${esc(x.loc)}</small>`:''}</button><span class="who">${whoMini(x.members)}</span></div>`;
+ const late=!x.done&&x.due<t,ok=can('task.complete',x);
+ return `<div class="cr" style="--c:${ws(x).length>1?'var(--accent)':M(ws(x)[0]).color}"><span class="tm${late?' late':x.time?'':' mu'}">${late?rel(x.due):x.time?hm(x.time):'Gün içi'}</span><span class="mk"><button class="ck" data-act="toggleTask" data-id="${x.id}" aria-pressed="${myTick(x)}" aria-label="${esc(x.title)}: ${myTick(x)?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}>${I('check','sm')}</button></span>
+  <button class="ti" data-act="openTask" data-id="${x.id}"><b>${esc(x.title)}</b>${allRule(x)?`<small>${(x.dn||[]).length}/${ws(x).length} yaptı</small>`:''}</button><span class="who">${avs(ws(x).slice(0,2))}</span></div>`}
+function wselHTML(id){const x=M(id),t=T(),c={mine:false,filter:[id]},dd=parse(t),mon=MON[dd.getMonth()];
+ const last=iso(new Date(dd.getFullYear(),dd.getMonth()+1,0)),days=[];
+ for(let d=t;d<=last;d=add(d,1)){const r=dayData(d,c),evs=d===t?r.evs.filter(e=>!e.time||toMin(e.time)>=nowMin()-30):r.evs,tks=r.tks.filter(k=>!k.done);
+  if(evs.length||tks.length)days.push([d,{evs,tks}])}
+ const n=days.reduce((a,[,v])=>a+v.evs.length+v.tks.length,0);
+ return `<div class="sec-h"><h2 class="sec">${esc(gen(first(x.name)))} ${mon} programı${n?` <span class="qty">· ${n}</span>`:''}</h2><button class="link" data-act="openMember" data-id="${id}">Profil ${I('chevR','sm')}</button></div>
+ ${days.length?days.map(([d,v])=>`<div class="wday"><span class="wd"><b>${parse(d).getDate()}</b><small>${d===t?'Bugün':DOW[(parse(d).getDay()+6)%7]}</small></span><div class="cl">${[...v.evs.map(e=>[e.time||'',crow('e',e,d)]),...v.tks.map(k=>[k.due<t?' ':k.time||'~',crow('t',k,d)])].sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0).map(r=>r[1]).join('')}</div></div>`).join('')
+  :`<div class="group">${emptyBox(`${mon} ayında ${esc(first(x.name))} için plan yok 🌿`,'Yeni bir etkinlik ya da görev eklediğinde burada görünür.')}</div>`}`}
 function vFamily(){const {m,adm}=famCtx(),ord=famOrd();if(!ord.some(x=>x.id===UI.wsel))UI.wsel=m.id;
  const card=(x,c)=>`<button class="wcard" data-act="wPick" data-id="${x.id}" data-c="${c}" style="--c:${x.color}" aria-label="${esc(x.name)}"${c===1?'':' tabindex="-1" aria-hidden="true"'}>${x.id===m.id?'<span class="you">Sen</span>':''}${av(x.id,'xl')}<b>${esc(first(x.name))}</b><span class="rl">${esc(x.rel||ROLES[x.role])}</span></button>`;
  return `<div class="hdr"><div class="h"><h1>Aile</h1><div class="sub">${esc(S.meta.name||'Ailemiz')} · ${S.members.length} kişi</div></div><button class="icon-btn" data-act="famSettings" aria-label="Ayarlar">${I('gear')}</button></div>
