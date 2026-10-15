@@ -81,6 +81,7 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 
 .av{--c:#888;width:2rem;height:2rem;border-radius:999px;background:var(--c);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex:none}
 .av.lg{width:3.25rem;height:3.25rem;font-size:1.25rem}
+.av.xl{width:5rem;height:5rem;font-size:1.8rem}
 .av.xs{width:1.5rem;height:1.5rem;font-size:.7rem}
 .avs{display:flex;flex:none}
 .avs .av{box-shadow:0 0 0 2px var(--surface)}
@@ -246,6 +247,19 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .invite{background:var(--accent-soft);border-radius:var(--r-lg);padding:18px}
 .invite .row2{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .feed .row{min-height:52px}
+/* Aile çarkı: ortadaki kişi büyük ve çerçeveli, yanlar küçülüp yana yatar */
+.wheel{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px;padding:18px 23% 16px;scrollbar-width:none;overscroll-behavior-x:contain}
+.wheel::-webkit-scrollbar{display:none}
+.wcard{flex:0 0 54%;scroll-snap-align:center;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:22px 10px 18px;border-radius:26px;background:color-mix(in srgb,var(--c) 12%,var(--surface));box-shadow:var(--shadow);will-change:transform}
+.wcard .av{box-shadow:0 0 0 4px var(--surface);margin-bottom:8px}
+.wcard b{font-family:var(--f-display);font-size:1.25rem}
+.wcard .rl{color:var(--muted);font-size:.85rem}
+.wcard .you{position:absolute;top:12px;right:12px;font-size:.75rem;font-weight:600;color:var(--muted);background:var(--surface);border-radius:999px;padding:2px 8px}
+.wcard.mid{box-shadow:0 0 0 2px var(--c),var(--shadow)}
+.wdots{display:flex;justify-content:center;gap:6px;margin:4px 0 2px}
+.wdots i{width:7px;height:7px;border-radius:999px;background:var(--line);transition:width .2s,background .2s}
+.wdots i.on{width:20px;background:var(--c)}
+.invlink{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;margin-top:6px;color:var(--muted);font-weight:600;font-size:.88rem}
 .setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;min-height:60px}
 .setrow+.setrow{border-top:1px solid var(--line)}
 .switch{width:52px;height:32px;border-radius:999px;background:var(--line);position:relative;flex:none}
@@ -820,7 +834,7 @@ function syncBack(){const st=history.state&&history.state.bz;
  if(store.mode&&S&&UI.tab!=='today'){if(!st)history.pushState({bz:1},'')}
  else if(st)history.back()}
 window.addEventListener('popstate',()=>{if(document.querySelector('.sheet'))close();if(UI.tab!=='today'){UI.tab='today';render()}});
-function afterRender(){trackStrip();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
+function afterRender(){trackStrip();bindWheel();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
 const emptyBox=(title,text,btn)=>`<div class="empty"><b>${title}</b>${text}${btn||''}</div>`;
 
 /* ---------- Ekranlar ---------- */
@@ -987,12 +1001,35 @@ function famInviteHTML(){const {adm,demo}=famCtx();return `<div class="invite">$
   <div style="color:var(--muted);font-size:.9rem;margin-top:4px">${demo?'Örnek ailede davet çalışmaz. Kendi aileni kurduğunda burada gerçek kodun yazar.':'Bizim Ev\'i açan kişi “Aile koduyla katıl” deyip bu kodu yazar. Bağlantıyı gönderirsen kod kendiliğinden dolar.'}</div>
   <div class="row2"><button class="btn primary sm" data-act="share">${I('link','sm')}Davet gönder</button><button class="btn soft sm" data-act="copyCode">${I('copy','sm')}Kodu kopyala</button></div>`
   :`<div style="display:flex;gap:10px;align-items:center">${I('lock')}<span>Yeni üye davetini aile yöneticisi yapar. ${esc(ADMIN().replace('Bunu yalnızca ','').replace(' yapabilir.',''))} ile konuş.</span></div>`}</div>`}
-function vFamily(){const {m,adm}=famCtx();
+// Aile çarkı: kişiler sağa sola kaydırılır, kartlar çark gibi yana yatar, sona gelince başa döner.
+// Ortadaki kişinin bugünü altta görünür; yandaki karta dokunmak onu ortaya getirir, ortadakine dokunmak profili açar.
+const gen=n=>{const v=[...low(n)].reverse().find(c=>'aeıioöuü'.includes(c))||'e',h={a:'ı',ı:'ı',e:'i',i:'i',o:'u',u:'u',ö:'ü',ü:'ü'}[v];return n+'’'+('aeıioöuü'.includes(low(n).slice(-1))?'n':'')+h+'n'};
+const famOrd=()=>[...S.members.filter(x=>x.role!=='child'),...S.members.filter(x=>x.role==='child')];
+function wselHTML(id){const x=M(id),t=T(),dd=dayData(t,{mine:false,filter:[id]}),n=dd.evs.length+dd.tks.filter(k=>!k.done).length;
+ return `<div class="sec-h"><h2 class="sec">${esc(gen(first(x.name)))} bugünü${n?` <span class="qty">· ${n}</span>`:''}</h2><button class="link" data-act="openMember" data-id="${id}">Profil ${I('chevR','sm')}</button></div>
+ ${dd.evs.length||dd.tks.length?dayBody(t,dd):`<div class="group">${emptyBox(`Bugün ${esc(first(x.name))} için bir şey yok 🌿`,'Planlanmış etkinlik ya da görev yok.')}</div>`}`}
+function vFamily(){const {m,adm}=famCtx(),ord=famOrd();if(!ord.some(x=>x.id===UI.wsel))UI.wsel=m.id;
+ const card=(x,c)=>`<button class="wcard" data-act="wPick" data-id="${x.id}" data-c="${c}" style="--c:${x.color}" aria-label="${esc(x.name)}"${c===1?'':' tabindex="-1" aria-hidden="true"'}>${x.id===m.id?'<span class="you">Sen</span>':''}${av(x.id,'xl')}<b>${esc(first(x.name))}</b><span class="rl">${esc(x.rel||ROLES[x.role])}</span></button>`;
  return `<div class="hdr"><div class="h"><h1>Aile</h1><div class="sub">${esc(S.meta.name||'Ailemiz')} · ${S.members.length} kişi</div></div><button class="icon-btn" data-act="famSettings" aria-label="Ayarlar">${I('gear')}</button></div>
  ${demoBar()}
- <div class="group">${S.members.map(x=>{const k=S.tasks.filter(t=>!t.done&&isFor(t,x.id)).length;return `<button class="row tap" data-act="openMember" data-id="${x.id}">${av(x.id)}<span class="body"><span class="t">${esc(x.name)}${x.id===m.id?' <span class="qty">(sen)</span>':''}</span><span class="m">${x.rel?`<span>${esc(x.rel)}</span>`:''}<span class="tag cat">${ROLES[x.role]}</span>${k?`<span>${k} görev</span>`:''}</span></span>${I('chevR')}</button>`}).join('')}${adm?`<button class="row tap" data-act="famInvite"><span class="av addav">${I('plus','sm')}</span><span class="body"><span class="t" style="color:var(--accent-ink)">Aileye davet et</span><span class="m"><span>Kod ya da bağlantı gönder</span></span></span>${I('chevR')}</button><button class="row tap" data-act="memberAddSheet"><span class="av addav">${I('user','sm')}</span><span class="body"><span class="t" style="color:var(--accent-ink)">Telefonu olmayan birini ekle</span><span class="m"><span>Görev ve etkinliklere atanabilir</span></span></span>${I('chevR')}</button>`:''}</div>
+ <div class="wheel" id="wheel" aria-label="Aile üyeleri, sağa sola kaydır">${[0,1,2].map(c=>ord.map(x=>card(x,c)).join('')).join('')}</div>
+ <div class="wdots" aria-hidden="true">${ord.map(x=>`<i style="--c:${x.color}"${x.id===UI.wsel?' class="on"':''}></i>`).join('')}</div>
+ <div id="wsel">${wselHTML(UI.wsel)}</div>
+ ${adm?`<button class="invlink" data-act="famInvite">${I('plus','sm')}Aileye birini ekle</button>`:''}
  <div class="sec-h"><h2 class="sec">Son değişiklikler</h2>${S.activity.length>3?`<button class="link" data-act="famFeed">Tümü ${I('chevR','sm')}</button>`:''}</div>
  ${feedHTML(3)}`}
+// Üyeler üç kez dizilir, ortadaki kopya görünür; uçlara gelince fark edilmeden ortaya atlanır.
+function bindWheel(){const w=document.getElementById('wheel');if(!w)return;const cs=[...w.children],n=cs.length/3,flat=calm();
+ const center=el=>el.offsetLeft+el.offsetWidth/2-w.clientWidth/2;
+ const paint=()=>{const mid=w.scrollLeft+w.clientWidth/2;cs.forEach(c=>{const d=(c.offsetLeft+c.offsetWidth/2-mid)/c.offsetWidth,a=Math.min(Math.abs(d),2);
+  c.style.transform=flat?`scale(${1-a*.1})`:`perspective(700px) rotateY(${-d*32}deg) scale(${1-a*.14})`;c.style.opacity=String(1-a*.35);c.classList.toggle('mid',a<.5)})};
+ const nearest=()=>{const mid=w.scrollLeft+w.clientWidth/2;return cs.reduce((b,c)=>Math.abs(c.offsetLeft+c.offsetWidth/2-mid)<Math.abs(b.offsetLeft+b.offsetWidth/2-mid)?c:b)};
+ w.scrollLeft=center(cs.find(c=>c.dataset.c==='1'&&c.dataset.id===UI.wsel)||cs[n]);paint();
+ let raf=0,to;const settle=()=>{clearTimeout(to);
+  let c=nearest();const ci=+c.dataset.c;if(ci!==1){const tw=cs[cs.indexOf(c)+(ci===0?n:-n)];w.scrollLeft+=center(tw)-center(c);c=tw;paint()}
+  if(UI.wsel!==c.dataset.id){UI.wsel=c.dataset.id;const s=document.getElementById('wsel');if(s)s.innerHTML=wselHTML(c.dataset.id);
+   const ids=cs.slice(0,n).map(x=>x.dataset.id);document.querySelectorAll('.wdots i').forEach((d,i)=>d.classList.toggle('on',ids[i]===c.dataset.id))}};
+ w.addEventListener('scroll',()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;paint()});clearTimeout(to);to=setTimeout(settle,150)},{passive:true});w.addEventListener('scrollend',settle)}
 const themeSeg=()=>[['system','Sistem'],['light','Açık'],['dark','Koyu']].map(([k,n])=>`<button data-act="theme" data-v="${k}" aria-pressed="${store.prefs.theme===k}">${n}</button>`).join('');
 
 function vLoading(){const b=(h,w,mt)=>`<div class="sk" style="height:${h}px;width:${w||'100%'};margin-top:${mt||10}px"></div>`;
@@ -1217,6 +1254,8 @@ const A={
  askNotify:()=>askNotify(),
  famSettings:()=>sheet('Ayarlar',`<div id="setsheet">${famSettingsHTML()}</div>`),
  famInvite:()=>sheet('Aileye davet et',famInviteHTML()),
+ wPick:(d,el)=>{const w=document.getElementById('wheel');if(!w)return;if(el.classList.contains('mid')){A.openMember(d);return}
+  w.scrollTo({left:el.offsetLeft+el.offsetWidth/2-w.clientWidth/2,behavior:calm()?'auto':'smooth'})},
  famFeed:()=>sheet('Son değişiklikler',feedHTML(40)),
  install:()=>{if(installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;render(true)})}},
  share:()=>{if(store.mode!=='family'){toast('Örnek ailede davet gönderilemez.');return}
