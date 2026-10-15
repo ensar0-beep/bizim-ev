@@ -131,6 +131,39 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .ann .txt{font-size:1.125rem;font-weight:600;line-height:1.35}
 .ann .meta{color:var(--muted);font-size:.875rem;margin-top:6px}
 .ann .body{flex:1;min-width:0}
+/* Bugün başlığı: tarih, selam, tek + */
+.th{display:flex;align-items:center;gap:10px;margin:2px 0 16px}
+.th .h{flex:1;min-width:0}
+.th .ov{font-size:.78rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.th h1{font-size:1.65rem;margin-top:2px}
+.th .add{width:42px;height:42px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:inline-flex;align-items:center;justify-content:center;flex:none}
+/* Duyuru notu: sıcak kâğıt, hafif eğik, üstte yazanın avatarı raptiye gibi */
+.anote{position:relative;display:block;width:calc(100% - 16px);margin:14px 8px 22px;text-align:left;padding:24px 20px 14px;border-radius:6px 6px 18px 6px;background:var(--warn-soft);transform:rotate(-1.2deg);box-shadow:var(--shadow)}
+.anote .pin{position:absolute;top:-14px;left:50%;transform:translateX(-50%) rotate(1.2deg)}
+.anote .pin .av{box-shadow:0 0 0 3px var(--warn-soft),0 2px 6px rgba(0,0,0,.18)}
+.anote .tx{display:block;font-family:var(--f-display);font-size:1.25rem;font-weight:600;line-height:1.3;text-align:center;overflow-wrap:anywhere}
+.anote .by{display:block;text-align:right;margin-top:8px;color:var(--muted);font-size:.82rem}
+.lbl{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:22px 4px 8px}
+.lbl>span{font-size:.78rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+/* Sıradaki etkinlik */
+.nx{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:var(--surface);border-radius:var(--r-lg);padding:16px 16px 16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.nx::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
+.nx .b{flex:1;min-width:0}
+.nx .k{font-size:.76rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--accent-ink)}
+.nx .t{display:block;font-family:var(--f-display);font-size:1.3rem;font-weight:700;line-height:1.2;margin:4px 0 6px}
+.nx .m{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--muted);font-size:.88rem}
+.nx .m span{display:inline-flex;align-items:center;gap:4px;min-width:0}
+/* Evde: alınacaklar ve aile fikri */
+.cl{background:var(--surface);border-radius:var(--r-lg);overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.tlempty{color:var(--muted);text-align:center;padding:22px 12px}
+.hrow{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:8px 14px;text-align:left;position:relative}
+.hrow+.hrow::before{content:"";position:absolute;top:0;left:62px;right:0;border-top:1px solid var(--line)}
+.hrow .ic{width:36px;height:36px;border-radius:12px;background:var(--sunk);display:flex;align-items:center;justify-content:center;flex:none}
+.hrow .b{flex:1;min-width:0}.hrow .b b{display:block;font-weight:600}
+.hrow .b small{display:block;color:var(--muted);font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow .n{font-weight:700;font-variant-numeric:tabular-nums}
+.hrow .n.u{color:var(--danger);font-size:.8rem;font-weight:700;background:var(--danger-soft);border-radius:999px;padding:2px 8px}
+.hrow>svg:last-child{color:var(--muted)}
 .ann-empty{border:1.5px dashed var(--line);border-radius:var(--r-lg);padding:14px 16px;display:flex;align-items:center;gap:12px;color:var(--muted);width:100%;text-align:left;min-height:56px}
 .qa{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
 .qa button{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);min-height:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-weight:600;font-size:.9rem;padding:8px 4px;text-align:center}
@@ -838,28 +871,34 @@ function afterRender(){trackStrip();bindWheel();if(UI.pending){const d=UI.pendin
 const emptyBox=(title,text,btn)=>`<div class="empty"><b>${title}</b>${text}${btn||''}</div>`;
 
 /* ---------- Ekranlar ---------- */
+// Bugün (Özet): üstte selam ve tek bir +, aile duyurusu not olarak, sıradaki etkinlik, önümüzdeki günler, en altta Evde.
+const nowMin=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
+const toMin=t=>t?+t.slice(0,2)*60+ +t.slice(3,5):null;
+const evColor=e=>isAll(e)?'var(--accent)':M(e.members[0]).color;
+const whoMini=ids=>ids.length>=S.members.length&&S.members.length>1?famBadge():avs(ids.slice(0,2));
+// Duyuru buzdolabına iğnelenmiş not gibi: hafif eğik, yazanın avatarı raptiye
+function annNote(){const a=annVisible()?S.ann:null;if(!a)return '';const w=M(a.by);
+ return `<button class="anote" data-act="annOpen" aria-label="Aile duyurusu, ${esc(w.name)}: ${esc(a.text)}"><span class="pin">${av(a.by)}</span><span class="tx">${esc(a.text)}</span><span class="by">— ${esc(first(w.name))} · ${ago(a.at)}</span></button>`}
+function nextHTML(c){const t=T();let nx=null,day=t;
+ for(let i=0;i<14&&!nx;i++){const d=add(t,i);nx=evsOn(d,c).find(e=>i>0||!e.time||toMin(e.time)>=nowMin()-30)||null;if(nx)day=d}
+ if(!nx)return `<div class="cl"><div class="tlempty">Önümüzdeki iki haftada etkinlik yok 🌿</div></div>`;
+ const e=nx,mins=e.time&&day===t?toMin(e.time)-nowMin():null;
+ const when=day!==t?`${rel(day)}${e.time?' · '+hm(e.time):' · tüm gün'}`:!e.time?'Bugün · tüm gün':mins<=0?'Şimdi':mins<60?`${hm(e.time)} · ${mins} dk sonra`:`${hm(e.time)} · ${Math.floor(mins/60)} sa${mins%60?' '+mins%60+' dk':''} sonra`;
+ return `<button class="nx" data-act="openEvent" data-id="${e.id}" data-d="${day}" style="--c:${evColor(e)}"><span class="b"><span class="k">${when}</span><span class="t">${esc(e.title)}</span><span class="m">${e.loc?`<span>${I('pin','sm')}${esc(e.loc)}</span>`:''}<span>${I(CATS[e.cat][1],'sm')}${CATS[e.cat][0]}</span></span></span>${whoMini(e.members)}</button>`}
+function homeRows(){const p=S.items.filter(i=>!i.done),u=p.filter(i=>i.pri==='acil').length,w=topIdea(),idea=w&&!(isChild()&&!w.want.includes(meId()))?w:null;
+ return `<div class="cl"><button class="hrow" data-act="tab" data-tab="lists"><span class="ic">${I('tag','sm')}</span><span class="b"><b>Alınacaklar</b><small>${p.length?p.slice(0,3).map(i=>esc(i.name)).join(', ')+(p.length>3?'…':''):'Hepsi alındı'}</small></span>${u?`<span class="n u">${u} acil</span>`:''}<span class="n">${p.length}</span>${I('chevR','sm')}</button>
+ ${idea?`<button class="hrow" data-act="openWish" data-id="${idea.id}"><span class="ic">${I(WT[idea.type][2],'sm')}</span><span class="b"><b>${esc(idea.title)}</b><small>${[0,6].includes(new Date().getDay())?'Bugün için':'Hafta sonu için'} bir fikir · ${idea.want.length} kişi istiyor</small></span>${I('chevR','sm')}</button>`:''}</div>`}
 function vToday(){
  const m=me(),child=isChild(),t=T(),h=new Date().getHours();
  const g=h<5?'İyi geceler':h<12?'Günaydın':h<18?'İyi günler':'İyi akşamlar';
- const lists=S.lists.map(l=>{const p=S.items.filter(i=>i.list===l.id&&!i.done);return {l,n:p.length,u:p.filter(i=>i.pri==='acil').length}});
- const ann=annVisible()?S.ann:null;
- return `<div class="hdr"><div class="h"><h1>${g}, ${esc(first(m.name))} 👋</h1><div class="sub">${long(t)}</div></div>
-  <button class="icon-btn" data-act="who" aria-label="Kişi değiştir">${av(m.id)}</button></div>
+ return `<div class="th"><div class="h"><div class="ov">${long(t)}</div><h1>${g}, ${esc(first(m.name))}</h1></div><button class="add" data-act="tdAdd" aria-label="Ekle">${I('plus')}</button><button class="icon-btn" data-act="who" aria-label="Kişi değiştir">${av(m.id)}</button></div>
  ${demoBar()}${inviteCard()}
  ${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>${starsHTML()}`:''}
- ${ann?`<section class="ann" aria-label="Aile duyurusu"><span class="ic">${I('mega')}</span><div class="body"><div class="txt">“${esc(ann.text)}”</div><div class="meta">${esc(M(ann.by).name)} · ${ago(ann.at)==='az önce'?'az önce':(iso(new Date(ann.at))===t?'bugün '+clock(ann.at):ago(ann.at))}</div></div>
-   ${can('announce')?`<button class="icon-btn" data-act="annEdit" aria-label="Duyuruyu düzenle">${I('edit')}</button>`:''}</section>`
-  :(can('announce')?`<button class="ann-empty" data-act="annEdit">${I('mega')}<span>Aileye kısa bir duyuru yaz</span></button>`:'')}
- <div class="qa">
-  <button data-act="newEvent"><span class="ic">${I('cal','sm')}</span>Etkinlik ekle</button>
-  <button data-act="newTask"><span class="ic">${I('tasks','sm')}</span>Görev ekle</button>
-  <button data-act="quickItem"><span class="ic">${I('tag','sm')}</span>Alınacak ekle</button>
- </div>
+ ${annNote()}
+ <div class="lbl"><span>Sıradaki</span></div>${nextHTML({mine:child,filter:[]})}
  <div class="sec-h"><h2 class="sec">Önümüzdeki günler</h2><button class="link" data-act="tab" data-tab="cal">Takvim ${I('chevR','sm')}</button></div>
  ${homeAgenda()}
- ${ideaHTML()}
- <div class="sec-h"><h2 class="sec">Alınacaklar</h2><button class="link" data-act="tab" data-tab="lists">Tümü ${I('chevR','sm')}</button></div>
- <div class="group">${lists.map(({l,n,u})=>`<button class="row tap" data-act="goList" data-id="${l.id}"><span class="icon-btn" style="width:40px;height:40px;background:var(--sunk);color:var(--fg)">${I(l.icon)}</span><span class="body"><span class="t">${esc(l.name)}</span><span class="m">${n?`<span>${n} şey bekliyor</span>`:'<span>Hepsi alındı</span>'}${u?`<span class="tag late">${u} acil</span>`:''}</span></span>${I('chevR')}</button>`).join('')||emptyBox('Henüz liste yok','')}</div>`}
+ <div class="lbl"><span>Evde</span></div>${homeRows()}`}
 
 // Takvimde kimin takvimi: Bütün aile (süzgeç yok) ya da seçilen kişiler; formlardaki avatar ızgarası
 function calFilterHTML(){const f=UI.filter,ck=`<span class="ck">${I('check','sm')}</span>`;
@@ -1256,6 +1295,8 @@ const A={
  famInvite:()=>sheet('Aileye davet et',famInviteHTML()),
  wPick:(d,el)=>{const w=document.getElementById('wheel');if(!w)return;if(el.classList.contains('mid')){A.openMember(d);return}
   w.scrollTo({left:el.offsetLeft+el.offsetWidth/2-w.clientWidth/2,behavior:calm()?'auto':'smooth'})},
+ tdAdd:()=>sheet('Ne eklemek istersin?',`<div class="group">${[['newEvent','cal','Etkinlik','Takvime bir plan'],['newTask','tasks','Görev','Birine ya da kendine iş'],['quickItem','tag','Alınacak','Listeye bir şey'],...(can('announce')?[['annEdit','mega','Duyuru','Bütün aileye kısa not']]:[])].map(([a,i,n,sub])=>`<button class="row tap" data-act="${a}"><span class="icon-btn" style="width:40px;height:40px;background:var(--accent-soft);color:var(--accent-ink)">${I(i)}</span><span class="body"><span class="t">${n}</span><span class="m"><span>${sub}</span></span></span>${I('chevR')}</button>`).join('')}</div>`),
+ annOpen:()=>{if(can('announce'))return A.annEdit();const a=S.ann;sheet('Aile duyurusu',`<section class="ann"><span class="ic">${I('mega')}</span><div class="body"><div class="txt">“${esc(a.text)}”</div><div class="meta">${esc(M(a.by).name)} · ${ago(a.at)}</div></div></section>`)},
  famFeed:()=>sheet('Son değişiklikler',feedHTML(40)),
  install:()=>{if(installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;render(true)})}},
  share:()=>{if(store.mode!=='family'){toast('Örnek ailede davet gönderilemez.');return}
