@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bizim Ev · Avatar yükle</title>
+<style>
+:root{color-scheme:light dark;--bg:#FAF8F5;--fg:#2A2621;--sub:#6B6257;--line:#E4DED4;--card:#fff;--acc:#C2502F}
+@media (prefers-color-scheme:dark){:root{--bg:#16140F;--fg:#F0EBE3;--sub:#A49A8C;--line:#2E2A23;--card:#1E1B15}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,sans-serif;padding:20px 16px 60px;max-width:620px;margin:0 auto}
+h1{font-size:1.3rem;margin:0 0 4px}
+h2{font-size:1rem;margin:28px 0 10px}
+p{margin:0 0 12px}
+.sub{color:var(--sub);font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:11px 16px;background:var(--acc);color:#fff}
+button:disabled{opacity:.5}
+button.gh{background:transparent;color:var(--fg);border:1px solid var(--line)}
+input{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
+label{display:block;font-size:.85rem;color:var(--sub);margin:10px 0 4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;margin-top:10px}
+.it{text-align:center;font-size:.72rem;color:var(--sub)}
+.it img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;border:1px solid var(--line);background:var(--card)}
+.it b{display:block;color:var(--fg);font-size:.78rem;margin-top:4px}
+.it button{background:transparent;color:#C2302F;padding:2px;font-size:.72rem}
+.log{font-size:.85rem;color:var(--sub);white-space:pre-wrap;margin-top:10px}
+.err{color:#C2302F}
+.ok{color:#2B8467}
+</style>
+</head>
+<body>
+<h1>Avatar yükle</h1>
+<p class="sub">Ailenin fotoğrafları açık depoda değil, ailenin kendi özel alanında durur. Bu sayfayı aileye katıldığın telefonda veya bilgisayarda aç.</p>
+
+<div class="card" id="who">Kontrol ediliyor…</div>
+
+<div id="main" hidden>
+  <h2>Yeni fotoğraf ekle</h2>
+  <div class="card">
+    <label for="n">Kim?</label>
+    <input id="n" placeholder="örn. Ayşe">
+    <label for="f">Fotoğraflar (birden çok seçebilirsin)</label>
+    <input id="f" type="file" accept="image/*" multiple>
+    <p class="sub" style="margin:10px 0 0">Her fotoğraf 256 piksele küçültülüp webp olarak yüklenir. Yüzün ortada ve yakın olması en iyi sonucu verir.</p>
+    <div style="margin-top:12px"><button id="up" disabled>Yükle</button></div>
+    <div class="log" id="ul"></div>
+  </div>
+
+  <h2>Yüklü avatarlar</h2>
+  <div class="card"><div class="grid" id="list"></div><div class="log" id="ll"></div></div>
+
+  <h2>Eski avatarları taşı</h2>
+  <div class="card">
+    <p class="sub">Depodaki (herkese açık) 22 avatarı ailenin özel alanına kopyalar. Bir kez yapılır; sonra depodaki dosyalar silinecek.</p>
+    <button class="gh" id="mig">Taşı</button>
+    <div class="log" id="ml"></div>
+  </div>
+</div>
+
+<script>
+(()=>{
+// Uygulamadakiyle aynı adresler (index.html ile birlikte güncellenmeli)
+const FB_URL='https://bizimev-96297-default-rtdb.firebaseio.com';
+const FB_KEY='';
+const TOK_URL='https://securetoken.googleapis.com/v1/token';
+const KEY='bizim-ev.v1';
+const OLD='./avatars/';
+// Depodan taşınacak eski avatarlar
+const ESKI=[['Ali',[['ali-1','Camel ceket'],['ali-2','Krem kazak'],['ali-3','Kot ceket'],['ali-4','Yeşil kapüşonlu'],['ali-5','Bordo kazak'],['ali-6','Mavi gömlek']]],
+ ['Ayşe',[['ayse-1','Deri ceket'],['ayse-2','Vizon eşarp'],['ayse-3','Yeşil eşarp'],['ayse-4','Bordo bluz'],['ayse-5','Lacivert eşarp'],['ayse-6','Krem eşarp'],['ayse-7','Antrasit eşarp'],['ayse-8','Zümrüt blazer']]],
+ ['Zeynep',[['zeynep-1','Pembe kazak'],['zeynep-2','Sarı hırka'],['zeynep-3','Kot salopet'],['zeynep-4','Mint kapüşonlu']]],
+ ['Can',[['can-1','Turkuaz kazak'],['can-2','Hardal hırka'],['can-3','Lacivert kapüşonlu'],['can-4','Kiremit gömlek']]]];
+
+const $=id=>document.getElementById(id);
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let store={},code='',tok='';
+
+try{store=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
+
+async function token(){
+ const a=store.auth;
+ if(!FB_KEY)return '';
+ if(a&&a.tok&&a.exp>Date.now()+120000)return a.tok;
+ if(!a||!a.rt)throw new Error('kimlik yok');
+ const r=await fetch(`${TOK_URL}?key=${FB_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({grant_type:'refresh_token',refresh_token:a.rt})});
+ const j=await r.json().catch(()=>null);
+ if(!r.ok||!j||!j.id_token)throw new Error('kimlik yenilenemedi');
+ store.auth={uid:j.user_id||a.uid,rt:j.refresh_token||a.rt,tok:j.id_token,exp:Date.now()+(+j.expires_in||3600)*1000};
+ try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}
+ return j.id_token}
+const url=(p,t,q)=>`${FB_URL}/${p}.json`+(t?'?auth='+encodeURIComponent(t):'')+(q?(t?'&':'?')+q:'');
+async function send(p,method,body){const t=await token();const r=await fetch(url(p,t),{method,body:JSON.stringify(body)});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+async function read(p,q){const t=await token();const r=await fetch(url(p,t,q));if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+
+// Görseli 256 piksellik kareye küçült, webp'e çevir
+function shrink(src){return new Promise((res,rej)=>{const im=new Image();im.crossOrigin='anonymous';
+ im.onload=()=>{const N=256,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');
+  const s=Math.min(im.width,im.height),sx=(im.width-s)/2,sy=(im.height-s)/2;
+  x.drawImage(im,sx,sy,s,s,0,0,N,N);
+  let d=c.toDataURL('image/webp',0.82);
+  if(d.indexOf('data:image/webp')!==0)d=c.toDataURL('image/jpeg',0.82);
+  res(d)};
+ im.onerror=()=>rej(new Error('görsel okunamadı'));im.src=src})}
+const readFile=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(new Error('dosya okunamadı'));r.readAsDataURL(f)});
+const slug=t=>t.toLocaleLowerCase('tr').replace(/ş/g,'s').replace(/ı/g,'i').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o').replace(/ç/g,'c').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,20)||'av';
+
+async function liste(){
+ const ids=await read('avatars/'+code,'shallow=true')||{};
+ const keys=Object.keys(ids);
+ if(!keys.length){$('list').innerHTML='';$('ll').textContent='Henüz yüklü avatar yok.';return}
+ $('ll').textContent='';
+ const parts=[];
+ for(const id of keys){const o=await read('avatars/'+code+'/'+id).catch(()=>null);if(!o||!o.d)continue;
+  parts.push(`<div class="it"><img src="${o.d}" alt=""><b>${esc(o.n||'')}</b>${esc(o.t||'')}<br><button data-del="${esc(id)}">Sil</button></div>`)}
+ $('list').innerHTML=parts.join('');
+ $('list').querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+  if(!confirm('Bu avatar silinsin mi?'))return;b.disabled=true;
+  try{await send('avatars/'+code+'/'+b.dataset.del,'PUT',null);await liste()}catch(e){alert('Silinemedi: '+e.message)}})}
+
+async function baslat(){
+ if(!store.code||store.mode!=='family'){$('who').innerHTML='<span class="err">Bu cihaz bir aileye bağlı değil.</span><p class="sub" style="margin:8px 0 0">Önce uygulamayı aç, aileye katıl, sonra bu sayfaya dön.</p>';return}
+ code=store.code;
+ try{await token()}catch(e){$('who').innerHTML='<span class="err">Kimlik alınamadı: '+esc(e.message)+'</span>';return}
+ $('who').innerHTML='Aile kodu <b>'+esc(code.slice(0,4)+'-'+code.slice(4))+'</b>'+(FB_KEY?'':'<br><span class="sub">Kimlik katmanı henüz kapalı (anahtar girilmedi).</span>');
+ $('main').hidden=false;
+ await liste().catch(e=>$('ll').textContent='Liste okunamadı: '+e.message)}
+
+$('f').onchange=()=>{$('up').disabled=!$('f').files.length||!$('n').value.trim()};
+$('n').oninput=()=>{$('up').disabled=!$('f').files.length||!$('n').value.trim()};
+$('up').onclick=async()=>{
+ const name=$('n').value.trim(),files=[...$('f').files];
+ if(!name||!files.length)return;
+ $('up').disabled=true;$('ul').textContent='';
+ const base=slug(name);let ok=0;
+ const varolan=Object.keys(await read('avatars/'+code,'shallow=true').catch(()=>({}))||{});
+ let s=varolan.filter(k=>k.indexOf(base+'-')===0).length;
+ for(const f of files){
+  try{const d=await shrink(await readFile(f));
+   let id;do{id=base+'-'+(++s)}while(varolan.includes(id));
+   varolan.push(id);
+   await send('avatars/'+code+'/'+id,'PUT',{n:name,t:'Fotoğraf '+s,d,at:Date.now()});ok++;
+   $('ul').innerHTML+=`<span class="ok">${esc(f.name)} yüklendi</span><br>`}
+  catch(e){$('ul').innerHTML+=`<span class="err">${esc(f.name)}: ${esc(e.message)}</span><br>`}}
+ $('f').value='';$('up').disabled=true;
+ $('ul').innerHTML+=`<b>${ok} fotoğraf yüklendi.</b> Uygulamayı kapatıp açtığında avatar seçiminde çıkar.<br>`;
+ await liste().catch(()=>{})};
+
+$('mig').onclick=async()=>{
+ $('mig').disabled=true;$('ml').textContent='';let ok=0,hata=0;
+ const var0=Object.keys(await read('avatars/'+code,'shallow=true').catch(()=>({}))||{});
+ for(const [kisi,list] of ESKI)for(const [id,etiket] of list){
+  if(var0.includes(id)){$('ml').innerHTML+=`${esc(id)}: zaten var<br>`;continue}
+  try{const d=await shrink(OLD+'ornek/'+id+'.webp');
+   await send('avatars/'+code+'/'+id,'PUT',{n:kisi,t:etiket,d,at:Date.now()});ok++;
+   $('ml').innerHTML+=`<span class="ok">${esc(kisi)} · ${esc(etiket)} taşındı</span><br>`}
+  catch(e){hata++;$('ml').innerHTML+=`<span class="err">${esc(id)}: ${esc(e.message)}</span><br>`}}
+ $('ml').innerHTML+=`<b>${ok} taşındı${hata?', '+hata+' hata':''}.</b><br>`;
+ $('mig').disabled=false;
+ await liste().catch(()=>{})};
+
+baslat();
+})();
+</script>
+</body>
+</html>

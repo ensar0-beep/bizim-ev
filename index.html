@@ -691,27 +691,41 @@ function seed(){
 /* ---------- Durum ---------- */
 // Firebase Realtime Database adresi. Boşsa uygulama yalnızca "örnek aile" modunda çalışır.
 const FB_URL='https://bizimev-96297-default-rtdb.firebaseio.com';
+// Firebase Web API anahtarı. Doluysa her telefon ilk açılışta görünmez bir kimlik (anonim giriş) alır,
+// kendini ailenin uids listesine yazar ve veritabanı yalnızca o kimliklere açılır. Boşsa kimlik katmanı
+// devre dışı kalır ve uygulama eskisi gibi yalnızca aile koduyla çalışır.
+const FB_KEY='';
+// Kimlik uç noktaları ayrı duruyor ki yerel testte sahte sunucuya yöneltilebilsin.
+const IDP_URL='https://identitytoolkit.googleapis.com/v1/accounts:signUp';
+const TOK_URL='https://securetoken.googleapis.com/v1/token';
 const KEY='bizim-ev.v1';
 const COLS=['members','events','tasks','lists','items','wishes','activity','freq'];
 let store;
 try{store=JSON.parse(localStorage.getItem(KEY))}catch(e){}
-store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{}},store&&typeof store==='object'?store:{});
+store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{},auth:null,av:{},avi:{}},store&&typeof store==='object'?store:{});
 let S=null,baseC={};
 const UI={shop:null,shopAt:0,joinFor:null,joinShown:false,tab:'today',cal:'flow',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,lmode:'buy',wt:'all',wdone:false,net:'online',err:null};
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){try{store.av={};store.avi={};localStorage.setItem(KEY,JSON.stringify(store))}catch(x){}}};
 const meId=()=>store.mode==='demo'?store.demoMe:store.me;
 const M=id=>(S&&S.members.find(m=>m.id===id))||{id,name:'Eski üye',color:'#8A8178',role:'adult',rel:''};
 const me=()=>M(meId());
 const isChild=()=>me().role==='child';
 // Avatar seçilmişse görsel (avatars/ klasörü), seçilmemişse baş harf.
 const AVATARS=[['anne','Anne'],['anne-basortulu','Başörtülü'],['baba','Gözlüklü'],['baba-sakalli','Sakallı'],['kiz-genc','Genç kız'],['erkek-genc','Genç erkek'],['kiz-cocuk','Kız çocuk'],['erkek-cocuk','Erkek çocuk'],['babaanne','Nine'],['dede','Dede'],['bebek','Bebek'],['kopek','Köpek']];
-// Aileye özel avatarlar (avatars/<aile>/): yalnızca o ailenin seçicisinde görünür; kayıtlı seçim her yerde geçerli kalır.
-const OZEL_AV={ornek:{ad:'Örnek',kisi:{Ali:[['ornek/ali-1','Camel ceket'],['ornek/ali-2','Krem kazak'],['ornek/ali-3','Kot ceket'],['ornek/ali-4','Yeşil kapüşonlu'],['ornek/ali-5','Bordo kazak'],['ornek/ali-6','Mavi gömlek']],'Ayşe':[['ornek/ayse-1','Deri ceket'],['ornek/ayse-2','Vizon eşarp'],['ornek/ayse-3','Yeşil eşarp'],['ornek/ayse-4','Bordo bluz'],['ornek/ayse-5','Lacivert eşarp'],['ornek/ayse-6','Krem eşarp'],['ornek/ayse-7','Antrasit eşarp'],['ornek/ayse-8','Zümrüt blazer']],'Zeynep':[['ornek/zeynep-1','Pembe kazak'],['ornek/zeynep-2','Sarı hırka'],['ornek/zeynep-3','Kot salopet'],['ornek/zeynep-4','Mint kapüşonlu']],'Can':[['ornek/can-1','Turkuaz kazak'],['ornek/can-2','Hardal hırka'],['ornek/can-3','Lacivert kapüşonlu'],['ornek/can-4','Kiremit gömlek']]}}};
-const OZEL_LIST=Object.values(OZEL_AV).flatMap(f=>Object.entries(f.kisi).flatMap(([n,l])=>l.map(([k,t])=>[k,`${n} · ${t}`])));
-const ozelAile=()=>Object.keys(OZEL_AV).find(k=>store.mode!=='demo'&&low((S&&S.meta&&S.meta.name)||'').includes(k))||null;
-const AVN=k=>(AVATARS.find(a=>a[0]===k)||OZEL_LIST.find(a=>a[0]===k)||[,''])[1];
-const avFace=(k,name,color,cls)=>k?`<span class="av pic${cls?' '+cls:''}" style="--c:${color}" aria-hidden="true"><img src="avatars/${k}.webp" alt="" decoding="async"></span>`
- :`<span class="av${cls?' '+cls:''}" style="--c:${color}" aria-hidden="true">${esc(up((name||'?')[0]))}</span>`;
+// Aileye özel avatarlar artık açık depoda değil: ailenin kendi kaydında (avatars/{kod}/{id}) durur,
+// yalnızca aileye kayıtlı cihazlar okuyabilir. Yerelde store.av (görsel) + store.avi (kim, hangi kıyafet)
+// olarak önbelleğe alınır. Anahtarları "ozel/" ile başlar; hazır avatarlar avatars/ klasöründen gelir.
+const OZ='ozel/';
+const isOz=k=>typeof k==='string'&&k.indexOf(OZ)===0;
+const ozId=k=>k.slice(OZ.length);
+const okOzId=k=>/^[A-Za-z0-9_-]{1,40}$/.test(k);
+const ozAll=()=>Object.keys(store.avi||{}).filter(id=>store.av&&store.av[id]);
+const ozPeople=()=>{const g=[];for(const id of ozAll()){const n=(store.avi[id].n||'Aile');let e=g.find(x=>x[0]===n);if(!e)g.push(e=[n,[]]);e[1].push(id)}return g};
+const avSrc=k=>isOz(k)?((store.av&&store.av[ozId(k)])||''):`avatars/${k}.webp`;
+const AVN=k=>isOz(k)?(((store.avi||{})[ozId(k)]||{}).t||'Avatar'):(AVATARS.find(a=>a[0]===k)||[,''])[1];
+const avFace=(k,name,color,cls)=>{const src=k?avSrc(k):'';
+ return src?`<span class="av pic${cls?' '+cls:''}" style="--c:${color}" aria-hidden="true"><img src="${src}" alt="" decoding="async"></span>`
+ :`<span class="av${cls?' '+cls:''}" style="--c:${color}" aria-hidden="true">${esc(up((name||'?')[0]))}</span>`};
 const av=(id,cls)=>{const m=M(id);return avFace(m.avatar,m.name,m.color,cls)};
 const refocus=(act,v)=>{const b=document.querySelector(`#avp [data-act="${act}"][data-v="${v}"]`);b&&b.focus({preventScroll:true})};
 const avs=ids=>`<span class="avs">${ids.slice(0,4).map(i=>av(i,'xs')).join('')}</span>`;
@@ -738,7 +752,7 @@ const str=v=>typeof v==='string'?v:'';
 const idList=v=>(Array.isArray(v)?v:v&&typeof v==='object'?Object.values(v):[]).filter(x=>typeof x==='string'&&okId(x));
 function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
  switch(c){
-  case 'members':x.name=str(x.name)||'?';x.rel=str(x.rel);if(!ROLES[x.role])x.role='adult';if(!/^#[0-9a-fA-F]{6}$/.test(x.color||''))x.color='#8A8178';if(!AVN(x.avatar))x.avatar='';break;
+  case 'members':x.name=str(x.name)||'?';x.rel=str(x.rel);if(!ROLES[x.role])x.role='adult';if(!/^#[0-9a-fA-F]{6}$/.test(x.color||''))x.color='#8A8178';x.avatar=str(x.avatar).replace(/^[a-z]+\/(?=[A-Za-z0-9_-]+$)/,OZ);if(!(isOz(x.avatar)&&okOzId(ozId(x.avatar)))&&!AVN(x.avatar))x.avatar='';break;
   case 'events':x.title=str(x.title);if(!okDate(x.date))x.date=T();x.time=okTime(x.time)?x.time:'';x.members=idList(x.members);if(!CATS[x.cat])x.cat='aile';if(!REM[x.rem])x.rem='none';if(!REP[x.repeat])x.repeat='none';x.loc=str(x.loc);x.desc=str(x.desc);break;
   case 'tasks':x.title=str(x.title);if(!okDate(x.due))x.due=T();x.time=okTime(x.time)?x.time:'';x.rot=idList(x.rot);x.assignee=typeof x.assignee==='string'&&okId(x.assignee)?x.assignee:'';x.who=idList(x.who);x.dn=idList(x.dn);x.all=!!x.all;if(!TREP[x.repeat])x.repeat='none';x.done=!!x.done;break;
   case 'lists':x.name=str(x.name)||'Liste';if(!P[x.icon])x.icon='tag';break;
@@ -758,9 +772,46 @@ function setS(v){S=v;if(store.mode==='demo')store.demo=S}
 function setAt(root,path,val){const ks=path.split('/').filter(Boolean);if(!ks.length)return val&&typeof val==='object'?val:{};root=root&&typeof root==='object'?root:{};let o=root;
  for(let i=0;i<ks.length-1;i++){if(!o[ks[i]]||typeof o[ks[i]]!=='object'){if(val===null)return root;o[ks[i]]={}}o=o[ks[i]]}
  if(val===null)delete o[ks[ks.length-1]];else o[ks[ks.length-1]]=val;return root}
-const fbUrl=(code,p)=>`${FB_URL}/families/${code}${p||''}.json`;
-async function fbGet(code,p){const r=await fetch(fbUrl(code,p));if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
-async function fbSend(code,method,body,p){const r=await fetch(fbUrl(code,p),{method,body:JSON.stringify(body)});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+/* ---------- Bu cihazın kimliği ----------
+   Anonim giriş: cihaz bir kez kaydolur, yenileme anahtarını saklar ve her istekte 1 saatlik
+   kimlik jetonu (?auth=) gönderir. Kimlik ailenin uids listesine yazılır; veritabanı kuralları
+   aile verisini yalnızca o listedeki kimliklere açar, yani aile kodunu bilmek tek başına yetmez. */
+const myUid=()=>(store.auth&&store.auth.uid)||'';
+const jpost=async(url,body)=>{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return{ok:r.ok,status:r.status,j:await r.json().catch(()=>null)}};
+let authP=null;
+function authTok(){if(!FB_KEY)return Promise.resolve('');return authP||(authP=doAuth().finally(()=>{authP=null}))}
+async function doAuth(){
+ const a=store.auth;
+ if(a&&a.tok&&a.exp>Date.now()+120000)return a.tok;
+ if(a&&a.rt){const r=await jpost(`${TOK_URL}?key=${FB_KEY}`,{grant_type:'refresh_token',refresh_token:a.rt});
+  if(r.ok&&r.j&&r.j.id_token){store.auth={uid:r.j.user_id||a.uid,rt:r.j.refresh_token||a.rt,tok:r.j.id_token,exp:Date.now()+(+r.j.expires_in||3600)*1000};save();return store.auth.tok}
+  if(r.status>=400&&r.status<500){store.auth=null;save()}else throw new Error('AUTH '+r.status)}
+ const r=await jpost(`${IDP_URL}?key=${FB_KEY}`,{returnSecureToken:true});
+ if(!r.ok||!r.j||!r.j.idToken)throw new Error('AUTH '+r.status);
+ store.auth={uid:r.j.localId,rt:r.j.refreshToken,tok:r.j.idToken,exp:Date.now()+(+r.j.expiresIn||3600)*1000};save();return store.auth.tok}
+const qAuth=t=>t?'?auth='+encodeURIComponent(t):'';
+const fbUrl=(code,p,t)=>`${FB_URL}/families/${code}${p||''}.json`+qAuth(t);
+const dbUrl=(p,t,q)=>`${FB_URL}/${p}.json`+qAuth(t)+(q?(t?'&':'?')+q:'');
+async function fbGet(code,p){const r=await fetch(fbUrl(code,p,await authTok()));if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+async function fbSend(code,method,body,p){const r=await fetch(fbUrl(code,p,await authTok()),{method,body:JSON.stringify(body)});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+// Bu cihazı ailenin kimlik listesine yaz (katılma ve her açılışta; aynı değer tekrar yazılırsa bir şey değişmez)
+const claimUid=(code,mid)=>FB_KEY?fbSend(code,'PUT',mid,'/uids/'+myUid()):Promise.resolve();
+/* Ailenin özel avatarları: önce hangi id'ler var diye bakılır (shallow), eksik olanlar tek tek indirilip
+   yerelde saklanır. Böylece her açılışta bütün görseller yeniden inmez. */
+let avLoading=false;
+async function loadAv(){
+ if(avLoading||!FB_URL||store.mode!=='family'||!store.code)return;avLoading=true;
+ try{const t=await authTok();const r=await fetch(dbUrl('avatars/'+store.code,t,'shallow=true'));
+  if(!r.ok)return;const ids=await r.json()||{};if(typeof ids!=='object')return;let ch=false;
+  for(const id in store.av||{})if(!(id in ids)){delete store.av[id];delete store.avi[id];ch=true}
+  for(const id in ids){if(!okOzId(id)||(store.av[id]&&store.avi[id]))continue;
+   const q=await fetch(dbUrl('avatars/'+store.code+'/'+id,await authTok()));if(!q.ok)continue;
+   const o=await q.json();if(!o||typeof o.d!=='string'||o.d.indexOf('data:image/')!==0||o.d.length>200000)continue;
+   store.av[id]=o.d;store.avi[id]={n:str(o.n).slice(0,40)||'Aile',t:str(o.t).slice(0,40)||'Avatar'};ch=true}
+  if(ch){save();if(S)render(true)}}
+ catch(e){}finally{avLoading=false}}
+async function ensureUid(){if(!FB_KEY||store.mode!=='family'||!store.me||!store.code)return;
+ try{await authTok();if(store.R&&store.R.uids&&store.R.uids[myUid()]===store.me)return;await claimUid(store.code,store.me)}catch(e){}}
 
 function commit(){
  if(store.mode==='demo'){if(S)store.demo=S;save();return}
@@ -783,10 +834,17 @@ let es=null,rq=0;
 function connect(){
  if(es){es.close();es=null}
  if(store.mode!=='family'||!FB_URL||typeof EventSource==='undefined')return;
- es=new EventSource(fbUrl(store.code));
+ const code=store.code;
+ authTok().then(t=>{if(store.mode!=='family'||store.code!==code)return;openEs(code,t)})
+  .catch(()=>setNet(navigator.onLine?'reconnecting':'offline'))}
+function openEs(code,t){
+ if(es){es.close();es=null}
+ es=new EventSource(fbUrl(code,'',t));
  es.addEventListener('put',e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}store.R=m.path==='/'?(m.data&&typeof m.data==='object'?m.data:{}):setAt(store.R,m.path,m.data);remote()});
  es.addEventListener('patch',e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}for(const k in m.data||{})store.R=setAt(store.R,m.path+'/'+k,m.data[k]);remote()});
  es.addEventListener('cancel',()=>{UI.err='denied';render()});
+ // Kimlik jetonu bir saat sonra düşer: akış kapanınca yeni jetonla yeniden bağlan
+ es.addEventListener('auth_revoked',()=>{setNet('reconnecting');connect()});
  es.onopen=()=>{setNet('online');flush()};
  es.onerror=()=>setNet(navigator.onLine?'reconnecting':'offline');
 }
@@ -1442,7 +1500,9 @@ const A={
  fRole:(d,el)=>{F.role=d.v;el.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
  leaveAsk:()=>{if(store.mode==='demo'){A.exitDemo();return}const n=Object.keys(store.pending).length;
   sheet('Bu cihazdan çıkılsın mı?',`<p>Ailenin bilgileri silinmez, diğerleri kullanmaya devam eder. Tekrar girmek için aile kodunu not al: <b style="font-family:var(--f-display);letter-spacing:.08em">${fmtCode(store.code)}</b></p>${n?`<p class="err">${n} değişiklik henüz gönderilmedi. Çıkarsan bunlar kaybolur.</p>`:''}<div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" data-act="leave">Çık</button></div>`)},
- leave:()=>{if(es){es.close();es=null}Object.assign(store,{mode:null,code:null,me:null,R:null,pending:{}});S=null;UI.err=null;close();render()},
+ leave:()=>{if(es){es.close();es=null}
+  if(FB_KEY&&store.mode==='family'&&store.code)fbSend(store.code,'PUT',null,'/uids/'+myUid()).catch(()=>{});
+  Object.assign(store,{mode:null,code:null,me:null,R:null,pending:{}});S=null;UI.err=null;close();render()},
  // Kişi, tema, ayarlar
  who:()=>sheet('Bu cihazda kim var?',`<p class="note" style="margin:0 0 12px">${I('info','sm')}<span>Ortak kullanılan bir tablet gibi cihazlarda kişiler arasında geçebilirsin.</span></p><div class="people">${S.members.map(m=>`<button data-act="asUser" data-id="${m.id}" aria-pressed="${meId()===m.id}">${av(m.id)}<span><b>${esc(m.name)}</b><small>${ROLES[m.role]}${m.rel?' · '+esc(m.rel):''}</small></span></button>`).join('')}</div>`),
  asUser:d=>{if(store.mode==='demo'){store.demoMe=d.id;store.prefs.big=!!M(d.id).big}else store.me=d.id;UI.tf=isChild()?'mine':'all';close();render();toast(`Artık ${M(d.id).name} olarak bakıyorsun`)},
@@ -1512,12 +1572,12 @@ const A={
   <div class="flabel" style="margin:0 0 8px">${self?'Rengin':'Rengi'}</div>
   <div class="swg" role="group" aria-label="Renk">${COLORS.map((c,i)=>`<button type="button" data-act="setColor" data-id="${m.id}" data-v="${c}" style="--c:${c}" aria-pressed="${m.color===c}" aria-label="Renk ${i+1}">${m.color===c?I('check','sm'):''}</button>`).join('')}</div>
   <div class="flabel" style="margin:18px 0 8px">Avatar</div>
-  ${(()=>{const f=ozelAile();return f?Object.entries(OZEL_AV[f].kisi).map(([n,l])=>`<div class="flabel" style="margin:0 0 8px">${esc(OZEL_AV[f].ad)} ailesine özel · ${esc(n)}</div><div class="avg" role="group" aria-label="${esc(n)} avatarları" style="margin-bottom:16px">${l.map(([k,t])=>b(k,t)).join('')}</div>`).join(''):''})()}
+  ${ozPeople().map(([n,ids])=>`<div class="flabel" style="margin:0 0 8px">Ailemize özel · ${esc(n)}</div><div class="avg" role="group" aria-label="${esc(n)} avatarları" style="margin-bottom:16px">${ids.map(id=>b(OZ+id,store.avi[id].t||'Avatar')).join('')}</div>`).join('')}
   <div class="avg" role="group" aria-label="Avatar">${AVATARS.map(([k,n])=>b(k,n)).join('')}${b('','Baş harf')}</div>${UI.joinFor===m.id?`<button class="btn primary block" data-act="joinDone" style="margin-top:18px">Devam</button>`:''}</div>`;
   // Seçim yaparken sayfa yeniden açılıp kaymasın: açıksa yalnızca içi yenilenir.
   if(open&&open.dataset.id===m.id)open.outerHTML=body;else sheet(UI.joinFor===m.id?'Avatarını ve rengini seç':self?'Avatarın ve rengin':esc(m.name)+' için avatar',body)},
  joinDone:()=>{const m=me();close();toast(`Hoş geldin ${first(m.name)}!`)},
- setAv:d=>{const m=S.members.find(x=>x.id===d.id);if(!m||!AVN(d.v)&&d.v)return;const u=snap();m.avatar=d.v||'';
+ setAv:d=>{const m=S.members.find(x=>x.id===d.id);if(!m||d.v&&!(isOz(d.v)?store.av[ozId(d.v)]:AVN(d.v)))return;const u=snap();m.avatar=d.v||'';
   log(m.id===meId()?'avatarını değiştirdi':`${m.name} için avatarı değiştirdi`);render(true);A.avPick({id:m.id});refocus('setAv',d.v);toast(d.v?`Avatar: ${AVN(d.v)}`:'Baş harf kullanılıyor',u)},
  setColor:d=>{const m=S.members.find(x=>x.id===d.id);if(!m||!COLORS.includes(d.v))return;const u=snap();m.color=d.v;
   log(m.id===meId()?'rengini değiştirdi':`${m.name} için rengi değiştirdi`);render(true);A.avPick({id:m.id});refocus('setColor',d.v);toast('Renk değişti',u)},
@@ -1659,7 +1719,7 @@ const FORMS={
   busy(g('cf-btn'),'Oluşturuluyor…');
   try{let code=newCode();for(let i=0;i<3&&await fbGet(code,'/meta');i++)code=newCode();
    const now=Date.now(),mid=uid(),lid=uid(),aid=uid();
-   const fam0={meta:{name:fam,createdAt:now,by:mid,v:1},members:{[mid]:{name,rel,role:'admin',color:COLORS[0],at:now}},lists:{[lid]:{name:'Alınacaklar',icon:'tag',at:now}},activity:{[aid]:{who:mid,text:'aileyi oluşturdu',at:now}}};
+   const fam0={meta:{name:fam,createdAt:now,by:mid,v:1},uids:FB_KEY?{[myUid()]:mid}:{},members:{[mid]:{name,rel,role:'admin',color:COLORS[0],at:now}},lists:{[lid]:{name:'Alınacaklar',icon:'tag',at:now}},activity:{[aid]:{who:mid,text:'aileyi oluşturdu',at:now}}};
    await fbSend(code,'PUT',fam0);
    Object.assign(store,{mode:'family',code,me:mid,R:fam0,pending:{}});UI.tab='today';UI.err=null;fromRemote();close();render();connect();toast('Aile oluşturuldu');UI.joinFor=mid;UI.joinShown=true;A.avPick({id:mid})}
   catch(e){busy(g('cf-btn'));err('Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.')}},
@@ -1675,7 +1735,7 @@ const FORMS={
   const err=t=>{g('jn-err').textContent=t;g('jn-err').hidden=false};
   if(!name)return err('Adını yaz.');
   busy(g('jn-btn'),'Katılıyor…');const j=F.join,id=uid(),now=Date.now();
-  try{await fbSend(j.code,'PATCH',{['members/'+id]:{name,rel,role:F.role||'adult',color:freeColor(j.members.map(m=>m.color)),at:now},['activity/'+uid()]:{who:id,text:'aileye katıldı',at:now}});enterFamily(j.code,id)}
+  try{await claimUid(j.code,id);await fbSend(j.code,'PATCH',{['members/'+id]:{name,rel,role:F.role||'adult',color:freeColor(j.members.map(m=>m.color)),at:now},['activity/'+uid()]:{who:id,text:'aileye katıldı',at:now}});enterFamily(j.code,id)}
   catch(e){busy(g('jn-btn'));err('Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.')}},
  memberAdd:()=>{const name=document.getElementById('ma-name').value.trim();if(!name)return;const rel=document.getElementById('ma-rel').value.trim();
   const u=snap();S.members.push({id:uid(),name,rel,role:F.role||'adult',color:freeColor(S.members.map(m=>m.color)),at:Date.now()});log(`${name} adlı üyeyi ekledi`);close();render(true);toast(`${name} eklendi`,u)},
@@ -1722,7 +1782,8 @@ function busy(btn,label){if(!btn)return;if(label){btn.dataset.t=btn.textContent;
 function joinWho(){const j=F.join;
  sheet(esc(j.meta.name||'Aile'),`<p style="margin:0 0 12px">Hoş geldin! Listede sen hangisisin?</p><div class="people">${j.members.map(m=>`<button data-act="joinAs" data-id="${m.id}"><span class="av" style="--c:${m.color}" aria-hidden="true">${esc(up(m.name[0]))}</span><span><b>${esc(m.name)}</b><small>${ROLES[m.role]}${m.rel?' · '+esc(m.rel):''}</small></span></button>`).join('')}</div>
  <button class="btn soft block" style="margin-top:12px" data-act="joinNewSheet">${I('plus','sm')}Listede yokum, beni ekle</button>`)}
-function enterFamily(code,id){Object.assign(store,{mode:'family',code,me:id,R:null,pending:{}});S=null;UI.err=null;UI.tab='today';close();UI.joinFor=id;UI.joinShown=false;save();render();connect()}
+async function enterFamily(code,id){try{await claimUid(code,id)}catch(e){}
+ Object.assign(store,{mode:'family',code,me:id,R:null,pending:{}});S=null;UI.err=null;UI.tab='today';close();UI.joinFor=id;UI.joinShown=false;save();render();connect();loadAv()}
 function copyText(t,msg){const fallback=()=>{const el=document.getElementById('fam-code');if(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}toast('Kopyalanamadı, kodu elle seçebilirsin')};
  try{navigator.clipboard.writeText(t).then(()=>toast(msg),fallback)}catch(e){fallback()}}
 let swReg=null,installEvt=null;
@@ -1774,7 +1835,7 @@ window.visualViewport&&window.visualViewport.addEventListener('resize',()=>setTi
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)unshift()});
 window.addEventListener('online',()=>{setNet('reconnecting');flush();if(es&&es.readyState===2)connect()});
 window.addEventListener('offline',()=>setNet('offline'));
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){checkReminders();if(store.mode==='family'&&(!es||es.readyState===2))connect();if(S)render(true)}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){checkReminders();if(store.mode==='family'&&(!es||es.readyState===2))ensureUid().then(connect);if(S)render(true)}});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;if(UI.tab==='family'&&S)render(true)});
 setInterval(checkReminders,30000);
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').then(r=>{swReg=r}).catch(()=>{});
@@ -1789,7 +1850,7 @@ if(qcode||qs.has('text')||qs.has('url')||qs.has('title'))history.replaceState(nu
 let rafS=0;document.getElementById('screen').addEventListener('scroll',()=>{if(rafS)return;rafS=requestAnimationFrame(()=>{rafS=0;trackStrip()})},{passive:true});
 UI.tf=S&&isChild()?'mine':'all';
 render();
-if(store.mode==='family'){connect();flush()}
+if(store.mode==='family'){ensureUid().then(()=>{connect();flush();loadAv()})}
 checkReminders();
 if(shared){if(S){UI.tab='lists';UI.lmode='wish';render(true);wishForm(null,{type:'mekan',title:shared.n,place:shared})}else toast('Önce aileye katıl, sonra mekanı yeniden paylaş.')}
 if(qcode&&!store.mode)A.joinSheet({code:qcode.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)});
