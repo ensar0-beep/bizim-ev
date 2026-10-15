@@ -946,7 +946,8 @@ function parseNL(raw){const T0=T(),o=[...(' '+raw+' ')],s=[...(' '+low(raw)+' ')
  if(r.repeat!=='weekly'||!r.date)cut(NL_B+NL_DRE+NL_SX+'(?: günü)?'+NL_E,m=>{if(r.date)return false;r.date=nlNext(T0,nlDay(m[1]),true)});
  // saat
  let part=null;
- cut(NL_B+'(sabah|öğleden sonra|öğlen|öğle|akşam|gece)'+NL_SX+NL_E,m=>{part=m[1]});
+ const R0=low(' '+raw+' ');
+  cut(NL_B+'(sabah|öğleden sonra|öğlen|öğle|akşam|gece)'+NL_SX+NL_E,m=>{if(/(?:sı|si)$/.test(m[0])&&!/(?:bugün|yarın|bu|pazartesi|salı|çarşamba|perşembe|cuma|cumartesi|pazar)\s*$/.test(R0.slice(0,m.index)))return false;part=m[1]});
  let h=null,mi=0;
  cut(NL_B+'(\\d{1,2})[.:](\\d{2})'+NL_SX+NL_E,m=>{if(h!==null||+m[1]>23||+m[2]>59)return false;h=+m[1];mi=+m[2]});
  cut(NL_B+'saat (\\d{1,2})'+NL_SX+NL_E,m=>{if(h!==null||+m[1]>23)return false;h=+m[1]});
@@ -956,7 +957,7 @@ function parseNL(raw){const T0=T(),o=[...(' '+raw+' ')],s=[...(' '+low(raw)+' ')
  else if(part)r.time={sabah:'09:00','öğlen':'12:00','öğle':'12:00','öğleden sonra':'15:00','akşam':'19:00',gece:'21:00'}[part];
  // kişiler
  if(cut(NL_B+'(?:bütün aile|tüm aile|hepimiz|hep beraber|hep birlikte|ailece|aile olarak)'+NL_SX+NL_E,()=>{}))r.members=S.members.map(x=>x.id);
- const al=[];S.members.forEach(x=>{al.push([low(first(x.name)),x.id]);const w=low((x.rel||'').split(/[ ,]/)[0]);if(['anne','baba','babaanne','anneanne','dede','nine','abla','abi','ağabey'].includes(w))al.push([w,x.id])});
+ const al=[];S.members.forEach(x=>{al.push([low(first(x.name)),x.id]);if(low(x.name)!==low(first(x.name)))al.push([low(x.name).replace(/[^a-zçğıöşü0-9 ]/g,''),x.id]);const w=low((x.rel||'').split(/[ ,]/)[0]);if(['anne','baba','babaanne','anneanne','dede','nine','abla','abi','ağabey'].includes(w))al.push([w,x.id])});
  al.sort((a,b)=>b[0].length-a[0].length).forEach(([n,id])=>{
   const g=new RegExp(NL_B+n+"('?[a-zçğıöşü]*)"+NL_E,'g');let m;
   while((m=g.exec(L))){if(!r.members.includes(id))r.members.push(id);
@@ -965,13 +966,15 @@ function parseNL(raw){const T0=T(),o=[...(' '+raw+' ')],s=[...(' '+low(raw)+' ')
  // yer: virgülden sonrası ya da "Kadıköy'de"
  let O=o.join('');const k=O.lastIndexOf(',');
  if(k>0&&O.slice(k+1).trim()){r.loc=O.slice(k+1).trim().replace(/[.!]+$/,'');O=O.slice(0,k)}
- if(!r.loc)O=O.replace(/([A-ZÇĞİÖŞÜ][^\s',]*(?:\s[A-ZÇĞİÖŞÜ][^\s',]*)*)'(?:de|da|te|ta)(?=[\s,.]|$)/,(a,b)=>{r.loc=b;return ' '});
- let ti=O.replace(/\s+/g,' ').replace(/^[\s,.;:–-]+|[\s,.;:–-]+$/g,'').replace(/\s+(ve|ile)$/,'');
+ if(!r.loc)O=O.replace(/([A-ZÇĞİÖŞÜ][^\s',]*(?:\s[A-ZÇĞİÖŞÜ][^\s',]*)*)'n?(?:de|da|te|ta)(?=[\s,.]|$)/,(a,b)=>{r.loc=b;return ' '});
+  // yer başlığın tamamını yuttuysa ("Kahvaltı Moda'da") yer yalnız son kelime olur
+  if(r.loc&&!O.replace(/[\s,.;:–-]/g,'')&&r.loc.includes(' ')){const w=r.loc.split(' ');r.loc=w.pop();O=w.join(' ')}
+ let ti=O.replace(/\s+/g,' ').replace(/^[\s,.;:–-]+|[\s,.;:–-]+$/g,'').replace(/^(?:ve|ile|için)\s+/i,'').replace(/\s+(?:ve|ile|için)$/i,'');
  const lt=low(ti);
  // tür: alınacak · görev · etkinlik
  let kind='e';
  if(!r.time&&/(?:^|\s)(al|alalım|alınacak|alın|lazım|almak|alınsın)$/.test(lt)&&!/randevu/.test(lt)){kind='i';ti=ti.replace(/\s+\S+$/,'')}
- else{const lw=lt.split(' ').pop();if(NL_TASK.some(v=>lw.startsWith(v))||/randevu al|sipariş et|iade et/.test(lt))kind='t'}
+ else{const lw=lt.split(' ').pop();if(NL_TASK.some(v=>lw===v||new RegExp('^'+v+'(?:sın|sin|sun|sün|alım|elim|mak|mek|ılsın|ilsin|ulsun|ülsün)$').test(lw))||/randevu al|sipariş et|iade et/.test(lt))kind='t'}
  r.kind=kind;r.title=ti?up(ti[0])+ti.slice(1):'';
  const all=low(raw);r.cat=r.members.length>1&&r.members.length===S.members.length?'aile':'aile';
  for(const[c,re]of NL_CAT)if(re.test(' '+all+' ')){r.cat=c;break}
