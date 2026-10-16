@@ -99,7 +99,8 @@ function shrink(src){return new Promise((res,rej)=>{const im=new Image();im.cros
   const s=Math.min(im.width,im.height),sx=(im.width-s)/2,sy=(im.height-s)/2;
   x.drawImage(im,sx,sy,s,s,0,0,N,N);
   let d=c.toDataURL('image/webp',0.82);
-  if(d.indexOf('data:image/webp')!==0)d=c.toDataURL('image/jpeg',0.82);
+  // iPhone tuvalden webp üretemiyor; JPEG şeffaflığı siyah yapmasın diye önce beyaz zemin
+  if(d.indexOf('data:image/webp')!==0){x.globalCompositeOperation='destination-over';x.fillStyle='#fff';x.fillRect(0,0,N,N);d=c.toDataURL('image/jpeg',0.82)}
   res(d)};
  im.onerror=()=>rej(new Error('görsel okunamadı'));im.src=src})}
 const readFile=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(new Error('dosya okunamadı'));r.readAsDataURL(f)});
@@ -151,7 +152,7 @@ $('mig').onclick=async()=>{
  const var0=Object.keys(await read('avatars/'+code,'shallow=true').catch(()=>({}))||{});
  for(const [kisi,list] of ESKI)for(const [id,etiket] of list){
   if(var0.includes(id)){$('ml').innerHTML+=`${esc(id)}: zaten var<br>`;continue}
-  try{const d=await shrink(OLD+'ayas/'+id+'.webp');
+  try{const d=await readFile(await (await fetch(OLD+'ayas/'+id+'.webp')).blob());
    await send('avatars/'+code+'/'+id,'PUT',{n:kisi,t:etiket,d,at:Date.now()});ok++;
    $('ml').innerHTML+=`<span class="ok">${esc(kisi)} · ${esc(etiket)} taşındı</span><br>`}
   catch(e){hata++;$('ml').innerHTML+=`<span class="err">${esc(id)}: ${esc(e.message)}</span><br>`}}
