@@ -867,17 +867,21 @@ async function loadAv(){
    const q=await fetch(dbUrl('avatars/'+store.code+'/'+id,await authTok()));if(!q.ok)continue;
    const o=await q.json();if(!o||typeof o.d!=='string'||o.d.indexOf('data:image/')!==0||o.d.length>200000)continue;
    store.av[id]=o.d;store.avi[id]={n:str(o.n).slice(0,40)||'Aile',t:str(o.t).slice(0,40)||'Avatar'};ch=true}
-  if(low((S&&S.meta&&S.meta.name)||'').includes('ayas')&&ESKI_ID.some(id=>!(id in ids))&&await moveOld(ids))ch=true;
+  if(low((S&&S.meta&&S.meta.name)||'').includes('ayas')&&ESKI_ID.some(id=>!(id in ids)||badAv(id))&&await moveOld(ids))ch=true;
   if(ch){save();if(S)render(true)}}
  catch(e){}finally{avLoading=false;if(avAgain){avAgain=false;loadAv()}}}
 // Eski depo avatarlarını 256 px webp'e çevirip ailenin özel alanına yazar; yazma izni yoksa (kural henüz
 // eklenmemişse) sessizce durur ve bir sonraki açılışta yeniden dener.
-const shrinkAv=src=>new Promise((res,rej)=>{const im=new Image();im.onload=()=>{const N=256,c=document.createElement('canvas');c.width=c.height=N;
- const s=Math.min(im.width,im.height);c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,N,N);
- let d=c.toDataURL('image/webp',.82);if(d.indexOf('data:image/webp')!==0)d=c.toDataURL('image/jpeg',.82);res(d)};im.onerror=rej;im.src=src});
+// Dosya olduğu gibi (256 px şeffaf webp) data URL'e çevrilir. Tuvalle yeniden kodlamak iPhone'da webp
+// desteklenmediği için JPEG'e düşüyor ve şeffaf arka planı siyah yapıyordu.
+const fileAv=src=>fetch(src).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.blob()})
+ .then(b=>new Promise((res,rej)=>{const f=new FileReader();f.onload=()=>res(f.result);f.onerror=rej;f.readAsDataURL(b)}));
+// İlk taşımada iPhone'un siyah arka planlı JPEG'e çevirdiği kopyalar yeniden taşınır
+const badAv=id=>ESKI_ID.includes(id)&&!!store.av[id]&&store.av[id].indexOf('data:image/jpeg')===0;
 async function moveOld(ids){let n=0;
- for(const [kisi,l] of ESKI_AV)for(const [id,t] of l){if(id in ids)continue;
-  let d;try{d=await shrinkAv(`avatars/ayas/${id}.webp`)}catch(e){continue}
+ for(const [kisi,l] of ESKI_AV)for(const [id,t] of l){if(id in ids&&!badAv(id))continue;
+  let d;try{d=await fileAv(`avatars/ayas/${id}.webp`)}catch(e){continue}
+  if(d.indexOf('data:image/')!==0)d='data:image/webp'+d.slice(d.indexOf(';'));
   const r=await fetch(dbUrl('avatars/'+store.code+'/'+id,await authTok()),{method:'PUT',body:JSON.stringify({n:kisi,t,d,at:Date.now()})});
   if(!r.ok)return n>0;
   store.av[id]=d;store.avi[id]={n:kisi,t};n++}
