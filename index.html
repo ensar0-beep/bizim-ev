@@ -194,6 +194,32 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .th .ov{font-size:.78rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
 .th h1{font-size:1.65rem;margin-top:2px}
 .th .add{width:42px;height:42px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:inline-flex;align-items:center;justify-content:center;flex:none}
+/* Bugün üst kısım: Gece göğü. Saate göre renk alan pano, Hicri tarih, ay evresi, sıradaki mübarek gün */
+.thx{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:10px;row-gap:2px}
+.thx .thbtn{grid-column:2;grid-row:1;display:flex;align-items:center;gap:10px}
+.thx .r1{grid-column:1;grid-row:1;min-width:0}
+.thx .full{grid-column:1/-1;min-width:0}
+.mbtn{flex:none;padding:0;border-radius:999px;line-height:0;background:none}
+.moon2{width:48px;height:48px;margin:-4px -4px -4px -8px}
+.hchip{grid-column:1/-1;justify-self:start;display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:5px 11px 5px 9px;border-radius:999px;background:var(--sunk);color:var(--muted);font-size:.8rem;font-weight:600;max-width:100%}
+.hchip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hchip.on{background:var(--coral-soft);color:var(--coral)}
+.thn .panel{grid-column:1/-1;position:relative;margin-top:8px;padding:14px 92px 14px 16px;border-radius:22px;background:linear-gradient(135deg,var(--s1),var(--s2));color:var(--sf);overflow:hidden;min-height:104px;display:flex;flex-direction:column;justify-content:center}
+.thn .panel h1{color:inherit;margin:0;font-size:clamp(1.3rem,6vw,1.6rem);line-height:1.15}
+.thn .panel .hj{color:inherit;opacity:.85;font-size:.88rem;margin-top:3px}
+.thn .panel .mbtn{position:absolute;right:10px;top:50%;transform:translateY(-50%)}
+.thn .panel .moon2{width:78px;height:78px;margin:0}
+.thn .panel .hchip{background:rgba(255,255,255,.4);color:inherit;margin-top:8px}
+.thn.sky-n{--moon-dark:rgba(10,14,36,.55)}.thn.sky-e{--moon-dark:rgba(62,35,64,.18)}
+.thn.sky-n .hchip{background:rgba(255,255,255,.14)}
+.thn .panel .hchip span{white-space:normal}
+@media (max-width:359px){.thn .panel{padding-right:72px}.thn .panel .moon2{width:60px;height:60px}.thn .panel .mbtn{right:6px}}
+.thn .st{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:.85}
+.sky-m{--s1:#FFE3C7;--s2:#FFF6E6;--sf:#4A2A12}.sky-d{--s1:#D6ECFA;--s2:#F2F8FC;--sf:#173A52}.sky-e{--s1:#F7C9B6;--s2:#E5D4F0;--sf:#3E2340}.sky-n{--s1:#1E2A4A;--s2:#36406B;--sf:#F1EEFF}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sky-m{--s1:#4A3320;--s2:#2E241B;--sf:#FFE9D2}:root:not([data-theme="light"]) .sky-d{--s1:#1C3A4F;--s2:#1A2730;--sf:#E2F2FC}:root:not([data-theme="light"]) .sky-e{--s1:#4D2E3A;--s2:#2F2840;--sf:#FBE6F0}}
+:root[data-theme="dark"] .sky-m{--s1:#4A3320;--s2:#2E241B;--sf:#FFE9D2}:root[data-theme="dark"] .sky-d{--s1:#1C3A4F;--s2:#1A2730;--sf:#E2F2FC}:root[data-theme="dark"] .sky-e{--s1:#4D2E3A;--s2:#2F2840;--sf:#FBE6F0}
+.thn{--moon-dark:var(--sunk)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .thn .panel .hchip{background:rgba(255,255,255,.12)}}:root[data-theme="dark"] .thn .panel .hchip{background:rgba(255,255,255,.12)}
 /* Duyuru notu: sıcak kâğıt, hafif eğik, üstte yazanın avatarı raptiye gibi */
 .anote{position:relative;display:block;width:calc(100% - 16px);margin:14px 8px 22px;text-align:left;padding:24px 20px 14px;border-radius:6px 6px 18px 6px;background:var(--warn-soft);transform:rotate(-1.2deg);box-shadow:var(--shadow)}
 .anote .pin{position:absolute;top:-14px;left:50%;transform:translateX(-50%) rotate(1.2deg)}
@@ -1229,10 +1255,42 @@ function nextHTML(c){const t=T();let nx=null,day=t;
 function homeRows(){const p=S.items.filter(i=>!i.done),u=p.filter(i=>i.pri==='acil').length,w=topIdea(),idea=w&&!(isChild()&&!w.want.includes(meId()))?w:null;
  return `<div class="cl"><button class="hrow" data-act="tab" data-tab="lists"><span class="ic">${I('tag','sm')}</span><span class="b"><b>Alınacaklar</b><small>${p.length?p.slice(0,3).map(i=>esc(i.name)).join(', ')+(p.length>3?'…':''):'Hepsi alındı'}</small></span>${u?`<span class="n u">${u} acil</span>`:''}<span class="n">${p.length}</span>${I('chevR','sm')}</button>
  ${idea?`<button class="hrow" data-act="openWish" data-id="${idea.id}"><span class="ic">${I(WT[idea.type][2],'sm')}</span><span class="b"><b>${esc(idea.title)}</b><small>${[0,6].includes(new Date().getDay())?'Bugün için':'Hafta sonu için'} bir fikir · ${idea.want.length} kişi istiyor</small></span>${I('chevR','sm')}</button>`:''}</div>`}
+// Hicri tarih (Ümmü'l-Kurâ; Diyanet'ten bir gün sapabilir), ay evresi ve mübarek günler
+const HF=(()=>{try{return new Intl.DateTimeFormat('tr-TR-u-ca-islamic-umalqura',{day:'numeric',month:'numeric',year:'numeric'})}catch(e){return null}})();
+const HAY=['Muharrem','Safer','Rebiülevvel','Rebiülahir','Cemaziyelevvel','Cemaziyelahir','Recep','Şaban','Ramazan','Şevval','Zilkade','Zilhicce'];
+function hnum(d){if(!HF)return null;const p=HF.formatToParts(d),v=k=>+(((p.find(x=>x.type===k)||{}).value||'0').replace(/\D/g,''));const h={d:v('day'),m:v('month'),y:v('year')};return h.d&&h.m?h:null}
+// Kandil, hicri günün başladığı akşamdır: bir önceki miladi gün.
+function holy(date){const h=hnum(date),n=hnum(new Date(date.getFullYear(),date.getMonth(),date.getDate()+1));if(!h||!n)return null;
+ if(n.m===7&&n.d<=7&&date.getDay()===4)return ['Regaib Kandili','kandil'];
+ if(n.m===3&&n.d===12)return ['Mevlid Kandili','kandil'];
+ if(n.m===7&&n.d===27)return ['Miraç Kandili','kandil'];
+ if(n.m===8&&n.d===15)return ['Berat Kandili','kandil'];
+ if(n.m===9&&n.d===27)return ['Kadir Gecesi','kandil'];
+ if(n.m===10&&n.d===1)return ['Ramazan Bayramı arifesi','arefe'];
+ if(h.m===10&&h.d<=3)return [`Ramazan Bayramı ${h.d}. gün`,'bayram'];
+ if(h.m===12&&h.d===9)return ['Kurban Bayramı arifesi','arefe'];
+ if(h.m===12&&h.d>=10&&h.d<=13)return [`Kurban Bayramı ${h.d-9}. gün`,'bayram'];
+ if(h.m===9&&h.d===1)return ['Ramazan başladı','ramazan'];
+ if(h.m===7&&h.d===1)return ['Üç Aylar başladı','gun'];
+ if(h.m===1&&h.d===1)return ['Hicri Yılbaşı','gun'];
+ if(h.m===1&&h.d===10)return ['Aşure Günü','gun'];
+ return null}
+let NH=null;function nextHoly(){const t=T();if(NH&&NH.t===t)return NH;const b=parse(t);NH={t};for(let i=1;i<400;i++){const d=new Date(b.getFullYear(),b.getMonth(),b.getDate()+i),x=holy(d);if(x&&x[1]!=='arefe'){NH={t,n:x[0],i};break}}return NH}
+const phaseN=d=>d<=6?'Hilal':d<=8?'İlk dördün':d<=13?'Şişkin ay':d<=16?'Dolunay':d<=21?'Şişkin ay':d<=23?'Son dördün':d<=28?'Hilal':'Yeni ay';
+// Aydınlık taraf büyürken sağda, küçülürken solda
+function moonSVG(day){const p=Math.min(day-1,28.5)/29.53,k=Math.cos(2*Math.PI*p),wax=p<.5,rx=(Math.abs(k)*16).toFixed(2),sw=wax?(k>0?0:1):(k>0?1:0);
+ return `<svg class="moon2" viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="mglow"><stop offset="50%" stop-color="#F6D98B" stop-opacity=".5"/><stop offset="100%" stop-color="#F6D98B" stop-opacity="0"/></radialGradient><linearGradient id="mlit" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FCEBB4"/><stop offset="1" stop-color="#E2B656"/></linearGradient></defs><circle cx="24" cy="24" r="23.5" fill="url(#mglow)"/><circle cx="24" cy="24" r="16" fill="var(--moon-dark)"/><path d="M24 8A16 16 0 0 ${wax?1:0} 24 40A${rx} 16 0 0 ${sw} 24 8Z" fill="url(#mlit)"/></svg>`}
+function selam(h,x,hj,fri){if(x&&x[1]==='kandil')return 'Kandiliniz mübarek olsun';if(x&&x[1]==='bayram')return 'Bayramınız mübarek olsun';if(hj&&hj.m===9)return 'Hayırlı Ramazanlar';if(fri)return 'Hayırlı cumalar';
+ return h>=22||h<5?'Hayırlı geceler':h<12?'Hayırlı sabahlar':h<18?'Hayırlı günler':'Hayırlı akşamlar'}
+function todayHead(){const m=me(),d=new Date(),h=d.getHours(),hj=hnum(d),x=holy(d),sk=h>=5&&h<11?'m':h>=11&&h<17?'d':h>=17&&h<21?'e':'n';
+ const n=x?null:nextHoly(),ch=x?`<span class="hchip on">✦ <span>Bugün ${x[0]}</span></span>`:n&&n.n?`<span class="hchip">✦ <span>${n.n} · ${n.i===1?'yarın':n.i+' gün kaldı'}</span></span>`:'';
+ const stars=sk==='e'||sk==='n'?[[75,12],[95,20],[88,8],[78,86],[96,78]].map(([a,b])=>`<i class="st" style="left:${a}%;top:${b}%"></i>`).join(''):'';
+ const hjt=hj?`<div class="hj">${hj.d} ${HAY[hj.m-1]} ${hj.y} · ${phaseN(hj.d).replace(' ','&nbsp;')}</div>`:'',mb=hj?`<button class="mbtn" data-act="moonInfo" data-d="${hj.d}" aria-label="Ay: ${phaseN(hj.d)}">${moonSVG(hj.d)}</button>`:'';
+ return `<div class="th thx thn sky-${sk}"><div class="r1"><div class="ov">${long(T())}</div></div><div class="thbtn"><button class="add" data-act="tdAdd" aria-label="Ekle">${I('plus')}</button><button class="icon-btn" data-act="myProfile" aria-label="Profilim">${av(m.id)}</button></div>
+ <div class="panel"${hj?'':' style="padding-right:16px"'}>${stars}<h1>${selam(h,x,hj,d.getDay()===5)}</h1>${hjt}${ch}${mb}</div></div>`}
 function vToday(){
- const m=me(),child=isChild(),t=T(),h=new Date().getHours();
- const g=h>=22||h<5?'Hayırlı geceler':h<12?'Hayırlı sabahlar':h<18?'Hayırlı günler':'Hayırlı akşamlar';
- return `<div class="th"><div class="h"><div class="ov">${long(t)}</div><h1>${g}, ${esc(first(m.name))}</h1></div><button class="add" data-act="tdAdd" aria-label="Ekle">${I('plus')}</button><button class="icon-btn" data-act="myProfile" aria-label="Profilim">${av(m.id)}</button></div>
+ const child=isChild();
+ return `${todayHead()}
  ${demoBar()}${inviteCard()}
  ${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>${starsHTML()}`:''}
  ${annNote()}
@@ -1699,6 +1757,7 @@ const A={
  famInvite:()=>sheet('Aileye davet et',famInviteHTML()),
  wPick:(d,el)=>{const w=document.getElementById('wheel');if(!w)return;if(el.classList.contains('mid')){A.openMember(d);return}
   w.scrollTo({left:el.offsetLeft+el.offsetWidth/2-w.clientWidth/2,behavior:calm()?'auto':'smooth'})},
+ moonInfo:d=>{const n=+d.d;toast(`${phaseN(n)} · Hicri ayın ${n}. günü${n<14?' · dolunaya '+(14-n)+' gün':n<=16?' · dolunay':''}`)},
  tdAdd:()=>{F={saKind:null};sheet('Ne eklemek istersin?',`<form data-form="smartAdd" autocomplete="off"><label class="sr" for="sa-in">Ne eklemek istersin?</label>
   <div class="sain">${I('sparkle','sm')}<input id="sa-in" placeholder="örn. Cumartesi 14.00 Zeynep yüzme" autofocus enterkeyhint="done"></div>
   <div id="sa-prev">${saHTML()}</div></form>
