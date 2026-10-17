@@ -1231,7 +1231,7 @@ function homeRows(){const p=S.items.filter(i=>!i.done),u=p.filter(i=>i.pri==='ac
  ${idea?`<button class="hrow" data-act="openWish" data-id="${idea.id}"><span class="ic">${I(WT[idea.type][2],'sm')}</span><span class="b"><b>${esc(idea.title)}</b><small>${[0,6].includes(new Date().getDay())?'Bugün için':'Hafta sonu için'} bir fikir · ${idea.want.length} kişi istiyor</small></span>${I('chevR','sm')}</button>`:''}</div>`}
 function vToday(){
  const m=me(),child=isChild(),t=T(),h=new Date().getHours();
- const g=h<5?'İyi geceler':h<12?'Günaydın':h<18?'İyi günler':'İyi akşamlar';
+ const g=h>=22||h<5?'Hayırlı geceler':h<12?'Hayırlı sabahlar':h<18?'Hayırlı günler':'Hayırlı akşamlar';
  return `<div class="th"><div class="h"><div class="ov">${long(t)}</div><h1>${g}, ${esc(first(m.name))}</h1></div><button class="add" data-act="tdAdd" aria-label="Ekle">${I('plus')}</button><button class="icon-btn" data-act="myProfile" aria-label="Profilim">${av(m.id)}</button></div>
  ${demoBar()}${inviteCard()}
  ${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>${starsHTML()}`:''}
