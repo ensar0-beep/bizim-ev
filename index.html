@@ -252,10 +252,6 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .tag.cat{background:var(--sunk);color:var(--fg);font-weight:600}
 .tag.soon{background:var(--warn-soft);color:var(--warn)}
 .tag.later{background:var(--sunk);color:var(--muted)}
-.want{min-height:44px;min-width:44px;padding:0 10px;border-radius:999px;border:1.5px solid var(--line);display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.9rem;flex:none;background:var(--surface)}
-.want[aria-pressed="true"]{background:var(--coral-soft);border-color:var(--coral);color:var(--coral)}
-.want svg{width:1.1rem;height:1.1rem}
-.want[aria-pressed="true"] svg{fill:currentColor}
 .wic{width:40px;height:40px;border-radius:12px;background:var(--sunk);color:var(--fg);display:flex;align-items:center;justify-content:center;flex:none}
 .moods{display:flex;gap:8px;flex-wrap:wrap}
 .moods button{width:52px;height:52px;border-radius:14px;border:1.5px solid var(--line);font-size:1.6rem;background:var(--surface)}
@@ -367,19 +363,25 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .lin input{flex:1;min-width:0;border:0;background:none;font-size:1rem;color:var(--fg);outline:none;min-height:52px}
 .lin .btn{min-height:42px;padding:0 14px}
 .lhint{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:.8rem;margin:8px 4px 2px}
-/* İsteklerimiz kartları (Pinterest, Google Haritalar kayıtlı yerler gibi) */
-.wtop{display:flex;gap:8px;overflow-x:auto;margin:0 -18px;padding:0 18px 4px;scrollbar-width:none}.wtop::-webkit-scrollbar{display:none}
-.wt1{flex:0 0 46%;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:14px;border-radius:var(--r-lg);background:linear-gradient(140deg,color-mix(in srgb,var(--c) 85%,#000),var(--c));color:#fff;min-height:120px}
-.wt1 .e{margin-bottom:auto;display:flex}.wt1 .e svg{width:1.7rem;height:1.7rem;stroke-width:1.8}.wt1 b{font-size:1rem;line-height:1.2}.wt1 small{opacity:.85;font-size:.78rem}
-.wgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
-.wcd{background:var(--surface);border-radius:var(--r-lg);overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05),0 6px 16px rgba(60,40,20,.06);display:flex;flex-direction:column}
-.wcd .cv{position:relative;height:84px;background:color-mix(in srgb,var(--c) 16%,var(--surface));display:flex;align-items:center;justify-content:center;color:var(--c)}
-.wcd .cv svg{width:2.1rem;height:2.1rem;stroke-width:1.6}
-.wcd .pl{position:absolute;left:8px;bottom:8px;display:inline-flex;align-items:center;gap:4px;font-size:.7rem;font-weight:700;background:var(--surface);color:var(--fg);border-radius:999px;padding:2px 8px}
-.wcd .pl svg{width:.85rem;height:.85rem;stroke-width:2}
-.wcd .tx{text-align:left;padding:10px 12px 4px}.wcd .tx b{display:block;font-weight:700;line-height:1.25;overflow-wrap:anywhere}.wcd .tx small{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
-.wcd .ft{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:4px 8px 8px 12px;margin-top:auto}
-.wcd .ft .avs .av{width:1.4rem;height:1.4rem}
+/* İsteklerimiz: sade satırlar, satırda 1-5 isteme puanı çubuğu (Instagram kaydırıcısı gibi) */
+.wr{display:grid;grid-template-columns:36px minmax(0,1fr) auto;column-gap:12px;row-gap:4px;align-items:center;padding:10px 14px;position:relative}
+.wr+.wr::before{content:"";position:absolute;top:0;left:62px;right:0;border-top:1px solid var(--line)}
+.wr .wi{grid-row:1/3;align-self:start;margin-top:2px;width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:var(--c);background:color-mix(in srgb,var(--c) 12%,var(--surface))}
+.wr .wi svg{width:1.2rem;height:1.2rem}
+.wr .tx{text-align:left;min-width:0}.wr .tx b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr .tx small{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden}
+.wr .tx small .pl{display:inline-flex;align-items:center;gap:3px;color:var(--accent-ink);font-weight:700}.wr .tx small svg{width:.85rem;height:.85rem}
+.wr .tot{grid-row:1;grid-column:3;display:flex;flex-direction:column;align-items:flex-end;font-size:.72rem;color:var(--muted);line-height:1.1}
+.wr .tot b{font-family:var(--f-display);font-size:1.15rem;color:var(--fg)}
+.rbarw{grid-column:2/4;display:flex;align-items:center;gap:8px}
+.rbar{flex:1;max-width:200px;display:flex;gap:3px;touch-action:none;cursor:pointer}
+.rbar button{flex:1;height:34px;display:flex;align-items:center;padding:0}
+.rbar button i{display:block;width:100%;height:10px;background:var(--sunk);border-radius:2px;transition:background .12s}
+.rbar button:first-child i{border-radius:6px 2px 2px 6px}.rbar button:last-child i{border-radius:2px 6px 6px 2px}
+.rbar button.on:nth-child(1) i{background:#EDB75A}.rbar button.on:nth-child(2) i{background:#E9A23B}.rbar button.on:nth-child(3) i{background:#E48A33}.rbar button.on:nth-child(4) i{background:#DD732F}.rbar button.on:nth-child(5) i{background:#C2502F}
+.rbarw em{font-style:normal;font-size:.78rem;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rbarw em.on{color:#C2502F}
+.rlist{display:flex;flex-direction:column;gap:6px;margin-top:6px}.rlist span.who b{margin-left:4px}
 .wdone{display:flex;flex-wrap:wrap;gap:6px}
 .wd1{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:.85rem;font-weight:600}
 .wd1 svg{width:1rem;height:1rem;color:var(--c)}
@@ -772,7 +774,7 @@ function seed(){
    ['mekan','Halil Lahmacun','Kadıköy, öğle saatinde kalabalık','can',['can','zeynep','mehmet','ayse']],
    ['mekan','Çiya Sofrası','Kadıköy, mezeleri meşhur','fatma',['fatma','ayse','mehmet']],
    ['mekan','Moda sahilinde kahvaltı','Pazar sabahı','zeynep',['zeynep']]
-  ].map(([type,title,note,by,want,dn],i)=>({id:uid(),type,title,note,by,want,at:now-(i+2)*26*H,done:!!dn,doneAt:dn?new Date(d(dn.d)).getTime():null,doneWith:dn?dn.with:[],mood:dn?dn.mood:'',planned:''})),
+  ].map(([type,title,note,by,want,dn],i)=>({id:uid(),type,title,note,by,want,rate:Object.fromEntries(want.map((m,j)=>[m,m===by?5:[4,3,5,2][(i+j)%4]])),at:now-(i+2)*26*H,done:!!dn,doneAt:dn?new Date(d(dn.d)).getTime():null,doneWith:dn?dn.with:[],mood:dn?dn.mood:'',planned:''})),
   freq:[['Süt',22,3,4],['Ekmek',25,2,1],['Yumurta',12,6,3],['Yoğurt',11,4,2],['Domates',10,5,2],['Peynir',9,7,8],['Zeytin',8,10,4],['Tavuk',7,7,9],['Çay',6,20,22],['Tuvalet kağıdı',6,14,6],['Elma',5,8,3],['Makarna',5,12,3]].map(([name,n,every,l])=>({id:fid(name),name,n,every,last:now-l*864e5})),
   ann:{text:'Bu akşam misafir gelecek.',by:'ayse',at:Math.min(annAt.getTime(),now-30*60e3),until:null},
   activity:[
@@ -866,7 +868,7 @@ function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
   case 'tasks':x.title=str(x.title);if(!okDate(x.due))x.due=T();x.time=okTime(x.time)?x.time:'';x.rot=idList(x.rot);x.assignee=typeof x.assignee==='string'&&okId(x.assignee)?x.assignee:'';x.who=idList(x.who);x.dn=idList(x.dn);x.all=!!x.all;if(!TREP[x.repeat])x.repeat='none';x.done=!!x.done;break;
   case 'lists':x.name=str(x.name)||'Liste';if(!P[x.icon])x.icon='tag';break;
   case 'items':x.name=str(x.name)||'?';x.note=str(x.note);x.cat=str(x.cat)||'Diğer';if(!PRI[x.pri])x.pri='yakinda';x.for=str(x.for);x.list=str(x.list);x.done=!!x.done;x.doneAt=+x.doneAt||0;break;
-  case 'wishes':x.title=str(x.title)||'?';x.note=str(x.note);{const p=x.place;if(p&&typeof p==='object'&&(str(p.n)||okMapsUrl(str(p.u))))x.place={n:str(p.n).slice(0,120),a:str(p.a).slice(0,200),u:okMapsUrl(str(p.u))?str(p.u):''};else delete x.place}if(!WT[x.type])x.type='yer';x.want=idList(x.want);x.doneWith=idList(x.doneWith);if(!MOODS.includes(x.mood))x.mood='';x.planned=okDate(x.planned)?x.planned:'';x.done=!!x.done;break;
+  case 'wishes':x.title=str(x.title)||'?';x.note=str(x.note);{const p=x.place;if(p&&typeof p==='object'&&(str(p.n)||okMapsUrl(str(p.u))))x.place={n:str(p.n).slice(0,120),a:str(p.a).slice(0,200),u:okMapsUrl(str(p.u))?str(p.u):''};else delete x.place}if(!WT[x.type])x.type='yer';x.want=idList(x.want);{const r={};if(x.rate&&typeof x.rate==='object')for(const k in x.rate){const v=Math.round(+x.rate[k]);if(okId(k)&&v>=1&&v<=5)r[k]=v}x.want.forEach(m=>{if(!r[m])r[m]=3});x.rate=r;x.want=Object.keys(r)}x.doneWith=idList(x.doneWith);if(!MOODS.includes(x.mood))x.mood='';x.planned=okDate(x.planned)?x.planned:'';x.done=!!x.done;break;
   case 'activity':x.text=str(x.text);x.at=+x.at||0;break;
   case 'freq':x.name=str(x.name)||'?';x.n=Math.max(0,+x.n||0);x.every=Math.max(0,+x.every||0);x.last=+x.last||0;break}
  return x}
@@ -1313,32 +1315,38 @@ const lvRow=i=>`<div class="lr${i.done?' done':''}" data-sw="item" data-id="${i.
 function lAddSheet(){const L=S.lists.find(l=>l.id===UI.list)||S.lists[0];if(!L)return;
  sheet(esc(L.name)+' listesine ekle',`<form class="lin" data-form="addItem" autocomplete="off"><label class="sr" for="item-input">Ne alınacak?</label><input id="item-input" placeholder="örn. süt, ekmek, spor ayakkabı" autofocus enterkeyhint="done"><button class="btn primary sm">Ekle</button></form>
  <p class="lhint">${I('sparkle','sm')}<span>Virgülle birden çok şey yazabilirsin.</span></p><div class="sugg" id="sugg">${suggHTML('')}</div>`)}
-const wantBtn=w=>{const on=w.want.includes(meId());return `<button class="want" data-act="want" data-id="${w.id}" aria-pressed="${on}" aria-label="${on?'İstemekten vazgeç':'Ben de istiyorum'}, ${w.want.length} kişi istiyor">${I('heart')}${w.want.length}</button>`};
-function topIdea(){return (S.wishes||[]).filter(w=>!w.done&&!w.planned&&w.want.length>=2).sort((a,b)=>b.want.length-a.want.length||a.at-b.at)[0]}
+function topIdea(){return (S.wishes||[]).filter(w=>!w.done&&!w.planned&&w.want.length>=2).sort(byScore)[0]}
 function ideaHTML(){const w=topIdea();if(!w||isChild()&&!w.want.includes(meId()))return '';const dw=new Date().getDay();const when=dw===0||dw===6?'Bugün için':'Hafta sonu için';
  return `<div class="sec-h"><h2 class="sec">Bir fikir</h2><button class="link" data-act="goWishes">İsteklerimiz ${I('chevR','sm')}</button></div>
  <button class="idea" data-act="openWish" data-id="${w.id}"><span class="wic" style="background:var(--surface)">${I(WT[w.type][2])}</span><span style="flex:1;min-width:0"><span class="m">${when} · ${WT[w.type][1]}</span><span class="t">${esc(w.title)}</span><span class="m">${w.want.length} kişi istiyor: ${w.want.map(x=>esc(first(M(x).name))).join(', ')}</span></span>${I('chevR')}</button>`}
 // İsteklerimiz: çizgi ikonlu tür sekmeleri (Airbnb gibi), en çok istenenler şeridi ve kartlar
 const WTAB={all:['grid','Hepsi'],yer:['compass','Gezi'],kitap:['book','Kitap'],film:['film','Film'],mekan:['fork','Mekan']};
 const WCOL={yer:'#2B8467',kitap:'#8B4FB8',film:'#2F6DB5',mekan:'#C2502F'};
+// İsteme puanı: her kişi 1-5 verir (rate), sıralama ailenin toplamına göre. want = puan verenler (eski sürümle uyum için)
+const RLBL=['','Olabilir','Fena olmaz','İsterim','Çok isterim','Mutlaka!'];
+const rOf=w=>w.rate||{},rSum=w=>Object.values(rOf(w)).reduce((a,b)=>a+b,0),rN=w=>Object.keys(rOf(w)).length;
+const byScore=(a,b)=>rSum(b)-rSum(a)||rN(b)-rN(a)||b.at-a.at;
+const rbarHTML=(id,my,act)=>`<span class="rbarw"><span class="rbar" data-id="${id}"${act?` data-f="1"`:''} role="slider" aria-label="Ne kadar istiyorsun?" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${my}" aria-valuetext="${my?RLBL[my]:'Puan yok'}" tabindex="0">${[1,2,3,4,5].map(n=>`<button type="button" data-act="${act||'rateSet'}" data-id="${id}" data-v="${n}"${act?'':' data-tap="1"'} class="${n<=my?'on':''}" aria-label="${n}: ${RLBL[n]}"><i></i></button>`).join('')}</span><em class="${my?'on':''}">${my?RLBL[my]:'Ne kadar istiyorsun?'}</em></span>`;
 function vWishes(){
- const all=S.wishes||[];if(UI.wt!=='all'&&!WT[UI.wt])UI.wt='all';const f=UI.wt;
- const pend=all.filter(w=>!w.done&&(f==='all'||w.type===f)).sort((a,b)=>b.want.length-a.want.length||b.at-a.at);
+ const all=S.wishes||[];if(UI.wt!=='all'&&!WT[UI.wt])UI.wt='all';const f=UI.wt,me0=meId();
+ const pend=all.filter(w=>!w.done&&(f==='all'||w.type===f)).sort(byScore);
+ // Puan verirken satırlar yerinden kaymasın: sayfadan çıkana kadar sıra sabit
+ if(UI.wrHold){const o=UI.wrOrd||[],ix=id=>{const i=o.indexOf(id);return i<0?-1:i};pend.sort((a,b)=>ix(a.id)-ix(b.id))}UI.wrOrd=pend.map(w=>w.id);
  const done=all.filter(w=>w.done&&(f==='all'||w.type===f)).sort((a,b)=>b.doneAt-a.doneAt);
- const top=f==='all'?pend.filter(w=>w.want.length>=2).slice(0,3):[];
  const cnt=k=>all.filter(w=>!w.done&&(k==='all'||w.type===k)).length;
- const card=w=>`<div class="wcd" style="--c:${WCOL[w.type]}"><button class="cv" data-act="openWish" data-id="${w.id}" aria-label="${esc(w.title)}">${I(WT[w.type][2])}${w.planned?`<span class="pl">${I('cal','sm')}${rel(w.planned)}</span>`:''}</button>
-  <button class="tx" data-act="openWish" data-id="${w.id}"><b>${esc(w.title)}</b><small>${w.place?esc(area(w.place)):esc(first(M(w.by).name))+' önerdi'}</small></button><div class="ft">${avs(w.want)}${wantBtn(w)}</div></div>`;
+ const row=w=>`<div class="wr" style="--c:${WCOL[w.type]}"><span class="wi" aria-hidden="true">${I(WT[w.type][2])}</span>
+  <button class="tx" data-act="openWish" data-id="${w.id}"><b>${esc(w.title)}</b><small>${w.planned?`<span class="pl">${I('cal','sm')}${rel(w.planned)}</span>`:''}<span>${w.place?esc(area(w.place)):esc(first(M(w.by).name))+' önerdi'}</span></small></button>
+  <span class="tot" aria-label="Ailenin toplamı ${rSum(w)} puan"><b>${rSum(w)}</b>puan</span>${rbarHTML(w.id,rOf(w)[me0]||0)}</div>`;
  return lTop(true)+itabs(Object.entries(WTAB).map(([k,[i,n]])=>({act:'wt',data:`data-v="${k}"`,on:f===k,i,n,cnt:cnt(k)})),'Tür')
- +(top.length?`<div class="lbl"><span>${new Date().getDay()%6===0?'Bugün için':'Hafta sonu için'} en çok istenenler</span></div><div class="wtop">${top.map(w=>`<button class="wt1" data-act="openWish" data-id="${w.id}" style="--c:${WCOL[w.type]}"><span class="e">${I(WT[w.type][2])}</span><b>${esc(w.title)}</b><small>${w.want.length} kişi istiyor</small></button>`).join('')}</div>`:'')
- +(pend.length?`<div class="wgrid">${pend.map(card).join('')}</div>`:`<div class="group" style="margin-top:12px">${emptyBox(f==='all'?'Henüz öneri yok':'Bu türde öneri yok','Gezmek, okumak, izlemek ya da yemek istediğiniz bir şeyi ekleyin.',`<br><button class="btn soft sm" data-act="newWish">${I('plus','sm')}Öneri ekle</button>`)}</div>`)
+ +(pend.length?`<div class="group" style="margin-top:12px">${pend.map(row).join('')}</div>`:`<div class="group" style="margin-top:12px">${emptyBox(f==='all'?'Henüz öneri yok':'Bu türde öneri yok','Gezmek, okumak, izlemek ya da yemek istediğiniz bir şeyi ekleyin.',`<br><button class="btn soft sm" data-act="newWish">${I('plus','sm')}Öneri ekle</button>`)}</div>`)
  +(done.length?`<div class="lbl"><span>Yaptıklarımız · ${done.length}</span></div><div class="wdone">${done.slice(0,UI.wdone?99:8).map(w=>`<button class="wd1" data-act="openWish" data-id="${w.id}" style="--c:${WCOL[w.type]}">${I(WT[w.type][2])}<span>${esc(w.title)}</span><span>${w.mood||''}</span></button>`).join('')}${done.length>8&&!UI.wdone?`<button class="link" data-act="wdone">Tümü (${done.length})</button>`:''}</div>`:'')}
-function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'?'yer':UI.wt)),edit:w?w.id:null,place:w?(w.place?{...w.place}:null):(pre.place||null)};
+function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'?'yer':UI.wt)),edit:w?w.id:null,place:w?(w.place?{...w.place}:null):(pre.place||null),rate:4};
  sheet(w?'Öneriyi düzenle':'Yeni öneri',`<form data-form="wish" autocomplete="off">
  <div class="field"><span class="flabel">Ne türde?</span><div class="chips" style="flex-wrap:wrap" id="wf-type">${Object.entries(WT).map(([k,v])=>`<button type="button" class="chip" data-act="fWt" data-v="${k}" aria-pressed="${F.wtype===k}">${I(v[2],'sm')}${v[1]}</button>`).join('')}</div></div>
  <div class="field"><label for="wf-title">Adı</label><input class="inp" id="wf-title" value="${w?esc(w.title):pre.title?esc(pre.title):''}" placeholder="örn. Kapadokya, Küçük Prens, Çiya Sofrası" autofocus><span class="err" id="wf-err" hidden>Bir ad yaz.</span></div>
  <div class="field" id="wf-place"${isPlaceType(F.wtype)?'':' hidden'}>${wpHTML()}</div>
  <div class="field"><label for="wf-note">Not (isteğe bağlı)</label><input class="inp" id="wf-note" value="${w?esc(w.note):''}" placeholder="Yazar, yönetmen, neden güzel…"></div>
+ ${w?'':`<div class="field"><span class="flabel">Ne kadar istiyorsun?</span>${rbarHTML('new',F.rate,'fRate')}</div>`}
  <button class="btn primary block">${w?'Kaydet':'Öneriyi ekle'}</button></form>`)}
 function wpHTML(){const p=F.place;
  if(p)return `<div class="wpcard">${I('pin')}<span class="tx"><b>${esc(p.n||(document.getElementById('wf-title')||{}).value||'Haritadaki yer')}</b>${p.a?`<span>${esc(p.a)}</span>`:''}<span class="src">Google Haritalar'dan</span></span><button type="button" class="x" data-act="wpClear" aria-label="Mekanı kaldır">${I('x')}</button></div>`;
@@ -1635,7 +1643,7 @@ function addItemTo(list,raw){raw=raw.trim();if(!raw)return null;
 
 /* ---------- Eylemler ---------- */
 const A={
- tab:d=>{UI.tab=d.tab;render()},
+ tab:d=>{UI.tab=d.tab;UI.wrHold=false;render()},
  close:()=>close(),
  undo:()=>{const u=toast.undo;document.getElementById('toastwrap').innerHTML='';u&&u()},
  // Karşılama, aile kurma ve katılma
@@ -1830,9 +1838,9 @@ const A={
  shopCat:d=>{UI.shop=d.v;render(true)},
  shopEnd:()=>{const n=S.items.filter(i=>i.done&&(i.doneAt||0)>=UI.shopAt).length;UI.shop=null;render();toast(n?`Alışveriş bitti · ${n} ürün alındı`:'Alışveriş modu kapandı')},
  toggleItem:d=>{const i=S.items.find(x=>x.id===d.id);if(!i)return;i.done=!i.done;i.doneAt=i.done?Date.now():null;i.doneBy=meId();if(i.done)log(`${low(i.name)} aldı`);render(true)},
- lmode:d=>{UI.lmode=d.v;render(true)},
+ lmode:d=>{UI.lmode=d.v;UI.wrHold=false;render(true)},
  goWishes:()=>{UI.tab='lists';UI.lmode='wish';render()},
- wt:d=>{UI.wt=d.v;render(true)},
+ wt:d=>{UI.wt=d.v;UI.wrHold=false;render(true)},
  wdone:()=>{UI.wdone=!UI.wdone;render(true)},
  newWish:()=>wishForm(null),
  fWt:d=>{F.wtype=d.v;document.querySelectorAll('#wf-type .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===d.v));wpRefresh()},
@@ -1840,15 +1848,18 @@ const A={
  wpPaste:()=>{const i=document.getElementById('wf-link'),v=i.value.trim(),p=v&&parsePlace('',v,'');
   if(!p||(!p.u&&/https?:\/\//.test(v))){document.getElementById('wf-lerr').hidden=false;i.focus();return}
   F.place=p;const t=document.getElementById('wf-title');if(!t.value.trim()&&p.n)t.value=p.n;wpRefresh()},
- want:d=>{const w=S.wishes.find(x=>x.id===d.id);if(!w)return;const mm=meId();if(w.want.includes(mm)){w.want=w.want.filter(x=>x!==mm)}else{w.want.push(mm);log(`“${w.title}” için “ben de istiyorum” dedi`)}render(true);if(document.querySelector('.sheet'))A.openWish(d)},
- openWish:d=>{const w=S.wishes.find(x=>x.id===d.id);if(!w)return;const on=w.want.includes(meId());const own=w.by===meId()||!isChild();
+ rateSet:d=>{const w=S.wishes.find(x=>x.id===d.id);if(!w)return;const mm=meId(),v=Math.max(0,Math.min(5,+d.v||0)),r={...rOf(w)},had=!!r[mm];
+  if(!v||(r[mm]===v&&d.tap))delete r[mm];else r[mm]=v;w.rate=r;w.want=Object.keys(r);if(!had&&r[mm])log(`“${w.title}” için ${RLBL[v].toLocaleLowerCase('tr')} dedi`);
+  UI.wrHold=true;render(true);if(document.getElementById('ow-rate'))A.openWish({id:w.id})},
+ fRate:d=>{F.rate=+d.v;const b=document.querySelector('.rbar[data-f]');if(b)rbPaint(b,F.rate)},
+ openWish:d=>{const w=S.wishes.find(x=>x.id===d.id);if(!w)return;const own=w.by===meId()||!isChild(),ppl=Object.entries(rOf(w)).sort((a,b)=>b[1]-a[1]);
   sheet(esc(w.title),`<div style="display:flex;gap:12px;align-items:center;margin-bottom:6px"><span class="wic">${I(WT[w.type][2])}</span><span><b>${WT[w.type][0]}</b><br><span style="color:var(--muted);font-size:.875rem">${esc(M(w.by).name)} önerdi · ${ago(w.at)}</span></span></div>
   ${w.note?`<p style="margin:8px 0 4px">${esc(w.note)}</p>`:''}
   ${w.place?`<div class="wpcard" style="margin:12px 0 4px">${I('pin')}<span class="tx"><b>${esc(w.place.n||w.title)}</b>${w.place.a?`<span>${esc(w.place.a)}</span>`:''}</span></div>
   <div class="actions" style="margin:8px 0 6px"><a class="btn soft" href="${esc(mapsUrl(w.place))}" target="_blank" rel="noopener">${I('pin','sm')}Haritada aç</a><a class="btn ghost" href="${esc(dirUrl({...w.place,n:w.place.n||w.title}))}" target="_blank" rel="noopener">Yol tarifi</a></div>`:''}
   <div class="dl">${w.done?`<div>${I('check')}<span><b>${w.mood} Yaptık</b> · ${long(iso(new Date(w.doneAt)))}<br><span style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">${w.doneWith.map(x=>`<span class="who">${av(x,'xs')}${esc(M(x).name)}</span>`).join('')}</span></span></div>`
-   :`<div>${I('heart')}<span><b>${w.want.length} kişi istiyor</b><br><span style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">${w.want.map(x=>`<span class="who">${av(x,'xs')}${esc(M(x).name)}</span>`).join('')||'Henüz kimse'}</span></span></div>${w.planned?`<div>${I('cal')}<span>Takvime eklendi: <b>${long(w.planned)}</b></span></div>`:''}`}</div>
-  ${w.done?'':`<div class="actions" style="margin-bottom:10px"><button class="btn ${on?'ghost':'soft'}" data-act="want" data-id="${w.id}">${I('heart','sm')}${on?'Vazgeçtim':'Ben de istiyorum'}</button></div>
+   :`<div>${I('heart')}<span><b>Ailenin puanı: ${rSum(w)}</b><span class="rlist">${ppl.map(([x,v])=>`<span class="who">${av(x,'xs')}${esc(first(M(x).name))}<b>${v}</b> · ${RLBL[v]}</span>`).join('')||'Henüz puan veren yok'}</span></span></div>${w.planned?`<div>${I('cal')}<span>Takvime eklendi: <b>${long(w.planned)}</b></span></div>`:''}`}</div>
+  ${w.done?'':`<div class="field" id="ow-rate" style="margin:4px 0 14px"><span class="flabel">Senin puanın</span>${rbarHTML(w.id,rOf(w)[meId()]||0)}</div>
   <div class="actions"><button class="btn primary" data-act="planWish" data-id="${w.id}">${I('cal','sm')}Plana dök</button><button class="btn soft" data-act="doneWish" data-id="${w.id}">${I('check','sm')}Yaptık</button></div>`}
   <div style="display:flex;justify-content:center;gap:18px;margin-top:14px">${w.done?`<button class="link" data-act="undoneWish" data-id="${w.id}">Yapılmadı olarak geri al</button>`:`<button class="link" data-act="editWish" data-id="${w.id}"${lock(own,PARENT)}>${I('edit','sm')}Düzenle</button>`}<button class="link" style="color:var(--danger)" data-act="delWish" data-id="${w.id}"${lock(own,PARENT)}>${I('trash','sm')}Sil</button></div>`)},
  editWish:d=>wishForm(S.wishes.find(x=>x.id===d.id)),
@@ -1934,7 +1945,7 @@ const FORMS={
   document.getElementById('qi-added').insertAdjacentHTML('afterbegin',`<div class="note">${I('check','sm')}<span>${esc(it.name)} → ${esc(S.lists.find(l=>l.id===F.list).name)} (${esc(it.cat)})</span></div>`);render(true)},
  wish:()=>{const g=id=>document.getElementById(id),t=g('wf-title').value.trim();if(!t){g('wf-err').hidden=false;return}const u=snap(),note=g('wf-note').value.trim();
   const place=isPlaceType(F.wtype)&&F.place?{n:F.place.n||t,a:F.place.a||'',u:F.place.u||''}:undefined;
-  if(F.edit){const ex=S.wishes.find(x=>x.id===F.edit);if(!ex){close();toast('Bu öneri başka bir cihazda silinmiş.');return}Object.assign(ex,{title:t,note,type:F.wtype});if(place)ex.place=place;else delete ex.place}else{S.wishes.push({id:uid(),type:F.wtype,title:t,note,...(place?{place}:{}),by:meId(),want:[meId()],at:Date.now(),done:false,doneAt:null,doneWith:[],mood:'',planned:''});log(`${WT[F.wtype][0].toLocaleLowerCase('tr')} listesine “${t}” önerisini ekledi`)}
+  if(F.edit){const ex=S.wishes.find(x=>x.id===F.edit);if(!ex){close();toast('Bu öneri başka bir cihazda silinmiş.');return}Object.assign(ex,{title:t,note,type:F.wtype});if(place)ex.place=place;else delete ex.place}else{S.wishes.push({id:uid(),type:F.wtype,title:t,note,...(place?{place}:{}),by:meId(),want:[meId()],rate:{[meId()]:F.rate||4},at:Date.now(),done:false,doneAt:null,doneWith:[],mood:'',planned:''});log(`${WT[F.wtype][0].toLocaleLowerCase('tr')} listesine “${t}” önerisini ekledi`)}
   close();render(true);toast(F.edit?'Kaydedildi':'Öneri eklendi',u)},
  wishDone:()=>{const w=S.wishes.find(x=>x.id===F.wid);if(!w)return;const u=snap();const dt=document.getElementById('wd-date').value||T();
   Object.assign(w,{done:true,doneAt:parse(dt).getTime()+12*3600e3,doneWith:F.with.length?F.with:[meId()],mood:F.mood});log(`“${w.title}” için “yaptık” dedi ${F.mood}`);close();UI.wdone=true;render(true);toast(`${w.title} · Yaptıklarımız'a eklendi`,u)},
@@ -1995,6 +2006,15 @@ function endSw(){if(!SW)return;const s=SW;SW=null;if(!s.on)return;swallow=true;s
  setTimeout(()=>{reset();if(kind==='task')right?A.toggleTask({id}):A.delTask({id});else right?A.toggleItem({id}):A.delItem({id})},190)}
 ['pointerup','pointercancel','mouseup','touchend'].forEach(t=>document.addEventListener(t,endSw,true));
 document.addEventListener('click',e=>{if(swallow){e.stopPropagation();e.preventDefault();swallow=false}},true);
+// İsteme puanı çubuğu: parmak kaydırınca canlı dolar, bırakınca kaydedilir (formdaysa formun puanı olur)
+let RB=null;const rbAt=(bar,x)=>{const r=bar.getBoundingClientRect();return Math.max(1,Math.min(5,Math.ceil((x-r.left)/r.width*5)))};
+function rbPaint(bar,n){bar.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',i<n));bar.setAttribute('aria-valuenow',n);const em=bar.parentElement.querySelector('em');if(em){em.textContent=n?RLBL[n]:'Ne kadar istiyorsun?';em.classList.toggle('on',!!n)}}
+document.addEventListener('pointerdown',e=>{const bar=e.target.closest&&e.target.closest('.rbar');if(!bar||e.button>0)return;RB={bar,n:rbAt(bar,e.clientX),x0:e.clientX,moved:false};rbPaint(bar,RB.n)},true);
+document.addEventListener('pointermove',e=>{if(!RB)return;if(Math.abs(e.clientX-RB.x0)>6)RB.moved=true;const n=rbAt(RB.bar,e.clientX);if(n!==RB.n){RB.n=n;rbPaint(RB.bar,n)}});
+document.addEventListener('pointerup',()=>{if(!RB)return;const {bar,n,moved}=RB;RB=null;if(!moved)return;rbSwallow=true;setTimeout(()=>{rbSwallow=false;bar.dataset.f?A.fRate({v:n}):A.rateSet({id:bar.dataset.id,v:n})},0)});
+document.addEventListener('pointercancel',()=>{RB=null});
+let rbSwallow=false;document.addEventListener('click',e=>{if(rbSwallow&&e.target.closest&&e.target.closest('.rbar')){e.stopPropagation();e.preventDefault()}},true);
+document.addEventListener('keydown',e=>{const bar=e.target.closest&&e.target.closest('.rbar');if(!bar||!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const n=Math.max(1,Math.min(5,(+bar.getAttribute('aria-valuenow')||0)+(e.key==='ArrowRight'?1:-1)));bar.dataset.f?A.fRate({v:n}):A.rateSet({id:bar.dataset.id,v:n})});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.sheet'))close()});
 
 // iOS klavye kapandıktan sonra sayfayı kaymış bırakabiliyor (üstte boşluk, alt menü ekran dışında); geri yerine oturt

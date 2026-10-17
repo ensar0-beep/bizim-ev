@@ -4,7 +4,7 @@
   2) Firebase isteklerine dokunmaz; eşitleme her zaman doğrudan sunucuyla yapılır.
   Yeni sürüm yayınlarken CACHE adını artır.
 */
-const CACHE = "bizim-ev-v35";
+const CACHE = "bizim-ev-v36";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icons/icon-192.png",
   "./icons/icon-512.png", "./icons/favicon.svg", "./icons/apple-touch-icon.png"];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
