@@ -219,13 +219,16 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sky-m{--s1:#4A3320;--s2:#2E241B;--sf:#FFE9D2}:root:not([data-theme="light"]) .sky-d{--s1:#1C3A4F;--s2:#1A2730;--sf:#E2F2FC}:root:not([data-theme="light"]) .sky-e{--s1:#4D2E3A;--s2:#2F2840;--sf:#FBE6F0}}
 :root[data-theme="dark"] .sky-m{--s1:#4A3320;--s2:#2E241B;--sf:#FFE9D2}:root[data-theme="dark"] .sky-d{--s1:#1C3A4F;--s2:#1A2730;--sf:#E2F2FC}:root[data-theme="dark"] .sky-e{--s1:#4D2E3A;--s2:#2F2840;--sf:#FBE6F0}
 .thn{--moon-dark:var(--sunk)}
+/* Duyuru panonun altına yapışık satır (Apple Hava uyarı satırı gibi) */
+.thn .panel.wa{border-radius:22px 22px 0 0}
+.pann{grid-column:1/-1;position:relative;display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 14px 11px;border-radius:0 0 22px 22px;background:linear-gradient(135deg,var(--s1),var(--s2));color:var(--sf);border-top:1px solid rgba(0,0,0,.07)}
+.pann::before{content:'';position:absolute;inset:0;border-radius:inherit;background:rgba(0,0,0,.045);pointer-events:none}
+.thn.sky-n .pann{border-top-color:rgba(255,255,255,.1)}.thn.sky-n .pann::before{background:rgba(0,0,0,.14)}
+.pann .ic{flex:none;opacity:.75;display:inline-flex}
+.pann .tx{flex:1;min-width:0;font-weight:600;font-size:.94rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pann .by{flex:none;display:flex;align-items:center;gap:6px;font-size:.75rem;opacity:.8}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .thn .panel .hchip{background:rgba(255,255,255,.12)}}:root[data-theme="dark"] .thn .panel .hchip{background:rgba(255,255,255,.12)}
 /* Duyuru notu: sıcak kâğıt, hafif eğik, üstte yazanın avatarı raptiye gibi */
-.anote{position:relative;display:block;width:calc(100% - 16px);margin:14px 8px 22px;text-align:left;padding:24px 20px 14px;border-radius:6px 6px 18px 6px;background:var(--warn-soft);transform:rotate(-1.2deg);box-shadow:var(--shadow)}
-.anote .pin{position:absolute;top:-14px;left:50%;transform:translateX(-50%) rotate(1.2deg)}
-.anote .pin .av{box-shadow:0 0 0 3px var(--warn-soft),0 2px 6px rgba(0,0,0,.18)}
-.anote .tx{display:block;font-family:var(--f-display);font-size:1.25rem;font-weight:600;line-height:1.3;text-align:center;overflow-wrap:anywhere}
-.anote .by{display:block;text-align:right;margin-top:8px;color:var(--muted);font-size:.82rem}
 .lbl{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:22px 4px 8px}
 .lbl>span{font-size:.78rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
 /* Sıradaki etkinlik */
@@ -1244,8 +1247,6 @@ const toMin=t=>t?+t.slice(0,2)*60+ +t.slice(3,5):null;
 const evColor=e=>isAll(e)?'var(--accent)':M(e.members[0]).color;
 const whoMini=ids=>ids.length>=S.members.length&&S.members.length>1?famBadge():avs(ids.slice(0,2));
 // Duyuru buzdolabına iğnelenmiş not gibi: hafif eğik, yazanın avatarı raptiye
-function annNote(){const a=annVisible()?S.ann:null;if(!a)return '';const w=M(a.by);
- return `<button class="anote" data-act="annOpen" aria-label="Aile duyurusu, ${esc(w.name)}: ${esc(a.text)}"><span class="pin">${av(a.by)}</span><span class="tx">${esc(a.text)}</span><span class="by">— ${esc(first(w.name))} · ${ago(a.at)}</span></button>`}
 function nextHTML(c){const t=T();let nx=null,day=t;
  for(let i=0;i<14&&!nx;i++){const d=add(t,i);nx=evsOn(d,c).find(e=>i>0||!e.time||toMin(e.time)>=nowMin()-30)||null;if(nx)day=d}
  if(!nx)return `<div class="cl"><div class="tlempty">Önümüzdeki iki haftada etkinlik yok 🌿</div></div>`;
@@ -1286,14 +1287,14 @@ function todayHead(){const m=me(),d=new Date(),h=d.getHours(),hj=hnum(d),x=holy(
  const n=x?null:nextHoly(),ch=x?`<span class="hchip on">✦ <span>Bugün ${x[0]}</span></span>`:n&&n.n?`<span class="hchip">✦ <span>${n.n} · ${n.i===1?'yarın':n.i+' gün kaldı'}</span></span>`:'';
  const stars=sk==='e'||sk==='n'?[[75,12],[95,20],[88,8],[78,86],[96,78]].map(([a,b])=>`<i class="st" style="left:${a}%;top:${b}%"></i>`).join(''):'';
  const hjt=hj?`<div class="hj">${hj.d} ${HAY[hj.m-1]} ${hj.y} · ${phaseN(hj.d).replace(' ','&nbsp;')}</div>`:'',mb=hj?`<button class="mbtn" data-act="moonInfo" data-d="${hj.d}" aria-label="Ay: ${phaseN(hj.d)}">${moonSVG(hj.d)}</button>`:'';
+ const an=annVisible()?S.ann:null,pa=an?`<button class="pann" data-act="annOpen" aria-label="Aile duyurusu, ${esc(M(an.by).name)}: ${esc(an.text)}"><span class="ic">${I('mega','sm')}</span><span class="tx">${esc(an.text)}</span><span class="by">${ago(an.at)}${av(an.by,'xs')}</span></button>`:'';
  return `<div class="th thx thn sky-${sk}"><div class="r1"><div class="ov">${long(T())}</div></div><div class="thbtn"><button class="add" data-act="tdAdd" aria-label="Ekle">${I('plus')}</button><button class="icon-btn" data-act="myProfile" aria-label="Profilim">${av(m.id)}</button></div>
- <div class="panel"${hj?'':' style="padding-right:16px"'}>${stars}<h1>${selam(h,x,hj,d.getDay()===5)}</h1>${hjt}${ch}${mb}</div></div>`}
+ <div class="panel${pa?' wa':''}"${hj?'':' style="padding-right:16px"'}>${stars}<h1>${selam(h,x,hj,d.getDay()===5)}</h1>${hjt}${ch}${mb}</div>${pa}</div>`}
 function vToday(){
  const child=isChild();
  return `${todayHead()}
  ${demoBar()}${inviteCard()}
  ${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>${starsHTML()}`:''}
- ${annNote()}
  <div class="lbl"><span>Sıradaki</span></div>${nextHTML({mine:child,filter:[]})}
  ${homeAgenda()}
  <div class="lbl"><span>Evde</span></div>${homeRows()}`}
