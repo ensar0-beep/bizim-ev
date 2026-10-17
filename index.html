@@ -1426,7 +1426,7 @@ function vWishes(){
  +(pend.length?`<div class="group" style="margin-top:12px">${pend.map(row).join('')}</div>`:`<div class="group" style="margin-top:12px">${emptyBox(f==='all'?'Henüz öneri yok':'Bu türde öneri yok','Gezmek, okumak, izlemek ya da yemek istediğiniz bir şeyi ekleyin.',`<br><button class="btn soft sm" data-act="newWish">${I('plus','sm')}Öneri ekle</button>`)}</div>`)
  +(done.length?`<div class="lbl"><span>Yaptıklarımız · ${done.length}</span></div><div class="wdone">${done.slice(0,UI.wdone?99:8).map(w=>`<button class="wd1" data-act="openWish" data-id="${w.id}" style="--c:${WCOL[w.type]}">${I(WT[w.type][2])}<span>${esc(w.title)}</span><span>${w.mood||''}</span></button>`).join('')}${done.length>8&&!UI.wdone?`<button class="link" data-act="wdone">Tümü (${done.length})</button>`:''}</div>`:'')}
 function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'?'yer':UI.wt)),edit:w?w.id:null,place:w?(w.place?{...w.place}:null):(pre.place||null),rate:4};
- sheet(w?'Öneriyi düzenle':'Yeni öneri',`<form data-form="wish" autocomplete="off">${w||F.place?'':`<div class="ipask" id="ipask" hidden>${I('link')}<span><b>Haritadan bir mekan mı kopyaladın?</b><small>Tek dokunuşla adı ve adresi gelsin</small></span><button type="button" class="btn soft sm" data-act="ipPaste">Yapıştır</button></div>`}
+ sheet(w?'Öneriyi düzenle':'Yeni öneri',`<form data-form="wish" autocomplete="off">${w||F.place||!IOS?'':`<div class="ipask" id="ipask" hidden>${I('link')}<span><b>Haritadan bir mekan mı kopyaladın?</b><small>Tek dokunuşla adı ve adresi gelsin</small></span><button type="button" class="btn soft sm" data-act="ipPaste">Yapıştır</button></div>`}
  <div class="field"><span class="flabel">Ne türde?</span><div class="chips" style="flex-wrap:wrap" id="wf-type">${Object.entries(WT).map(([k,v])=>`<button type="button" class="chip" data-act="fWt" data-v="${k}" aria-pressed="${F.wtype===k}">${I(v[2],'sm')}${v[1]}</button>`).join('')}</div></div>
  <div class="field"><label for="wf-title">Adı</label><input class="inp" id="wf-title" value="${w?esc(w.title):pre.title?esc(pre.title):''}" placeholder="örn. Kapadokya, Küçük Prens, Çiya Sofrası" autofocus><span class="err" id="wf-err" hidden>Bir ad yaz.</span></div>
  <div class="field" id="wf-place"${isPlaceType(F.wtype)?'':' hidden'}>${wpHTML()}</div>
@@ -1435,14 +1435,14 @@ function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'
  <button class="btn primary block">${w?'Kaydet':'Öneriyi ekle'}</button></form>`);if(!w&&!F.place)ipCheck()}
 // Kopyalanmış harita bağlantısı: iPhone panoyu dokunmadan okutmaz. İzin verilmişse (Android) bakıp yalnızca bağlantı varsa,
 // değilse uygulamadan son 10 dakikada çıkılıp dönüldüyse (Haritalar'a gidip kopyalamış olabilir) kartı gösterir.
+const IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1;
 let AWAY=0;document.addEventListener('visibilitychange',()=>{if(document.hidden)AWAY=Date.now()});
 const mapsIn=t=>{const p=parsePlace('',t||'','');return p&&p.u?p:null};
-async function ipCheck(){const k=document.getElementById('ipask');if(!k)return;let show=AWAY&&Date.now()-AWAY<10*60e3;
- try{const q=await navigator.permissions.query({name:'clipboard-read'});if(q.state==='granted')show=!!mapsIn(await navigator.clipboard.readText())}catch(e){}
- if(show&&document.getElementById('ipask'))k.hidden=false}
+// iPhone'da pano sessizce okunamaz: uygulamadan çıkıp 10 dakika içinde dönüldüyse (Haritalar'da Kopyala) kart çıkar
+function ipCheck(){const k=document.getElementById('ipask');if(k&&AWAY&&Date.now()-AWAY<10*60e3)k.hidden=false}
 function wpHTML(){const p=F.place;
  if(p)return `<div class="wpcard">${I('pin')}<span class="tx"><b>${esc(p.n||(document.getElementById('wf-title')||{}).value||'Haritadaki yer')}</b>${p.a?`<span>${esc(p.a)}</span>`:''}<span class="src">Google Haritalar'dan</span></span><button type="button" class="x" data-act="wpClear" aria-label="Mekanı kaldır">${I('x')}</button></div>`;
- return `<div class="wpbox"><div class="st">${I('pin','sm')}<span>${/iPhone|iPad|iPod/.test(navigator.userAgent)?`Google Haritalar'da mekanı aç, <b>Paylaş → Kopyala</b>'ya dokun, sonra bağlantıyı buraya yapıştır.`:`Google Haritalar'da mekanı aç, <b>Paylaş</b>'a dokun, listeden <b>Bizim Ev</b>'i seç. Ad ve adres buraya gelir.`}</span></div>
+ return `<div class="wpbox"><div class="st">${I('pin','sm')}<span>${IOS?`Google Haritalar'da mekanı aç, <b>Paylaş → Kopyala</b>'ya dokun, sonra bağlantıyı buraya yapıştır.`:`Google Haritalar'da mekanı aç, <b>Paylaş</b>'a dokun, listeden <b>Bizim Ev</b>'i seç. Ad ve adres buraya gelir.`}</span></div>
   <div class="wprow"><input class="inp" id="wf-link" placeholder="ya da bağlantıyı yapıştır" inputmode="url" aria-label="Google Haritalar bağlantısı"><button type="button" class="btn soft sm" data-act="wpPaste">Ekle</button></div>
   <span class="err" id="wf-lerr" hidden>Bu bir Google Haritalar bağlantısı değil.</span></div>`}
 function wpRefresh(){const b=document.getElementById('wf-place');if(!b)return;b.hidden=!isPlaceType(F.wtype);b.innerHTML=wpHTML()}
