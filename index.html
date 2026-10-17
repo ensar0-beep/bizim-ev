@@ -490,6 +490,12 @@ details.more summary{min-height:52px;display:flex;align-items:center;gap:6px;fon
 :root[data-theme="dark"] details.more summary{color:var(--accent)}
 details.more summary::-webkit-details-marker{display:none}
 details.more[open] summary svg{transform:rotate(180deg)}
+.tkfree{padding:12px 16px;color:var(--muted);font-size:.9rem}
+.tkmore{display:flex;align-items:center;gap:6px;width:100%;min-height:48px;margin-top:18px;padding:0 6px;font-weight:700;color:var(--accent-ink)}
+.tkmore .n{margin-left:auto;color:var(--muted);font-weight:600;font-size:.85rem}
+.tkday{font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin:18px 6px 6px}
+.tknx{color:var(--accent-ink);font-weight:600}
+:root[data-theme="dark"] .tkmore,:root[data-theme="dark"] .tknx{color:var(--accent)}
 .note{font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:flex-start;margin:-4px 0 12px}
 .err{color:var(--danger);font-size:.875rem;font-weight:600}
 .actions{display:flex;gap:10px;margin-top:8px}
@@ -1358,17 +1364,28 @@ function itemForm(i){F={for:i.for||'',pri:i.pri||'yakinda',edit:i.id};
  <button class="btn primary block">Kaydet</button>
  <div class="actions"><button type="button" class="btn danger" data-act="delItem" data-id="${i.id}">${I('trash','sm')}Sil</button><button type="button" class="btn soft" data-act="toggleItem2" data-id="${i.id}">${I('check','sm')}${i.done?'Alınmadı':'Alındı'}</button></div></form>`)}
 
+// Görevler: Bugün · Yaklaşan · Rutinler (Todoist/Things'in Bugün–Yaklaşan ayrımı + Hearth'ın rutinleri).
+// Bugün: gecikenler, senin bugünün, ailenin bugünü; bugün bitenler altta katlanır. Tekrarlayan işler Rutinler'de bir kez durur.
+// Çocuk yalnızca kendi görevlerini görür.
 function vTasks(){
- const t=T(),mine=meId();let f=UI.tf;
- let list=S.tasks.filter(x=>f==='done'?x.done:!x.done&&(f==='all'||isFor(x,mine)));
+ const t=T(),mine=meId(),v=UI.tkb||'today',kid=isChild(),vis=x=>!kid||isFor(x,mine);
+ const open=S.tasks.filter(x=>!x.done&&vis(x)).sort((a,b)=>(a.due+(a.time||'99')).localeCompare(b.due+(b.time||'99')));
+ const sec=(n,a,red)=>`<div class="sec-h" style="margin-top:20px"><h2 class="sec"${red?' style="color:var(--danger)"':''}>${n}</h2><small style="color:var(--muted)">${a.length}</small></div>`;
  let body='';
- if(f==='done'){list.sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));body=list.length?`<div class="group">${list.map(taskRow).join('')}</div>`:`<div class="group">${emptyBox('Henüz tamamlanan görev yok','Tamamladığın görevler burada görünür.')}</div>`}
- else{const G=[['Geciken',x=>x.due<t],['Bugün',x=>x.due===t],['Yarın',x=>x.due===add(t,1)],['Bu hafta',x=>x.due>add(t,1)&&x.due<=add(t,7)],['Daha sonra',x=>x.due>add(t,7)]];
-  list.sort((a,b)=>(a.due+(a.time||'99')).localeCompare(b.due+(b.time||'99')));
-  body=G.map(([n,fn])=>{const a=list.filter(fn);return a.length?`<div class="sec-h" style="margin-top:20px"><h2 class="sec"${n==='Geciken'?' style="color:var(--danger)"':''}>${n}</h2><small style="color:var(--muted)">${a.length}</small></div><div class="group">${a.map(taskRow).join('')}</div>`:''}).join('')
-   ||`<div class="group" style="margin-top:16px">${emptyBox(f==='mine'?'Sana atanmış görev yok':'Hiç görev yok','Ev işlerini paylaştırmak için ilk görevi ekle.',`<br><button class="btn primary sm" data-act="newTask">${I('plus','sm')}Görev ekle</button>`)}</div>`}
- return `<div class="hdr"><div class="h"><h1>Görevler</h1></div><button class="btn primary sm" data-act="newTask">${I('plus','sm')}Ekle</button></div>${isChild()?starsHTML():''}
- <div class="seg" role="group" aria-label="Süz">${[['mine','Bana atanan'],['all','Herkes'],['done','Tamamlanan']].map(([k,n])=>`<button data-act="tf" data-v="${k}" aria-pressed="${f===k}">${n}</button>`).join('')}</div>${body}`}
+ if(v==='today'){const mid=parse(t).getTime(),late=open.filter(x=>x.due<t),td=open.filter(x=>x.due===t),my=td.filter(x=>isFor(x,mine)),oth=td.filter(x=>!isFor(x,mine)),dn=S.tasks.filter(x=>x.done&&vis(x)&&(x.doneAt||0)>=mid).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
+  body=(late.length?sec('Geciken',late,1)+`<div class="group">${late.map(taskRow).join('')}</div>`:'')
+   +sec(kid?'Bugün':'Senin bugünün',my)+`<div class="group">${my.map(taskRow).join('')||`<div class="tkfree">${late.length?'Bugüne başka işin yok.':'Bugün sana iş yok.'}</div>`}</div>`
+   +(oth.length?sec('Ailenin bugünü',oth)+`<div class="group">${oth.map(taskRow).join('')}</div>`:'')
+   +(dn.length?`<button class="tkmore" data-act="tkUp" aria-expanded="${!!UI.tkUp}">${I(UI.tkUp?'chevD':'chevR','sm')}Bugün yapılanlar<span class="n">${dn.length}</span></button>${UI.tkUp?`<div class="group">${dn.map(taskRow).join('')}</div>`:''}`:'')}
+ if(v==='up'){const up=open.filter(x=>x.due>t),days=[...new Set(up.map(x=>x.due))];
+  body=days.map(d=>{const a=up.filter(x=>x.due===d),dn=d===add(t,1)?'Yarın':parse(d).toLocaleDateString('tr',{weekday:'long',day:'numeric',month:'long'});return `<div class="tkday">${esc(dn)}</div><div class="group">${a.map(taskRow).join('')}</div>`}).join('')
+   ||`<div class="group" style="margin-top:16px">${emptyBox('Yaklaşan görev yok','Bugünden sonrası için eklenen görevler burada gün gün görünür.')}</div>`}
+ if(v==='rt'){const R=Object.entries(TREP).filter(([k])=>k!=='none'),rt=S.tasks.filter(x=>x.repeat&&x.repeat!=='none'&&!x.done&&vis(x));
+  body=`<p class="note" style="margin-top:12px">${I('repeat','sm')}<span>Tekrarlayan işler burada bir kez durur; sıranın kimde olduğunu ve bir sonraki günü gösterir.</span></p>`
+   +(R.map(([r,n])=>{const a=rt.filter(x=>x.repeat===r);return a.length?`<div class="tkday">${esc(n)}</div><div class="group">${a.map(x=>{const nx=nextIn(x);return `<div class="row"><span class="wic">${I('repeat','sm')}</span><button class="body tap" style="text-align:left" data-act="openTask" data-id="${x.id}"><span class="t">${esc(x.title)}</span><span class="m">${whoHTML(x,true)}<span>${I('clock','sm')}${rel(x.due)}${x.time?' '+hm(x.time):''}</span>${nx?`<span class="tknx">Sonra: ${esc(first(M(nx).name))}</span>`:''}</span></button></div>`}).join('')}</div>`:''}).join('')
+   ||`<div class="group">${emptyBox('Rutin yok','Bir görevi eklerken “Daha fazla seçenek”ten tekrar seçersen burada durur.')}</div>`)}
+ return `<div class="hdr"><div class="h"><h1>Görevler</h1></div><button class="btn primary sm" data-act="newTask">${I('plus','sm')}Ekle</button></div>${kid?starsHTML():''}
+ <div class="seg" role="group" aria-label="Görünüm">${[['today','Bugün'],['up','Yaklaşan'],['rt','Rutinler']].map(([k,n])=>`<button data-act="tkb" data-v="${k}" aria-pressed="${v===k}">${n}</button>`).join('')}</div>${body}`}
 
 // Aile sekmesi: kişiler, davet satırı ve son 3 değişiklik. Ayarlar sağ üstteki dişlide, gruplu bir sayfada.
 // Duyuru ayarlarda yok; Bugün ekranından değiştirilir.
@@ -1787,6 +1804,8 @@ const A={
  fRot:d=>{F.rot=F.rot.includes(d.id)?F.rot.filter(x=>x!==d.id):[...F.rot,d.id];document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true});if(F.rot[0]){F.who=[F.rot[0]];asRefresh()}},
  // Görevler
  tf:d=>{UI.tf=d.v;render(true)},
+ tkb:d=>{UI.tkb=d.v;UI.tkUp=false;render(true)},
+ tkUp:()=>{UI.tkUp=!UI.tkUp;render(true)},
  newTask:()=>taskForm(null),
  sugAdd:d=>{const it=addItemTo(UI.list,d.v);if(!it)return;render(true);const g=document.getElementById('sugg'),q=document.getElementById('item-input');if(g)g.innerHTML=suggHTML(q?q.value:'');toast(`${it.name} eklendi`)},
  toggleTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const u=snap();
