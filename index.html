@@ -575,6 +575,21 @@ a.btn{text-decoration:none}
 .strip .days b{font-size:1.02rem;width:1.9rem;height:1.9rem;display:flex;align-items:center;justify-content:center;border-radius:999px}
 .strip .days button[aria-current="date"] b{background:var(--coral);color:var(--on-coral)}
 .strip .days button[aria-pressed="true"]{background:var(--accent-soft)}
+/* Bugün: sade şerit (Apple Takvim gibi): seçili gün koyu yuvarlak, bugün renkli yazı; gün başlıkları tek satır */
+.hs1 .strip.sticky{padding-bottom:6px}
+.hs1 .strip .days button{min-height:54px;background:none!important;gap:2px}
+.hs1 .strip .days small{font-size:.64rem}
+.hs1 .strip .days b{width:2rem;height:2rem;transition:background .2s,color .2s}
+.hs1 .strip .days button[aria-current="date"] b{background:none;color:var(--coral);font-weight:800}
+.hs1 .strip .days button[aria-pressed="true"] b{background:var(--fg);color:var(--bg)}
+.hs1 .strip .days button[aria-current="date"][aria-pressed="true"] b{background:var(--coral);color:var(--on-coral)}
+.hs1 .strip .dots i{width:4px;height:4px}
+.dhs{display:flex;align-items:baseline;gap:8px;margin:0 2px 8px;min-height:36px}
+.dhs b{font-weight:700;font-size:1rem;flex:none}
+.dhs span{color:var(--muted);font-size:.88rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dhs small{flex:none;color:var(--muted);font-size:.8rem;white-space:nowrap}
+.dhs .dadd{align-self:center;width:36px;height:36px;margin-right:-6px}
+.dblock.today .dhs b{color:var(--coral)}
 .fam{width:2rem;height:2rem;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex:none;background:var(--coral-soft);color:var(--coral)}
 .fam svg{width:1.2rem;height:1.2rem}
 .chip .fam{width:1.6rem;height:1.6rem}
@@ -1056,8 +1071,10 @@ function cTaskRow(t){const late=!t.done&&t.due<T();const ok=can('task.complete',
   <button class="body tap" style="text-align:left" data-act="openTask" data-id="${t.id}"><span class="t">${esc(t.title)}</span>
    <span class="m"><span>${I('tasks','sm')}Görev</span>${whoHTML(t)}${late?`<span class="tag late">Gecikti · ${rel(t.due)}</span>`:''}${t.repeat!=='none'&&!t.done?`<span>${I('repeat','sm')}${TREP[t.repeat]}</span>`:''}</span></button>
   <button class="chk" data-act="toggleTask" data-id="${t.id}" aria-pressed="${myTick(t)}" aria-label="${esc(t.title)}: ${myTick(t)?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}><span>${I('check','sm')}</span></button></div>`}
+let SLIM=false; // Bugün'deki akışta gün başlıkları tek satır
 function dayHead(day,{evs,tks}){const d=parse(day),t=T();const r=day===t?'Bugün':day===add(t,1)?'Yarın':day===add(t,-1)?'Dün':'';
  const c=[evs.length&&evs.length+' etkinlik',tks.length&&tks.length+' görev'].filter(Boolean).join(' · ')||'Boş';
+ if(SLIM)return `<div class="dhs"><b>${r||DAYS[d.getDay()]}</b><span>${r?DAYS[d.getDay()]+' ':''}${d.getDate()} ${MON[d.getMonth()]}</span><small>${c}</small><button class="dadd" data-act="addOn" data-d="${day}" aria-label="${long(day)} için ekle">${I('plus','sm')}</button></div>`;
  return `<div class="dhead"><span class="dnum" aria-hidden="true"><b>${d.getDate()}</b><small>${MON[d.getMonth()].slice(0,3)}</small></span><span class="h"><b>${r?r+' · ':''}${DAYS[d.getDay()]}</b><small>${c}</small></span><button class="dadd" data-act="addOn" data-d="${day}" aria-label="${long(day)} için ekle">${I('plus')}</button></div>`}
 function dayBody(day,{evs,tks}){
  if(!evs.length&&!tks.length)return `<div class="group">${emptyBox(day===T()?'Bugün sakin bir gün 🌿':'Bu gün boş','Planlanmış bir şey yok.')}</div>`;
@@ -1085,11 +1102,12 @@ function strip(start,sel,o){STRIP=o;return `<div class="strip sticky" id="strip"
 function updStrip(start,sel){const el=document.getElementById('strip');if(!el||!STRIP)return;el.dataset.start=start;el.innerHTML=stripInner(start,sel,STRIP)}
 const markStrip=day=>document.querySelectorAll('#strip .days button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.d===day));
 function homeAgenda(){const t=T(),c={mine:isChild(),filter:[]};
- return `<div id="hag">${strip(t,t,{act:'homeDay',rel:true,ctx:c,mode:'fixed'})}${flowHTML(t,7,c)}</div>
+ SLIM=true;const list=flowHTML(t,7,c);SLIM=false;
+ return `<div id="hag" class="hs1">${strip(t,t,{act:'homeDay',rel:true,ctx:c,mode:'fixed'})}${list}</div>
  <button class="btn ghost block sm" data-act="tab" data-tab="cal" style="margin-top:14px">Takvimde devamını gör ${I('chevR','sm')}</button>`}
 function scrollToDay(day){const sc=document.getElementById('screen');
  const b=[...sc.querySelectorAll('.dblock')].find(x=>x.dataset.from<=day&&day<=x.dataset.to);if(!b)return false;
- const st=document.getElementById('strip');const off=st?st.getBoundingClientRect().height-12:8;
+ const st=document.getElementById('strip');const off=st?st.getBoundingClientRect().height+(st.closest('.hs1')?6:-12):8;
  sc.scrollTo({top:sc.scrollTop+b.getBoundingClientRect().top-sc.getBoundingClientRect().top-off,behavior:'smooth'});
  b.classList.remove('flash');void b.offsetWidth;b.classList.add('flash');return true}
 // Kaydırırken şeridin üstünde kalan günü işaretler; takvimde hafta değişince şeridi yeniler.
@@ -1219,7 +1237,6 @@ function vToday(){
  ${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>${starsHTML()}`:''}
  ${annNote()}
  <div class="lbl"><span>Sıradaki</span></div>${nextHTML({mine:child,filter:[]})}
- <div class="sec-h"><h2 class="sec">Önümüzdeki günler</h2><button class="link" data-act="tab" data-tab="cal">Takvim ${I('chevR','sm')}</button></div>
  ${homeAgenda()}
  <div class="lbl"><span>Evde</span></div>${homeRows()}`}
 
