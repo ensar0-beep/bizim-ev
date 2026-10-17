@@ -405,7 +405,9 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .lin .btn{min-height:42px;padding:0 14px}
 .lhint{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:.8rem;margin:8px 4px 2px}
 /* İsteklerimiz: sade satırlar, satırda 1-5 isteme puanı çubuğu (Instagram kaydırıcısı gibi) */
-.wr{display:grid;grid-template-columns:36px minmax(0,1fr) auto;column-gap:12px;row-gap:4px;align-items:center;padding:10px 14px;position:relative}
+.wr{display:grid;grid-template-columns:36px minmax(0,1fr) auto;column-gap:12px;row-gap:4px;align-items:center;padding:10px 14px;position:relative;background:var(--surface)}
+.wr.wmv{animation:wmv 1.8s ease-out}@keyframes wmv{0%,30%{background:var(--accent-soft)}100%{background:var(--surface)}}
+.wup{position:absolute;bottom:8px;left:12px;font-size:.72rem;font-weight:800;color:#2E9E62;background:rgba(46,158,98,.13);padding:1px 6px;border-radius:99px;animation:wup 1.8s ease-out forwards;pointer-events:none}.wup.dn{color:#C2502F;background:rgba(194,80,47,.12)}@keyframes wup{0%{opacity:0;transform:translateY(4px)}15%,75%{opacity:1;transform:none}100%{opacity:0}}
 .wr+.wr::before{content:"";position:absolute;top:0;left:62px;right:0;border-top:1px solid var(--line)}
 .wr .wi{grid-row:1/3;align-self:start;margin-top:2px;width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:var(--c);background:color-mix(in srgb,var(--c) 12%,var(--surface))}
 .wr .wi svg{width:1.2rem;height:1.2rem}
@@ -1414,11 +1416,11 @@ const rbarHTML=(id,my,act)=>`<span class="rbarw"><span class="rbar" data-id="${i
 function vWishes(){
  const all=S.wishes||[];if(UI.wt!=='all'&&!WT[UI.wt])UI.wt='all';const f=UI.wt,me0=meId();
  const pend=all.filter(w=>!w.done&&(f==='all'||w.type===f)).sort(byScore);
- // Puan verirken satırlar yerinden kaymasın: sayfadan çıkana kadar sıra sabit
+ // Puan verirken satırlar hemen kaymasın: son puandan 1 sn sonra (wrSettle) yeni sıraya kayarak geçer
  if(UI.wrHold){const o=UI.wrOrd||[],ix=id=>{const i=o.indexOf(id);return i<0?-1:i};pend.sort((a,b)=>ix(a.id)-ix(b.id))}UI.wrOrd=pend.map(w=>w.id);
  const done=all.filter(w=>w.done&&(f==='all'||w.type===f)).sort((a,b)=>b.doneAt-a.doneAt);
  const cnt=k=>all.filter(w=>!w.done&&(k==='all'||w.type===k)).length;
- const row=w=>`<div class="wr" style="--c:${WCOL[w.type]}"><span class="wi" aria-hidden="true">${I(WT[w.type][2])}</span>
+ const row=w=>`<div class="wr" data-wid="${w.id}" style="--c:${WCOL[w.type]}"><span class="wi" aria-hidden="true">${I(WT[w.type][2])}</span>
   <button class="tx" data-act="openWish" data-id="${w.id}"><b>${esc(w.title)}</b><small>${w.planned?`<span class="pl">${I('cal','sm')}${rel(w.planned)}</span>`:''}<span>${w.place?esc(area(w.place)):esc(first(M(w.by).name))+' önerdi'}</span></small></button>
   <span class="tot" aria-label="Ailenin toplamı ${rSum(w)} puan"><b>${rSum(w)}</b>puan</span>${rbarHTML(w.id,rOf(w)[me0]||0)}</div>`;
  return lTop(true)+itabs(Object.entries(WTAB).map(([k,[i,n]])=>({act:'wt',data:`data-v="${k}"`,on:f===k,i,n,cnt:cnt(k)})),'Tür')
@@ -1951,7 +1953,7 @@ const A={
   F.place=p;const t=document.getElementById('wf-title');if(!t.value.trim()&&p.n)t.value=p.n;wpRefresh()},
  rateSet:d=>{const w=S.wishes.find(x=>x.id===d.id);if(!w)return;const mm=meId(),v=Math.max(0,Math.min(5,+d.v||0)),r={...rOf(w)},had=!!r[mm];
   if(!v||(r[mm]===v&&d.tap))delete r[mm];else r[mm]=v;w.rate=r;w.want=Object.keys(r);if(!had&&r[mm])log(`“${w.title}” için ${RLBL[v].toLocaleLowerCase('tr')} dedi`);
-  UI.wrHold=true;render(true);if(document.getElementById('ow-rate'))A.openWish({id:w.id})},
+  UI.wrHold=true;render(true);if(document.getElementById('ow-rate'))A.openWish({id:w.id});wrSettle(w.id)},
  fRate:d=>{F.rate=+d.v;const b=document.querySelector('.rbar[data-f]');if(b)rbPaint(b,F.rate)},
  openWish:d=>{const w=S.wishes.find(x=>x.id===d.id);if(!w)return;const own=w.by===meId()||!isChild(),ppl=Object.entries(rOf(w)).sort((a,b)=>b[1]-a[1]);
   sheet(esc(w.title),`<div style="display:flex;gap:12px;align-items:center;margin-bottom:6px"><span class="wic">${I(WT[w.type][2])}</span><span><b>${WT[w.type][0]}</b><br><span style="color:var(--muted);font-size:.875rem">${esc(M(w.by).name)} önerdi · ${ago(w.at)}</span></span></div>
@@ -2108,13 +2110,25 @@ function endSw(){if(!SW)return;const s=SW;SW=null;if(!s.on)return;swallow=true;s
 ['pointerup','pointercancel','mouseup','touchend'].forEach(t=>document.addEventListener(t,endSw,true));
 document.addEventListener('click',e=>{if(swallow){e.stopPropagation();e.preventDefault();swallow=false}},true);
 // İsteme puanı çubuğu: parmak kaydırınca canlı dolar, bırakınca kaydedilir (formdaysa formun puanı olur)
+// Sıra değişince satırlar eski yerinden yenisine kayar (FLIP); taşınan satır bir an parlar ve ↑N rozeti gösterir (Duolingo lig tablosu gibi)
+function wrSettle(id){clearTimeout(UI.wrT);UI.wrT=setTimeout(()=>{if(UI.tab!=='lists'||UI.lmode!=='wish'||RB||document.querySelector('.sheet'))return;
+ const sc=document.getElementById('screen'),pos={},o0=(UI.wrOrd||[]).slice();sc.querySelectorAll('[data-wid]').forEach(e=>pos[e.dataset.wid]=e.getBoundingClientRect().top);
+ UI.wrHold=false;render(true);const o1=UI.wrOrd||[],up=o0.indexOf(id)-o1.indexOf(id),e=sc.querySelector(`[data-wid="${id}"]`);
+ if(!up||!e||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ e.classList.add('wmv');e.insertAdjacentHTML('beforeend',`<span class="wup${up<0?' dn':''}" aria-hidden="true">${up>0?'↑':'↓'}${Math.abs(up)}</span>`);setTimeout(()=>{e.classList.remove('wmv');const u=e.querySelector('.wup');u&&u.remove()},1800);
+ const st=[...sc.querySelectorAll('.sticky')].reduce((m,x)=>Math.max(m,x.getBoundingClientRect().bottom),sc.getBoundingClientRect().top),nb=document.getElementById('nav').getBoundingClientRect().top,rr=e.getBoundingClientRect();
+ if(rr.top<st+8)sc.scrollBy({top:rr.top-st-60,behavior:'smooth'});else if(rr.bottom>nb-8)sc.scrollBy({top:rr.bottom-nb+60,behavior:'smooth'});
+ sc.querySelectorAll('[data-wid]').forEach(x=>{const p=pos[x.dataset.wid];if(p==null)return;const d=p-x.getBoundingClientRect().top;if(Math.abs(d)<1)return;
+  x.style.transition='none';x.style.transform=`translateY(${d}px)`;x.style.zIndex=x===e?3:1;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{x.style.transition='transform .5s cubic-bezier(.2,.8,.2,1)';x.style.transform='';setTimeout(()=>{x.style.zIndex='';x.style.transition=''},550)}))})},1000)}
 let RB=null;const rbAt=(bar,x)=>{const r=bar.getBoundingClientRect();return Math.max(1,Math.min(5,Math.ceil((x-r.left)/r.width*5)))};
 function rbPaint(bar,n){bar.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',i<n));bar.setAttribute('aria-valuenow',n);const em=bar.parentElement.querySelector('em');if(em){em.textContent=n?RLBL[n]:'Ne kadar istiyorsun?';em.classList.toggle('on',!!n)}}
 document.addEventListener('pointerdown',e=>{const bar=e.target.closest&&e.target.closest('.rbar');if(!bar||e.button>0)return;RB={bar,n:rbAt(bar,e.clientX),x0:e.clientX,moved:false};rbPaint(bar,RB.n)},true);
 document.addEventListener('pointermove',e=>{if(!RB)return;if(Math.abs(e.clientX-RB.x0)>6)RB.moved=true;const n=rbAt(RB.bar,e.clientX);if(n!==RB.n){RB.n=n;rbPaint(RB.bar,n)}});
-document.addEventListener('pointerup',()=>{if(!RB)return;const {bar,n,moved}=RB;RB=null;if(!moved)return;rbSwallow=true;setTimeout(()=>{rbSwallow=false;bar.dataset.f?A.fRate({v:n}):A.rateSet({id:bar.dataset.id,v:n})},0)});
+// Değer dokunulan andaki noktadan alınır: boyayınca yazı kısalıp çubuk genişler, sonraki click yan bölmeye düşebilir
+document.addEventListener('pointerup',()=>{if(!RB)return;const {bar,n,moved}=RB;RB=null;rbSwallow=true;setTimeout(()=>rbSwallow=false,600);setTimeout(()=>{bar.dataset.f?A.fRate({v:n}):A.rateSet({id:bar.dataset.id,v:n,tap:moved?'':'1'})},0)});
 document.addEventListener('pointercancel',()=>{RB=null});
-let rbSwallow=false;document.addEventListener('click',e=>{if(rbSwallow&&e.target.closest&&e.target.closest('.rbar')){e.stopPropagation();e.preventDefault()}},true);
+let rbSwallow=false;document.addEventListener('click',e=>{if(rbSwallow&&e.target.closest&&e.target.closest('.rbar')){rbSwallow=false;e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener('keydown',e=>{const bar=e.target.closest&&e.target.closest('.rbar');if(!bar||!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const n=Math.max(1,Math.min(5,(+bar.getAttribute('aria-valuenow')||0)+(e.key==='ArrowRight'?1:-1)));bar.dataset.f?A.fRate({v:n}):A.rateSet({id:bar.dataset.id,v:n})});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.sheet'))close()});
 // Listeler: alt sekmeler (listeler / istek türleri) arasında sağa sola kaydırma; sayfa parmağı izler, uçlarda durur
