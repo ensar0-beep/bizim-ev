@@ -328,13 +328,16 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .qty{color:var(--muted);font-weight:500}
 .donebar{display:flex;align-items:center;justify-content:space-between;margin-top:22px}
 /* Listeler: üstte büyük sekmeler (Alınacaklar | İsteklerimiz), altta çizgi ikonlu sekmeler (Airbnb gibi) */
-.ltabs{display:flex;align-items:center;gap:10px;margin:2px 0 4px}
-.ltabs>.lt{font-family:var(--f-display);font-size:clamp(.94rem,4.6vw,1.22rem);white-space:nowrap;font-weight:700;color:var(--muted);padding:4px 0;min-height:44px;flex:none}
-.ltabs>.lt[aria-pressed="true"]{color:var(--fg)}
+.ltabs{display:flex;align-items:center;gap:10px;margin:2px -18px 4px;padding:0 18px;border-bottom:1px solid var(--line)}
+.ltabs>.lt{position:relative;display:inline-flex;align-items:center;gap:6px;font-family:var(--f-display);font-size:clamp(.9rem,4.2vw,1.1rem);white-space:nowrap;font-weight:700;color:var(--muted);opacity:.75;min-height:52px;flex:none}
+.ltabs>.lt[aria-pressed="true"]{color:var(--fg);opacity:1}
+.ltabs>.lt[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:4px;border-radius:4px 4px 0 0;background:var(--accent)}
+.ltabs>.lt em{font-style:normal;font-family:var(--f-body);font-size:.72rem;font-weight:800;border-radius:999px;padding:1px 7px;background:var(--accent-soft);color:var(--accent-ink)}
+.ltabs+.wtabs{margin-top:2px}
 .ltabs .sp{flex:1;min-width:0}
 .lbtn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:999px;flex:none;background:var(--accent-soft);color:var(--accent-ink)}
 .lbtn.pl{background:var(--accent);color:var(--on-accent)}
-@media (max-width:359px){.ltabs{gap:8px}.lbtn{width:36px;height:36px}}
+@media (max-width:359px){.ltabs{gap:8px}.lbtn{width:36px;height:36px}.ltabs>.lt em{display:none}}
 .lbtn .n{position:absolute;top:-3px;right:-3px;min-width:19px;height:19px;border-radius:999px;background:var(--accent);color:var(--on-accent);font-size:.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 0 0 2px var(--bg)}
 .wtabs{display:flex;border-bottom:1px solid var(--line);margin:4px -18px 10px;padding:0 14px;overflow-x:auto;scrollbar-width:none}.wtabs::-webkit-scrollbar{display:none}
 .wtabs.scr{overflow-x:auto;scrollbar-width:none;margin:4px -18px 10px;padding:0 12px}.wtabs.scr::-webkit-scrollbar{display:none}
@@ -1267,8 +1270,8 @@ function bindMore(){const m=document.getElementById('cmore');if(!m||!window.Inte
 // Listeler (seçilen: 3 Sekmeli + Listeler sekmesi + Çizgi ikonlar). Üstte Alınacaklar | İsteklerimiz, altında çizgi ikonlu sekmeler.
 const LCOL=['#2B8467','#8B4FB8','#A0692B','#2F6DB5','#C2502F','#B5487A'];
 function itabs(arr,label){return `<div class="wtabs${arr.length>5?' scr':''}" role="tablist" aria-label="${label}">${arr.map(t=>`<button role="tab" data-act="${t.act}" ${t.data} aria-pressed="${t.on}" aria-selected="${t.on}" aria-label="${esc(t.n)}${t.cnt?', '+t.cnt:''}"><span class="ic">${I(t.i)}${t.cnt?`<i>${t.cnt}</i>`:''}</span><span class="tl">${esc(t.n)}</span></button>`).join('')}</div>`}
-function lTop(wish){const mk=S.items.filter(i=>!i.done&&i.cat==='Market').length;
- return `<div class="ltabs"><button class="lt" data-act="lmode" data-v="buy" aria-pressed="${!wish}">Alınacaklar</button><button class="lt" data-act="lmode" data-v="wish" aria-pressed="${!!wish}">İsteklerimiz</button><span class="sp"></span>
+function lTop(wish){const mk=S.items.filter(i=>!i.done&&i.cat==='Market').length,n=wish?(S.wishes||[]).filter(w=>!w.done).length:S.items.filter(i=>!i.done).length,cnt=`<em aria-hidden="true">${n}</em>`;
+ return `<div class="ltabs" role="tablist" aria-label="Liste türü"><button class="lt" role="tab" data-act="lmode" data-v="buy" aria-pressed="${!wish}" aria-selected="${!wish}">Alınacaklar${!wish&&n?cnt:''}</button><button class="lt" role="tab" data-act="lmode" data-v="wish" aria-pressed="${!!wish}" aria-selected="${!!wish}">İsteklerimiz${wish&&n?cnt:''}</button><span class="sp"></span>
  ${!wish&&mk?`<button class="lbtn" data-act="shopStart" data-v="Market" aria-label="Marketteyim, bütün listelerden ${mk} ürün">${I('cart')}<span class="n">${mk}</span></button>`:''}
  ${wish?`<button class="lbtn pl" data-act="newWish" aria-label="Öneri ekle">${I('plus')}</button>`:S.lists.length?`<button class="lbtn pl" data-act="lAdd" aria-label="Ekle">${I('plus')}</button>`:''}</div>`}
 function vLists(){
