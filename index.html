@@ -373,6 +373,11 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .wr .tx small .pl{display:inline-flex;align-items:center;gap:3px;color:var(--accent-ink);font-weight:700}.wr .tx small svg{width:.85rem;height:.85rem}
 .wr .tot{grid-row:1;grid-column:3;display:flex;flex-direction:column;align-items:flex-end;font-size:.72rem;color:var(--muted);line-height:1.1}
 .wr .tot b{font-family:var(--f-display);font-size:1.15rem;color:var(--fg)}
+.screen.tsw{touch-action:pan-y}
+.wtabs button.peek{color:var(--fg)}
+.tsin-l{animation:tsinL .24s ease-out}.tsin-r{animation:tsinR .24s ease-out}
+@keyframes tsinL{from{transform:translateX(-30%);opacity:0}}@keyframes tsinR{from{transform:translateX(30%);opacity:0}}
+.tsedge{position:fixed;top:50%;z-index:30;display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:var(--fg);color:var(--surface);font-size:.82rem;font-weight:700;pointer-events:none;opacity:0;transition:opacity .12s;transform:translateY(-50%)}
 .rbarw{grid-column:2/4;display:flex;align-items:center;gap:8px}
 .rbar{flex:1;max-width:200px;display:flex;gap:3px;touch-action:none;cursor:pointer}
 .rbar button{flex:1;height:34px;display:flex;align-items:center;padding:0}
@@ -1115,7 +1120,7 @@ function syncBack(){const st=history.state&&history.state.bz;
  if(store.mode&&S&&UI.tab!=='today'){if(!st)history.pushState({bz:1},'')}
  else if(st)history.back()}
 window.addEventListener('popstate',()=>{if(document.querySelector('.sheet'))close();if(UI.tab!=='today'){UI.tab='today';render()}});
-function afterRender(){trackStrip();bindWheel();bindMore();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
+function afterRender(){document.getElementById('screen').classList.toggle('tsw',UI.tab==='lists'&&!UI.shop);trackStrip();bindWheel();bindMore();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
 const emptyBox=(title,text,btn)=>`<div class="empty"><b>${title}</b>${text}${btn||''}</div>`;
 
 /* ---------- Konuşur gibi ekleme ----------
@@ -1309,7 +1314,7 @@ function vLists(){
   :`<div class="group" style="margin-top:12px">${emptyBox(done.length?'Hepsi alındı 🎉':'Liste boş',done.length?'Bu listede bekleyen bir şey kalmadı.':'Eklemek için sağ üstteki artıya dokun.',done.length?'':`<br><button class="btn soft sm" data-act="lAdd">${I('plus','sm')}Ekle</button>`)}</div>`)
  +(done.length?`<div class="donebar"><button class="link" data-act="toggleDone" aria-expanded="${UI.doneOpen}">${I('chevD','sm')}Alınanlar (${done.length})</button><button class="link" data-act="clearDone">Alınanları temizle</button></div>${UI.doneOpen?`<div class="group">${done.map(lvRow).join('')}</div>`:''}`:'')
  +(can('list.manage')&&S.lists.length>1?`<div style="text-align:center;margin-top:26px"><button class="link" style="color:var(--danger)" data-act="delList">${I('trash','sm')}“${esc(L.name)}” listesini sil</button></div>`:'')}
-const lvRow=i=>`<div class="lr${i.done?' done':''}" data-sw="item" data-id="${i.id}"><button class="ck" data-act="toggleItem" data-id="${i.id}" aria-pressed="${i.done}" aria-label="${esc(i.name)}: ${i.done?'alınmadı olarak işaretle':'alındı olarak işaretle'}"><span>${I('check','sm')}</span></button>
+const lvRow=i=>`<div class="lr${i.done?' done':''}" data-id="${i.id}"><button class="ck" data-act="toggleItem" data-id="${i.id}" aria-pressed="${i.done}" aria-label="${esc(i.name)}: ${i.done?'alınmadı olarak işaretle':'alındı olarak işaretle'}"><span>${I('check','sm')}</span></button>
  <button class="ti" data-act="openItem" data-id="${i.id}"><b>${esc(i.name)}</b>${i.note||i.for?`<small>${[i.note?esc(i.note):'',i.for?esc(forName(i.for)):''].filter(Boolean).join(' · ')}</small>`:''}</button>${i.pri==='acil'&&!i.done?'<span class="acil">Acil</span>':''}${i.for&&i.for!=='ev'?av(i.for,'xs'):''}</div>`;
 // Ekleme: artıya dokununca alttan açılır; virgülle birden çok şey yazılabilir, art arda eklenir
 function lAddSheet(){const L=S.lists.find(l=>l.id===UI.list)||S.lists[0];if(!L)return;
@@ -2016,6 +2021,32 @@ document.addEventListener('pointercancel',()=>{RB=null});
 let rbSwallow=false;document.addEventListener('click',e=>{if(rbSwallow&&e.target.closest&&e.target.closest('.rbar')){e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener('keydown',e=>{const bar=e.target.closest&&e.target.closest('.rbar');if(!bar||!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const n=Math.max(1,Math.min(5,(+bar.getAttribute('aria-valuenow')||0)+(e.key==='ArrowRight'?1:-1)));bar.dataset.f?A.fRate({v:n}):A.rateSet({id:bar.dataset.id,v:n})});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.sheet'))close()});
+// Listeler: alt sekmeler (listeler / istek türleri) arasında sağa sola kaydırma; sayfa parmağı izler, uçlarda durur
+let TS=null;const TSACT=['pickList','wt'];
+const tsTabs=()=>[...document.querySelectorAll('#screen .wtabs button')].filter(b=>TSACT.includes(b.dataset.act));
+function tsBody(){const tb=document.querySelector('#screen .wtabs'),sc=document.getElementById('screen'),out=[];if(!tb)return out;
+ for(let n=tb;n&&n!==sc;n=n.parentElement)for(let m=n.nextElementSibling;m;m=m.nextElementSibling)out.push(m);return out}
+function tsTarget(dir){const tabs=tsTabs(),j=tabs.findIndex(b=>b.getAttribute('aria-pressed')==='true')+dir;return j>=0&&j<tabs.length?{b:tabs[j],n:tabs[j].querySelector('.tl')?.textContent||''}:null}
+document.addEventListener('pointerdown',e=>{if(UI.tab!=='lists'||UI.shop||e.button>0||!S)return;const t=e.target;
+ if(!t.closest||!t.closest('#screen')||t.closest('.sheet,.rbar,input,textarea,select'))return;
+ const tb=t.closest('.wtabs');if(tb&&tb.scrollWidth>tb.clientWidth+2)return;if(!document.querySelector('#screen .wtabs'))return;
+ TS={x0:e.clientX,y0:e.clientY,t0:performance.now(),dx:0,on:false,pid:e.pointerId}},true);
+document.addEventListener('pointermove',e=>{if(!TS||e.pointerId!==TS.pid)return;const dx=e.clientX-TS.x0,dy=e.clientY-TS.y0;
+ if(!TS.on){if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){TS=null;return}if(Math.abs(dx)<12)return;TS.on=true;TS.els=tsBody();
+  TS.pill=document.createElement('div');TS.pill.className='tsedge';document.body.appendChild(TS.pill)}
+ const dir=dx<0?1:-1;if(TS.dir!==dir){TS.dir=dir;TS.tg=tsTarget(dir);document.querySelectorAll('.wtabs .peek').forEach(b=>b.classList.remove('peek'));if(TS.tg)TS.tg.b.classList.add('peek');
+  TS.pill.innerHTML=TS.tg?(dir>0?`${esc(TS.tg.n)} ${I('chevR','sm')}`:`${I('chevL','sm')} ${esc(TS.tg.n)}`):'';TS.pill.style.left=dir>0?'':'12px';TS.pill.style.right=dir>0?'12px':''}
+ const v=TS.tg?dx:dx*.25;TS.dx=dx;TS.els.forEach(el=>{el.style.transition='none';el.style.transform=`translateX(${v}px)`;el.style.opacity=TS.tg?Math.max(.35,1-Math.abs(dx)/500):1});
+ TS.pill.style.opacity=TS.tg&&Math.abs(dx)>40?1:0},true);
+function tsEnd(e){if(!TS||e.pointerId!==TS.pid)return;const s=TS;TS=null;if(!s.on)return;
+ swallow=true;setTimeout(()=>swallow=false,350);s.pill.remove();document.querySelectorAll('.wtabs .peek').forEach(b=>b.classList.remove('peek'));
+ const fast=Math.abs(s.dx)/(performance.now()-s.t0)>.45&&Math.abs(s.dx)>30,go=s.tg&&e.type!=='pointercancel'&&(Math.abs(s.dx)>70||fast);
+ if(!go)return s.els.forEach(el=>{el.style.transition='transform .2s ease,opacity .2s';el.style.transform='';el.style.opacity='';setTimeout(()=>{el.style.transition=''},220)});
+ s.els.forEach(el=>{el.style.transition='transform .14s ease-in,opacity .14s';el.style.transform=`translateX(${s.dir>0?'-':''}60%)`;el.style.opacity='0'});
+ setTimeout(()=>{const d=s.tg.b.dataset;A[d.act](d);const sc=document.getElementById('screen');sc.style.scrollBehavior='auto';sc.scrollTop=0;sc.style.scrollBehavior='';
+  tsBody().forEach(el=>{el.classList.add(s.dir>0?'tsin-r':'tsin-l');el.addEventListener('animationend',()=>el.classList.remove('tsin-l','tsin-r'),{once:true})});
+  const on=document.querySelector('#screen .wtabs button[aria-pressed="true"]');if(on)on.scrollIntoView({block:'nearest',inline:'center'})},140)}
+document.addEventListener('pointerup',tsEnd,true);document.addEventListener('pointercancel',tsEnd,true);
 
 // iOS klavye kapandıktan sonra sayfayı kaymış bırakabiliyor (üstte boşluk, alt menü ekran dışında); geri yerine oturt
 const unshift=()=>{const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;if(window.scrollY||document.documentElement.scrollTop||document.body.scrollTop){window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0}};
