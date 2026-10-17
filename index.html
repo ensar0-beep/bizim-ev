@@ -544,6 +544,7 @@ a.btn{text-decoration:none}
 .wpbox .st{display:flex;align-items:flex-start;gap:8px;font-size:.85rem;color:var(--muted)}
 .wpbox .st .i{flex:none;margin-top:1px}.wpbox .st b{color:var(--fg);font-weight:600}
 .wprow{display:flex;gap:8px}.wprow .inp{flex:1;min-width:0}
+.ipask{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:16px;background:var(--accent-soft);margin-bottom:14px}.ipask>.i{color:var(--accent-ink);flex:none}.ipask span{flex:1;min-width:0;display:grid}.ipask b{font-size:.92rem}.ipask small{font-size:.8rem;color:var(--muted)}
 .wpcard{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:16px;padding:10px 6px 10px 12px}
 .wpcard>.i{color:var(--accent-ink);margin-top:2px;flex:none}
 .wpcard .tx{flex:1;min-width:0;display:grid;gap:2px}.wpcard .tx b{font-weight:700;overflow-wrap:anywhere}.wpcard .tx span{font-size:.85rem;color:var(--muted);overflow-wrap:anywhere}
@@ -1425,16 +1426,23 @@ function vWishes(){
  +(pend.length?`<div class="group" style="margin-top:12px">${pend.map(row).join('')}</div>`:`<div class="group" style="margin-top:12px">${emptyBox(f==='all'?'Henüz öneri yok':'Bu türde öneri yok','Gezmek, okumak, izlemek ya da yemek istediğiniz bir şeyi ekleyin.',`<br><button class="btn soft sm" data-act="newWish">${I('plus','sm')}Öneri ekle</button>`)}</div>`)
  +(done.length?`<div class="lbl"><span>Yaptıklarımız · ${done.length}</span></div><div class="wdone">${done.slice(0,UI.wdone?99:8).map(w=>`<button class="wd1" data-act="openWish" data-id="${w.id}" style="--c:${WCOL[w.type]}">${I(WT[w.type][2])}<span>${esc(w.title)}</span><span>${w.mood||''}</span></button>`).join('')}${done.length>8&&!UI.wdone?`<button class="link" data-act="wdone">Tümü (${done.length})</button>`:''}</div>`:'')}
 function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'?'yer':UI.wt)),edit:w?w.id:null,place:w?(w.place?{...w.place}:null):(pre.place||null),rate:4};
- sheet(w?'Öneriyi düzenle':'Yeni öneri',`<form data-form="wish" autocomplete="off">
+ sheet(w?'Öneriyi düzenle':'Yeni öneri',`<form data-form="wish" autocomplete="off">${w||F.place?'':`<div class="ipask" id="ipask" hidden>${I('link')}<span><b>Haritadan bir mekan mı kopyaladın?</b><small>Tek dokunuşla adı ve adresi gelsin</small></span><button type="button" class="btn soft sm" data-act="ipPaste">Yapıştır</button></div>`}
  <div class="field"><span class="flabel">Ne türde?</span><div class="chips" style="flex-wrap:wrap" id="wf-type">${Object.entries(WT).map(([k,v])=>`<button type="button" class="chip" data-act="fWt" data-v="${k}" aria-pressed="${F.wtype===k}">${I(v[2],'sm')}${v[1]}</button>`).join('')}</div></div>
  <div class="field"><label for="wf-title">Adı</label><input class="inp" id="wf-title" value="${w?esc(w.title):pre.title?esc(pre.title):''}" placeholder="örn. Kapadokya, Küçük Prens, Çiya Sofrası" autofocus><span class="err" id="wf-err" hidden>Bir ad yaz.</span></div>
  <div class="field" id="wf-place"${isPlaceType(F.wtype)?'':' hidden'}>${wpHTML()}</div>
  <div class="field"><label for="wf-note">Not (isteğe bağlı)</label><input class="inp" id="wf-note" value="${w?esc(w.note):''}" placeholder="Yazar, yönetmen, neden güzel…"></div>
  ${w?'':`<div class="field"><span class="flabel">Ne kadar istiyorsun?</span>${rbarHTML('new',F.rate,'fRate')}</div>`}
- <button class="btn primary block">${w?'Kaydet':'Öneriyi ekle'}</button></form>`)}
+ <button class="btn primary block">${w?'Kaydet':'Öneriyi ekle'}</button></form>`);if(!w&&!F.place)ipCheck()}
+// Kopyalanmış harita bağlantısı: iPhone panoyu dokunmadan okutmaz. İzin verilmişse (Android) bakıp yalnızca bağlantı varsa,
+// değilse uygulamadan son 10 dakikada çıkılıp dönüldüyse (Haritalar'a gidip kopyalamış olabilir) kartı gösterir.
+let AWAY=0;document.addEventListener('visibilitychange',()=>{if(document.hidden)AWAY=Date.now()});
+const mapsIn=t=>{const p=parsePlace('',t||'','');return p&&p.u?p:null};
+async function ipCheck(){const k=document.getElementById('ipask');if(!k)return;let show=AWAY&&Date.now()-AWAY<10*60e3;
+ try{const q=await navigator.permissions.query({name:'clipboard-read'});if(q.state==='granted')show=!!mapsIn(await navigator.clipboard.readText())}catch(e){}
+ if(show&&document.getElementById('ipask'))k.hidden=false}
 function wpHTML(){const p=F.place;
  if(p)return `<div class="wpcard">${I('pin')}<span class="tx"><b>${esc(p.n||(document.getElementById('wf-title')||{}).value||'Haritadaki yer')}</b>${p.a?`<span>${esc(p.a)}</span>`:''}<span class="src">Google Haritalar'dan</span></span><button type="button" class="x" data-act="wpClear" aria-label="Mekanı kaldır">${I('x')}</button></div>`;
- return `<div class="wpbox"><div class="st">${I('pin','sm')}<span>Google Haritalar'da mekanı aç, <b>Paylaş</b>'a dokun, listeden <b>Bizim Ev</b>'i seç. Ad ve adres buraya gelir.</span></div>
+ return `<div class="wpbox"><div class="st">${I('pin','sm')}<span>${/iPhone|iPad|iPod/.test(navigator.userAgent)?`Google Haritalar'da mekanı aç, <b>Paylaş → Kopyala</b>'ya dokun, sonra bağlantıyı buraya yapıştır.`:`Google Haritalar'da mekanı aç, <b>Paylaş</b>'a dokun, listeden <b>Bizim Ev</b>'i seç. Ad ve adres buraya gelir.`}</span></div>
   <div class="wprow"><input class="inp" id="wf-link" placeholder="ya da bağlantıyı yapıştır" inputmode="url" aria-label="Google Haritalar bağlantısı"><button type="button" class="btn soft sm" data-act="wpPaste">Ekle</button></div>
   <span class="err" id="wf-lerr" hidden>Bu bir Google Haritalar bağlantısı değil.</span></div>`}
 function wpRefresh(){const b=document.getElementById('wf-place');if(!b)return;b.hidden=!isPlaceType(F.wtype);b.innerHTML=wpHTML()}
@@ -1943,6 +1951,8 @@ const A={
  newWish:()=>wishForm(null),
  fWt:d=>{F.wtype=d.v;document.querySelectorAll('#wf-type .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===d.v));wpRefresh()},
  wpClear:()=>{F.place=null;wpRefresh()},
+ ipPaste:async()=>{let t='';try{t=await navigator.clipboard.readText()}catch(e){}const p=mapsIn(t),k=document.getElementById('ipask');if(k)k.remove();
+  if(!p){toast('Kopyalanmış bir Google Haritalar bağlantısı yok');return}AWAY=0;if(!isPlaceType(F.wtype))A.fWt({v:'mekan'});F.place=p;const i=document.getElementById('wf-title');if(i&&!i.value.trim()&&p.n)i.value=p.n;wpRefresh()},
  wpPaste:()=>{const i=document.getElementById('wf-link'),v=i.value.trim(),p=v&&parsePlace('',v,'');
   if(!p||(!p.u&&/https?:\/\//.test(v))){document.getElementById('wf-lerr').hidden=false;i.focus();return}
   F.place=p;const t=document.getElementById('wf-title');if(!t.value.trim()&&p.n)t.value=p.n;wpRefresh()},
