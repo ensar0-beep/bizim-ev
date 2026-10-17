@@ -50,12 +50,6 @@ label{display:block;font-size:.85rem;color:var(--sub);margin:10px 0 4px}
   <h2>Yüklü avatarlar</h2>
   <div class="card"><div class="grid" id="list"></div><div class="log" id="ll"></div></div>
 
-  <h2>Eski avatarları taşı</h2>
-  <div class="card">
-    <p class="sub">Depodaki (herkese açık) 22 avatarı ailenin özel alanına kopyalar. Bir kez yapılır; sonra depodaki dosyalar silinecek.</p>
-    <button class="gh" id="mig">Taşı</button>
-    <div class="log" id="ml"></div>
-  </div>
 </div>
 
 <script>
@@ -65,12 +59,6 @@ const FB_URL='https://bizimev-96297-default-rtdb.firebaseio.com';
 const FB_KEY='AIzaSyB6cyMIu_2Q5T1cAXTzDFPmXlPs0CWzQpg';
 const TOK_URL='https://securetoken.googleapis.com/v1/token';
 const KEY='bizim-ev.v1';
-const OLD='./avatars/';
-// Depodan taşınacak eski avatarlar
-const ESKI=[['Ensar',[['ensar-1','Camel ceket'],['ensar-2','Krem kazak'],['ensar-3','Kot ceket'],['ensar-4','Yeşil kapüşonlu'],['ensar-5','Bordo kazak'],['ensar-6','Mavi gömlek']]],
- ['Müşerref',[['muserref-1','Deri ceket'],['muserref-2','Vizon eşarp'],['muserref-3','Yeşil eşarp'],['muserref-4','Bordo bluz'],['muserref-5','Lacivert eşarp'],['muserref-6','Krem eşarp'],['muserref-7','Antrasit eşarp'],['muserref-8','Zümrüt blazer']]],
- ['Fatıma',[['fatima-1','Pembe kazak'],['fatima-2','Sarı hırka'],['fatima-3','Kot salopet'],['fatima-4','Mint kapüşonlu']]],
- ['Muhammed',[['muhammed-1','Turkuaz kazak'],['muhammed-2','Hardal hırka'],['muhammed-3','Lacivert kapüşonlu'],['muhammed-4','Kiremit gömlek']]]];
 
 const $=id=>document.getElementById(id);
 const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -145,19 +133,6 @@ $('up').onclick=async()=>{
   catch(e){$('ul').innerHTML+=`<span class="err">${esc(f.name)}: ${esc(e.message)}</span><br>`}}
  $('f').value='';$('up').disabled=true;
  $('ul').innerHTML+=`<b>${ok} fotoğraf yüklendi.</b> Uygulamayı kapatıp açtığında avatar seçiminde çıkar.<br>`;
- await liste().catch(()=>{})};
-
-$('mig').onclick=async()=>{
- $('mig').disabled=true;$('ml').textContent='';let ok=0,hata=0;
- const var0=Object.keys(await read('avatars/'+code,'shallow=true').catch(()=>({}))||{});
- for(const [kisi,list] of ESKI)for(const [id,etiket] of list){
-  if(var0.includes(id)){$('ml').innerHTML+=`${esc(id)}: zaten var<br>`;continue}
-  try{const d=await readFile(await (await fetch(OLD+'ayas/'+id+'.webp')).blob());
-   await send('avatars/'+code+'/'+id,'PUT',{n:kisi,t:etiket,d,at:Date.now()});ok++;
-   $('ml').innerHTML+=`<span class="ok">${esc(kisi)} · ${esc(etiket)} taşındı</span><br>`}
-  catch(e){hata++;$('ml').innerHTML+=`<span class="err">${esc(id)}: ${esc(e.message)}</span><br>`}}
- $('ml').innerHTML+=`<b>${ok} taşındı${hata?', '+hata+' hata':''}.</b><br>`;
- $('mig').disabled=false;
  await liste().catch(()=>{})};
 
 baslat();
