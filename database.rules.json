@@ -4,8 +4,25 @@
     ".write": false,
     "families": {
       "$code": {
-        ".read": "$code.matches(/^[A-Z2-9]{8}$/)",
-        ".write": "$code.matches(/^[A-Z2-9]{8}$/)"
+        ".read": "auth != null && data.child('uids').child(auth.uid).exists()",
+        ".write": "auth != null && $code.matches(/^[A-Z2-9]{8}$/) && (!data.exists() || data.child('uids').child(auth.uid).exists())",
+        "meta": { ".read": "auth != null && $code.matches(/^[A-Z2-9]{8}$/)" },
+        "members": { ".read": "auth != null && $code.matches(/^[A-Z2-9]{8}$/)" },
+        "uids": {
+          "$uid": {
+            ".read": "auth != null && $uid === auth.uid",
+            ".write": "auth != null && $code.matches(/^[A-Z2-9]{8}$/) && $uid === auth.uid && (!newData.exists() || (newData.isString() && newData.val().length <= 40))"
+          }
+        }
+      }
+    },
+    "avatars": {
+      "$code": {
+        ".read": "auth != null && root.child('families').child($code).child('uids').child(auth.uid).exists()",
+        ".write": "auth != null && root.child('families').child($code).child('uids').child(auth.uid).exists()",
+        "$key": {
+          ".validate": "!newData.exists() || (newData.child('d').isString() && newData.child('d').val().length < 120000)"
+        }
       }
     }
   }
