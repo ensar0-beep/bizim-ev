@@ -219,14 +219,23 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sky-m{--s1:#4A3320;--s2:#2E241B;--sf:#FFE9D2}:root:not([data-theme="light"]) .sky-d{--s1:#1C3A4F;--s2:#1A2730;--sf:#E2F2FC}:root:not([data-theme="light"]) .sky-e{--s1:#4D2E3A;--s2:#2F2840;--sf:#FBE6F0}}
 :root[data-theme="dark"] .sky-m{--s1:#4A3320;--s2:#2E241B;--sf:#FFE9D2}:root[data-theme="dark"] .sky-d{--s1:#1C3A4F;--s2:#1A2730;--sf:#E2F2FC}:root[data-theme="dark"] .sky-e{--s1:#4D2E3A;--s2:#2F2840;--sf:#FBE6F0}
 .thn{--moon-dark:var(--sunk)}
-/* Duyuru panonun altına yapışık satır (Apple Hava uyarı satırı gibi) */
+/* Panoda herkesin mesajı: tek satır, dokundukça sıradakine geçer (Apple Hava uyarıları gibi) */
+.pstrip{grid-column:1/-1;position:relative;display:flex;align-items:center;border-radius:0 0 22px 22px;background:linear-gradient(135deg,var(--s1),var(--s2));color:var(--sf);border-top:1px solid rgba(0,0,0,.07)}
+.pstrip::before{content:'';position:absolute;inset:0;border-radius:inherit;background:rgba(0,0,0,.045);pointer-events:none}
+.thn.sky-n .pstrip{border-top-color:rgba(255,255,255,.1)}.thn.sky-n .pstrip::before{background:rgba(0,0,0,.14)}
+.pstrip>*{position:relative}
+.pmc{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;padding:10px 4px 11px 14px;color:inherit;min-height:54px}
+.pmc .in{display:flex;align-items:center;gap:10px;flex:1;min-width:0;animation:pmIn .3s ease}
+.pmc .tx{flex:1;min-width:0;font-size:.92rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.pmc .tx b{font-weight:700;margin-right:5px}
+.pmc .t{flex:none;font-size:.72rem;opacity:.7}
+.pmc .dots{flex:none;display:flex;gap:4px}.pmc .dots i{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.3;transition:opacity .2s}.pmc .dots i.on{opacity:.85}
+.pmw{flex:none;width:44px;height:44px;margin-right:4px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;color:inherit;opacity:.8}
+@keyframes pmIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.pmc .in{animation:none}}
 .thn .panel.wa{border-radius:22px 22px 0 0}
-.pann{grid-column:1/-1;position:relative;display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 14px 11px;border-radius:0 0 22px 22px;background:linear-gradient(135deg,var(--s1),var(--s2));color:var(--sf);border-top:1px solid rgba(0,0,0,.07)}
-.pann::before{content:'';position:absolute;inset:0;border-radius:inherit;background:rgba(0,0,0,.045);pointer-events:none}
-.thn.sky-n .pann{border-top-color:rgba(255,255,255,.1)}.thn.sky-n .pann::before{background:rgba(0,0,0,.14)}
-.pann .ic{flex:none;opacity:.75;display:inline-flex}
-.pann .tx{flex:1;min-width:0;font-weight:600;font-size:.94rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.pann .by{flex:none;display:flex;align-items:center;gap:6px;font-size:.75rem;opacity:.8}
+.msgl{display:flex;flex-direction:column;margin-top:18px}.msgl>b{font-size:.82rem;color:var(--muted);margin-bottom:2px}
+.msgl .r{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.msgl .r .b{flex:1;min-width:0}.msgl .r .h{font-size:.82rem;color:var(--muted)}.msgl .r .h b{color:var(--fg)}.msgl .r .x{margin-top:2px;overflow-wrap:anywhere}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .thn .panel .hchip{background:rgba(255,255,255,.12)}}:root[data-theme="dark"] .thn .panel .hchip{background:rgba(255,255,255,.12)}
 /* Duyuru notu: sıcak kâğıt, hafif eğik, üstte yazanın avatarı raptiye gibi */
 .lbl{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:22px 4px 8px}
@@ -834,7 +843,8 @@ function seed(){
    ['mekan','Moda sahilinde kahvaltı','Pazar sabahı','zeynep',['zeynep']]
   ].map(([type,title,note,by,want,dn],i)=>({id:uid(),type,title,note,by,want,rate:Object.fromEntries(want.map((m,j)=>[m,m===by?5:[4,3,5,2][(i+j)%4]])),at:now-(i+2)*26*H,done:!!dn,doneAt:dn?new Date(d(dn.d)).getTime():null,doneWith:dn?dn.with:[],mood:dn?dn.mood:'',planned:''})),
   freq:[['Süt',22,3,4],['Ekmek',25,2,1],['Yumurta',12,6,3],['Yoğurt',11,4,2],['Domates',10,5,2],['Peynir',9,7,8],['Zeytin',8,10,4],['Tavuk',7,7,9],['Çay',6,20,22],['Tuvalet kağıdı',6,14,6],['Elma',5,8,3],['Makarna',5,12,3]].map(([name,n,every,l])=>({id:fid(name),name,n,every,last:now-l*864e5})),
-  ann:{text:'Bu akşam misafir gelecek.',by:'ayse',at:Math.min(annAt.getTime(),now-30*60e3),until:null},
+  ann:null,
+  msgs:[['ayse','Bu akşam misafir gelecek.',Math.min(annAt.getTime(),now-30*60e3)],['mehmet','Yarın geç geleceğim, yemeği beklemeyin.',now-2*H],['zeynep','Matematikten 95 aldım 🎉',now-5*H],['fatma','Pazar sarma yapacağım, hepiniz gelin.',now-26*H]].map(([id,t,at])=>({id,t,at})),
   activity:[
    {id:uid(),who:'mehmet',text:'Alınacaklar listesine dizüstü bilgisayar ekledi',at:now-20*60e3},
    {id:uid(),who:'fatma',text:'Alınacaklar listesine elektrikli süpürge ekledi',at:now-75*60e3},
@@ -856,7 +866,7 @@ const FB_KEY='AIzaSyB6cyMIu_2Q5T1cAXTzDFPmXlPs0CWzQpg';
 const IDP_URL='https://identitytoolkit.googleapis.com/v1/accounts:signUp';
 const TOK_URL='https://securetoken.googleapis.com/v1/token';
 const KEY='bizim-ev.v1';
-const COLS=['members','events','tasks','lists','items','wishes','activity','freq'];
+const COLS=['members','events','tasks','lists','items','wishes','activity','freq','msgs'];
 let store;
 try{store=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{},auth:null,av:{},avi:{}},store&&typeof store==='object'?store:{});
@@ -918,7 +928,8 @@ function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
   case 'items':x.name=str(x.name)||'?';x.note=str(x.note);x.cat=str(x.cat)||'Diğer';if(!PRI[x.pri])x.pri='yakinda';x.for=str(x.for);x.list=str(x.list);x.done=!!x.done;x.doneAt=+x.doneAt||0;break;
   case 'wishes':x.title=str(x.title)||'?';x.note=str(x.note);{const p=x.place;if(p&&typeof p==='object'&&(str(p.n)||okMapsUrl(str(p.u))))x.place={n:str(p.n).slice(0,120),a:str(p.a).slice(0,200),u:okMapsUrl(str(p.u))?str(p.u):''};else delete x.place}if(!WT[x.type])x.type='yer';x.want=idList(x.want);{const r={};if(x.rate&&typeof x.rate==='object')for(const k in x.rate){const v=Math.round(+x.rate[k]);if(okId(k)&&v>=1&&v<=5)r[k]=v}x.want.forEach(m=>{if(!r[m])r[m]=3});x.rate=r;x.want=Object.keys(r)}x.doneWith=idList(x.doneWith);if(!MOODS.includes(x.mood))x.mood='';x.planned=okDate(x.planned)?x.planned:'';x.done=!!x.done;break;
   case 'activity':x.text=str(x.text);x.at=+x.at||0;break;
-  case 'freq':x.name=str(x.name)||'?';x.n=Math.max(0,+x.n||0);x.every=Math.max(0,+x.every||0);x.last=+x.last||0;break}
+  case 'freq':x.name=str(x.name)||'?';x.n=Math.max(0,+x.n||0);x.every=Math.max(0,+x.every||0);x.last=+x.last||0;break;
+  case 'msgs':x.t=str(x.t).slice(0,80);x.at=+x.at||0;break}
  return x}
 function flat(s){const o={};if(!s)return o;for(const c of COLS)for(const x of s[c]||[])o[c+'/'+x.id]=x;if(s.ann)o.ann=s.ann;if(s.meta)o.meta=s.meta;return o}
 function unflat(o){const s={meta:o.meta||{},ann:o.ann&&typeof o.ann==='object'?Object.assign({},o.ann,{text:str(o.ann.text)}):null};for(const c of COLS)s[c]=[];
@@ -1283,11 +1294,19 @@ function moonSVG(day){const p=Math.min(day-1,28.5)/29.53,k=Math.cos(2*Math.PI*p)
  return `<svg class="moon2" viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="mglow"><stop offset="50%" stop-color="#F6D98B" stop-opacity=".5"/><stop offset="100%" stop-color="#F6D98B" stop-opacity="0"/></radialGradient><linearGradient id="mlit" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FCEBB4"/><stop offset="1" stop-color="#E2B656"/></linearGradient></defs><circle cx="24" cy="24" r="23.5" fill="url(#mglow)"/><circle cx="24" cy="24" r="16" fill="var(--moon-dark)"/><path d="M24 8A16 16 0 0 ${wax?1:0} 24 40A${rx} 16 0 0 ${sw} 24 8Z" fill="url(#mlit)"/></svg>`}
 function selam(h,x,hj,fri){if(x&&x[1]==='kandil')return 'Kandiliniz mübarek olsun';if(x&&x[1]==='bayram')return 'Bayramınız mübarek olsun';if(hj&&hj.m===9)return 'Hayırlı Ramazanlar';if(fri)return 'Hayırlı cumalar';
  return h>=22||h<5?'Hayırlı geceler':h<12?'Hayırlı sabahlar':h<18?'Hayırlı günler':'Hayırlı akşamlar'}
+// Panodaki mesajlar: kişi başına bir mesaj (msgs/{üye}), sahibi kaldırana kadar durur. Eski aile duyurusu yazanın mesajı sayılır.
+function msgList(){const L=(S.msgs||[]).filter(x=>x.t&&S.members.some(m=>m.id===x.id));const a=annVisible()?S.ann:null;
+ if(a&&!L.some(x=>x.id===a.by)&&S.members.some(m=>m.id===a.by))L.push({id:a.by,t:a.text,at:a.at,old:true});return L.sort((x,y)=>y.at-x.at)}
+function pmcInner(L,i){const x=L[i%L.length];return `<span class="in">${av(x.id,'xs')}<span class="tx"><b>${esc(first(M(x.id).name))}</b>${esc(x.t)}</span></span>${L.length>1?`<span class="dots" aria-hidden="true">${L.map((_,j)=>`<i class="${j===i%L.length?'on':''}"></i>`).join('')}</span>`:`<span class="t">${ago(x.at).replace(' önce','')}</span>`}`}
+function msgStrip(){const L=msgList(),pen=`<button class="pmw" data-act="msgEdit" aria-label="Mesajını yaz">${I('edit','sm')}</button>`;
+ if(!L.length)return `<div class="pstrip"><button class="pmc" data-act="msgEdit"><span class="in"><span class="tx">Aileye bir mesaj bırak</span></span></button>${pen}</div>`;
+ const i=(UI.msgI||0)%L.length,x=L[i];
+ return `<div class="pstrip"><button class="pmc" data-act="msgNext" aria-label="${esc(M(x.id).name)}: ${esc(x.t)}${L.length>1?`. ${i+1}/${L.length}, sıradaki için dokun`:''}">${pmcInner(L,i)}</button>${pen}</div>`}
 function todayHead(){const m=me(),d=new Date(),h=d.getHours(),hj=hnum(d),x=holy(d),sk=h>=5&&h<11?'m':h>=11&&h<17?'d':h>=17&&h<21?'e':'n';
  const n=x?null:nextHoly(),ch=x?`<span class="hchip on">✦ <span>Bugün ${x[0]}</span></span>`:n&&n.n?`<span class="hchip">✦ <span>${n.n} · ${n.i===1?'yarın':n.i+' gün kaldı'}</span></span>`:'';
  const stars=sk==='e'||sk==='n'?[[75,12],[95,20],[88,8],[78,86],[96,78]].map(([a,b])=>`<i class="st" style="left:${a}%;top:${b}%"></i>`).join(''):'';
  const hjt=hj?`<div class="hj">${hj.d} ${HAY[hj.m-1]} ${hj.y} · ${phaseN(hj.d).replace(' ','&nbsp;')}</div>`:'',mb=hj?`<button class="mbtn" data-act="moonInfo" data-d="${hj.d}" aria-label="Ay: ${phaseN(hj.d)}">${moonSVG(hj.d)}</button>`:'';
- const an=annVisible()?S.ann:null,pa=an?`<button class="pann" data-act="annOpen" aria-label="Aile duyurusu, ${esc(M(an.by).name)}: ${esc(an.text)}"><span class="ic">${I('mega','sm')}</span><span class="tx">${esc(an.text)}</span><span class="by">${ago(an.at)}${av(an.by,'xs')}</span></button>`:'';
+ const pa=msgStrip();
  return `<div class="th thx thn sky-${sk}"><div class="r1"><div class="ov">${long(T())}</div></div><div class="thbtn"><button class="add" data-act="tdAdd" aria-label="Ekle">${I('plus')}</button><button class="icon-btn" data-act="myProfile" aria-label="Profilim">${av(m.id)}</button></div>
  <div class="panel${pa?' wa':''}"${hj?'':' style="padding-right:16px"'}>${stars}<h1>${selam(h,x,hj,d.getDay()===5)}</h1>${hjt}${ch}${mb}</div>${pa}</div>`}
 function vToday(){
@@ -1762,7 +1781,7 @@ const A={
  tdAdd:()=>{F={saKind:null};sheet('Ne eklemek istersin?',`<form data-form="smartAdd" autocomplete="off"><label class="sr" for="sa-in">Ne eklemek istersin?</label>
   <div class="sain">${I('sparkle','sm')}<input id="sa-in" placeholder="örn. Cumartesi 14.00 Zeynep yüzme" autofocus enterkeyhint="done"></div>
   <div id="sa-prev">${saHTML()}</div></form>
-  <div class="saalt"><span>ya da adım adım:</span>${[['newEvent','cal','Etkinlik'],['newTask','tasks','Görev'],['quickItem','tag','Alınacak'],...(can('announce')?[['annEdit','mega','Duyuru']]:[])].map(([a,i,n])=>`<button class="chip plain" data-act="${a}">${I(i,'sm')}${n}</button>`).join('')}</div>`)},
+  <div class="saalt"><span>ya da adım adım:</span>${[['newEvent','cal','Etkinlik'],['newTask','tasks','Görev'],['quickItem','tag','Alınacak'],['msgEdit','mega','Mesaj']].map(([a,i,n])=>`<button class="chip plain" data-act="${a}">${I(i,'sm')}${n}</button>`).join('')}</div>`)},
  saEx:d=>{const i=document.getElementById('sa-in');if(!i)return;i.value=d.v;F.saKind=null;saUpd();i.focus()},
  saKind:d=>{F.saKind=d.v;saUpd()},
  saMore:()=>{const p=F.sa;if(!p)return;const k=F.saKind||p.kind;
@@ -1771,7 +1790,7 @@ const A={
   taskForm(null,p.date||T());const g=id=>document.getElementById(id);g('tk-title').value=p.title;if(p.time)g('tk-time').value=p.time;if(TREP[p.repeat])g('tk-rep').value=p.repeat;
   if(p.members.length){F.who=[...p.members];F.many=p.members.length>1;const a=g('tk-as');if(a)a.innerHTML=asHTML()}
   document.querySelectorAll('.dtp input,.dtr input').forEach(x=>{try{dtSync(x)}catch(e){}})},
- annOpen:()=>{if(can('announce'))return A.annEdit();const a=S.ann;sheet('Aile duyurusu',`<section class="ann"><span class="ic">${I('mega')}</span><div class="body"><div class="txt">“${esc(a.text)}”</div><div class="meta">${esc(M(a.by).name)} · ${ago(a.at)}</div></div></section>`)},
+ msgNext:()=>{const L=msgList();if(L.length<2)return A.msgEdit();UI.msgI=((UI.msgI||0)+1)%L.length;const el=document.querySelector('.pmc[data-act="msgNext"]');if(!el)return render();const x=L[UI.msgI];el.innerHTML=pmcInner(L,UI.msgI);el.setAttribute('aria-label',`${M(x.id).name}: ${x.t}. ${UI.msgI+1}/${L.length}, sıradaki için dokun`)},
  famFeed:()=>sheet('Son değişiklikler',feedHTML(40)),
  install:()=>{if(installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;render(true)})}},
  share:()=>{if(store.mode!=='family'){toast('Örnek ailede davet gönderilemez.');return}
@@ -1963,11 +1982,11 @@ const A={
  quickItem:()=>quickItem(),
  qiList:(d,el)=>{F.list=d.id;document.querySelectorAll('#qi-lists .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.id===d.id));document.getElementById('qi-input').focus()},
  // Aile
- annEdit:()=>{if(!can('announce')){toast(PARENT);return}const a=annVisible()?S.ann:null;
-  sheet('Aile duyurusu',`<form data-form="ann" autocomplete="off"><div class="field"><label for="an-text">Herkesin ana ekranında görünür</label><textarea class="inp" id="an-text" maxlength="140" placeholder="örn. Bu akşam misafir gelecek." autofocus>${a?esc(a.text):''}</textarea><span class="note" style="margin:0" id="an-count">${a?a.text.length:0}/140</span></div>
-  <div class="field"><label for="an-until">Ne zaman kalksın?</label><select class="inp" id="an-until"><option value="">Ben kaldırana kadar</option><option value="mid">Bu gece yarısı</option><option value="24">24 saat sonra</option></select></div>
-  <button class="btn primary block">${a?'Güncelle':'Paylaş'}</button>${a?`<div style="text-align:center;margin-top:8px"><button type="button" class="link" style="color:var(--danger)" data-act="annDel">Duyuruyu kaldır</button></div>`:''}</form>`)},
- annDel:()=>{const u=snap();S.ann=null;log('aile duyurusunu kaldırdı');close();render(true);toast('Duyuru kaldırıldı',u)}
+ msgEdit:()=>{const me=meId(),m=msgList().find(x=>x.id===me),L=msgList().filter(x=>x.id!==me);close();
+  sheet('Mesajın',`<form data-form="msg" autocomplete="off"><div class="field"><label for="ms-t">Ailedeki herkes Bugün'de panoda görür</label><textarea class="inp" id="ms-t" maxlength="80" placeholder="örn. Bu akşam geç geleceğim" autofocus>${m?esc(m.t):''}</textarea></div>
+  <button class="btn primary block">${m?'Güncelle':'Paylaş'}</button>${m?`<div style="text-align:center;margin-top:8px"><button type="button" class="link" style="color:var(--danger)" data-act="msgDel">Mesajımı kaldır</button></div>`:''}</form>
+  ${L.length?`<div class="msgl"><b>Ailenin mesajları</b>${L.map(x=>`<div class="r">${av(x.id)}<div class="b"><div class="h"><b>${esc(M(x.id).name)}</b> · ${ago(x.at)}</div><div class="x">${esc(x.t)}</div></div></div>`).join('')}</div>`:''}`)},
+ msgDel:()=>{const me=meId(),u=snap();S.msgs=(S.msgs||[]).filter(x=>x.id!==me);if(S.ann&&S.ann.by===me)S.ann=null;close();render(true);toast('Mesajın kaldırıldı',u)}
 };
 
 const FORMS={
@@ -2031,9 +2050,9 @@ const FORMS={
  item:()=>{const g=id=>document.getElementById(id),i=S.items.find(x=>x.id===F.edit);if(!i)return;const nm=g('it-name').value.trim();if(!nm)return;
   const u=snap();Object.assign(i,{name:nm,for:F.for,pri:F.pri,note:g('it-note').value.trim(),cat:g('it-cat').value});log(`${low(nm)} ayrıntılarını güncelledi`);close();render(true);toast('Kaydedildi',u)},
  newList:()=>{const v=document.getElementById('nl-name').value.trim();if(!v)return;const id=uid();S.lists.push({id,name:v,icon:'tag',at:Date.now()});UI.list=id;log(`“${v}” listesini oluşturdu`);close();render();toast('Liste oluşturuldu')},
- ann:()=>{const v=document.getElementById('an-text').value.trim();if(!v)return;const un=document.getElementById('an-until').value;let until=null;
-  if(un==='mid'){const d=new Date();d.setHours(23,59,59,0);until=d.getTime()}else if(un==='24')until=Date.now()+864e5;
-  const u=snap();S.ann={text:v,by:meId(),at:Date.now(),until};log('aile duyurusunu güncelledi');close();render(true);toast('Duyuru paylaşıldı',u)}
+ msg:()=>{const t=document.getElementById('ms-t').value.trim().slice(0,80);if(!t)return A.msgDel();const me=meId(),u=snap();
+  S.msgs=S.msgs||[];const x=S.msgs.find(m=>m.id===me);if(x){x.t=t;x.at=Date.now()}else S.msgs.push({id:me,t,at:Date.now()});if(S.ann&&S.ann.by===me)S.ann=null;
+  UI.msgI=0;log('panoya mesaj bıraktı');close();render(true);toast('Mesajın panoda',u)}
 };
 
 /* ---------- Yardımcılar: katılım, kopyalama, hatırlatma ---------- */
