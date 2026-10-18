@@ -405,6 +405,13 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .lin .btn{min-height:42px;padding:0 14px}
 .lhint{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:.8rem;margin:8px 4px 2px}
 /* İsteklerimiz: sade satırlar, satırda 1-5 isteme puanı çubuğu (Instagram kaydırıcısı gibi) */
+.bkc{position:relative;display:block;flex:none;border-radius:2px 5px 5px 2px;overflow:hidden;background:var(--sunk);box-shadow:0 1px 3px rgba(0,0,0,.22)}.bkc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.bkc.css,.bkc>.css{display:flex;align-items:flex-start;background:linear-gradient(165deg,var(--a) 0 64%,#E8DCC8 64%);color:#fff;padding:7% 9%;box-shadow:inset 3px 0 0 rgba(0,0,0,.18)}.bkc>.css{position:absolute;inset:0;border-radius:0}.bkc i{font-style:normal;font-weight:800;line-height:1.05;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+.bkc.xs{width:30px;height:44px;justify-self:center}.bkc.xs i{font-size:5px}.bkc.sm{width:38px;height:56px}.bkc.sm i{font-size:6px}.bkc.md{width:72px;height:106px}.bkc.md i{font-size:10px}
+.bkhint{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--muted)}.bkmsg{font-size:.85rem;color:var(--muted);margin:8px 2px 0}
+.bklist{display:grid;margin-top:8px;border:1px solid var(--line);border-radius:16px;overflow:hidden}.bkrow{display:flex;gap:12px;align-items:center;padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);width:100%}.bkrow:last-child{border-bottom:0}.bkrow>span{display:grid;min-width:0}.bkrow b{font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bkrow span span{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bksel{display:flex;gap:14px;align-items:center;padding:10px;border-radius:16px;background:var(--sunk)}.bksel>span{flex:1;min-width:0;display:grid;gap:2px}.bksel>span span{font-size:.85rem;color:var(--muted)}
+.bkhead{display:flex;gap:14px;align-items:center;margin-bottom:8px}.bkhead>span{display:grid;gap:3px}.bkhead>span span{font-size:.875rem;color:var(--muted)}
 .wr{display:grid;grid-template-columns:36px minmax(0,1fr) auto;column-gap:12px;row-gap:4px;align-items:center;padding:10px 14px;position:relative;background:var(--surface)}
 .wr.wmv,.row.wmv{animation:wmv 1.8s ease-out}
 [data-tk]{background:var(--surface);position:relative}
@@ -741,6 +748,8 @@ const CAT_ICON=Object.fromEntries(ICAT.map(([c,i])=>[c,i]));CAT_ICON['Diğer']='
 const guessCat=name=>{const n=low(name);for(const[c,,ks]of ICAT)if(ks.some(k=>n.includes(k)))return c;return 'Diğer'};
 // İsteklerde mekan: Google Haritalar'dan paylaşılır ya da bağlantısı yapıştırılır. API anahtarı gerekmez.
 const isPlaceType=t=>t==='mekan'||t==='yer';
+// Kitap kapakları yalnızca Google Books ve Open Library'den, https ile
+const okCover=u=>{try{const x=new URL(u);return x.protocol==='https:'&&/^(books\.google\.[a-z.]+|books\.googleusercontent\.com|covers\.openlibrary\.org)$/.test(x.hostname)}catch(e){return false}};
 const okMapsUrl=u=>{try{const x=new URL(u);return x.protocol==='https:'&&(/^(maps\.app\.goo\.gl|goo\.gl|maps\.google\.[a-z.]+)$/.test(x.hostname)||(/^(www\.)?google\.[a-z.]+$/.test(x.hostname)&&x.pathname.startsWith('/maps')))}catch(e){return false}};
 const mapsUrl=p=>p.u||'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((p.n+' '+p.a).trim());
 const dirUrl=p=>'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent((p.n+' '+p.a).trim());
@@ -932,7 +941,7 @@ function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
   case 'tasks':x.title=str(x.title);if(!okDate(x.due))x.due=T();x.time=okTime(x.time)?x.time:'';x.rot=idList(x.rot);x.assignee=typeof x.assignee==='string'&&okId(x.assignee)?x.assignee:'';x.who=idList(x.who);x.dn=idList(x.dn);x.all=!!x.all;if(!TREP[x.repeat])x.repeat='none';x.done=!!x.done;break;
   case 'lists':x.name=str(x.name)||'Liste';if(!P[x.icon])x.icon='tag';break;
   case 'items':x.name=str(x.name)||'?';x.note=str(x.note);x.cat=str(x.cat)||'Diğer';if(!PRI[x.pri])x.pri='yakinda';x.for=str(x.for);x.list=str(x.list);x.done=!!x.done;x.doneAt=+x.doneAt||0;break;
-  case 'wishes':x.title=str(x.title)||'?';x.note=str(x.note);{const p=x.place;if(p&&typeof p==='object'&&(str(p.n)||okMapsUrl(str(p.u))))x.place={n:str(p.n).slice(0,120),a:str(p.a).slice(0,200),u:okMapsUrl(str(p.u))?str(p.u):''};else delete x.place}if(!WT[x.type])x.type='yer';x.want=idList(x.want);{const r={};if(x.rate&&typeof x.rate==='object')for(const k in x.rate){const v=Math.round(+x.rate[k]);if(okId(k)&&v>=1&&v<=5)r[k]=v}x.want.forEach(m=>{if(!r[m])r[m]=3});x.rate=r;x.want=Object.keys(r)}x.doneWith=idList(x.doneWith);if(!MOODS.includes(x.mood))x.mood='';x.planned=okDate(x.planned)?x.planned:'';x.done=!!x.done;break;
+  case 'wishes':x.title=str(x.title)||'?';x.note=str(x.note);{const p=x.place;if(p&&typeof p==='object'&&(str(p.n)||okMapsUrl(str(p.u))))x.place={n:str(p.n).slice(0,120),a:str(p.a).slice(0,200),u:okMapsUrl(str(p.u))?str(p.u):''};else delete x.place}if(!WT[x.type])x.type='yer';{const b=x.book;if(x.type==='kitap'&&b&&typeof b==='object'&&str(b.t))x.book={t:str(b.t).slice(0,160),a:str(b.a).slice(0,120),p:Math.max(0,Math.min(20000,Math.round(+b.p)||0)),y:/^\d{4}$/.test(str(b.y))?str(b.y):'',i:okCover(str(b.i))?str(b.i):''};else delete x.book}x.want=idList(x.want);{const r={};if(x.rate&&typeof x.rate==='object')for(const k in x.rate){const v=Math.round(+x.rate[k]);if(okId(k)&&v>=1&&v<=5)r[k]=v}x.want.forEach(m=>{if(!r[m])r[m]=3});x.rate=r;x.want=Object.keys(r)}x.doneWith=idList(x.doneWith);if(!MOODS.includes(x.mood))x.mood='';x.planned=okDate(x.planned)?x.planned:'';x.done=!!x.done;break;
   case 'activity':x.text=str(x.text);x.at=+x.at||0;break;
   case 'freq':x.name=str(x.name)||'?';x.n=Math.max(0,+x.n||0);x.every=Math.max(0,+x.every||0);x.last=+x.last||0;break;
   case 'msgs':x.t=str(x.t).slice(0,80);x.at=+x.at||0;break}
@@ -1424,16 +1433,17 @@ function vWishes(){
  if(UI.wrHold){const o=UI.wrOrd||[],ix=id=>{const i=o.indexOf(id);return i<0?-1:i};pend.sort((a,b)=>ix(a.id)-ix(b.id))}UI.wrOrd=pend.map(w=>w.id);
  const done=all.filter(w=>w.done&&(f==='all'||w.type===f)).sort((a,b)=>b.doneAt-a.doneAt);
  const cnt=k=>all.filter(w=>!w.done&&(k==='all'||w.type===k)).length;
- const row=w=>`<div class="wr" data-wid="${w.id}" style="--c:${WCOL[w.type]}"><span class="wi" aria-hidden="true">${I(WT[w.type][2])}</span>
-  <button class="tx" data-act="openWish" data-id="${w.id}"><b>${esc(w.title)}</b><small>${w.planned?`<span class="pl">${I('cal','sm')}${rel(w.planned)}</span>`:''}<span>${w.place?esc(area(w.place)):esc(first(M(w.by).name))+' önerdi'}</span></small></button>
+ const row=w=>`<div class="wr" data-wid="${w.id}" style="--c:${WCOL[w.type]}">${w.book?bkCover(w.book,'xs'):`<span class="wi" aria-hidden="true">${I(WT[w.type][2])}</span>`}
+  <button class="tx" data-act="openWish" data-id="${w.id}"><b>${esc(w.title)}</b><small>${w.planned?`<span class="pl">${I('cal','sm')}${rel(w.planned)}</span>`:''}<span>${w.book&&(w.book.a||w.book.p)?esc([w.book.a,w.book.p?w.book.p+' sayfa':''].filter(Boolean).join(' · ')):w.place?esc(area(w.place)):esc(first(M(w.by).name))+' önerdi'}</span></small></button>
   <span class="tot" aria-label="Ailenin toplamı ${rSum(w)} puan"><b>${rSum(w)}</b>puan</span>${rbarHTML(w.id,rOf(w)[me0]||0)}</div>`;
  return lTop(true)+itabs(Object.entries(WTAB).map(([k,[i,n]])=>({act:'wt',data:`data-v="${k}"`,on:f===k,i,n,cnt:cnt(k)})),'Tür')
  +(pend.length?`<div class="group" style="margin-top:12px">${pend.map(row).join('')}</div>`:`<div class="group" style="margin-top:12px">${emptyBox(f==='all'?'Henüz öneri yok':'Bu türde öneri yok','Gezmek, okumak, izlemek ya da yemek istediğiniz bir şeyi ekleyin.',`<br><button class="btn soft sm" data-act="newWish">${I('plus','sm')}Öneri ekle</button>`)}</div>`)
  +(done.length?`<div class="lbl"><span>Yaptıklarımız · ${done.length}</span></div><div class="wdone">${done.slice(0,UI.wdone?99:8).map(w=>`<button class="wd1" data-act="openWish" data-id="${w.id}" style="--c:${WCOL[w.type]}">${I(WT[w.type][2])}<span>${esc(w.title)}</span><span>${w.mood||''}</span></button>`).join('')}${done.length>8&&!UI.wdone?`<button class="link" data-act="wdone">Tümü (${done.length})</button>`:''}</div>`:'')}
-function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'?'yer':UI.wt)),edit:w?w.id:null,place:w?(w.place?{...w.place}:null):(pre.place||null),rate:4};
+function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'?'yer':UI.wt)),edit:w?w.id:null,place:w?(w.place?{...w.place}:null):(pre.place||null),book:w&&w.book?{...w.book}:null,rate:4};
  sheet(w?'Öneriyi düzenle':'Yeni öneri',`<form data-form="wish" autocomplete="off">
  <div class="field"><span class="flabel">Ne türde?</span><div class="chips" style="flex-wrap:wrap" id="wf-type">${Object.entries(WT).map(([k,v])=>`<button type="button" class="chip" data-act="fWt" data-v="${k}" aria-pressed="${F.wtype===k}">${I(v[2],'sm')}${v[1]}</button>`).join('')}</div></div>
  <div class="field"><label for="wf-title">Adı</label><input class="inp" id="wf-title" value="${w?esc(w.title):pre.title?esc(pre.title):''}" placeholder="örn. Kapadokya, Küçük Prens, Çiya Sofrası" autofocus><span class="err" id="wf-err" hidden>Bir ad yaz.</span></div>
+ <div class="field" id="wf-book"${F.wtype==='kitap'?'':' hidden'}>${bkHTML()}</div>
  <div class="field" id="wf-place"${isPlaceType(F.wtype)?'':' hidden'}>${wpHTML()}</div>
  <div class="field"><label for="wf-note">Not (isteğe bağlı)</label><input class="inp" id="wf-note" value="${w?esc(w.note):''}" placeholder="Yazar, yönetmen, neden güzel…"></div>
  ${w?'':`<div class="field"><span class="flabel">Ne kadar istiyorsun?</span>${rbarHTML('new',F.rate,'fRate')}</div>`}
@@ -1441,6 +1451,27 @@ function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'
 // Kopyalanmış harita bağlantısı: iPhone panoyu dokunmadan okutmaz. İzin verilmişse (Android) bakıp yalnızca bağlantı varsa,
 // değilse uygulamadan son 10 dakikada çıkılıp dönüldüyse (Haritalar'a gidip kopyalamış olabilir) kartı gösterir.
 const IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1;
+P.search='<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>';
+// Kitap arama: adını yazdıkça Google Books'tan (olmazsa Open Library) kapak, yazar ve sayfa sayısıyla sonuçlar (Goodreads gibi)
+const BKC=['#6E2B2B','#2E5A8A','#3E7C6B','#6B4C9A','#B8662B','#2F4F4F','#8A1E1E','#4B5B2E'];
+const bkCover=(b,sz)=>{const h=[...(b.t||'')].reduce((a,c)=>a+c.charCodeAt(0),0),ph=`<span class="bkc ${sz} css" style="--a:${BKC[h%BKC.length]}" aria-hidden="true"><i>${esc(b.t||'')}</i></span>`;
+ return b.i&&okCover(b.i)?`<span class="bkc ${sz}" aria-hidden="true"><img src="${esc(b.i)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">${ph}</span>`:ph};
+let bkSeq=0;
+async function bkSearch(q){q=q.trim();if(q.length<2)return [];const get=async u=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),6000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)throw 0;return await r.json()}finally{clearTimeout(t)}};
+ try{const j=await get(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=12&printType=books`);
+  const r=(j.items||[]).map(x=>x.volumeInfo||{}).filter(v=>v.title).sort((a,b)=>(b.language==='tr')-(a.language==='tr')).map(v=>{const im=v.imageLinks||{};return {t:String(v.title+(v.subtitle?': '+v.subtitle:'')).slice(0,160),a:(v.authors||[]).join(', ').slice(0,120),p:+v.pageCount||0,y:(String(v.publishedDate||'').match(/^\d{4}/)||[''])[0],i:String(im.thumbnail||im.smallThumbnail||'').replace(/^http:/,'https:').replace('&edge=curl','')}});
+  if(r.length)return r.slice(0,8)}catch(e){}
+ try{const j=await get(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=8&fields=title,author_name,number_of_pages_median,first_publish_year,cover_i`);
+  return (j.docs||[]).filter(d=>d.title).map(d=>({t:String(d.title).slice(0,160),a:(d.author_name||[]).slice(0,2).join(', '),p:+d.number_of_pages_median||0,y:d.first_publish_year?String(d.first_publish_year):'',i:d.cover_i?`https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg`:''}))}catch(e){return null}}
+function bkHTML(){const b=F.book;
+ if(b)return `<div class="bksel">${bkCover(b,'md')}<span><b>${esc(b.t)}</b>${b.a?`<span>${esc(b.a)}</span>`:''}${b.p||b.y?`<span>${[b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · ')}</span>`:''}</span><button type="button" class="icon-btn" data-act="bkClear" aria-label="Kitabı kaldır">${I('x')}</button></div>`;
+ return `<span class="bkhint">${I('search','sm')}Adını yazdıkça kitaplar kapağı ve sayfa sayısıyla burada çıkar</span><div id="bk-res" aria-live="polite"></div>`}
+function bkRefresh(){const f=document.getElementById('wf-book');if(!f)return;f.hidden=F.wtype!=='kitap';f.innerHTML=bkHTML()}
+let bkT=0;document.addEventListener('input',e=>{if(e.target.id!=='wf-title'||!F||F.wtype!=='kitap'||F.book)return;clearTimeout(bkT);const q=e.target.value,n=++bkSeq;
+ bkT=setTimeout(async()=>{const el=document.getElementById('bk-res');if(!el)return;if(q.trim().length<2){el.innerHTML='';return}el.innerHTML='<p class="bkmsg">Aranıyor…</p>';
+  const r=await bkSearch(q);if(n!==bkSeq)return;const e2=document.getElementById('bk-res');if(!e2)return;UI.bkRes=r||[];
+  e2.innerHTML=r===null?'<p class="bkmsg">Kitap aramasına şu an ulaşılamıyor. Adını yazıp ekleyebilirsin.</p>':!r.length?'<p class="bkmsg">Bulunamadı. Adını yazıp ekleyebilirsin.</p>'
+   :`<div class="bklist">${r.map((b,i)=>`<button type="button" class="bkrow" data-act="bkPick" data-i="${i}">${bkCover(b,'sm')}<span><b>${esc(b.t)}</b><span>${esc([b.a,b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · '))}</span></span></button>`).join('')}</div>`},400)});
 function wpHTML(){const p=F.place;
  if(p)return `<div class="wpcard">${I('pin')}<span class="tx"><b>${esc(p.n||(document.getElementById('wf-title')||{}).value||'Haritadaki yer')}</b>${p.a?`<span>${esc(p.a)}</span>`:''}<span class="src">Google Haritalar'dan</span></span><button type="button" class="x" data-act="wpClear" aria-label="Mekanı kaldır">${I('x')}</button></div>`;
  return `<div class="wpbox"><div class="st">${I('pin','sm')}<span>${IOS?`Google Haritalar'da mekanı aç, <b>Paylaş → Kopyala</b>'ya dokun, sonra bağlantıyı buraya yapıştır.`:`Google Haritalar'da mekanı aç, <b>Paylaş</b>'a dokun, listeden <b>Bizim Ev</b>'i seç. Ad ve adres buraya gelir.`}</span></div>
@@ -1963,7 +1994,9 @@ const A={
  wt:d=>{UI.wt=d.v;UI.wrHold=false;render(true)},
  wdone:()=>{UI.wdone=!UI.wdone;render(true)},
  newWish:()=>wishForm(null),
- fWt:d=>{F.wtype=d.v;document.querySelectorAll('#wf-type .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===d.v));wpRefresh()},
+ fWt:d=>{F.wtype=d.v;document.querySelectorAll('#wf-type .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===d.v));wpRefresh();bkRefresh()},
+ bkPick:d=>{const b=(UI.bkRes||[])[+d.i];if(!b)return;F.book=b;const t=document.getElementById('wf-title');if(t)t.value=b.t;bkRefresh()},
+ bkClear:()=>{F.book=null;UI.bkRes=[];bkRefresh();const t=document.getElementById('wf-title');t&&t.focus()},
  wpClear:()=>{F.place=null;wpRefresh()},
  wpPaste:()=>{const i=document.getElementById('wf-link'),v=i.value.trim(),p=v&&parsePlace('',v,'');
   if(!p||(!p.u&&/https?:\/\//.test(v))){document.getElementById('wf-lerr').hidden=false;i.focus();return}
@@ -1973,7 +2006,7 @@ const A={
   UI.wrHold=true;render(true);if(document.getElementById('ow-rate'))A.openWish({id:w.id});wrSettle(w.id)},
  fRate:d=>{F.rate=+d.v;const b=document.querySelector('.rbar[data-f]');if(b)rbPaint(b,F.rate)},
  openWish:d=>{const w=S.wishes.find(x=>x.id===d.id);if(!w)return;const own=w.by===meId()||!isChild(),ppl=Object.entries(rOf(w)).sort((a,b)=>b[1]-a[1]);
-  sheet(esc(w.title),`<div style="display:flex;gap:12px;align-items:center;margin-bottom:6px"><span class="wic">${I(WT[w.type][2])}</span><span><b>${WT[w.type][0]}</b><br><span style="color:var(--muted);font-size:.875rem">${esc(M(w.by).name)} önerdi · ${ago(w.at)}</span></span></div>
+  const bk=w.book;sheet(esc(w.title),`${bk?`<div class="bkhead">${bkCover(bk,'md')}<span>${bk.a?`<b>${esc(bk.a)}</b>`:''}${bk.p||bk.y?`<span>${[bk.p?bk.p+' sayfa':'',bk.y].filter(Boolean).join(' · ')}</span>`:''}<span>${esc(M(w.by).name)} önerdi · ${ago(w.at)}</span></span></div>`:`<div style="display:flex;gap:12px;align-items:center;margin-bottom:6px"><span class="wic">${I(WT[w.type][2])}</span><span><b>${WT[w.type][0]}</b><br><span style="color:var(--muted);font-size:.875rem">${esc(M(w.by).name)} önerdi · ${ago(w.at)}</span></span></div>`}
   ${w.note?`<p style="margin:8px 0 4px">${esc(w.note)}</p>`:''}
   ${w.place?`<div class="wpcard" style="margin:12px 0 4px">${I('pin')}<span class="tx"><b>${esc(w.place.n||w.title)}</b>${w.place.a?`<span>${esc(w.place.a)}</span>`:''}</span></div>
   <div class="actions" style="margin:8px 0 6px"><a class="btn soft" href="${esc(mapsUrl(w.place))}" target="_blank" rel="noopener">${I('pin','sm')}Haritada aç</a><a class="btn ghost" href="${esc(dirUrl({...w.place,n:w.place.n||w.title}))}" target="_blank" rel="noopener">Yol tarifi</a></div>`:''}
@@ -2064,8 +2097,8 @@ const FORMS={
  quickItem:()=>{const inp=document.getElementById('qi-input');const it=addItemTo(F.list,inp.value);if(!it)return;inp.value='';inp.focus();
   document.getElementById('qi-added').insertAdjacentHTML('afterbegin',`<div class="note">${I('check','sm')}<span>${esc(it.name)} → ${esc(S.lists.find(l=>l.id===F.list).name)} (${esc(it.cat)})</span></div>`);render(true)},
  wish:()=>{const g=id=>document.getElementById(id),t=g('wf-title').value.trim();if(!t){g('wf-err').hidden=false;return}const u=snap(),note=g('wf-note').value.trim();
-  const place=isPlaceType(F.wtype)&&F.place?{n:F.place.n||t,a:F.place.a||'',u:F.place.u||''}:undefined;
-  if(F.edit){const ex=S.wishes.find(x=>x.id===F.edit);if(!ex){close();toast('Bu öneri başka bir cihazda silinmiş.');return}Object.assign(ex,{title:t,note,type:F.wtype});if(place)ex.place=place;else delete ex.place}else{S.wishes.push({id:uid(),type:F.wtype,title:t,note,...(place?{place}:{}),by:meId(),want:[meId()],rate:{[meId()]:F.rate||4},at:Date.now(),done:false,doneAt:null,doneWith:[],mood:'',planned:''});log(`${WT[F.wtype][0].toLocaleLowerCase('tr')} listesine “${t}” önerisini ekledi`)}
+  const place=isPlaceType(F.wtype)&&F.place?{n:F.place.n||t,a:F.place.a||'',u:F.place.u||''}:undefined,book=F.wtype==='kitap'&&F.book?{t:F.book.t,a:F.book.a||'',p:F.book.p||0,y:F.book.y||'',i:F.book.i||''}:undefined;
+  if(F.edit){const ex=S.wishes.find(x=>x.id===F.edit);if(!ex){close();toast('Bu öneri başka bir cihazda silinmiş.');return}Object.assign(ex,{title:t,note,type:F.wtype});if(place)ex.place=place;else delete ex.place;if(book)ex.book=book;else delete ex.book}else{S.wishes.push({id:uid(),type:F.wtype,title:t,note,...(place?{place}:{}),...(book?{book}:{}),by:meId(),want:[meId()],rate:{[meId()]:F.rate||4},at:Date.now(),done:false,doneAt:null,doneWith:[],mood:'',planned:''});log(`${WT[F.wtype][0].toLocaleLowerCase('tr')} listesine “${t}” önerisini ekledi`)}
   close();render(true);toast(F.edit?'Kaydedildi':'Öneri eklendi',u)},
  wishDone:()=>{const w=S.wishes.find(x=>x.id===F.wid);if(!w)return;const u=snap();const dt=document.getElementById('wd-date').value||T();
   Object.assign(w,{done:true,doneAt:parse(dt).getTime()+12*3600e3,doneWith:F.with.length?F.with:[meId()],mood:F.mood});log(`“${w.title}” için “yaptık” dedi ${F.mood}`);close();UI.wdone=true;render(true);toast(`${w.title} · Yaptıklarımız'a eklendi`,u)},
