@@ -16,6 +16,8 @@
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://books.google.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
 <style>
 /* Telefonda tam ekran uygulama, altta 5 sekmeli menü; geniş ekranda ortada telefon genişliğinde bir çerçeve */
@@ -405,13 +407,13 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .lin .btn{min-height:42px;padding:0 14px}
 .lhint{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:.8rem;margin:8px 4px 2px}
 /* İsteklerimiz: sade satırlar, satırda 1-5 isteme puanı çubuğu (Instagram kaydırıcısı gibi) */
-.bkc{position:relative;display:block;flex:none;border-radius:2px 5px 5px 2px;overflow:hidden;background:var(--sunk);box-shadow:0 1px 3px rgba(0,0,0,.22)}.bkc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
-.bkc.css,.bkc>.css{display:flex;align-items:flex-start;background:linear-gradient(165deg,var(--a) 0 64%,#E8DCC8 64%);color:#fff;padding:7% 9%;box-shadow:inset 3px 0 0 rgba(0,0,0,.18)}.bkc>.css{position:absolute;inset:0;border-radius:0}.bkc i{font-style:normal;font-weight:800;line-height:1.05;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+.bkc{position:relative;display:block;flex:none;box-sizing:border-box;border-radius:2px 5px 5px 2px;overflow:hidden;background:var(--sunk);box-shadow:0 1px 3px rgba(0,0,0,.22)}.bkc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.bkc.css,.bkc>.css{display:flex;align-items:flex-start;background:linear-gradient(165deg,var(--a) 0 64%,#E8DCC8 64%);color:#fff;padding:3px 3px 3px 5px;box-shadow:inset 3px 0 0 rgba(0,0,0,.18)}.bkc.md.css,.bkc.md>.css{padding:7px 7px 7px 9px}.bkc>.css{position:absolute;inset:0;border-radius:0}.bkc i{font-style:normal;font-weight:800;line-height:1.05;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
 .bkc.xs{width:30px;height:44px;justify-self:center}.bkc.xs i{font-size:5px}.bkc.sm{width:38px;height:56px}.bkc.sm i{font-size:6px}.bkc.md{width:72px;height:106px}.bkc.md i{font-size:10px}
 .bkhint{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--muted)}.bkmsg{font-size:.85rem;color:var(--muted);margin:8px 2px 0}
-.bklist{display:grid;margin-top:8px;border:1px solid var(--line);border-radius:16px;overflow:hidden}.bkrow{display:flex;gap:12px;align-items:center;padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);width:100%}.bkrow:last-child{border-bottom:0}.bkrow>span{display:grid;min-width:0}.bkrow b{font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bkrow span span{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bksel{display:flex;gap:14px;align-items:center;padding:10px;border-radius:16px;background:var(--sunk)}.bksel>span{flex:1;min-width:0;display:grid;gap:2px}.bksel>span span{font-size:.85rem;color:var(--muted)}
-.bkhead{display:flex;gap:14px;align-items:center;margin-bottom:8px}.bkhead>span{display:grid;gap:3px}.bkhead>span span{font-size:.875rem;color:var(--muted)}
+.bklist{display:grid;margin-top:8px;border:1px solid var(--line);border-radius:16px;overflow:hidden}.bkrow{display:flex;gap:12px;align-items:center;padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);width:100%}.bkrow:last-child{border-bottom:0}.bkrow .bktx{display:grid;min-width:0}.bkrow b{font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bkrow .bktx span{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bksel{display:flex;gap:14px;align-items:center;padding:10px;border-radius:16px;background:var(--sunk)}.bksel .bktx{flex:1;min-width:0;display:grid;gap:2px}.bksel .bktx span{font-size:.85rem;color:var(--muted)}
+.bkhead{display:flex;gap:14px;align-items:center;margin-bottom:8px}.bkhead .bktx{display:grid;gap:3px;min-width:0}.bkhead .bktx span{font-size:.875rem;color:var(--muted)}
 .wr{display:grid;grid-template-columns:36px minmax(0,1fr) auto;column-gap:12px;row-gap:4px;align-items:center;padding:10px 14px;position:relative;background:var(--surface)}
 .wr.wmv,.row.wmv{animation:wmv 1.8s ease-out}
 [data-tk]{background:var(--surface);position:relative}
@@ -1464,14 +1466,14 @@ async function bkSearch(q){q=q.trim();if(q.length<2)return [];const get=async u=
  try{const j=await get(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=8&fields=title,author_name,number_of_pages_median,first_publish_year,cover_i`);
   return (j.docs||[]).filter(d=>d.title).map(d=>({t:String(d.title).slice(0,160),a:(d.author_name||[]).slice(0,2).join(', '),p:+d.number_of_pages_median||0,y:d.first_publish_year?String(d.first_publish_year):'',i:d.cover_i?`https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg`:''}))}catch(e){return null}}
 function bkHTML(){const b=F.book;
- if(b)return `<div class="bksel">${bkCover(b,'md')}<span><b>${esc(b.t)}</b>${b.a?`<span>${esc(b.a)}</span>`:''}${b.p||b.y?`<span>${[b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · ')}</span>`:''}</span><button type="button" class="icon-btn" data-act="bkClear" aria-label="Kitabı kaldır">${I('x')}</button></div>`;
+ if(b)return `<div class="bksel">${bkCover(b,'md')}<span class="bktx"><b>${esc(b.t)}</b>${b.a?`<span>${esc(b.a)}</span>`:''}${b.p||b.y?`<span>${[b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · ')}</span>`:''}</span><button type="button" class="icon-btn" data-act="bkClear" aria-label="Kitabı kaldır">${I('x')}</button></div>`;
  return `<span class="bkhint">${I('search','sm')}Adını yazdıkça kitaplar kapağı ve sayfa sayısıyla burada çıkar</span><div id="bk-res" aria-live="polite"></div>`}
 function bkRefresh(){const f=document.getElementById('wf-book');if(!f)return;f.hidden=F.wtype!=='kitap';f.innerHTML=bkHTML()}
 let bkT=0;document.addEventListener('input',e=>{if(e.target.id!=='wf-title'||!F||F.wtype!=='kitap'||F.book)return;clearTimeout(bkT);const q=e.target.value,n=++bkSeq;
  bkT=setTimeout(async()=>{const el=document.getElementById('bk-res');if(!el)return;if(q.trim().length<2){el.innerHTML='';return}el.innerHTML='<p class="bkmsg">Aranıyor…</p>';
   const r=await bkSearch(q);if(n!==bkSeq)return;const e2=document.getElementById('bk-res');if(!e2)return;UI.bkRes=r||[];
   e2.innerHTML=r===null?'<p class="bkmsg">Kitap aramasına şu an ulaşılamıyor. Adını yazıp ekleyebilirsin.</p>':!r.length?'<p class="bkmsg">Bulunamadı. Adını yazıp ekleyebilirsin.</p>'
-   :`<div class="bklist">${r.map((b,i)=>`<button type="button" class="bkrow" data-act="bkPick" data-i="${i}">${bkCover(b,'sm')}<span><b>${esc(b.t)}</b><span>${esc([b.a,b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · '))}</span></span></button>`).join('')}</div>`},400)});
+   :`<div class="bklist">${r.map((b,i)=>`<button type="button" class="bkrow" data-act="bkPick" data-i="${i}">${bkCover(b,'sm')}<span class="bktx"><b>${esc(b.t)}</b><span>${esc([b.a,b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · '))}</span></span></button>`).join('')}</div>`},250)});
 function wpHTML(){const p=F.place;
  if(p)return `<div class="wpcard">${I('pin')}<span class="tx"><b>${esc(p.n||(document.getElementById('wf-title')||{}).value||'Haritadaki yer')}</b>${p.a?`<span>${esc(p.a)}</span>`:''}<span class="src">Google Haritalar'dan</span></span><button type="button" class="x" data-act="wpClear" aria-label="Mekanı kaldır">${I('x')}</button></div>`;
  return `<div class="wpbox"><div class="st">${I('pin','sm')}<span>${IOS?`Google Haritalar'da mekanı aç, <b>Paylaş → Kopyala</b>'ya dokun, sonra bağlantıyı buraya yapıştır.`:`Google Haritalar'da mekanı aç, <b>Paylaş</b>'a dokun, listeden <b>Bizim Ev</b>'i seç. Ad ve adres buraya gelir.`}</span></div>
@@ -2006,7 +2008,7 @@ const A={
   UI.wrHold=true;render(true);if(document.getElementById('ow-rate'))A.openWish({id:w.id});wrSettle(w.id)},
  fRate:d=>{F.rate=+d.v;const b=document.querySelector('.rbar[data-f]');if(b)rbPaint(b,F.rate)},
  openWish:d=>{const w=S.wishes.find(x=>x.id===d.id);if(!w)return;const own=w.by===meId()||!isChild(),ppl=Object.entries(rOf(w)).sort((a,b)=>b[1]-a[1]);
-  const bk=w.book;sheet(esc(w.title),`${bk?`<div class="bkhead">${bkCover(bk,'md')}<span>${bk.a?`<b>${esc(bk.a)}</b>`:''}${bk.p||bk.y?`<span>${[bk.p?bk.p+' sayfa':'',bk.y].filter(Boolean).join(' · ')}</span>`:''}<span>${esc(M(w.by).name)} önerdi · ${ago(w.at)}</span></span></div>`:`<div style="display:flex;gap:12px;align-items:center;margin-bottom:6px"><span class="wic">${I(WT[w.type][2])}</span><span><b>${WT[w.type][0]}</b><br><span style="color:var(--muted);font-size:.875rem">${esc(M(w.by).name)} önerdi · ${ago(w.at)}</span></span></div>`}
+  const bk=w.book;sheet(esc(w.title),`${bk?`<div class="bkhead">${bkCover(bk,'md')}<span class="bktx">${bk.a?`<b>${esc(bk.a)}</b>`:''}${bk.p||bk.y?`<span>${[bk.p?bk.p+' sayfa':'',bk.y].filter(Boolean).join(' · ')}</span>`:''}<span>${esc(M(w.by).name)} önerdi · ${ago(w.at)}</span></span></div>`:`<div style="display:flex;gap:12px;align-items:center;margin-bottom:6px"><span class="wic">${I(WT[w.type][2])}</span><span><b>${WT[w.type][0]}</b><br><span style="color:var(--muted);font-size:.875rem">${esc(M(w.by).name)} önerdi · ${ago(w.at)}</span></span></div>`}
   ${w.note?`<p style="margin:8px 0 4px">${esc(w.note)}</p>`:''}
   ${w.place?`<div class="wpcard" style="margin:12px 0 4px">${I('pin')}<span class="tx"><b>${esc(w.place.n||w.title)}</b>${w.place.a?`<span>${esc(w.place.a)}</span>`:''}</span></div>
   <div class="actions" style="margin:8px 0 6px"><a class="btn soft" href="${esc(mapsUrl(w.place))}" target="_blank" rel="noopener">${I('pin','sm')}Haritada aç</a><a class="btn ghost" href="${esc(dirUrl({...w.place,n:w.place.n||w.title}))}" target="_blank" rel="noopener">Yol tarifi</a></div>`:''}

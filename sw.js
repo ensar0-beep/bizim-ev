@@ -4,10 +4,13 @@
   2) Firebase isteklerine dokunmaz; eşitleme her zaman doğrudan sunucuyla yapılır.
   Yeni sürüm yayınlarken CACHE adını artır.
 */
-const CACHE = "bizim-ev-v51";
+const CACHE = "bizim-ev-v52";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icons/icon-192.png",
   "./icons/icon-512.png", "./icons/favicon.svg", "./icons/apple-touch-icon.png"];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
+// Kitap kapakları ayrı bir önbellekte durur (sürüm değişince silinmez): liste ikinci açılışta beklemeden gelir.
+const COVERS = "bizim-ev-kapak";
+const COVER_HOSTS = /^(books\.google\.[a-z.]+|books\.googleusercontent\.com|covers\.openlibrary\.org)$/;
 
 self.addEventListener("install", (e) => {
   // cache: "reload" — tarayıcının HTTP önbelleğindeki eski kopyayı değil, sunucudakini al.
@@ -18,7 +21,7 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => k !== CACHE && k !== COVERS).map((k) => caches.delete(k)))
     )
   );
   self.clients.claim();
@@ -29,6 +32,20 @@ self.addEventListener("fetch", (e) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   const sameOrigin = url.origin === self.location.origin;
+  if (COVER_HOSTS.test(url.hostname) && req.destination === "image") {
+    e.respondWith(
+      caches.open(COVERS).then((c) =>
+        c.match(req).then((hit) => hit || fetch(req).then((res) => {
+          if (res.ok || res.type === "opaque") {
+            c.put(req, res.clone());
+            c.keys().then((ks) => ks.slice(0, Math.max(0, ks.length - 80)).forEach((k) => c.delete(k)));
+          }
+          return res;
+        }))
+      )
+    );
+    return;
+  }
   if (!sameOrigin && !FONT_HOSTS.includes(url.hostname)) return; // Firebase ve diğerleri: dokunma
 
   // Sayfanın kendisi: önce ağ (yeni sürüm gelsin), olmazsa önbellek.
