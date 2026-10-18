@@ -406,7 +406,10 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .lhint{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:.8rem;margin:8px 4px 2px}
 /* İsteklerimiz: sade satırlar, satırda 1-5 isteme puanı çubuğu (Instagram kaydırıcısı gibi) */
 .wr{display:grid;grid-template-columns:36px minmax(0,1fr) auto;column-gap:12px;row-gap:4px;align-items:center;padding:10px 14px;position:relative;background:var(--surface)}
-.wr.wmv{animation:wmv 1.8s ease-out}@keyframes wmv{0%,30%{background:var(--accent-soft)}100%{background:var(--surface)}}
+.wr.wmv,.row.wmv{animation:wmv 1.8s ease-out}
+[data-tk]{background:var(--surface);position:relative}
+.tkday small{color:var(--muted);font-weight:600;margin-left:6px}
+.dcsum{margin-top:14px;padding:12px 14px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow)}.dcsum>b{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.dcsum>div{display:flex;gap:16px;margin-top:10px;overflow-x:auto}.dcsum span{display:grid;justify-items:center;gap:3px;font-size:.75rem;color:var(--muted);flex:none}.dcsum em{font-style:normal;font-weight:800;font-size:1.05rem;color:var(--fg);line-height:1}@keyframes wmv{0%,30%{background:var(--accent-soft)}100%{background:var(--surface)}}
 .wup{position:absolute;bottom:8px;left:12px;font-size:.72rem;font-weight:800;color:#2E9E62;background:rgba(46,158,98,.13);padding:1px 6px;border-radius:99px;animation:wup 1.8s ease-out forwards;pointer-events:none}.wup.dn{color:#C2502F;background:rgba(194,80,47,.12)}@keyframes wup{0%{opacity:0;transform:translateY(4px)}15%,75%{opacity:1;transform:none}100%{opacity:0}}
 .wr+.wr::before{content:"";position:absolute;top:0;left:62px;right:0;border-top:1px solid var(--line)}
 .wr .wi{grid-row:1/3;align-self:start;margin-top:2px;width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:var(--c);background:color-mix(in srgb,var(--c) 12%,var(--surface))}
@@ -874,6 +877,7 @@ try{store=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{},auth:null,av:{},avi:{}},store&&typeof store==='object'?store:{});
 let S=null,baseC={};
 const UI={shop:null,shopAt:0,joinFor:null,joinShown:false,tab:'today',cal:'flow',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,lmode:'buy',wt:'all',wdone:false,net:'online',err:null};
+UI.dcKeep=new Set();
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){try{store.av={};store.avi={};localStorage.setItem(KEY,JSON.stringify(store))}catch(x){}}};
 const meId=()=>store.mode==='demo'?store.demoMe:store.me;
 const M=id=>(S&&S.members.find(m=>m.id===id))||{id,name:'Eski üye',color:'#8A8178',role:'adult',rel:''};
@@ -1083,12 +1087,12 @@ function evRow(e,day){const c=e.members.length>=S.members.length&&S.members.leng
   <span class="body"><span class="t">${esc(e.title)}</span><span class="m"><span>${I(CATS[e.cat][1],'sm')}${CATS[e.cat][0]}</span>${e.loc?`<span>${I('pin','sm')}${esc(e.loc)}</span>`:''}</span></span>
   ${isAll(e)?famBadge():avs(e.members)}<span class="sr">Katılanlar: ${isAll(e)?'Bütün aile':e.members.map(x=>M(x).name).join(', ')}</span></button>`}
 function taskRow(t){const late=!t.done&&t.due<T();const nx=nextIn(t);const ok=can('task.complete',t);
- return `<div class="row${t.done?' done':''}" data-sw="task" data-id="${t.id}">
+ return `<div class="row${t.done?' done':''}" data-sw="task" data-id="${t.id}" data-tk="${t.id}">
   <button class="chk" data-act="toggleTask" data-id="${t.id}" aria-pressed="${myTick(t)}" aria-label="${esc(t.title)}: ${myTick(t)?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}><span>${I('check','sm')}</span></button>
   <button class="body tap" style="text-align:left" data-act="openTask" data-id="${t.id}">
    <span class="t">${esc(t.title)}</span>
    <span class="m">${whoHTML(t,true)}
-   ${t.done?`<span>${t.doneAt?ago(t.doneAt):''}</span>`:`<span>${I('clock','sm')}${rel(t.due)}${t.time?' '+hm(t.time):''}</span>`}
+   ${t.done?`<span>${t.doneAt?(iso(new Date(t.doneAt))===T()?new Date(t.doneAt).toLocaleTimeString('tr',{hour:'2-digit',minute:'2-digit'}):ago(t.doneAt)):''}</span>`:`<span>${I('clock','sm')}${rel(t.due)}${t.time?' '+hm(t.time):''}</span>`}
    ${late?'<span class="tag late">Gecikti</span>':''}
    ${t.repeat!=='none'&&!t.done?`<span>${I('repeat','sm')}${TREP[t.repeat]}</span>`:''}
    ${nx&&!t.done?`<span class="tag rot">Sırada: ${esc(M(nx).name)}</span>`:''}</span>
@@ -1469,14 +1473,26 @@ function itemForm(i){F={for:i.for||'',pri:i.pri||'yakinda',edit:i.id};
 // Çocuk yalnızca kendi görevlerini görür.
 function vTasks(){
  const t=T(),mine=meId(),v=UI.tkb||'today',kid=isChild(),vis=x=>!kid||isFor(x,mine);
- const open=S.tasks.filter(x=>!x.done&&vis(x)).sort((a,b)=>(a.due+(a.time||'99')).localeCompare(b.due+(b.time||'99')));
+ const byDue=(a,b)=>(a.due+(a.time||'99')).localeCompare(b.due+(b.time||'99')),open=S.tasks.filter(x=>!x.done&&vis(x)).sort(byDue);
  const sec=(n,a,red)=>`<div class="sec-h" style="margin-top:20px"><h2 class="sec"${red?' style="color:var(--danger)"':''}>${n}</h2><small style="color:var(--muted)">${a.length}</small></div>`;
  let body='';
- if(v==='today'){const mid=parse(t).getTime(),late=open.filter(x=>x.due<t),td=open.filter(x=>x.due===t),my=td.filter(x=>isFor(x,mine)),oth=td.filter(x=>!isFor(x,mine)),dn=S.tasks.filter(x=>x.done&&vis(x)&&(x.doneAt||0)>=mid).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
-  body=(late.length?sec('Geciken',late,1)+`<div class="group">${late.map(taskRow).join('')}</div>`:'')
-   +sec(kid?'Bugün':'Senin bugünün',my)+`<div class="group">${my.map(taskRow).join('')||`<div class="tkfree">${late.length?'Bugüne başka işin yok.':'Bugün sana iş yok.'}</div>`}</div>`
-   +(oth.length?sec('Ailenin bugünü',oth)+`<div class="group">${oth.map(taskRow).join('')}</div>`:'')
-   +(dn.length?`<button class="tkmore" data-act="tkUp" aria-expanded="${!!UI.tkUp}">${I(UI.tkUp?'chevD':'chevR','sm')}Bugün yapılanlar<span class="n">${dn.length}</span></button>${UI.tkUp?`<div class="group">${dn.map(taskRow).join('')}</div>`:''}`:'')}
+ // Yapılan iş gün bitene kadar kendi bölümünün altında, kimin yaptığıyla durur (Skylight gibi). Az önce işaretlenen, kısa bir süre yerinde kalıp kayar (dcKeep)
+ if(v==='today'){const mid=parse(t).getTime(),K=UI.dcKeep,kp=x=>x.done&&K.has(x.id),vi=x=>vis(x)&&(!x.done||kp(x));
+  const late=S.tasks.filter(x=>vi(x)&&x.due<t).sort(byDue),td=S.tasks.filter(x=>vi(x)&&x.due===t).sort(byDue),dn=S.tasks.filter(x=>x.done&&vis(x)&&!kp(x)&&(x.doneAt||0)>=mid).sort((a,b)=>(a.doneAt||0)-(b.doneAt||0));
+  const my=td.filter(x=>isFor(x,mine)),oth=td.filter(x=>!isFor(x,mine)),dm=dn.filter(x=>isFor(x,mine)),dO=dn.filter(x=>!isFor(x,mine));
+  const H=(n,a,d,red)=>{const all=a.length+d.length,ok=d.length+a.filter(x=>x.done).length;return `<div class="sec-h" style="margin-top:20px"><h2 class="sec"${red?' style="color:var(--danger)"':''}>${n}</h2><small style="color:var(--muted)">${red?a.filter(x=>!x.done).length:all?ok+'/'+all:0}</small></div>`};
+  body=(late.length?H('Geciken',late,[],1)+`<div class="group">${late.map(taskRow).join('')}</div>`:'')
+   +H(kid?'Bugün':'Senin bugünün',my,dm)+`<div class="group">${my.concat(dm).map(taskRow).join('')||`<div class="tkfree">${late.length?'Bugüne başka işin yok.':'Bugün sana iş yok.'}</div>`}</div>`
+   +(oth.length||dO.length?H('Ailenin bugünü',oth,dO)+`<div class="group">${oth.concat(dO).map(taskRow).join('')}</div>`:'')
+   +`<button class="tkmore" data-act="tkb" data-v="dn">${I('chevR','sm')}Bütün yapılanlar</button>`}
+ // Yapılanlar: bu hafta kim kaç iş yaptı, altında son iki hafta gün gün (Things'in kayıt defteri gibi)
+ if(v==='dn'){const from=add(t,-13),fm=parse(monday(t)).getTime(),D=S.tasks.filter(x=>x.done&&vis(x)&&x.doneAt&&iso(new Date(x.doneAt))>=from),dd=x=>iso(new Date(x.doneAt));
+  const wk=S.members.filter(m=>!kid||m.id===mine).map(m=>({m,n:D.filter(x=>(x.doneBy||x.assignee)===m.id&&x.doneAt>=fm).length})).sort((a,b)=>b.n-a.n);
+  const days=[...new Set(D.map(dd))].sort().reverse();
+  body=`<div class="dcsum"><b>Bu hafta</b><div>${wk.map(({m,n})=>`<span>${av(m.id,'sm')}<em>${n}</em>${esc(first(m.name))}</span>`).join('')}</div></div>`
+   +(days.map(d=>{const a=D.filter(x=>dd(x)===d).sort((x,y)=>y.doneAt-x.doneAt);return `<div class="tkday">${d===t?'Bugün':d===add(t,-1)?'Dün':esc(parse(d).toLocaleDateString('tr',{weekday:'long',day:'numeric',month:'long'}))}<small>${a.length}</small></div><div class="group">${a.map(taskRow).join('')}</div>`}).join('')
+    ||`<div class="group" style="margin-top:16px">${emptyBox('Henüz yapılan yok','Tamamlanan görevler burada gün gün durur.')}</div>`)
+   +`<p class="note" style="margin-top:12px">${I('info','sm')}<span>Son iki hafta. Yanlışlıkla işaretlediğini satırdaki daireye dokunarak geri açabilirsin.</span></p>`}
  if(v==='up'){const up=open.filter(x=>x.due>t),days=[...new Set(up.map(x=>x.due))];
   body=days.map(d=>{const a=up.filter(x=>x.due===d),dn=d===add(t,1)?'Yarın':parse(d).toLocaleDateString('tr',{weekday:'long',day:'numeric',month:'long'});return `<div class="tkday">${esc(dn)}</div><div class="group">${a.map(taskRow).join('')}</div>`}).join('')
    ||`<div class="group" style="margin-top:16px">${emptyBox('Yaklaşan görev yok','Bugünden sonrası için eklenen görevler burada gün gün görünür.')}</div>`}
@@ -1485,7 +1501,7 @@ function vTasks(){
    +(R.map(([r,n])=>{const a=rt.filter(x=>x.repeat===r);return a.length?`<div class="tkday">${esc(n)}</div><div class="group">${a.map(x=>{const nx=nextIn(x);return `<div class="row"><span class="wic">${I('repeat','sm')}</span><button class="body tap" style="text-align:left" data-act="openTask" data-id="${x.id}"><span class="t">${esc(x.title)}</span><span class="m">${whoHTML(x,true)}<span>${I('clock','sm')}${rel(x.due)}${x.time?' '+hm(x.time):''}</span>${nx?`<span class="tknx">Sonra: ${esc(first(M(nx).name))}</span>`:''}</span></button></div>`}).join('')}</div>`:''}).join('')
    ||`<div class="group">${emptyBox('Rutin yok','Bir görevi eklerken “Daha fazla seçenek”ten tekrar seçersen burada durur.')}</div>`)}
  return `<div class="hdr"><div class="h"><h1>Görevler</h1></div><button class="btn primary sm" data-act="newTask">${I('plus','sm')}Ekle</button></div>${kid?starsHTML():''}
- <div class="seg" role="group" aria-label="Görünüm">${[['today','Bugün'],['up','Yaklaşan'],['rt','Rutinler']].map(([k,n])=>`<button data-act="tkb" data-v="${k}" aria-pressed="${v===k}">${n}</button>`).join('')}</div>${body}`}
+ <div class="seg" role="group" aria-label="Görünüm">${[['today','Bugün'],['up','Yaklaşan'],['rt','Rutinler'],['dn','Yapılanlar']].map(([k,n])=>`<button data-act="tkb" data-v="${k}" aria-pressed="${v===k}">${n}</button>`).join('')}</div>${body}`}
 
 // Aile sekmesi: kişiler, davet satırı ve son 3 değişiklik. Ayarlar sağ üstteki dişlide, gruplu bir sayfada.
 // Duyuru ayarlarda yok; Bugün ekranından değiştirilir.
@@ -1743,7 +1759,7 @@ function addItemTo(list,raw){raw=raw.trim();if(!raw)return null;
 
 /* ---------- Eylemler ---------- */
 const A={
- tab:d=>{UI.tab=d.tab;UI.wrHold=false;render()},
+ tab:d=>{UI.tab=d.tab;UI.wrHold=false;UI.dcKeep.clear();render()},
  close:()=>close(),
  undo:()=>{const u=toast.undo;document.getElementById('toastwrap').innerHTML='';u&&u()},
  // Karşılama, aile kurma ve katılma
@@ -1905,11 +1921,12 @@ const A={
  fRot:d=>{F.rot=F.rot.includes(d.id)?F.rot.filter(x=>x!==d.id):[...F.rot,d.id];document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true});if(F.rot[0]){F.who=[F.rot[0]];asRefresh()}},
  // Görevler
  tf:d=>{UI.tf=d.v;render(true)},
- tkb:d=>{UI.tkb=d.v;UI.tkUp=false;render(true)},
+ tkb:d=>{UI.tkb=d.v;UI.tkUp=false;UI.dcKeep.clear();render(true)},
  tkUp:()=>{UI.tkUp=!UI.tkUp;render(true)},
  newTask:()=>taskForm(null),
  sugAdd:d=>{const it=addItemTo(UI.list,d.v);if(!it)return;render(true);const g=document.getElementById('sugg'),q=document.getElementById('item-input');if(g)g.innerHTML=suggHTML(q?q.value:'');toast(`${it.name} eklendi`)},
- toggleTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const u=snap();
+ toggleTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;if(!t.done&&UI.tab==='tasks')UI.dcKeep.add(t.id);else UI.dcKeep.delete(t.id);A.tkDone(d);if(!t.done){UI.dcKeep.delete(t.id);return}if(UI.dcKeep.has(t.id))dcSettle(t.id)},
+ tkDone:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const u=snap();
   if(t.done){t.done=false;delete t.doneAt;t.dn=[];log(`“${t.title}” görevini yeniden açtı`);render(true);toast('Görev yeniden açıldı',u);return}
   const mm=meId();
   if(allRule(t)&&isFor(t,mm)){t.dn=[...(t.dn||[])];
@@ -2111,6 +2128,13 @@ function endSw(){if(!SW)return;const s=SW;SW=null;if(!s.on)return;swallow=true;s
 document.addEventListener('click',e=>{if(swallow){e.stopPropagation();e.preventDefault();swallow=false}},true);
 // İsteme puanı çubuğu: parmak kaydırınca canlı dolar, bırakınca kaydedilir (formdaysa formun puanı olur)
 // Sıra değişince satırlar eski yerinden yenisine kayar (FLIP); taşınan satır bir an parlar ve ↑N rozeti gösterir (Duolingo lig tablosu gibi)
+// Görevler'de işaretlenen görev 1 sn yerinde kalır, sonra bölümünün altına kayar ve bir an parlar
+function dcSettle(id){clearTimeout(UI.dcT);UI.dcT=setTimeout(()=>{if(UI.tab!=='tasks'||document.querySelector('.sheet'))return;
+ const sc=document.getElementById('screen'),pos={};sc.querySelectorAll('[data-tk]').forEach(e=>pos[e.dataset.tk]=e.getBoundingClientRect().top);UI.dcKeep.clear();render(true);
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ sc.querySelectorAll('[data-tk]').forEach(e=>{const p=pos[e.dataset.tk];if(p==null)return;const d=p-e.getBoundingClientRect().top,me=e.dataset.tk===id;if(me)e.classList.add('wmv');if(Math.abs(d)<1)return;
+  e.style.transition='none';e.style.transform=`translateY(${d}px)`;e.style.zIndex=me?3:1;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{e.style.transition='transform .5s cubic-bezier(.2,.8,.2,1)';e.style.transform='';setTimeout(()=>{e.style.zIndex='';e.style.transition=''},550)}))})},1100)}
 function wrSettle(id){clearTimeout(UI.wrT);UI.wrT=setTimeout(()=>{if(UI.tab!=='lists'||UI.lmode!=='wish'||RB||document.querySelector('.sheet'))return;
  const sc=document.getElementById('screen'),pos={},o0=(UI.wrOrd||[]).slice();sc.querySelectorAll('[data-wid]').forEach(e=>pos[e.dataset.wid]=e.getBoundingClientRect().top);
  UI.wrHold=false;render(true);const o1=UI.wrOrd||[],up=o0.indexOf(id)-o1.indexOf(id),e=sc.querySelector(`[data-wid="${id}"]`);
