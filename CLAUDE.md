@@ -27,6 +27,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Places in wishes.** For `mekan`/`yer` wishes, `wish.place = {n, a, u}` (name, address, Google Maps link). It arrives through the manifest `share_target` (Google Maps → Paylaş → Bizim Ev opens `./?text=…`, parsed by `parsePlace()` at boot) or a pasted link in the wish form. No Maps API key: detail buttons use plain Google Maps URLs (`mapsUrl`, `dirUrl`). `okMapsUrl()` only accepts https Google Maps hosts; `norm()` drops anything else.
 
+**Books in wishes.** For `kitap` wishes, `wish.book = {t, a, p, y, i}` (title, author, pages, year, cover URL). Typing the title in the wish form searches Google Books (keyless, CORS) and falls back to Open Library (`bkSearch`); picking a result fills it. `okCover()` only accepts https covers from Google Books / Open Library hosts; `norm()` drops anything else. Without a cover, `bkCover()` draws a coloured placeholder.
+
 **Bugün header.** `todayHead()` draws a panel tinted by the hour (`sky-m/d/e/n`) with the greeting (`selam()`: Hayırlı …; Friday, kandil, bayram and Ramazan variants), the Hijri date and moon phase (`hnum()` via Intl `islamic-umalqura`, `moonSVG`), and the next holy day (`holy()`, `nextHoly()`). Hijri dates can be one day off from Diyanet. Under it, `msgStrip()` shows the family's messages one at a time (`msgs/{memberId} = {t, at}`, one per person, kept until its owner removes it; tap = next, pencil = `msgEdit`). An old `ann` counts as its author's message until they write one.
 
 **Undo.** `snap()` captures the flattened state before a change; `toast(msg, undo)` captures the state after it. Undo reverts only the paths that this change touched, so it doesn't clobber edits from other phones.
