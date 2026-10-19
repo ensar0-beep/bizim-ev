@@ -194,6 +194,10 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .ann .txt{font-size:1.125rem;font-weight:600;line-height:1.35}
 .ann .meta{color:var(--muted);font-size:.875rem;margin-top:6px}
 .ann .body{flex:1;min-width:0}
+/* Gün akışında görev satırı: etkinlikten çok hafif kâğıt rengi zeminle ayrılır, "Görev" yazısı yok */
+.row.ctask{background:color-mix(in srgb,var(--sunk) 60%,var(--surface))}
+.row.ctask .t{font-weight:500}
+.row.ctask .mbar{opacity:.6}
 /* Bugün başlığı: tarih, selam, tek + */
 .th{display:flex;align-items:center;gap:10px;margin:2px 0 16px}
 .th .h{flex:1;min-width:0}
@@ -1130,7 +1134,7 @@ function cTaskRow(t){const late=!t.done&&t.due<T();const ok=can('task.complete',
   ${t.time?`<span class="time">${hm(t.time)}</span>`:`<span class="time ad">Gün<br>içinde</span>`}
   <span class="mbar dash" style="--c:${ws(t).length>1?'var(--accent)':M(t.assignee).color}"></span>
   <button class="body tap" style="text-align:left" data-act="openTask" data-id="${t.id}"><span class="t">${esc(t.title)}</span>
-   <span class="m"><span>${I('tasks','sm')}Görev</span>${whoHTML(t)}${late?`<span class="tag late">Gecikti · ${rel(t.due)}</span>`:''}${t.repeat!=='none'&&!t.done?`<span>${I('repeat','sm')}${TREP[t.repeat]}</span>`:''}</span></button>
+   <span class="m">${whoHTML(t)}${late?`<span class="tag late">Gecikti · ${rel(t.due)}</span>`:''}${t.repeat!=='none'&&!t.done?`<span>${I('repeat','sm')}${TREP[t.repeat]}</span>`:''}</span></button>
   <button class="chk" data-act="toggleTask" data-id="${t.id}" aria-pressed="${myTick(t)}" aria-label="${esc(t.title)}: ${myTick(t)?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}><span>${I('check','sm')}</span></button></div>`}
 let SLIM=false; // Bugün'deki akışta gün başlıkları tek satır
 function dayHead(day,{evs,tks}){const d=parse(day),t=T();const r=day===t?'Bugün':day===add(t,1)?'Yarın':day===add(t,-1)?'Dün':'';
