@@ -332,6 +332,7 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 /* Aile sekmesi: ayarlar sayfası grupları, davet/ekle satırlarının simgesi */
 .setsec{font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:18px 6px 6px}
 .setsec:first-child{margin-top:4px}
+.ntsub{font-size:.75rem;font-weight:800;letter-spacing:.06em;color:var(--muted);padding:12px 14px 2px;text-transform:uppercase}
 .av.addav{background:var(--accent-soft);color:var(--accent-ink)}
 /* Tarih ve saat: telefonun kendi seçicisi görünmez katman olarak üstte; görünen yazıyı biz yazarız, böylece iPhone'da kutu taşmaz */
 .two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -1552,8 +1553,7 @@ function famSettingsHTML(){const {m,demo,np,standalone,ios,sync,sub}=famCtx();
  return `<div class="setsec">Görünüm</div><div class="group">
   <div class="setrow"><span id="lbl-big"><b>Büyük yazı</b>${sub('Sadece bu cihazda')}</span><button class="switch" role="switch" aria-labelledby="lbl-big" aria-checked="${!!store.prefs.big}" data-act="bigToggle"></button></div>
   <div class="setrow" style="flex-wrap:wrap"><b>Tema</b><div class="seg" style="flex:1;min-width:220px">${themeSeg()}</div></div></div>
- <div class="setsec">Bildirimler</div><div class="group">
-  <div class="setrow"><span><b>Hatırlatmalar</b>${sub(np==='granted'?'Açık. Bildirim şimdilik uygulama açıkken gelir.':np==='denied'?'Bildirimler bu cihazda kapalı. Tarayıcı ayarlarından açabilirsin.':np==='unsupported'?(ios&&!standalone?'iPhone\'da bildirim için önce uygulamayı ana ekrana ekle.':'Bu tarayıcı bildirim desteklemiyor.'):'Etkinlik hatırlatmaları için izin ver.')}</span>${np==='default'?'<button class="btn ghost sm" data-act="askNotify">İzin ver</button>':''}</div></div>
+ <div class="setsec">Bildirimler</div><div class="group">${notifHTML(demo,np,standalone,ios,sub)}</div>
  <div class="setsec">Bu cihaz</div><div class="group">
   <div class="setrow"><span><b>Bu cihazda</b>${sub(esc(m.name))}</span><button class="btn ghost sm" data-act="who">Değiştir</button></div>
   ${standalone?'':`<div class="setrow"><span><b>Telefona yükle</b>${sub(installEvt?'Bizim Ev ana ekranında uygulama gibi açılır.':ios?'Safari\'de Paylaş düğmesine, sonra “Ana Ekrana Ekle”ye dokun.':'Tarayıcı menüsünden “Ana ekrana ekle”yi seç.')}</span>${installEvt?'<button class="btn ghost sm" data-act="install">Yükle</button>':''}</div>`}
@@ -1823,14 +1823,18 @@ const A={
  leaveAsk:()=>{if(store.mode==='demo'){A.exitDemo();return}const n=Object.keys(store.pending).length;
   sheet('Bu cihazdan çıkılsın mı?',`<p>Ailenin bilgileri silinmez, diğerleri kullanmaya devam eder. Tekrar girmek için aile kodunu not al: <b style="font-family:var(--f-display);letter-spacing:.08em">${fmtCode(store.code)}</b></p>${n?`<p class="err">${n} değişiklik henüz gönderilmedi. Çıkarsan bunlar kaybolur.</p>`:''}<div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" data-act="leave">Çık</button></div>`)},
  leave:()=>{if(es){es.close();es=null}
-  if(FB_KEY&&store.mode==='family'&&store.code)fbSend(store.code,'PUT',null,'/uids/'+myUid()).catch(()=>{});
+  if(FB_KEY&&store.mode==='family'&&store.code){const c=store.code,u=myUid();if(store.push&&store.push.on)navigator.serviceWorker.ready.then(r=>r.pushManager.getSubscription()).then(s=>s&&s.unsubscribe()).catch(()=>{});store.push=null;
+   fbSend(c,'PUT',null,'/push/'+u).catch(()=>{}).finally(()=>fbSend(c,'PUT',null,'/uids/'+u).catch(()=>{}))}
   Object.assign(store,{mode:null,code:null,me:null,R:null,pending:{}});S=null;UI.err=null;close();render()},
  // Kişi, tema, ayarlar
  who:()=>sheet('Bu cihazda kim var?',`<p class="note" style="margin:0 0 12px">${I('info','sm')}<span>Ortak kullanılan bir tablet gibi cihazlarda kişiler arasında geçebilirsin.</span></p><div class="people">${S.members.map(m=>`<button data-act="asUser" data-id="${m.id}" aria-pressed="${meId()===m.id}">${av(m.id)}<span><b>${esc(m.name)}</b><small>${ROLES[m.role]}${m.rel?' · '+esc(m.rel):''}</small></span></button>`).join('')}</div>`),
- asUser:d=>{if(store.mode==='demo'){store.demoMe=d.id;store.prefs.big=!!M(d.id).big}else store.me=d.id;UI.tf=isChild()?'mine':'all';close();render();toast(`Artık ${M(d.id).name} olarak bakıyorsun`)},
+ asUser:d=>{if(store.mode==='demo'){store.demoMe=d.id;store.prefs.big=!!M(d.id).big}else store.me=d.id;UI.tf=isChild()?'mine':'all';close();render();pushSync();toast(`Artık ${M(d.id).name} olarak bakıyorsun`)},
  theme:d=>{store.prefs.theme=d.v;render(true)},
  bigToggle:()=>{store.prefs.big=!store.prefs.big;render(true)},
  askNotify:()=>askNotify(),
+ pushOn:()=>pushOn(),pushOff:()=>pushOff(),
+ pushKind:(d,el)=>{const p=store.push.p=store.push.p||{};p[d.k]=p[d.k]===false;if(p[d.k])delete p[d.k];save();el.setAttribute('aria-checked',p[d.k]!==false);fbSend(store.code,'PUT',store.push.p,'/push/'+myUid()+'/p').catch(()=>toast('Kaydedilemedi, bağlantını kontrol et'))},
+ pushTest:()=>{fbSend(store.code,'PUT',Date.now(),'/push/'+myUid()+'/test').then(()=>toast('Örnek bildirim gönderildi, birkaç saniye içinde gelir'),()=>toast('Gönderilemedi, bağlantını kontrol et'))},
  famSettings:()=>sheet('Ayarlar',`<div id="setsheet">${famSettingsHTML()}</div>`),
  famInvite:()=>sheet('Aileye davet et',famInviteHTML()),
  wPick:(d,el)=>{const w=document.getElementById('wheel');if(!w)return;if(el.classList.contains('mid')){A.openMember(d);return}
@@ -2127,10 +2131,45 @@ function copyText(t,msg){const fallback=()=>{const el=document.getElementById('f
  try{navigator.clipboard.writeText(t).then(()=>toast(msg),fallback)}catch(e){fallback()}}
 let swReg=null,installEvt=null;
 const REM_MS={m15:15*60e3,h1:3600e3,d1:864e5};
-function askNotify(){try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(()=>{if(UI.tab==='family')render(true)})}catch(e){}}
+function askNotify(){if(store.mode==='family'&&pushOk()&&!store.push&&'Notification' in window&&Notification.permission!=='denied'){pushOn();return}
+ try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission().then(()=>{if(UI.tab==='family')render(true)})}catch(e){}}
 function notify(title,body){try{if('Notification' in window&&Notification.permission==='granted'){if(swReg&&swReg.showNotification){swReg.showNotification(title,{body,icon:'icons/icon-192.png',badge:'icons/icon-192.png',tag:title});return}new Notification(title,{body,icon:'icons/icon-192.png'});return}}catch(e){}toast(`Hatırlatma: ${title}, ${body}`)}
+/* ---------- Bildirimler (Web Push) ----------
+   Telefon izin verince tarayıcıdan bir abonelik alınır ve families/{kod}/push/{uid} altına yazılır:
+   {m: üye, e: adres, k: {p, a}, p: {tür: false}}. Sunucu (functions/) hatırlatmaları ve sana dair haberleri
+   (görev verilince, etkinliğe eklenince, panoya yazılınca) bu adrese yollar; uygulama kapalıyken de gelir. */
+const VAPID='BLxtYzrpEo830fpjfQPVEqZJ9Q8Db2ykKuhMysKRpwQouMD8zscludFVZ4Os6OhI3BfPKiVWP-zGBmko4S4Fzmw';
+const PUSH_REM=[['ev','Etkinlik hatırlatmaları','Her etkinlikte seçtiğin zamanda'],['tk','Görev hatırlatmaları','Saati olan görevde o saatte, olmayanda sabah 08.00']];
+const PUSH_ME=[['as','Sana görev verilince','Sıra sana gelince de'],['ad','Seni etkinliğe ekleyince',''],['ms','Panoya mesaj yazılınca','Ailenden biri mesajını değiştirince']];
+const pushOk=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window&&(location.protocol==='https:'||location.hostname==='localhost');
+const pushLive=()=>store.mode==='family'&&!!(store.push&&store.push.on)&&'Notification' in window&&Notification.permission==='granted';
+const b64u=s=>{const b=atob((s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(b,c=>c.charCodeAt(0))};
+const ab64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+async function pushSub(){const reg=await navigator.serviceWorker.ready;return await reg.pushManager.getSubscription()||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)})}
+async function pushSave(s){if(!myUid())throw new Error('kimlik yok');const rec={m:store.me,e:s.endpoint,k:{p:ab64(s.getKey('p256dh')),a:ab64(s.getKey('auth'))},p:store.push.p||{},at:Date.now()};
+ await fbSend(store.code,'PUT',rec,'/push/'+myUid());Object.assign(store.push,{e:s.endpoint,m:store.me});save()}
+async function pushOn(){if(store.mode!=='family'||!pushOk())return;
+ try{if(await Notification.requestPermission()!=='granted'){render(true);return}
+  store.push=Object.assign({p:{}},store.push,{on:true});save();await authTok();await pushSave(await pushSub());render(true);toast('Bildirimler açıldı')}
+ catch(e){store.push&&(store.push.on=false);save();render(true);toast('Bildirim açılamadı. Bağlantını kontrol edip tekrar dene.')}}
+async function pushOff(){const code=store.code;store.push=Object.assign({p:{}},store.push,{on:false,e:''});save();render(true);
+ try{const s=await(await navigator.serviceWorker.ready).pushManager.getSubscription();s&&await s.unsubscribe()}catch(e){}
+ if(code)fbSend(code,'PUT',null,'/push/'+myUid()).catch(()=>{})}
+// Açılışta ve kişi değişince: abonelik yenilenmişse ya da kayıt eksikse yeniden yaz
+async function pushSync(){if(!pushLive()||!pushOk())return;
+ try{const s=await pushSub(),rec=store.R&&store.R.push&&store.R.push[myUid()];
+  if(store.push.e!==s.endpoint||store.push.m!==store.me||(store.R&&(!rec||rec.e!==s.endpoint||rec.m!==store.me)))await pushSave(s)}catch(e){}}
+function notifHTML(demo,np,standalone,ios,sub){
+ const row=(t,d,end)=>`<div class="setrow"><span><b>${t}</b>${d?sub(d):''}</span>${end||''}</div>`;
+ if(demo)return row('Hatırlatmalar','Örnek ailede bildirim gelmez. Kendi aileni kurunca açabilirsin.');
+ if(!pushOk())return row('Bu telefon',ios&&!standalone?'iPhone\'da bildirim için önce uygulamayı ana ekrana ekle.':'Bu tarayıcı bildirim desteklemiyor.');
+ if(np==='denied')return row('Bu telefon','Bildirimlere izin verilmemiş. Telefonun Ayarlar › Bizim Ev › Bildirimler kısmından açabilirsin.');
+ if(!pushLive())return row('Bu telefon','Uygulama kapalıyken de hatırlatma ve sana dair haber gelsin.','<button class="btn primary sm" data-act="pushOn">Aç</button>');
+ const p=store.push.p||{},sw=([k,t,d])=>row(t,d,`<button class="switch" role="switch" aria-label="${t}" aria-checked="${p[k]!==false}" data-act="pushKind" data-k="${k}"></button>`);
+ return row('Bu telefon','Açık · uygulama kapalıyken de gelir','<button class="btn ghost sm" data-act="pushTest">Dene</button>')+PUSH_REM.map(sw).join('')
+  +`<div class="ntsub">Sana dair</div>`+PUSH_ME.map(sw).join('')+row('Bu telefonda kapat','','<button class="btn ghost sm" data-act="pushOff">Kapat</button>')}
 // Uygulama açıkken etkinlik hatırlatmalarını gösterir. Gerçek push için sunucu gerekir; o sonraki adım.
-function checkReminders(){if(!S||!store.mode)return;const now=Date.now(),mine=meId(),t=T();store.fired=store.fired||{};
+function checkReminders(){if(!S||!store.mode||pushLive())return;const now=Date.now(),mine=meId(),t=T();store.fired=store.fired||{};
  for(const day of [t,add(t,1)])for(const e of S.events){if(!REM_MS[e.rem]||!e.members.includes(mine)||!occurs(e,day))continue;const k=e.id+'|'+day;if(store.fired[k])continue;
   const st=parse(day);if(e.time){const[h,mi]=e.time.split(':');st.setHours(+h,+mi,0,0)}else st.setHours(9,0,0,0);const at=st.getTime()-REM_MS[e.rem];
   if(now>=at&&now-at<30*60e3&&now<st.getTime()+3600e3){store.fired[k]=1;notify(e.title,`${rel(day)}${e.time?' '+hm(e.time):', tüm gün'}${e.loc?' · '+e.loc:''}`)}}
@@ -2243,7 +2282,7 @@ if(qcode||qs.has('text')||qs.has('url')||qs.has('title'))history.replaceState(nu
 let rafS=0;document.getElementById('screen').addEventListener('scroll',()=>{if(rafS)return;rafS=requestAnimationFrame(()=>{rafS=0;trackStrip()})},{passive:true});
 UI.tf=S&&isChild()?'mine':'all';
 render();
-if(store.mode==='family'){ensureUid().then(()=>{connect();flush();loadAv()})}
+if(store.mode==='family'){ensureUid().then(()=>{connect();flush();loadAv();pushSync()})}
 checkReminders();
 if(shared){if(S){UI.tab='lists';UI.lmode='wish';render(true);wishForm(null,{type:'mekan',title:shared.n,place:shared})}else toast('Önce aileye katıl, sonra mekanı yeniden paylaş.')}
 if(qcode&&!store.mode)A.joinSheet({code:qcode.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)});

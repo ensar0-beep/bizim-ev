@@ -1,3 +1,4 @@
 .DS_Store
 # Aileye özel avatarların orijinal büyük PNG dosyaları; uygulama avatars/<aile>/ altındaki küçük webp kopyalarını kullanır
 avatars/*Ailesi/
+functions/node_modules/
