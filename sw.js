@@ -4,7 +4,7 @@
   2) Firebase isteklerine dokunmaz; eşitleme her zaman doğrudan sunucuyla yapılır.
   Yeni sürüm yayınlarken CACHE adını artır.
 */
-const CACHE = "bizim-ev-v53";
+const CACHE = "bizim-ev-v54";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icons/icon-192.png",
   "./icons/icon-512.png", "./icons/favicon.svg", "./icons/apple-touch-icon.png"];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
@@ -78,6 +78,15 @@ self.addEventListener("fetch", (e) => {
       return cached || network;
     })
   );
+});
+
+// Sunucudan gelen bildirim (functions/): {t: başlık, b: metin, tag}. iOS her push için bildirim göstermeyi şart koşar.
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (x) { d = { t: e.data && e.data.text() }; }
+  e.waitUntil(self.registration.showNotification(d.t || "Bizim Ev", {
+    body: d.b || "", icon: "icons/icon-192.png", badge: "icons/icon-192.png", tag: d.tag || undefined
+  }));
 });
 
 self.addEventListener("notificationclick", (e) => {
