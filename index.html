@@ -161,7 +161,7 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .mdet .d .num{align-self:center;font-weight:700;font-size:.85rem;font-variant-numeric:tabular-nums;width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;border-radius:999px}
 .mdet .d.today .num{background:var(--coral);color:#fff}
 .mdet .d.out{opacity:.35}
-.mdet .d.rh .num{color:var(--danger)}
+.mdet .d.rsm .num{color:var(--danger)}
 .mdet .d[aria-pressed="true"]{background:var(--accent-soft)}
 .mdet .mb{display:block;font-size:.6rem;font-weight:600;line-height:1.25;padding:1px 3px;border-radius:4px;background:color-mix(in srgb,var(--c) 18%,var(--surface));border-left:2px solid var(--c);white-space:nowrap;overflow:hidden;text-overflow:clip}
 .mdet .mb.hb{--c:var(--danger);background:var(--danger-soft);color:var(--danger)}
@@ -895,7 +895,7 @@ let store;
 try{store=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{},auth:null,av:{},avi:{}},store&&typeof store==='object'?store:{});
 let S=null,baseC={};
-const UI={shop:null,shopAt:0,joinFor:null,joinShown:false,tab:'today',cal:'flow',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,lmode:'buy',wt:'all',wdone:false,net:'online',err:null};
+const UI={shop:null,shopAt:0,joinFor:null,joinShown:false,tab:'today',cal:'month',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,lmode:'buy',wt:'all',wdone:false,net:'online',err:null};
 UI.dcKeep=new Set();
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){try{store.av={};store.avi={};localStorage.setItem(KEY,JSON.stringify(store))}catch(x){}}};
 const meId=()=>store.mode==='demo'?store.demoMe:store.me;
@@ -1361,10 +1361,8 @@ const holShort=t=>t.split(' · ')[0].replace('Okullarda ara tatil','Ara tatil').
 const holChip=d=>{const h=hol(d);return h?`<span class="hol ${h[1]}">${h[1]==='resmi'?'🇹🇷 ':h[1]==='okul'?'🎒 ':''}${esc(h[0])}</span>`:''};
 const evPast=(e,day)=>day<T()||day===T()&&!!e.time&&toMin(e.time)+60<=nowMin();
 // Takvim: Akış (gün gün, tek satırlık satırlar, görevler katlanır) ve Ay (hücrelerde etkinlik adları). Sağ üstteki iki simgeyle geçilir.
-function calTop(){const f=UI.filter,who=!f.length?'Herkes':f.length===1?first(M(f[0]).name):f.length+' kişi',k=UI.cal==='month'?'month':'flow';
- return `<div class="ctop"><h1>Takvim</h1><div class="cvw" role="group" aria-label="Görünüm"><button data-act="calView" data-v="flow" aria-pressed="${k==='flow'}" aria-label="Akış">${I('listb')}</button><button data-act="calView" data-v="month" aria-pressed="${k==='month'}" aria-label="Ay">${I('cal')}</button></div><button class="add" data-act="tdAdd" aria-label="Ekle">${I('plus')}</button></div>
- <div class="cbar"><button class="cwho${f.length?' on':''}" data-act="calWho">${f.length?avs(f.slice(0,3)):famBadge()}<span>${esc(who)}</span>${I('chevD','sm')}</button>
- ${k==='flow'?`<button class="ctg" data-act="ctkAll" aria-pressed="${!!UI.ctk}">${UI.ctk?I('check','sm'):I('tasks','sm')}Görevler</button>`:''}</div>`}
+function calTop(){const k=UI.cal==='month'?'month':'flow';
+ return `<div class="ctop"><h1>Takvim</h1><div class="cvw" role="group" aria-label="Görünüm"><button data-act="calView" data-v="flow" aria-pressed="${k==='flow'}" aria-label="Akış">${I('listb')}</button><button data-act="calView" data-v="month" aria-pressed="${k==='month'}" aria-label="Ay">${I('cal')}</button></div><button class="add" data-act="tdAdd" aria-label="Ekle">${I('plus')}</button></div>`}
 function ctkLine(d,tks){if(!tks.length)return '';const t=T();
  if(UI.ctk||(UI.ctkOpen||{})[d])return tks.sort((a,b)=>tkKey(a,d)<tkKey(b,d)?-1:1).map(x=>crow('t',x,d)).join('')+(UI.ctk?'':`<button class="ctk" data-act="ctkDay" data-d="${d}"><span class="ck0">${I('chevU','sm')}</span><span class="b">Görevleri gizle</span></button>`);
  const who=[...new Set(tks.flatMap(x=>ws(x)))];
@@ -1384,7 +1382,7 @@ function calMonth(c){const d=UI.calDate,dd=parse(d),t=T(),f1=iso(new Date(dd.get
  for(let i=0;i<wk*7;i++){const x=add(start,i),cd=parse(x),out=cd.getMonth()!==dd.getMonth(),evs=out?[]:evsOn(x,c),tk=out?0:tasksOn(x,c).filter(y=>!y.done).length,h=out?null:hol(x);
   const bars=[...(h?[`<span class="mb hb ${h[1]}">${esc(holShort(h[0]))}</span>`]:[]),...evs.map(e=>`<span class="mb" style="--c:${evColor(e)}">${esc(e.title)}</span>`)];
   const more=bars.length>3?bars.length-2:0;
-  cells+=`<button class="d${out?' out':''}${x===t?' today':''}${h&&h[1]==='resmi'?' rh':''}" aria-pressed="${x===sel}" data-act="cbDay" data-d="${x}" aria-label="${long(x)}${h?', '+h[0]:''}${evs.length?', '+evs.length+' etkinlik':''}${tk?', '+tk+' görev':''}"><span class="num">${cd.getDate()}</span>${(more?bars.slice(0,2):bars).join('')}${more?`<span class="mm">+${more}</span>`:''}${tk&&!more&&bars.length<3?`<span class="mt">✓${tk}</span>`:''}</button>`}
+  cells+=`<button class="d${out?' out':''}${x===t?' today':''}${h&&h[1]==='resmi'?' rsm':''}" aria-pressed="${x===sel}" data-act="cbDay" data-d="${x}" aria-label="${long(x)}${h?', '+h[0]:''}${evs.length?', '+evs.length+' etkinlik':''}${tk?', '+tk+' görev':''}"><span class="num">${cd.getDate()}</span>${(more?bars.slice(0,2):bars).join('')}${more?`<span class="mm">+${more}</span>`:''}${tk&&!more&&bars.length<3?`<span class="mt">✓${tk}</span>`:''}</button>`}
  const evs=evsOn(sel,c),tks=tasksOn(sel,c).filter(x=>!x.done),sd=parse(sel);
  return `<div class="calnav"><button class="icon-btn" data-act="calMove" data-n="-1" aria-label="Önceki ay">${I('chevL')}</button><div class="title" aria-live="polite">${MON[dd.getMonth()]} ${dd.getFullYear()}</div><button class="icon-btn" data-act="calMove" data-n="1" aria-label="Sonraki ay">${I('chevR')}</button><button class="btn ghost sm" data-act="cbToday">Bugün</button></div>
  <div class="mdet">${DOW.map(x=>`<div class="dow" aria-hidden="true">${x}</div>`).join('')}${cells}</div>
