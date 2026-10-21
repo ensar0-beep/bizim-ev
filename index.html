@@ -25,6 +25,7 @@
   --bg:#FAF8F5; --surface:#FFFFFF; --sunk:#F2EEE8; --line:#E4DED4; --fg:#22201D; --muted:#625B52;
   --accent:#2E6A51; --on-accent:#FFFFFF; --accent-soft:#E1EDE6; --accent-ink:#22533F;
   --coral:#B9502F; --coral-soft:#FBE9E2; --on-coral:#FFFFFF; --danger:#B3261E; --danger-soft:#FBE4E2; --warn:#7D5200; --warn-soft:#FFF0D2;
+  --blue:#2F6DB5; --blue-soft:#E3ECF8; --plum:#8B4FB8; --plum-soft:#F0E6F7;
   --stage:#ECE7DF; --scrim:rgba(30,24,18,.38);
   --shadow:0 1px 2px rgba(60,40,20,.06),0 8px 24px rgba(60,40,20,.08);
   --f-display:'Bricolage Grotesque','Figtree',system-ui,sans-serif;
@@ -35,12 +36,14 @@
   --bg:#16140F; --surface:#211E19; --sunk:#2B2721; --line:#3B362E; --fg:#F2EDE5; --muted:#ADA497;
   --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD;
   --coral:#F29A80; --coral-soft:#3A251E; --on-coral:#2A140C; --danger:#F3A69F; --danger-soft:#3E201D; --warn:#F2C46E; --warn-soft:#3A2E15;
+  --blue:#8FB4E8; --blue-soft:#1E2A3A; --plum:#C9A0E6; --plum-soft:#2E2238;
   --stage:#0D0C0A; --scrim:rgba(0,0,0,.55);
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.4); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#16140F; --surface:#211E19; --sunk:#2B2721; --line:#3B362E; --fg:#F2EDE5; --muted:#ADA497;
   --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD;
   --coral:#F29A80; --coral-soft:#3A251E; --on-coral:#2A140C; --danger:#F3A69F; --danger-soft:#3E201D; --warn:#F2C46E; --warn-soft:#3A2E15;
+  --blue:#8FB4E8; --blue-soft:#1E2A3A; --plum:#C9A0E6; --plum-soft:#2E2238;
   --stage:#0D0C0A; --scrim:rgba(0,0,0,.55);
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.4); color-scheme:dark}
 html.big{font-size:125%}
@@ -505,6 +508,18 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .sac.dim{background:var(--sunk);color:var(--muted);font-weight:500}
 .saact{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
 .saact .btn[disabled]{opacity:.45}
+/* ➕ sayfası kutuları */
+.satiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:2px 0 16px}
+.satile{--c:var(--accent);--s:var(--accent-soft);display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 2px 12px;border-radius:18px;background:var(--s);color:var(--fg);font-weight:600;font-size:.85rem;min-width:0}
+.satile .bub{width:44px;height:44px;border-radius:14px;background:var(--surface);color:var(--c);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.satile.ev{--c:var(--blue);--s:var(--blue-soft)}.satile.tk{--c:var(--accent);--s:var(--accent-soft)}.satile.it{--c:var(--warn);--s:var(--warn-soft)}.satile.ms{--c:var(--plum);--s:var(--plum-soft)}
+.satile:active{transform:scale(.96)}
+.saor{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.8rem;margin:0 2px 10px}
+.saor::before,.saor::after{content:"";flex:1;height:1px;background:var(--line)}
+.sain{background:var(--sunk);border-color:transparent}
+.sain:focus-within{background:var(--surface);border-color:var(--accent)}
+.saex{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:.8rem;margin:8px 4px 0}
+.saex b{color:var(--accent-ink);font-weight:600}
 .saalt{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
 .saalt>span{color:var(--muted);font-size:.82rem;margin-right:4px}
 .saalt .chip{min-height:38px;font-size:.88rem;gap:6px}
@@ -1257,6 +1272,9 @@ function parseNL(raw){const T0=T(),o=[...(' '+raw+' ')],s=[...(' '+low(raw)+' ')
  if(r.cat==='aile'&&r.members.length===1)r.cat='kisisel';
  if(r.cat==='dogum'&&r.members.length===1&&kind==='e'){const n=first(M(r.members[0]).name);if(!low(r.title).includes(low(n)))r.title=gen(n)+' '+low(r.title||'doğum günü')}
  return r}
+// Yazma kutusunun altında birkaç saniyede bir değişen tek örnek; yazmaya başlayınca gizlenir
+const SAEX=['Yarın 18.00 Muhammed aşı','Cuma akşam aile sohbeti','Süt ve ekmek al','Ensar her salı çöpü çıkar'];
+let SAT=null;function saTick(){clearInterval(SAT);if(calm())return;let n=0;SAT=setInterval(()=>{const e=document.getElementById('sa-ex');if(!e){clearInterval(SAT);return}n=(n+1)%SAEX.length;const b=e.querySelector('b');if(b)b.textContent=SAEX[n]},3000)}
 function saHTML(){const inp=document.getElementById('sa-in'),v=inp?inp.value.trim():'';
  if(!v)return '';
  const p=parseNL(v),k=F.saKind||p.kind;F.sa=p;
@@ -1835,10 +1853,14 @@ const A={
  wPick:(d,el)=>{const w=document.getElementById('wheel');if(!w)return;if(el.classList.contains('mid')){A.openMember(d);return}
   w.scrollTo({left:el.offsetLeft+el.offsetWidth/2-w.clientWidth/2,behavior:calm()?'auto':'smooth'})},
  moonInfo:d=>{const n=+d.d;toast(`${phaseN(n)} · Hicri ayın ${n}. günü${n<14?' · dolunaya '+(14-n)+' gün':n<=16?' · dolunay':''}`)},
- tdAdd:()=>{F={saKind:null};sheet('Ne eklemek istersin?',`<form data-form="smartAdd" autocomplete="off"><label class="sr" for="sa-in">Ne eklemek istersin?</label>
-  <div class="sain">${I('sparkle','sm')}<input id="sa-in" placeholder="örn. Cumartesi 14.00 Zeynep yüzme" autofocus enterkeyhint="done"></div>
-  <div id="sa-prev">${saHTML()}</div></form>
-  <div class="saalt"><span>ya da adım adım:</span>${[['newEvent','cal','Etkinlik'],['newTask','tasks','Görev'],['quickItem','tag','Alınacak'],['msgEdit','mega','Mesaj']].map(([a,i,n])=>`<button class="chip plain" data-act="${a}">${I(i,'sm')}${n}</button>`).join('')}</div>`)},
+ // ➕ sayfası: üstte dört renkli kutu (Apple Kestirmeler gibi), altında yazarak ekleme ve dönen tek örnek
+ tdAdd:()=>{F={saKind:null};const K=[['newEvent','cal','Etkinlik','ev'],['newTask','tasks','Görev','tk'],['quickItem','tag','Alınacak','it'],['msgEdit','mega','Mesaj','ms']];
+  sheet('Ne eklemek istersin?',`<div class="satiles">${K.map(([a,i,n,c])=>`<button class="satile ${c}" data-act="${a}"><span class="bub">${I(i)}</span>${n}</button>`).join('')}</div>
+  <div class="saor">ya da yaz, ben anlayayım</div>
+  <form data-form="smartAdd" autocomplete="off"><label class="sr" for="sa-in">Ne eklemek istersin?</label>
+  <div class="sain">${I('edit','sm')}<input id="sa-in" placeholder="Yaz: yarın 18.00 aşı" enterkeyhint="done"></div>
+  <p class="saex" id="sa-ex">${I('sparkle','sm')}<span>Örnek: <b>${esc(SAEX[0])}</b></span></p>
+  <div id="sa-prev">${saHTML()}</div></form>`);saTick()},
  saKind:d=>{F.saKind=d.v;saUpd()},
  saMore:()=>{const p=F.sa;if(!p)return;const k=F.saKind||p.kind;
   if(k==='e')return eventForm(null,p.date||T(),{title:p.title,time:p.time,members:p.members.length?p.members:[meId()],cat:p.cat,loc:p.loc,repeat:p.repeat});
@@ -2147,7 +2169,7 @@ document.addEventListener('change',e=>{
  if(e.target.matches('.dtp input'))dtSync(e.target);
  if(e.target.id==='tk-rot'){const a=document.getElementById('rot-area');a.hidden=!e.target.checked;F.who=[F.who[0]];asRefresh();if(e.target.checked){if(!F.rot.length)F.rot=[F.who[0]];const r=document.getElementById('tk-rep');if(r.value==='none')r.value='weekly';document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true})}}});
 document.addEventListener('input',e=>{if(e.target.matches&&e.target.matches('.dtp input'))dtSync(e.target)});
-document.addEventListener('input',e=>{if(e.target.id==='sa-in'){F.saKind=null;saUpd()}});
+document.addEventListener('input',e=>{if(e.target.id==='sa-in'){F.saKind=null;saUpd();const x=document.getElementById('sa-ex');if(x)x.hidden=!!e.target.value.trim()}});
 // Masaüstü tarayıcıda görünmez tarih kutusuna tıklayınca seçici açılsın (telefonda zaten açılır)
 document.addEventListener('click',e=>{const i=e.target.closest&&e.target.closest('.dtp input');if(i&&!i.disabled&&i.showPicker){try{i.showPicker()}catch(x){}}});
 document.addEventListener('input',e=>{if(e.target.id==='an-text')document.getElementById('an-count').textContent=e.target.value.length+'/140';
