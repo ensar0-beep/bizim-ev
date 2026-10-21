@@ -494,9 +494,6 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 /* Konuşur gibi ekleme */
 .sain{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 16px;border-radius:18px;background:var(--surface);border:1.5px solid var(--accent);color:var(--accent-ink)}
 .sain input{flex:1;min-width:0;border:0;background:none;font-size:1.08rem;color:var(--fg);outline:none;min-height:52px}
-.saex{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.saex>span{width:100%;color:var(--muted);font-size:.82rem;margin-bottom:2px}
-.saex .chip{font-size:.85rem;min-height:36px}
 .sap{margin-top:12px;background:var(--surface);border-radius:var(--r-lg);padding:12px 14px 14px;box-shadow:var(--shadow)}
 .sakind{margin:0 0 10px}
 .sakind button{min-height:36px;font-size:.88rem}
@@ -1104,7 +1101,7 @@ function evRow(e,day){const c=e.members.length>=S.members.length&&S.members.leng
  return `<button class="row tap" data-act="openEvent" data-id="${e.id}" data-d="${day}">
   ${e.time?`<span class="time">${hm(e.time)}</span>`:`<span class="time ad">Tüm<br>gün</span>`}
   <span class="mbar" style="--c:${c}"></span>
-  <span class="body"><span class="t">${esc(e.title)}</span><span class="m"><span>${I(CATS[e.cat][1],'sm')}${CATS[e.cat][0]}</span>${e.loc?`<span>${I('pin','sm')}${esc(e.loc)}</span>`:''}</span></span>
+  <span class="body"><span class="t">${esc(e.title)}</span><span class="m">${e.loc?`<span>${I('pin','sm')}${esc(e.loc)}</span>`:''}</span></span>
   ${isAll(e)?famBadge():avs(e.members)}<span class="sr">Katılanlar: ${isAll(e)?'Bütün aile':e.members.map(x=>M(x).name).join(', ')}</span></button>`}
 function taskRow(t){const late=!t.done&&t.due<T();const nx=nextIn(t);const ok=can('task.complete',t);
  return `<div class="row${t.done?' done':''}" data-sw="task" data-id="${t.id}" data-tk="${t.id}">
@@ -1261,7 +1258,7 @@ function parseNL(raw){const T0=T(),o=[...(' '+raw+' ')],s=[...(' '+low(raw)+' ')
  if(r.cat==='dogum'&&r.members.length===1&&kind==='e'){const n=first(M(r.members[0]).name);if(!low(r.title).includes(low(n)))r.title=gen(n)+' '+low(r.title||'doğum günü')}
  return r}
 function saHTML(){const inp=document.getElementById('sa-in'),v=inp?inp.value.trim():'';
- if(!v)return `<div class="saex"><span>Örnekler, dokununca dener:</span>${['Cumartesi 14.00 Zeynep yüzme, Caddebostan','Yarın akşam 7\'de bütün aile yemek','Can her salı çöpü çıkar','Süt ve ekmek al','Haftaya perşembe 10.30 dişçi, Kadıköy','25 Kasım babaanne doğum günü'].map(x=>`<button type="button" class="chip plain" data-act="saEx" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>`;
+ if(!v)return '';
  const p=parseNL(v),k=F.saKind||p.kind;F.sa=p;
  const d=p.date||T(),dd=parse(d),dl=`${rel(d)===long(d)||!['Bugün','Yarın','Dün'].includes(rel(d))?dd.getDate()+' '+MON[dd.getMonth()].slice(0,3)+' '+DOW[(dd.getDay()+6)%7]:rel(d)}`;
  const who=p.members.length?p.members:[meId()],allF=S.members.length>1&&who.length===S.members.length;
@@ -1270,7 +1267,7 @@ function saHTML(){const inp=document.getElementById('sa-in'),v=inp?inp.value.tri
  let ch='';
  if(k==='i'){const cat=guessCat(p.title||v);ch=c('cart',S.lists[0]?esc(S.lists[0].name):'Alınacaklar',true,'Liste')+c('tag',esc(cat),true,'Kategori')+(p.members.length===1?`<span class="sac">${av(p.members[0],'xs')}<span>${esc(first(M(p.members[0]).name))} için</span></span>`:'')}
  else{ch=c('cal',dl,!!p.date,'Tarih')+c('clock',p.time?hm(p.time):k==='e'?'Tüm gün':'Saat yok',!!p.time,'Saat')+pp
-  +(k==='e'?c(CATS[p.cat][1],CATS[p.cat][0],true,'Kategori')+(p.loc?c('pin',esc(p.loc),true,'Yer'):''):'')
+  +(k==='e'&&p.loc?c('pin',esc(p.loc),true,'Yer'):'')
   +(p.repeat!=='none'?c('repeat',(k==='t'?TREP:REP)[p.repeat]||REP[p.repeat],true,'Tekrar'):'')}
  return `<div class="sap"><div class="seg sakind" role="group" aria-label="Ne ekleniyor">${[['e','Etkinlik'],['t','Görev'],['i','Alınacak']].map(([x,n])=>`<button type="button" data-act="saKind" data-v="${x}" aria-pressed="${k===x}">${n}</button>`).join('')}</div>
   <div class="sat">${p.title?esc(p.title):'<span style="color:var(--muted)">Başlık yaz…</span>'}</div><div class="sacs">${ch}</div>
@@ -1289,7 +1286,7 @@ function nextHTML(c){const t=T();let nx=null,day=t;
  if(!nx)return `<div class="cl"><div class="tlempty">Önümüzdeki iki haftada etkinlik yok 🌿</div></div>`;
  const e=nx,mins=e.time&&day===t?toMin(e.time)-nowMin():null;
  const when=day!==t?`${rel(day)}${e.time?' · '+hm(e.time):' · tüm gün'}`:!e.time?'Bugün · tüm gün':mins<=0?'Şimdi':mins<60?`${hm(e.time)} · ${mins} dk sonra`:`${hm(e.time)} · ${Math.floor(mins/60)} sa${mins%60?' '+mins%60+' dk':''} sonra`;
- return `<button class="nx" data-act="openEvent" data-id="${e.id}" data-d="${day}" style="--c:${evColor(e)}"><span class="b"><span class="k">${when}</span><span class="t">${esc(e.title)}</span><span class="m">${e.loc?`<span>${I('pin','sm')}${esc(e.loc)}</span>`:''}<span>${I(CATS[e.cat][1],'sm')}${CATS[e.cat][0]}</span></span></span>${whoMini(e.members)}</button>`}
+ return `<button class="nx" data-act="openEvent" data-id="${e.id}" data-d="${day}" style="--c:${evColor(e)}"><span class="b"><span class="k">${when}</span><span class="t">${esc(e.title)}</span>${e.loc?`<span class="m"><span>${I('pin','sm')}${esc(e.loc)}</span></span>`:''}</span>${whoMini(e.members)}</button>`}
 function homeRows(){const p=S.items.filter(i=>!i.done),u=p.filter(i=>i.pri==='acil').length,w=topIdea(),idea=w&&!(isChild()&&!w.want.includes(meId()))?w:null;
  return `<div class="cl"><button class="hrow" data-act="tab" data-tab="lists"><span class="ic">${I('tag','sm')}</span><span class="b"><b>Alınacaklar</b><small>${p.length?p.slice(0,3).map(i=>esc(i.name)).join(', ')+(p.length>3?'…':''):'Hepsi alındı'}</small></span>${u?`<span class="n u">${u} acil</span>`:''}<span class="n">${p.length}</span>${I('chevR','sm')}</button>
  ${idea?`<button class="hrow" data-act="openWish" data-id="${idea.id}"><span class="ic">${I(WT[idea.type][2],'sm')}</span><span class="b"><b>${esc(idea.title)}</b><small>${[0,6].includes(new Date().getDay())?'Bugün için':'Hafta sonu için'} bir fikir · ${idea.want.length} kişi istiyor</small></span>${I('chevR','sm')}</button>`:''}</div>`}
@@ -1712,7 +1709,6 @@ function eventForm(e,day,pre){const child=isChild();
  <label class="check"><input type="checkbox" id="ev-allday"${e&&!e.time?' checked':''}>Tüm gün sürüyor</label>
  <div class="field"><span class="flabel">Kimler katılacak?</span><div class="pgrid" id="ev-mem">${memChips()}</div></div>
  <details class="more"${e&&(e.loc||e.desc||e.repeat!=='none')?' open':''}><summary>Daha fazla seçenek ${I('chevD','sm')}</summary>
-  <div class="field"><label for="ev-cat">Kategori</label><select class="inp" id="ev-cat">${Object.entries(CATS).map(([k,[n]])=>`<option value="${k}"${v.cat===k?' selected':''}>${n}</option>`).join('')}</select></div>
   <div class="field"><label for="ev-loc">Konum</label><input class="inp" id="ev-loc" value="${esc(v.loc)}" placeholder="örn. Kadıköy"></div>
   <div class="two"><div class="field"><label for="ev-rem">Hatırlatma</label><select class="inp" id="ev-rem">${Object.entries(REM).map(([k,n])=>`<option value="${k}"${v.rem===k?' selected':''}>${n}</option>`).join('')}</select></div>
   <div class="field"><label for="ev-rep">Tekrar</label><select class="inp" id="ev-rep">${Object.entries(REP).map(([k,n])=>`<option value="${k}"${v.repeat===k?' selected':''}>${n}</option>`).join('')}</select></div></div>
@@ -1843,7 +1839,6 @@ const A={
   <div class="sain">${I('sparkle','sm')}<input id="sa-in" placeholder="örn. Cumartesi 14.00 Zeynep yüzme" autofocus enterkeyhint="done"></div>
   <div id="sa-prev">${saHTML()}</div></form>
   <div class="saalt"><span>ya da adım adım:</span>${[['newEvent','cal','Etkinlik'],['newTask','tasks','Görev'],['quickItem','tag','Alınacak'],['msgEdit','mega','Mesaj']].map(([a,i,n])=>`<button class="chip plain" data-act="${a}">${I(i,'sm')}${n}</button>`).join('')}</div>`)},
- saEx:d=>{const i=document.getElementById('sa-in');if(!i)return;i.value=d.v;F.saKind=null;saUpd();i.focus()},
  saKind:d=>{F.saKind=d.v;saUpd()},
  saMore:()=>{const p=F.sa;if(!p)return;const k=F.saKind||p.kind;
   if(k==='e')return eventForm(null,p.date||T(),{title:p.title,time:p.time,members:p.members.length?p.members:[meId()],cat:p.cat,loc:p.loc,repeat:p.repeat});
@@ -1941,7 +1936,6 @@ const A={
   sheet(esc(e.title),`<div class="dl">
    <div>${I('clock')}<span><b>${long(d.d||e.date)}</b><br>${e.time?hm(e.time):'Tüm gün'}${e.repeat!=='none'?` · ${REP[e.repeat]}`:''}</span></div>
    ${e.loc?`<div>${I('pin')}<span>${esc(e.loc)}</span></div>`:''}
-   <div>${I(CATS[e.cat][1])}<span>${CATS[e.cat][0]}</span></div>
    <div>${I('users')}<span style="display:flex;flex-wrap:wrap;gap:8px">${isAll(e)?`<span class="who">${famBadge()}<b>Bütün aile</b></span>`:e.members.map(x=>`<span class="who">${av(x,'xs')}${esc(M(x).name)}</span>`).join('')}</span></div>
    <div>${I('bell')}<span>${e.rem==='none'?'Hatırlatma yok':REM[e.rem]+' hatırlatılacak'}</span></div>
    ${e.desc?`<div>${I('edit')}<span>${esc(e.desc)}</span></div>`:''}
@@ -2092,7 +2086,7 @@ const FORMS={
   const o={title:p.title,date:p.date||T(),time:p.time,members:who,cat:p.cat,loc:p.loc,rem:'h1',repeat:p.repeat,desc:''};S.events.push({id:uid(),by:meId(),...o});log(`“${p.title}” etkinliğini ekledi`);close();render(true);askNotify();toast(`${rel(o.date)} için eklendi`,u)},
  event:()=>{const g=id=>document.getElementById(id);const title=g('ev-title').value.trim();if(!title){g('ev-err').hidden=false;g('ev-title').focus();return}
   if(!F.members.length)F.members=[meId()];
-  const o={title,date:g('ev-date').value||T(),time:g('ev-allday').checked?'':g('ev-time').value,members:F.members,cat:g('ev-cat').value,loc:g('ev-loc').value.trim(),rem:g('ev-rem').value,repeat:g('ev-rep').value,desc:g('ev-desc').value.trim()};
+  const o={title,date:g('ev-date').value||T(),time:g('ev-allday').checked?'':g('ev-time').value,members:F.members,cat:(S.events.find(x=>x.id===F.edit)||{}).cat||'aile',loc:g('ev-loc').value.trim(),rem:g('ev-rem').value,repeat:g('ev-rep').value,desc:g('ev-desc').value.trim()};
   const u=snap();
   if(F.edit){const ex=S.events.find(x=>x.id===F.edit);if(!ex){close();toast('Bu etkinlik başka bir cihazda silinmiş.');return}Object.assign(ex,o);log(`“${title}” etkinliğini güncelledi`)}else{S.events.push({id:uid(),by:meId(),...o});log(`“${title}” etkinliğini ekledi`);const w=F.fromWish&&(S.wishes||[]).find(x=>x.id===F.fromWish);if(w)w.planned=o.date}
   if(o.rem!=='none')askNotify();close();if(UI.tab==='cal')UI.calDate=o.date;render(true);toast(F.edit?'Etkinlik güncellendi':`${rel(o.date)} için eklendi`,u)},
