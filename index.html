@@ -374,6 +374,7 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .catlbl{font-size:.8rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:18px 4px 6px}
 .item{min-height:58px}
 .qty{color:var(--muted);font-weight:500}
+.lnall{display:grid;gap:8px;margin-bottom:10px}.lnall .r{display:flex;align-items:center;gap:8px}.lnall .ic{width:36px;height:36px;border-radius:10px;background:var(--sunk);display:flex;align-items:center;justify-content:center;flex:none}.lnall .inp{flex:1;min-width:0}.lnall .x{width:40px;height:40px;border-radius:999px;color:var(--danger);display:flex;align-items:center;justify-content:center;flex:none}
 .donebar{display:flex;align-items:center;justify-content:space-between;margin-top:22px}
 /* Listeler: üstte büyük sekmeler (Alınacaklar | İsteklerimiz), altta çizgi ikonlu sekmeler (Airbnb gibi) */
 .ltabs{display:flex;align-items:center;gap:10px;margin:2px -18px 4px;padding:0 18px;border-bottom:1px solid var(--line)}
@@ -1415,7 +1416,7 @@ function vLists(){
  +(order.length?order.map(g=>`${one?'':`<div class="rh"><span>${esc(g)}</span><span class="n">${groups[g].length}</span></div>`}<div class="group"${one?' style="margin-top:12px"':''}>${groups[g].map(lvRow).join('')}</div>`).join('')
   :`<div class="group" style="margin-top:12px">${emptyBox(done.length?'Hepsi alındı 🎉':'Liste boş',done.length?'Bu listede bekleyen bir şey kalmadı.':'Eklemek için sağ üstteki artıya dokun.',done.length?'':`<br><button class="btn soft sm" data-act="lAdd">${I('plus','sm')}Ekle</button>`)}</div>`)
  +(done.length?`<div class="donebar"><button class="link" data-act="toggleDone" aria-expanded="${UI.doneOpen}">${I('chevD','sm')}Alınanlar (${done.length})</button><button class="link" data-act="clearDone">Alınanları temizle</button></div>${UI.doneOpen?`<div class="group">${done.map(lvRow).join('')}</div>`:''}`:'')
- +(can('list.manage')&&S.lists.length>1?`<div style="text-align:center;margin-top:26px"><button class="link" style="color:var(--danger)" data-act="delList">${I('trash','sm')}“${esc(L.name)}” listesini sil</button></div>`:'')}
+ +(can('list.manage')?`<div style="text-align:center;margin-top:26px"><button class="link" data-act="lnAll">${I('edit','sm')}Listeleri düzenle</button></div>`:'')}
 const lvRow=i=>`<div class="lr${i.done?' done':''}" data-id="${i.id}"><button class="ck" data-act="toggleItem" data-id="${i.id}" aria-pressed="${i.done}" aria-label="${esc(i.name)}: ${i.done?'alınmadı olarak işaretle':'alındı olarak işaretle'}"><span>${I('check','sm')}</span></button>
  <button class="ti" data-act="openItem" data-id="${i.id}"><b>${esc(i.name)}</b>${i.note||i.for?`<small>${[i.note?esc(i.note):'',i.for?esc(forName(i.for)):''].filter(Boolean).join(' · ')}</small>`:''}</button>${i.pri==='acil'&&!i.done?'<span class="acil">Acil</span>':''}${i.for&&i.for!=='ev'?av(i.for,'xs'):''}</div>`;
 // Ekleme: artıya dokununca alttan açılır; virgülle birden çok şey yazılabilir, art arda eklenir
@@ -2040,6 +2041,9 @@ const A={
  clearDone:()=>{const u=snap(),n=S.items.filter(i=>i.list===UI.list&&i.done).length;S.items=S.items.filter(i=>!(i.list===UI.list&&i.done));render(true);toast(`${n} ürün temizlendi`,u)},
  newList:()=>sheet('Yeni liste',`<form data-form="newList" autocomplete="off"><div class="field"><label for="nl-name">Liste adı</label><input class="inp" id="nl-name" placeholder="örn. Kışlık giyim" autofocus></div><div class="chips" style="flex-wrap:wrap;margin-bottom:14px">${['Kışlık giyim','Bayram alışverişi','Taşınma','Doğum günü hediyeleri'].map(x=>`<button type="button" class="chip plain" data-act="nlFill" data-v="${x}">${x}</button>`).join('')}</div><button class="btn primary block">Listeyi oluştur</button></form>`),
  nlFill:d=>{document.getElementById('nl-name').value=d.v},
+ // Listeleri düzenle: bütün liste adları tek sayfada yazılabilir; çöp kutusu silme onayını açar
+ lnAll:()=>{if(!can('list.manage'))return;sheet('Listeleri düzenle',`<form data-form="renAll" autocomplete="off"><div class="lnall">${S.lists.map(l=>`<div class="r"><span class="ic">${I(l.icon||'tag')}</span><input class="inp" data-id="${l.id}" value="${esc(l.name)}" maxlength="40" aria-label="Liste adı" enterkeyhint="done">${S.lists.length>1?`<button type="button" class="x" data-act="lnDel" data-id="${l.id}" aria-label="${esc(l.name)} listesini sil">${I('trash','sm')}</button>`:''}</div>`).join('')}</div><button type="button" class="btn ghost block" data-act="newList" style="margin:4px 0 10px">${I('plus','sm')}Yeni liste</button><button class="btn primary block">Kaydet</button></form>`)},
+ lnDel:d=>{if(!S.lists.some(l=>l.id===d.id))return;UI.list=d.id;A.delList()},
  delList:()=>{const L=S.lists.find(l=>l.id===UI.list),n=S.items.filter(i=>i.list===L.id).length;sheet('Liste silinsin mi?',`<p>“${esc(L.name)}” listesi ve içindeki ${n} ürün silinecek. Silme sonrası birkaç saniye içinde geri alabilirsin.</p><div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" data-act="delList2">Sil</button></div>`)},
  delList2:()=>{const u=snap(),L=S.lists.find(l=>l.id===UI.list);S.lists=S.lists.filter(l=>l.id!==L.id);S.items=S.items.filter(i=>i.list!==L.id);log(`“${L.name}” listesini sildi`);UI.list=(S.lists[0]||{}).id;close();render(true);toast('Liste silindi',u)},
  quickItem:()=>quickItem(),
@@ -2112,6 +2116,7 @@ const FORMS={
   Object.assign(w,{done:true,doneAt:parse(dt).getTime()+12*3600e3,doneWith:F.with.length?F.with:[meId()],mood:F.mood});log(`“${w.title}” için “yaptık” dedi ${F.mood}`);close();UI.wdone=true;render(true);toast(`${w.title} · Yaptıklarımız'a eklendi`,u)},
  item:()=>{const g=id=>document.getElementById(id),i=S.items.find(x=>x.id===F.edit);if(!i)return;const nm=g('it-name').value.trim();if(!nm)return;
   const u=snap();Object.assign(i,{name:nm,for:F.for,pri:F.pri,note:g('it-note').value.trim(),cat:g('it-cat').value});log(`${low(nm)} ayrıntılarını güncelledi`);close();render(true);toast('Kaydedildi',u)},
+ renAll:()=>{const u=snap();let n=0;document.querySelectorAll('.lnall input').forEach(i=>{const L=S.lists.find(l=>l.id===i.dataset.id),v=i.value.trim().slice(0,40);if(L&&v&&v!==L.name){log(`“${L.name}” listesinin adını “${v}” yaptı`);L.name=v;n++}});close();render(true);if(n)toast(n>1?`${n} listenin adı değişti`:'Liste adı değişti',u)},
  newList:()=>{const v=document.getElementById('nl-name').value.trim();if(!v)return;const id=uid();S.lists.push({id,name:v,icon:'tag',at:Date.now()});UI.list=id;log(`“${v}” listesini oluşturdu`);close();render();toast('Liste oluşturuldu')},
  msg:()=>{const t=document.getElementById('ms-t').value.trim().slice(0,80);if(!t)return A.msgDel();const me=meId(),u=snap();
   S.msgs=S.msgs||[];const x=S.msgs.find(m=>m.id===me);if(x){x.t=t;x.at=Date.now()}else S.msgs.push({id:me,t,at:Date.now()});if(S.ann&&S.ann.by===me)S.ann=null;
