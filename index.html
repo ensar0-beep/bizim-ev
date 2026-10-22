@@ -23,7 +23,7 @@
 /* Telefonda tam ekran uygulama, altta 5 sekmeli menü; geniş ekranda ortada telefon genişliğinde bir çerçeve */
 :root{
   --bg:#FAF8F5; --surface:#FFFFFF; --sunk:#F2EEE8; --line:#E4DED4; --fg:#22201D; --muted:#625B52;
-  --accent:#2E6A51; --on-accent:#FFFFFF; --accent-soft:#E1EDE6; --accent-ink:#22533F; --wish:#7A4FB5; --wish-soft:#EFE6F8; --wish-ink:#5B3690;
+  --accent:#2E6A51; --on-accent:#FFFFFF; --accent-soft:#E1EDE6; --accent-ink:#22533F; --buy:#2E6A51; --buy-ink:#22533F; --wish:#7A4FB5; --wish-soft:#EFE6F8; --wish-ink:#5B3690;
   --coral:#B9502F; --coral-soft:#FBE9E2; --on-coral:#FFFFFF; --danger:#B3261E; --danger-soft:#FBE4E2; --warn:#7D5200; --warn-soft:#FFF0D2;
   --stage:#ECE7DF; --scrim:rgba(30,24,18,.38);
   --shadow:0 1px 2px rgba(60,40,20,.06),0 8px 24px rgba(60,40,20,.08);
@@ -33,13 +33,13 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#16140F; --surface:#211E19; --sunk:#2B2721; --line:#3B362E; --fg:#F2EDE5; --muted:#ADA497;
-  --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD; --wish:#C7A8EE; --wish-soft:#2E2438; --wish-ink:#D9C3F5;
+  --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD; --buy:#8BCBA9; --buy-ink:#A5DABD; --wish:#C7A8EE; --wish-soft:#2E2438; --wish-ink:#D9C3F5;
   --coral:#F29A80; --coral-soft:#3A251E; --on-coral:#2A140C; --danger:#F3A69F; --danger-soft:#3E201D; --warn:#F2C46E; --warn-soft:#3A2E15;
   --stage:#0D0C0A; --scrim:rgba(0,0,0,.55);
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.4); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#16140F; --surface:#211E19; --sunk:#2B2721; --line:#3B362E; --fg:#F2EDE5; --muted:#ADA497;
-  --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD; --wish:#C7A8EE; --wish-soft:#2E2438; --wish-ink:#D9C3F5;
+  --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD; --buy:#8BCBA9; --buy-ink:#A5DABD; --wish:#C7A8EE; --wish-soft:#2E2438; --wish-ink:#D9C3F5;
   --coral:#F29A80; --coral-soft:#3A251E; --on-coral:#2A140C; --danger:#F3A69F; --danger-soft:#3E201D; --warn:#F2C46E; --warn-soft:#3A2E15;
   --stage:#0D0C0A; --scrim:rgba(0,0,0,.55);
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.4); color-scheme:dark}
@@ -393,6 +393,14 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .ltabs .sp{flex:1;min-width:0}
 /* Renkli: her tarafın kendi rengi (Apple Anımsatıcılar gibi); İstekler'de çizgi, sayılar ve ortadaki artı mor */
 .ltabs{background:linear-gradient(to bottom,transparent,color-mix(in srgb,var(--accent) 10%,transparent))}
+/* Kamera şeridi: --mx (0 Alınacaklar … 1 İstekler) kaydırırken renkleri birbirine karıştırır */
+.ltabs.lsx{--mx:0;gap:8px;background:linear-gradient(to bottom,transparent,color-mix(in srgb,color-mix(in srgb,var(--wish) calc(var(--mx)*100%),var(--buy)) 11%,transparent))}
+.lsw{position:relative;flex:1;min-width:0;height:56px;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 21%,#000 79%,transparent);mask-image:linear-gradient(90deg,transparent,#000 21%,#000 79%,transparent)}
+.lsi{position:absolute;left:50%;top:50%;--on:0;display:inline-flex;align-items:center;gap:6px;padding:10px 6px;white-space:nowrap;font-family:var(--f-display);font-weight:800;font-size:clamp(.9rem,4.3vw,1.02rem);letter-spacing:.08em;color:color-mix(in srgb,var(--c) calc(var(--on)*100%),var(--muted));transform:translate(-50%,-50%);will-change:transform,opacity}
+.lsi em{font-style:normal;font-family:var(--f-body);letter-spacing:0;font-size:.7rem;font-weight:800;border-radius:999px;padding:1px 7px;background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c);opacity:var(--on)}
+.lsd{position:absolute;left:50%;bottom:6px;width:var(--dw,6px);height:5px;border-radius:9px;transform:translateX(-50%);background:color-mix(in srgb,var(--wish) calc(var(--mx)*100%),var(--buy))}
+.rtgh{position:absolute;z-index:3;pointer-events:none;overflow:hidden;background:var(--bg)}
+.rtgh .ltabs{visibility:hidden}
 body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--accent-soft:var(--wish-soft);--accent-ink:var(--wish-ink)}
 .lbtn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:999px;flex:none;background:var(--accent-soft);color:var(--accent-ink)}
 .lbtn.pl{background:var(--accent);color:var(--on-accent)}
@@ -449,8 +457,8 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .wr .tot b{font-family:var(--f-display);font-size:1.15rem;color:var(--fg)}
 .screen.tsw{touch-action:pan-y}
 .wtabs button.peek{color:var(--fg)}
-.tsin-l{animation:tsinL .24s ease-out}.tsin-r{animation:tsinR .24s ease-out}
-@keyframes tsinL{from{transform:translateX(-30%);opacity:0}}@keyframes tsinR{from{transform:translateX(30%);opacity:0}}
+.tsin-l{animation:tsinL .34s cubic-bezier(.2,.8,.2,1)}.tsin-r{animation:tsinR .34s cubic-bezier(.2,.8,.2,1)}
+@keyframes tsinL{from{transform:translateX(-22%) scale(.98);opacity:0}}@keyframes tsinR{from{transform:translateX(22%) scale(.98);opacity:0}}
 .tsedge{position:fixed;top:50%;z-index:30;display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:var(--fg);color:var(--surface);font-size:.82rem;font-weight:700;pointer-events:none;opacity:0;transition:opacity .12s;transform:translateY(-50%)}
 .rbarw{grid-column:2/4;display:flex;align-items:center;gap:8px}
 .rbar{flex:1;max-width:200px;display:flex;gap:3px;touch-action:none;cursor:pointer}
@@ -1246,7 +1254,7 @@ function syncBack(){const st=history.state&&history.state.bz;
  if(store.mode&&S&&UI.tab!=='today'){if(!st)history.pushState({bz:1},'')}
  else if(st)history.back()}
 window.addEventListener('popstate',()=>{if(document.querySelector('.sheet'))close();if(UI.tab!=='today'){UI.tab='today';render()}});
-function afterRender(){document.getElementById('screen').classList.toggle('tsw',UI.tab==='lists'&&!UI.shop);trackStrip();bindWheel();bindMore();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
+function afterRender(){document.getElementById('screen').classList.toggle('tsw',UI.tab==='lists'&&!UI.shop);rtInit();trackStrip();bindWheel();bindMore();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
 const emptyBox=(title,text,btn)=>`<div class="empty"><b>${title}</b>${text}${btn||''}</div>`;
 
 /* ---------- Konuşur gibi ekleme ----------
@@ -1453,8 +1461,12 @@ function bindMore(){const m=document.getElementById('cmore');if(!m||!window.Inte
 // Listeler (seçilen: 3 Sekmeli + Listeler sekmesi + Çizgi ikonlar). Üstte Alınacaklar | İsteklerimiz, altında çizgi ikonlu sekmeler.
 const LCOL=['#2B8467','#8B4FB8','#A0692B','#2F6DB5','#C2502F','#B5487A'];
 function itabs(arr,label){return `<div class="wtabs${arr.length>5?' scr':''}" role="tablist" aria-label="${label}">${arr.map(t=>`<button role="tab" data-act="${t.act}" ${t.data} aria-pressed="${t.on}" aria-selected="${t.on}" aria-label="${esc(t.n)}${t.cnt?', '+t.cnt:''}"><span class="ic">${I(t.i)}${t.cnt?`<i>${t.cnt}</i>`:''}</span><span class="tl">${esc(t.n)}</span></button>`).join('')}</div>`}
-function lTop(wish){const mk=S.items.filter(i=>!i.done&&i.cat==='Market').length,n=wish?(S.wishes||[]).filter(w=>!w.done).length:S.items.filter(i=>!i.done).length,cnt=`<em aria-hidden="true">${n}</em>`;
- return `<div class="ltabs" role="tablist" aria-label="Liste türü"><button class="lt" role="tab" data-act="lmode" data-v="buy" aria-pressed="${!wish}" aria-selected="${!wish}">Alınacaklar${!wish&&n?cnt:''}</button><button class="lt" role="tab" data-act="lmode" data-v="wish" aria-pressed="${!!wish}" aria-selected="${!!wish}">İstekler${wish&&n?cnt:''}</button><span class="sp"></span>
+function lTop(wish){const mk=S.items.filter(i=>!i.done&&i.cat==='Market').length,sel=wish?1:0,cn=[S.items.filter(i=>!i.done).length,(S.wishes||[]).filter(w=>!w.done).length],
+  opt=[['buy','Alınacaklar','--buy-ink'],['wish','İstekler','--wish-ink']];
+ // Kamera şeridi (iPhone Kamera gibi): seçilen ortada ve renkli, öbürü iki yanda soluk. Daireseldir: iki yana da öbürü görünür, kaydırınca döner.
+ const it=[-2,-1,0,1,2].map(k=>{const i=((sel+k)%2+2)%2,[v,n,c]=opt[i],real=k===0||k===1;
+  return `<button class="lsi" ${real?`role="tab" aria-selected="${k===0}"`:'aria-hidden="true" tabindex="-1"'} data-act="lmode" data-v="${v}" data-dir="${k<0?-1:1}" data-k="${k}" data-w="${i}" aria-pressed="${k===0}" style="--c:var(${c})"><span>${n.toLocaleUpperCase('tr')}</span>${cn[i]?`<em aria-hidden="true">${cn[i]}</em>`:''}</button>`}).join('');
+ return `<div class="ltabs lsx" role="tablist" aria-label="Liste türü: kaydırarak değiştir"><div class="lsw" data-s="${sel}">${it}<i class="lsd" aria-hidden="true"></i></div>
  ${!wish&&mk?`<button class="lbtn" data-act="shopStart" data-v="Market" aria-label="Marketteyim, bütün listelerden ${mk} ürün">${I('cart')}<span class="n">${mk}</span></button>`:''}
  </div>`}
 function vLists(){
@@ -2085,7 +2097,7 @@ const A={
  shopCat:d=>{UI.shop=d.v;render(true)},
  shopEnd:()=>{const n=S.items.filter(i=>i.done&&(i.doneAt||0)>=UI.shopAt).length;UI.shop=null;render();toast(n?`Alışveriş bitti · ${n} ürün alındı`:'Alışveriş modu kapandı')},
  toggleItem:d=>{const i=S.items.find(x=>x.id===d.id);if(!i)return;i.done=!i.done;i.doneAt=i.done?Date.now():null;i.doneBy=meId();if(i.done)log(`${low(i.name)} aldı`);render(true)},
- lmode:d=>{UI.lmode=d.v;UI.wrHold=false;render(true)},
+ lmode:d=>{if(d.v===UI.lmode)return;if(UI.tab==='lists'&&!UI.shop&&document.querySelector('#screen .lsw'))return rtGo(+d.dir||(d.v==='wish'?1:-1));UI.lmode=d.v;UI.wrHold=false;render(true)},
  goWishes:()=>{UI.tab='lists';UI.lmode='wish';render()},
  wt:d=>{UI.wt=d.v;UI.wrHold=false;render(true)},
  memOpen:()=>{const f=UI.wt,done=(S.wishes||[]).filter(w=>w.done&&(f==='all'||w.type===f)).sort((a,b)=>b.doneAt-a.doneAt);if(!done.length)return;sheet(WDN[f]||WDN.all,`<p class="memsub">${done.length} anı</p>`+memTL(done))},
@@ -2306,15 +2318,17 @@ let TS=null;const TSACT=['pickList','wt'];
 const tsTabs=()=>[...document.querySelectorAll('#screen .wtabs button')].filter(b=>TSACT.includes(b.dataset.act));
 function tsBody(){const tb=document.querySelector('#screen .wtabs'),sc=document.getElementById('screen'),out=[];if(!tb)return out;
  for(let n=tb;n&&n!==sc;n=n.parentElement)for(let m=n.nextElementSibling;m;m=m.nextElementSibling)out.push(m);return out}
-function tsTarget(dir){const tabs=tsTabs(),j=tabs.findIndex(b=>b.getAttribute('aria-pressed')==='true')+dir;return j>=0&&j<tabs.length?{b:tabs[j],n:tabs[j].querySelector('.tl')?.textContent||''}:null}
+function tsTarget(dir){const tabs=tsTabs(),j=tabs.findIndex(b=>b.getAttribute('aria-pressed')==='true')+dir;if(j>=0&&j<tabs.length)return {b:tabs[j],n:tabs[j].querySelector('.tl')?.textContent||''};
+ // uçtan devam edince öbür tarafa geçer (Film → Alınacaklar, son liste → İstekler), sonra başa döner
+ return UI.lmode==='wish'?{x:1,n:'Alınacaklar'}:{x:1,n:'İstekler'}}
 document.addEventListener('pointerdown',e=>{if(UI.tab!=='lists'||UI.shop||e.button>0||!S)return;const t=e.target;
- if(!t.closest||!t.closest('#screen')||t.closest('.sheet,.rbar,input,textarea,select'))return;
+ if(!t.closest||!t.closest('#screen')||t.closest('.sheet,.rbar,input,textarea,select,.ltabs'))return;
  const tb=t.closest('.wtabs');if(tb&&tb.scrollWidth>tb.clientWidth+2)return;if(!document.querySelector('#screen .wtabs'))return;
  TS={x0:e.clientX,y0:e.clientY,t0:performance.now(),dx:0,on:false,pid:e.pointerId}},true);
 document.addEventListener('pointermove',e=>{if(!TS||e.pointerId!==TS.pid)return;const dx=e.clientX-TS.x0,dy=e.clientY-TS.y0;
  if(!TS.on){if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){TS=null;return}if(Math.abs(dx)<12)return;TS.on=true;TS.els=tsBody();
   TS.pill=document.createElement('div');TS.pill.className='tsedge';document.body.appendChild(TS.pill)}
- const dir=dx<0?1:-1;if(TS.dir!==dir){TS.dir=dir;TS.tg=tsTarget(dir);document.querySelectorAll('.wtabs .peek').forEach(b=>b.classList.remove('peek'));if(TS.tg)TS.tg.b.classList.add('peek');
+ const dir=dx<0?1:-1;if(TS.dir!==dir){TS.dir=dir;TS.tg=tsTarget(dir);document.querySelectorAll('.wtabs .peek').forEach(b=>b.classList.remove('peek'));if(TS.tg&&TS.tg.b)TS.tg.b.classList.add('peek');
   TS.pill.innerHTML=TS.tg?(dir>0?`${esc(TS.tg.n)} ${I('chevR','sm')}`:`${I('chevL','sm')} ${esc(TS.tg.n)}`):'';TS.pill.style.left=dir>0?'':'12px';TS.pill.style.right=dir>0?'12px':''}
  const v=TS.tg?dx:dx*.25;TS.dx=dx;TS.els.forEach(el=>{el.style.transition='none';el.style.transform=`translateX(${v}px)`;el.style.opacity=TS.tg?Math.max(.35,1-Math.abs(dx)/500):1});
  TS.pill.style.opacity=TS.tg&&Math.abs(dx)>40?1:0},true);
@@ -2322,11 +2336,54 @@ function tsEnd(e){if(!TS||e.pointerId!==TS.pid)return;const s=TS;TS=null;if(!s.o
  swallow=true;setTimeout(()=>swallow=false,350);s.pill.remove();document.querySelectorAll('.wtabs .peek').forEach(b=>b.classList.remove('peek'));
  const fast=Math.abs(s.dx)/(performance.now()-s.t0)>.45&&Math.abs(s.dx)>30,go=s.tg&&e.type!=='pointercancel'&&(Math.abs(s.dx)>70||fast);
  if(!go)return s.els.forEach(el=>{el.style.transition='transform .2s ease,opacity .2s';el.style.transform='';el.style.opacity='';setTimeout(()=>{el.style.transition=''},220)});
+ if(s.tg.x)return rtGo(s.dir,true);
  s.els.forEach(el=>{el.style.transition='transform .14s ease-in,opacity .14s';el.style.transform=`translateX(${s.dir>0?'-':''}60%)`;el.style.opacity='0'});
  setTimeout(()=>{const d=s.tg.b.dataset;A[d.act](d);const sc=document.getElementById('screen');sc.style.scrollBehavior='auto';sc.scrollTop=0;sc.style.scrollBehavior='';
   tsBody().forEach(el=>{el.classList.add(s.dir>0?'tsin-r':'tsin-l');el.addEventListener('animationend',()=>el.classList.remove('tsin-l','tsin-r'),{once:true})});
   const on=document.querySelector('#screen .wtabs button[aria-pressed="true"]');if(on)on.scrollIntoView({block:'nearest',inline:'center'})},140)}
 document.addEventListener('pointerup',tsEnd,true);document.addEventListener('pointercancel',tsEnd,true);
+// Alınacaklar ⇄ İstekler kamera şeridi. t: şeridin kayması (0 yerinde, 1 sağdaki ortada, -1 soldaki ortada)
+const rtRM=()=>window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function rtPaint(w,t){w._t=t;const W=w.clientWidth,sp=Math.min(W*.5,170);let mx=0;
+ w.querySelectorAll('.lsi').forEach(el=>{const d=+el.dataset.k-t,a=Math.min(Math.abs(d),2),on=Math.max(0,1-a);if(el.dataset.w==='1')mx+=on;
+  el.style.transform=`translate(-50%,-50%) translateX(${(d*sp).toFixed(1)}px) scale(${(1-.2*Math.min(a,1)).toFixed(3)})`;
+  el.style.opacity=(a>1?Math.max(0,.5-(a-1)*.9):1-.5*a).toFixed(3);el.style.setProperty('--on',on.toFixed(3))});
+ const f=Math.abs(t-Math.round(t)),h=w.parentNode;h.style.setProperty('--mx',mx.toFixed(3));w.style.setProperty('--dw',(6+44*f).toFixed(1)+'px')}
+// yay gibi oturma: hedefi biraz geçip geri döner
+const rtSpring=x=>1-Math.exp(-6.5*x)*Math.cos(8.5*x)*(1-x);
+function rtTween(w,from,to,ms,ease,cb){const t0=performance.now();cancelAnimationFrame(w._raf);
+ const step=now=>{const x=Math.min(1,(now-t0)/ms);rtPaint(w,from+(to-from)*ease(x));if(x<1)w._raf=requestAnimationFrame(step);else cb&&cb()};w._raf=requestAnimationFrame(step)}
+function rtInit(){const w=document.querySelector('#screen .lsw');if(w)rtPaint(w,0)}
+const rtBody=()=>{const h=document.querySelector('#screen .ltabs'),out=[];for(let m=h&&h.nextElementSibling;m;m=m.nextElementSibling)out.push(m);return out};
+function rtGo(dir,edge){const v=UI.lmode==='wish'?'buy':'wish',sc=document.getElementById('screen'),w=sc.querySelector('.lsw'),t0=w?(w._t||0):0;
+ const apply=()=>{UI.lmode=v;UI.wrHold=false;render();if(edge){const tb=tsTabs(),g=dir>0?tb[0]:tb[tb.length-1];if(g&&g.getAttribute('aria-pressed')!=='true')A[g.dataset.act](g.dataset)}sc.scrollTop=0};
+ if(rtRM())return apply();
+ try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}
+ // sayfa itilir: eski içeriğin kopyası (başlığın altı) bir yana çıkarken yenisi yanı başında öbür yandan girer
+ const hd=sc.querySelector('.ltabs'),par=sc.parentNode,r=sc.getBoundingClientRect(),hb=hd?Math.max(0,hd.getBoundingClientRect().bottom-r.top):0,pr=par.getBoundingClientRect(),cs=getComputedStyle(sc),gh=sc.cloneNode(true),st=sc.scrollTop;
+ gh.removeAttribute('id');gh.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));gh.classList.add('rtgh');gh.setAttribute('aria-hidden','true');
+ Object.assign(gh.style,{left:(r.left-pr.left)+'px',top:(r.top-pr.top)+'px',width:r.width+'px',height:r.height+'px',clipPath:`inset(${hb}px 0 0 0)`});
+ ['--accent','--accent-soft','--accent-ink'].forEach(k=>gh.style.setProperty(k,cs.getPropertyValue(k)));
+ par.insertBefore(gh,sc.nextSibling);gh.scrollTop=st;
+ apply();
+ const ez='cubic-bezier(.25,.9,.28,1)',ms=420;
+ gh.animate([{transform:'translateX(0)',opacity:1},{transform:`translateX(${dir>0?-100:100}%)`,opacity:.5}],{duration:ms,easing:ez,fill:'forwards'}).finished.then(()=>gh.remove(),()=>gh.remove());
+ rtBody().forEach(el=>el.animate([{transform:`translateX(${dir>0?100:-100}%)`},{transform:'none'}],{duration:ms,easing:ez}));
+ const w2=sc.querySelector('.lsw');if(w2)rtTween(w2,t0-dir,0,560,rtSpring)}
+let RTD=null;
+document.addEventListener('pointerdown',e=>{if(UI.tab!=='lists'||UI.shop||e.button>0||!S)return;const w=e.target.closest&&e.target.closest('#screen .lsw');if(!w)return;
+ cancelAnimationFrame(w._raf);RTD={w,x0:e.clientX,y0:e.clientY,t0:performance.now(),dx:0,on:false,pid:e.pointerId,t:w._t||0}},true);
+document.addEventListener('pointermove',e=>{const R=RTD;if(!R||e.pointerId!==R.pid)return;const dx=e.clientX-R.x0,dy=e.clientY-R.y0;
+ if(!R.on){if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){RTD=null;return}if(Math.abs(dx)<8)return;R.on=true;R.els=rtBody()}
+ R.dx=dx;const W=R.w.clientWidth,t=Math.max(-1.1,Math.min(1.1,R.t-dx/Math.min(W*.5,170)));rtPaint(R.w,t);
+ // içerik parmağı biraz arkadan izler
+ const p=Math.min(1,Math.abs(dx)/W);R.els.forEach(el=>{el.style.transition='none';el.style.transform=`translateX(${(dx*.35).toFixed(1)}px)`;el.style.opacity=(1-p*.45).toFixed(3)})},true);
+function rtEnd(e){const R=RTD;if(!R||e.pointerId!==R.pid)return;RTD=null;if(!R.on)return;swallow=true;setTimeout(()=>swallow=false,350);
+ const W=R.w.clientWidth,fast=Math.abs(R.dx)/(performance.now()-R.t0)>.4&&Math.abs(R.dx)>20,go=e.type!=='pointercancel'&&(Math.abs(R.dx)>Math.min(W*.5,170)*.4||fast);
+ if(go){R.els.forEach(el=>{el.style.transition='';el.style.transform='';el.style.opacity=''});return rtGo(R.dx<0?1:-1)}
+ rtTween(R.w,R.w._t||0,0,420,rtSpring);R.els.forEach(el=>{el.style.transition='transform .3s cubic-bezier(.2,.85,.25,1),opacity .3s';el.style.transform='';el.style.opacity='';setTimeout(()=>{el.style.transition=''},320)})}
+document.addEventListener('pointerup',rtEnd,true);document.addEventListener('pointercancel',rtEnd,true);
+window.addEventListener('resize',rtInit);
 
 // iOS klavye kapandıktan sonra sayfayı kaymış bırakabiliyor (üstte boşluk, alt menü ekran dışında); geri yerine oturt
 const unshift=()=>{const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;if(window.scrollY||document.documentElement.scrollTop||document.body.scrollTop){window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0}};
@@ -2346,7 +2403,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-23b',items:[['clock','Yaptıklarımız bir hatıra defteri','Ay ay zaman çizgisi; türüne göre Gittiklerimiz, Gezdiklerimiz…'],['plus','Ekleme artık ortadaki artıda','Hangi sayfadaysan oraya ekler; Aile sağ üstteki resminde'],['board','Alınacaklar ve İstekler','İstekler kendi rengiyle, mor'],['chat','Yaptığınız isteklere yorum yazın','Yaptıklarımız’dan birini açın, altta sohbet var']]};
+const NEWS={v:'2026-10-23c',items:[['board','Alınacaklar ⇄ İstekler','Başlığı sağa sola kaydırın, dönerek öne gelir'],['clock','Yaptıklarımız bir hatıra defteri','Listenin altındaki karta dokunun; ay ay zaman çizgisi'],['plus','Ekleme artık ortadaki artıda','Hangi sayfadaysan oraya ekler; Aile sağ üstteki resminde'],['chat','Yaptığınız isteklere yorum yazın','Yaptıklarımız’dan birini açın, altta sohbet var']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
