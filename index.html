@@ -375,6 +375,12 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .item{min-height:58px}
 .qty{color:var(--muted);font-weight:500}
 .lnall{display:grid;gap:8px;margin-bottom:10px}.lnall .r{display:flex;align-items:center;gap:8px}.lnall .ic{width:36px;height:36px;border-radius:10px;background:var(--sunk);display:flex;align-items:center;justify-content:center;flex:none}.lnall .inp{flex:1;min-width:0}.lnall .x{width:40px;height:40px;border-radius:999px;color:var(--danger);display:flex;align-items:center;justify-content:center;flex:none}
+.lohint{color:var(--muted);font-size:.84rem;margin:-4px 0 12px}
+.lnall .ic{border:0;cursor:pointer;color:var(--fg)}.lnall .r.op .ic{background:var(--accent-soft);color:var(--accent-ink);box-shadow:0 0 0 2px var(--accent)}
+.lnall .r{border-radius:14px;transition:background .15s,box-shadow .15s}.lnall .r.dragging{background:var(--surface);box-shadow:0 8px 24px rgba(0,0,0,.16);position:relative;z-index:2}
+.lnall .drag{width:34px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--muted);flex:none;touch-action:none;cursor:grab}
+.icg2{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;padding:8px;margin:-2px 0 4px;border-radius:14px;background:var(--sunk)}
+.icg2 button{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--fg)}.icg2 button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
 /* Açılış kartı */
 .popov{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--scrim);opacity:0;transition:opacity .2s}
 .popov.on{opacity:1}.popov.on .popc{transform:none;opacity:1}
@@ -685,7 +691,7 @@ a.btn{text-decoration:none}
 (function(){
 'use strict';
 /* ---------- İkonlar ---------- */
-const P={arrUp:'<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',grid:'<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',listb:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>',sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
+const P={grip:'<path d="M5 8h14M5 12h14M5 16h14"/>',arrUp:'<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',grid:'<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',listb:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>',sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
  today:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
  cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
  cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h9a1.5 1.5 0 0 0 1.5-1.1L21.5 7H6"/>',
@@ -962,7 +968,7 @@ function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
   case 'members':x.name=str(x.name)||'?';x.rel=str(x.rel);if(!ROLES[x.role])x.role='adult';if(!/^#[0-9a-fA-F]{6}$/.test(x.color||''))x.color='#8A8178';x.avatar=str(x.avatar).replace(/^[a-z]+\/(?=[A-Za-z0-9_-]+$)/,OZ);if(!(isOz(x.avatar)&&okOzId(ozId(x.avatar)))&&!AVN(x.avatar))x.avatar='';break;
   case 'events':x.title=str(x.title);if(!okDate(x.date))x.date=T();x.time=okTime(x.time)?x.time:'';x.members=idList(x.members);if(!CATS[x.cat])x.cat='aile';if(!REM[x.rem])x.rem='none';if(!REP[x.repeat])x.repeat='none';x.loc=str(x.loc);x.desc=str(x.desc);break;
   case 'tasks':x.title=str(x.title);if(!okDate(x.due))x.due=T();x.time=okTime(x.time)?x.time:'';x.rot=idList(x.rot);x.assignee=typeof x.assignee==='string'&&okId(x.assignee)?x.assignee:'';x.who=idList(x.who);x.dn=idList(x.dn);x.all=!!x.all;if(!TREP[x.repeat])x.repeat='none';x.done=!!x.done;break;
-  case 'lists':x.name=str(x.name)||'Liste';if(!P[x.icon])x.icon='tag';break;
+  case 'lists':x.name=str(x.name)||'Liste';if(!P[x.icon])x.icon='tag';x.at=+x.at||0;break;
   case 'items':x.name=str(x.name)||'?';x.note=str(x.note);x.cat=str(x.cat)||'Diğer';if(!PRI[x.pri])x.pri='yakinda';x.for=str(x.for);x.list=str(x.list);x.done=!!x.done;x.doneAt=+x.doneAt||0;break;
   case 'wishes':x.title=str(x.title)||'?';x.note=str(x.note);{const p=x.place;if(p&&typeof p==='object'&&(str(p.n)||okMapsUrl(str(p.u))))x.place={n:str(p.n).slice(0,120),a:str(p.a).slice(0,200),u:okMapsUrl(str(p.u))?str(p.u):''};else delete x.place}if(!WT[x.type])x.type='yer';{const b=x.book;if(x.type==='kitap'&&b&&typeof b==='object'&&str(b.t))x.book={t:str(b.t).slice(0,160),a:str(b.a).slice(0,120),p:Math.max(0,Math.min(20000,Math.round(+b.p)||0)),y:/^\d{4}$/.test(str(b.y))?str(b.y):'',i:okCover(str(b.i))?str(b.i):''};else delete x.book}x.want=idList(x.want);{const r={};if(x.rate&&typeof x.rate==='object')for(const k in x.rate){const v=Math.round(+x.rate[k]);if(okId(k)&&v>=1&&v<=5)r[k]=v}x.want.forEach(m=>{if(!r[m])r[m]=3});x.rate=r;x.want=Object.keys(r)}x.doneWith=idList(x.doneWith);if(!MOODS.includes(x.mood))x.mood='';x.planned=okDate(x.planned)?x.planned:'';x.done=!!x.done;break;
   case 'activity':x.text=str(x.text);x.at=+x.at||0;break;
@@ -1429,6 +1435,22 @@ function vLists(){
   :`<div class="group" style="margin-top:12px">${emptyBox(done.length?'Hepsi alındı 🎉':'Liste boş',done.length?'Bu listede bekleyen bir şey kalmadı.':'Eklemek için sağ üstteki artıya dokun.',done.length?'':`<br><button class="btn soft sm" data-act="lAdd">${I('plus','sm')}Ekle</button>`)}</div>`)
  +(done.length?`<div class="donebar"><button class="link" data-act="toggleDone" aria-expanded="${UI.doneOpen}">${I('chevD','sm')}Alınanlar (${done.length})</button><button class="link" data-act="clearDone">Alınanları temizle</button></div>${UI.doneOpen?`<div class="group">${done.map(lvRow).join('')}</div>`:''}`:'')
  +(can('list.manage')?`<div style="text-align:center;margin-top:26px"><button class="link" data-act="lnAll">${I('edit','sm')}Listeleri düzenle</button></div>`:'')}
+// Listeleri düzenle sayfasının satırları (F.lo sıra, F.nm yazılan adlar, F.ic seçilen simgeler)
+const LOICS=['tag','cart','fork','shirt','book','laptop','sofa','home','spray','pill','heart','gift','cake','bike','film','compass'];
+const loSync=()=>document.querySelectorAll('.lnall input').forEach(i=>F.nm[i.dataset.id]=i.value);
+const loDraw=()=>{const b=document.getElementById('lnall');if(b)b.innerHTML=loRows()};
+function loRows(){return F.lo.map(id=>{const L=S.lists.find(l=>l.id===id);if(!L)return '';const ic=F.ic[id]||L.icon||'tag',op=F.icOpen===id;
+ return `<div class="r${op?' op':''}" data-id="${id}"><button type="button" class="ic" data-act="loIc" data-id="${id}" aria-expanded="${op}" aria-label="${esc(L.name)} simgesini değiştir">${I(ic)}</button><input class="inp" data-id="${id}" value="${esc(F.nm[id]??L.name)}" maxlength="40" aria-label="Liste adı" enterkeyhint="done">`
+ +(S.lists.length>1?`<button type="button" class="x" data-act="lnDel" data-id="${id}" aria-label="${esc(L.name)} listesini sil">${I('trash','sm')}</button>`:'')
+ +(S.lists.length>1?`<span class="drag" data-id="${id}" aria-hidden="true">${I('grip')}</span>`:'')+`</div>`
+ +(op?`<div class="icg2" role="group" aria-label="Simge seç">${LOICS.map(x=>`<button type="button" data-act="loPick" data-id="${id}" data-v="${x}" aria-pressed="${x===ic}" aria-label="Simge">${I(x)}</button>`).join('')}</div>`:'')}).join('')}
+// Tut-kaydır: tutulan satır parmağın altındaki satırın yerine geçer
+let LD=null;
+document.addEventListener('pointerdown',e=>{const h=e.target.closest&&e.target.closest('.lnall .drag');if(!h||e.button>0)return;e.preventDefault();loSync();if(F.icOpen){F.icOpen=null;loDraw()}
+ const r=document.querySelector(`.lnall .r[data-id="${h.dataset.id}"]`);if(!r)return;r.classList.add('dragging');LD={r,pid:e.pointerId};try{r.querySelector('.drag').setPointerCapture(e.pointerId)}catch(x){}},true);
+document.addEventListener('pointermove',e=>{if(!LD||e.pointerId!==LD.pid)return;e.preventDefault();const rows=[...document.querySelectorAll('.lnall .r')];
+ for(const o of rows){if(o===LD.r)continue;const b=o.getBoundingClientRect();if(e.clientY>b.top&&e.clientY<b.bottom){o.parentNode.insertBefore(LD.r,rows.indexOf(o)<rows.indexOf(LD.r)?o:o.nextSibling);navigator.vibrate&&navigator.vibrate(5);break}}},true);
+['pointerup','pointercancel'].forEach(t=>document.addEventListener(t,()=>{if(!LD)return;LD.r.classList.remove('dragging');F.lo=[...document.querySelectorAll('.lnall .r')].map(x=>x.dataset.id);LD=null},true));
 const lvRow=i=>`<div class="lr${i.done?' done':''}" data-id="${i.id}"><button class="ck" data-act="toggleItem" data-id="${i.id}" aria-pressed="${i.done}" aria-label="${esc(i.name)}: ${i.done?'alınmadı olarak işaretle':'alındı olarak işaretle'}"><span>${I('check','sm')}</span></button>
  <button class="ti" data-act="openItem" data-id="${i.id}"><b>${esc(i.name)}</b>${i.note||i.for?`<small>${[i.note?esc(i.note):'',i.for?esc(forName(i.for)):''].filter(Boolean).join(' · ')}</small>`:''}</button>${i.pri==='acil'&&!i.done?'<span class="acil">Acil</span>':''}${i.for&&i.for!=='ev'?av(i.for,'xs'):''}</div>`;
 // Ekleme: artıya dokununca alttan açılır; virgülle birden çok şey yazılabilir, art arda eklenir
@@ -2053,7 +2075,10 @@ const A={
  newList:()=>sheet('Yeni liste',`<form data-form="newList" autocomplete="off"><div class="field"><label for="nl-name">Liste adı</label><input class="inp" id="nl-name" placeholder="örn. Kışlık giyim" autofocus></div><div class="chips" style="flex-wrap:wrap;margin-bottom:14px">${['Kışlık giyim','Bayram alışverişi','Taşınma','Doğum günü hediyeleri'].map(x=>`<button type="button" class="chip plain" data-act="nlFill" data-v="${x}">${x}</button>`).join('')}</div><button class="btn primary block">Listeyi oluştur</button></form>`),
  nlFill:d=>{document.getElementById('nl-name').value=d.v},
  // Listeleri düzenle: bütün liste adları tek sayfada yazılabilir; çöp kutusu silme onayını açar
- lnAll:()=>{if(!can('list.manage'))return;sheet('Listeleri düzenle',`<form data-form="renAll" autocomplete="off"><div class="lnall">${S.lists.map(l=>`<div class="r"><span class="ic">${I(l.icon||'tag')}</span><input class="inp" data-id="${l.id}" value="${esc(l.name)}" maxlength="40" aria-label="Liste adı" enterkeyhint="done">${S.lists.length>1?`<button type="button" class="x" data-act="lnDel" data-id="${l.id}" aria-label="${esc(l.name)} listesini sil">${I('trash','sm')}</button>`:''}</div>`).join('')}</div><button type="button" class="btn ghost block" data-act="newList" style="margin:4px 0 10px">${I('plus','sm')}Yeni liste</button><button class="btn primary block">Kaydet</button></form>`)},
+ // Listeleri düzenle: adlar yazılabilir, simgeye dokununca seçici açılır, sağdaki çizgilerden tutup sıra değişir; çöp kutusu silme onayını açar
+ lnAll:()=>{if(!can('list.manage'))return;F={lo:S.lists.map(l=>l.id),ic:{},nm:{},icOpen:null};sheet('Listeleri düzenle',`<form data-form="renAll" autocomplete="off"><p class="lohint">Sırayı değiştirmek için sağdaki çizgilerden tutup kaydır. Simgeye dokunursan başkasını seçebilirsin.</p><div class="lnall" id="lnall">${loRows()}</div><button type="button" class="btn ghost block" data-act="newList" style="margin:4px 0 10px">${I('plus','sm')}Yeni liste</button><button class="btn primary block">Kaydet</button></form>`)},
+ loIc:d=>{loSync();F.icOpen=F.icOpen===d.id?null:d.id;loDraw()},
+ loPick:d=>{if(!P[d.v])return;loSync();F.ic[d.id]=d.v;F.icOpen=null;loDraw()},
  lnDel:d=>{if(!S.lists.some(l=>l.id===d.id))return;UI.list=d.id;A.delList()},
  delList:()=>{const L=S.lists.find(l=>l.id===UI.list),n=S.items.filter(i=>i.list===L.id).length;sheet('Liste silinsin mi?',`<p>“${esc(L.name)}” listesi ve içindeki ${n} ürün silinecek. Silme sonrası birkaç saniye içinde geri alabilirsin.</p><div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" data-act="delList2">Sil</button></div>`)},
  delList2:()=>{const u=snap(),L=S.lists.find(l=>l.id===UI.list);S.lists=S.lists.filter(l=>l.id!==L.id);S.items=S.items.filter(i=>i.list!==L.id);log(`“${L.name}” listesini sildi`);UI.list=(S.lists[0]||{}).id;close();render(true);toast('Liste silindi',u)},
@@ -2127,7 +2152,12 @@ const FORMS={
   Object.assign(w,{done:true,doneAt:parse(dt).getTime()+12*3600e3,doneWith:F.with.length?F.with:[meId()],mood:F.mood});log(`“${w.title}” için “yaptık” dedi ${F.mood}`);close();UI.wdone=true;render(true);toast(`${w.title} · Yaptıklarımız'a eklendi`,u)},
  item:()=>{const g=id=>document.getElementById(id),i=S.items.find(x=>x.id===F.edit);if(!i)return;const nm=g('it-name').value.trim();if(!nm)return;
   const u=snap();Object.assign(i,{name:nm,for:F.for,pri:F.pri,note:g('it-note').value.trim(),cat:g('it-cat').value});log(`${low(nm)} ayrıntılarını güncelledi`);close();render(true);toast('Kaydedildi',u)},
- renAll:()=>{const u=snap();let n=0;document.querySelectorAll('.lnall input').forEach(i=>{const L=S.lists.find(l=>l.id===i.dataset.id),v=i.value.trim().slice(0,40);if(L&&v&&v!==L.name){log(`“${L.name}” listesinin adını “${v}” yaptı`);L.name=v;n++}});close();render(true);if(n)toast(n>1?`${n} listenin adı değişti`:'Liste adı değişti',u)},
+ renAll:()=>{if(!F.lo)return;loSync();const u=snap();let ch=false;
+  S.lists.forEach(L=>{const v=String(F.nm[L.id]??L.name).trim().slice(0,40);if(v&&v!==L.name){log(`“${L.name}” listesinin adını “${v}” yaptı`);L.name=v;ch=true}if(F.ic[L.id]&&F.ic[L.id]!==L.icon){L.icon=F.ic[L.id];ch=true}});
+  // Sıra 'at' alanıyla tutulur (listeler ona göre dizilir): yeni sıraya 1, 2, 3… verilir; sonradan açılan liste (at = şimdi) sona düşer
+  const ord=[...F.lo.filter(id=>S.lists.some(l=>l.id===id)),...S.lists.map(l=>l.id).filter(id=>!F.lo.includes(id))];
+  if(ord.join()!==S.lists.map(l=>l.id).join()){S.lists=ord.map((id,ix)=>Object.assign(S.lists.find(l=>l.id===id),{at:ix+1}));log('listelerin sırasını değiştirdi');ch=true}
+  close();render(true);if(ch)toast('Listeler kaydedildi',u)},
  newList:()=>{const v=document.getElementById('nl-name').value.trim();if(!v)return;const id=uid();S.lists.push({id,name:v,icon:'tag',at:Date.now()});UI.list=id;log(`“${v}” listesini oluşturdu`);close();render();toast('Liste oluşturuldu')},
  msg:()=>{const t=document.getElementById('ms-t').value.trim().slice(0,80);if(!t)return A.msgDel();const me=meId(),u=snap();
   S.msgs=S.msgs||[];const x=S.msgs.find(m=>m.id===me);if(x){x.t=t;x.at=Date.now()}else S.msgs.push({id:me,t,at:Date.now()});if(S.ann&&S.ann.by===me)S.ann=null;
