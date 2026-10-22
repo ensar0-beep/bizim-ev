@@ -461,10 +461,19 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .rbarw em{font-style:normal;font-size:.78rem;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rbarw em.on{color:#C2502F}
 .rlist{display:flex;flex-direction:column;gap:6px;margin-top:6px}.rlist span.who b{margin-left:4px}
-.wdone{display:flex;flex-wrap:wrap;gap:6px}
-.wd1{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:.85rem;font-weight:600}
-.wd1 svg{width:1rem;height:1rem;color:var(--c)}
-.wd1 .cmn{display:inline-flex;align-items:center;gap:2px;color:var(--muted);font-size:.75rem}.wd1 .cmn svg{width:.9rem;height:.9rem;color:var(--muted)}
+.memh{display:flex;align-items:baseline;justify-content:space-between;margin:26px 2px 10px}.memh h2{margin:0;font-family:var(--f-display);font-size:1.25rem}.memh small{color:var(--muted);font-weight:600}
+.memm{font-size:.74rem;font-weight:800;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin:14px 0 6px 2px}
+.tl2{position:relative}
+.tle{position:relative;display:grid;grid-template-columns:40px 30px 1fr;gap:10px;align-items:start;width:100%;text-align:left;padding:4px 0 16px}
+.tle::before{content:'';position:absolute;left:64px;top:30px;bottom:-4px;width:2px;background:var(--line)}
+.tle.last::before{display:none}
+.tld{text-align:center;line-height:1.05;padding-top:2px}.tld b{display:block;font-family:var(--f-display);font-size:1.35rem}.tld small{font-size:.7rem;color:var(--muted);font-weight:700}
+.tldot{width:30px;height:30px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c) 16%,var(--surface));color:var(--c);box-shadow:0 0 0 4px var(--bg);position:relative;z-index:1}.tldot svg{width:16px;height:16px}
+.tlb{background:var(--surface);border-radius:var(--r-md);padding:11px 13px;box-shadow:0 1px 2px rgba(0,0,0,.05);display:flex;flex-direction:column;gap:5px;min-width:0}
+.tlb .t{display:flex;align-items:center;gap:6px;font-weight:700;font-size:1rem}.tlb .t>span{min-width:0;overflow-wrap:anywhere}.tlb .t i{font-style:normal;margin-left:auto;font-size:1.15rem}
+.tlb q{font-family:var(--f-display);font-size:.95rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;border-left:3px solid color-mix(in srgb,var(--c) 45%,transparent);padding-left:9px}
+.tlb .f{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.78rem}.tlb .f .fam{transform:scale(.8);margin:-3px}.tlb .f .cm{display:inline-flex;align-items:center;gap:3px;margin-left:auto}.tlb .f .cm svg{width:.9rem;height:.9rem}
+.memmore{display:block;margin:4px auto 0}
 /* İsteklerde yorum: yapılan isteğin altında sohbet balonları (Google Fotoğraflar paylaşılan albüm gibi) */
 .cmh{display:flex;align-items:center;gap:8px;margin:18px 0 8px;font-weight:700}.cmh small{color:var(--muted);font-weight:600}
 .cmb{display:flex;flex-direction:column;gap:8px}
@@ -806,7 +815,9 @@ function parsePlace(title,text,url){text=str(text);let u=str(url).trim();const m
  let n=str(title).trim()||lines[0]||'';const a=lines.filter(x=>x!==n)[0]||'';
  if(!n&&u){const pm=u.match(/\/maps\/place\/([^/@?]+)/);if(pm)try{n=decodeURIComponent(pm[1].replace(/\+/g,' '))}catch(e){}}
  if(!n&&!u)return null;return {n:n.slice(0,120),a:a.slice(0,200),u}}
-const WT={yer:['Gezilecek yerler','Gezi','compass'],kitap:['Okunacak kitaplar','Kitap','book'],film:['İzlenecek filmler','Film','film'],mekan:['Gidilecek mekanlar','Mekan','fork']};
+const WT={mekan:['Gidilecek mekanlar','Mekan','fork'],yer:['Gezilecek yerler','Gezi','compass'],kitap:['Okunacak kitaplar','Kitap','book'],film:['İzlenecek filmler','Film','film']};
+// Yaptıklarımız'ın türe göre adı
+const WDN={all:'Yaptıklarımız',mekan:'Gittiklerimiz',yer:'Gezdiklerimiz',kitap:'Okuduklarımız',film:'İzlediklerimiz'};
 const MOODS=['😍','😊','😐','😴','😂'];
 const PRI={acil:['Acil','late'],yakinda:['Yakında','soon'],biara:['Bir ara','later']};
 const forName=f=>f==='ev'?'Ev için':f?M(f).name+' için':'';
@@ -1482,7 +1493,7 @@ function ideaHTML(){const w=topIdea();if(!w||isChild()&&!w.want.includes(meId())
  return `<div class="sec-h"><h2 class="sec">Bir fikir</h2><button class="link" data-act="goWishes">İstekler ${I('chevR','sm')}</button></div>
  <button class="idea" data-act="openWish" data-id="${w.id}"><span class="wic" style="background:var(--surface)">${I(WT[w.type][2])}</span><span style="flex:1;min-width:0"><span class="m">${when} · ${WT[w.type][1]}</span><span class="t">${esc(w.title)}</span><span class="m">${w.want.length} kişi istiyor: ${w.want.map(x=>esc(first(M(x).name))).join(', ')}</span></span>${I('chevR')}</button>`}
 // İsteklerimiz: çizgi ikonlu tür sekmeleri (Airbnb gibi), en çok istenenler şeridi ve kartlar
-const WTAB={all:['grid','Hepsi'],yer:['compass','Gezi'],kitap:['book','Kitap'],film:['film','Film'],mekan:['fork','Mekan']};
+const WTAB={all:['grid','Hepsi'],mekan:['fork','Mekan'],yer:['compass','Gezi'],kitap:['book','Kitap'],film:['film','Film']};
 const WCOL={yer:'#2B8467',kitap:'#8B4FB8',film:'#2F6DB5',mekan:'#C2502F'};
 // İsteme puanı: her kişi 1-5 verir (rate), sıralama ailenin toplamına göre. want = puan verenler (eski sürümle uyum için)
 const RLBL=['','Olabilir','Fena olmaz','İsterim','Çok isterim','Mutlaka!'];
@@ -1501,8 +1512,18 @@ function vWishes(){
   <span class="tot" aria-label="Ailenin toplamı ${rSum(w)} puan"><b>${rSum(w)}</b>puan</span>${rbarHTML(w.id,rOf(w)[me0]||0)}</div>`;
  return lTop(true)+itabs(Object.entries(WTAB).map(([k,[i,n]])=>({act:'wt',data:`data-v="${k}"`,on:f===k,i,n,cnt:cnt(k)})),'Tür')
  +(pend.length?`<div class="group" style="margin-top:12px">${pend.map(row).join('')}</div>`:`<div class="group" style="margin-top:12px">${emptyBox(f==='all'?'Henüz öneri yok':'Bu türde öneri yok','Gezmek, okumak, izlemek ya da yemek istediğiniz bir şeyi ekleyin.',`<br><button class="btn soft sm" data-act="newWish">${I('plus','sm')}Öneri ekle</button>`)}</div>`)
- +(done.length?`<div class="lbl"><span>Yaptıklarımız · ${done.length}</span></div><div class="wdone">${done.slice(0,UI.wdone?99:8).map(w=>`<button class="wd1" data-act="openWish" data-id="${w.id}" style="--c:${WCOL[w.type]}">${I(WT[w.type][2])}<span>${esc(w.title)}</span><span>${w.mood||''}</span>${cmOf(w).length?`<span class="cmn">${I('chat')}${cmOf(w).length}</span>`:''}</button>`).join('')}${done.length>8&&!UI.wdone?`<button class="link" data-act="wdone">Tümü (${done.length})</button>`:''}</div>`:'')}
-function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'?'yer':UI.wt)),edit:w?w.id:null,place:w?(w.place?{...w.place}:null):(pre.place||null),book:w&&w.book?{...w.book}:null,rate:4};
+ +memHTML(done,f)}
+// Yaptıklarımız: hatıra defteri gibi zaman çizgisi (Day One, Facebook Anılar). Ay ay gruplu; solda gün, ortada türün
+// simgesiyle çizgi, sağda anı kartı: his, ilk yorum alıntı gibi, kimler vardı (herkes varsa "Bütün aile"), yorum sayısı.
+const allIn=ids=>S.members.length>1&&S.members.every(m=>ids.includes(m.id));
+function memHTML(done,f){if(!done.length)return '';
+ const lim=UI.wdone?done:done.slice(0,5),grp=[];
+ lim.forEach(w=>{const d=new Date(w.doneAt),m=MON[d.getMonth()]+' '+d.getFullYear();let g=grp.find(x=>x[0]===m);if(!g)grp.push(g=[m,[]]);g[1].push(w)});
+ const card=(w,last)=>{const d=new Date(w.doneAt),c=cmOf(w),fam=allIn(w.doneWith);
+  return `<button class="tle${last?' last':''}" data-act="openWish" data-id="${w.id}" style="--c:${WCOL[w.type]}"><span class="tld"><b>${d.getDate()}</b><small>${DOW[(d.getDay()+6)%7]}</small></span><span class="tldot">${I(WT[w.type][2])}</span>
+  <span class="tlb"><span class="t"><span>${esc(w.title)}</span><i>${w.mood||''}</i></span>${c[0]?`<q>${esc(c[0].t)}</q>`:''}<span class="f">${fam?famBadge():avs(w.doneWith)}<span>${fam?'Bütün aile':w.doneWith.length+' kişi'}</span>${c.length?`<span class="cm">${I('chat')}${c.length}</span>`:''}</span></span></button>`};
+ return `<div class="memh"><h2>${WDN[f]||WDN.all}</h2><small>${done.length} anı</small></div><div class="tl2">${grp.map(([m,ws])=>`<div class="memm">${m}</div>`+ws.map((w,i)=>card(w,i===ws.length-1)).join('')).join('')}</div>${done.length>5?`<button class="btn soft sm memmore" data-act="wdone">${UI.wdone?'Daha az göster':`Tümünü gör (${done.length})`}</button>`:''}`}
+function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'?'mekan':UI.wt)),edit:w?w.id:null,place:w?(w.place?{...w.place}:null):(pre.place||null),book:w&&w.book?{...w.book}:null,rate:4};
  sheet(w?'Öneriyi düzenle':'Yeni öneri',`<form data-form="wish" autocomplete="off">
  <div class="field"><span class="flabel">Ne türde?</span><div class="chips" style="flex-wrap:wrap" id="wf-type">${Object.entries(WT).map(([k,v])=>`<button type="button" class="chip" data-act="fWt" data-v="${k}" aria-pressed="${F.wtype===k}">${I(v[2],'sm')}${v[1]}</button>`).join('')}</div></div>
  <div class="field"><label for="wf-title">Adı</label><input class="inp" id="wf-title" value="${w?esc(w.title):pre.title?esc(pre.title):''}" placeholder="örn. Kapadokya, Küçük Prens, Çiya Sofrası" autofocus><span class="err" id="wf-err" hidden>Bir ad yaz.</span></div>
@@ -2075,7 +2096,7 @@ const A={
   ${w.note?`<p style="margin:8px 0 4px">${esc(w.note)}</p>`:''}
   ${w.place?`<div class="wpcard" style="margin:12px 0 4px">${I('pin')}<span class="tx"><b>${esc(w.place.n||w.title)}</b>${w.place.a?`<span>${esc(w.place.a)}</span>`:''}</span></div>
   <div class="actions" style="margin:8px 0 6px"><a class="btn soft" href="${esc(mapsUrl(w.place))}" target="_blank" rel="noopener">${I('pin','sm')}Haritada aç</a><a class="btn ghost" href="${esc(dirUrl({...w.place,n:w.place.n||w.title}))}" target="_blank" rel="noopener">Yol tarifi</a></div>`:''}
-  <div class="dl">${w.done?`<div>${I('check')}<span><b>${w.mood} Yaptık</b> · ${long(iso(new Date(w.doneAt)))}<br><span style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">${w.doneWith.map(x=>`<span class="who">${av(x,'xs')}${esc(M(x).name)}</span>`).join('')}</span></span></div>`
+  <div class="dl">${w.done?`<div>${I('check')}<span><b>${w.mood} Yaptık</b> · ${long(iso(new Date(w.doneAt)))}<br><span style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">${allIn(w.doneWith)?`<span class="who">${famBadge()}<b>Bütün aile</b></span>`:w.doneWith.map(x=>`<span class="who">${av(x,'xs')}${esc(M(x).name)}</span>`).join('')}</span></span></div>`
    :`<div>${I('heart')}<span><b>Ailenin puanı: ${rSum(w)}</b><span class="rlist">${ppl.map(([x,v])=>`<span class="who">${av(x,'xs')}${esc(first(M(x).name))}<b>${v}</b> · ${RLBL[v]}</span>`).join('')||'Henüz puan veren yok'}</span></span></div>${w.planned?`<div>${I('cal')}<span>Takvime eklendi: <b>${long(w.planned)}</b></span></div>`:''}`}</div>
   ${w.done?cmHTML(w):''}
   ${w.done?'':`<div class="field" id="ow-rate" style="margin:4px 0 14px"><span class="flabel">Senin puanın</span>${rbarHTML(w.id,rOf(w)[meId()]||0)}</div>
@@ -2314,7 +2335,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-23',items:[['plus','Ekleme artık ortadaki artıda','Hangi sayfadaysan oraya ekler; Aile sağ üstteki resminde'],['board','Alınacaklar ve İstekler','İstekler kendi rengiyle, mor'],['chat','Yaptığınız isteklere yorum yazın','Yaptıklarımız’dan birini açın, altta sohbet var']]};
+const NEWS={v:'2026-10-23b',items:[['clock','Yaptıklarımız bir hatıra defteri','Ay ay zaman çizgisi; türüne göre Gittiklerimiz, Gezdiklerimiz…'],['plus','Ekleme artık ortadaki artıda','Hangi sayfadaysan oraya ekler; Aile sağ üstteki resminde'],['board','Alınacaklar ve İstekler','İstekler kendi rengiyle, mor'],['chat','Yaptığınız isteklere yorum yazın','Yaptıklarımız’dan birini açın, altta sohbet var']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
