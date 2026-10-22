@@ -27,6 +27,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Places in wishes.** For `mekan`/`yer` wishes, `wish.place = {n, a, u}` (name, address, Google Maps link). It arrives through the manifest `share_target` (Google Maps → Paylaş → Bizim Ev opens `./?text=…`, parsed by `parsePlace()` at boot) or a pasted link in the wish form. No Maps API key: detail buttons use plain Google Maps URLs (`mapsUrl`, `dirUrl`). `okMapsUrl()` only accepts https Google Maps hosts; `norm()` drops anything else.
 
+**Done wishes (Yaptıklarımız).** `memHTML()` draws them as a month-grouped timeline under İstekler; the heading follows the type tab (`WDN`: Gittiklerimiz, Gezdiklerimiz, Okuduklarımız, İzlediklerimiz). Type order everywhere comes from `WT`/`WTAB` (Mekan, Gezi, Kitap, Film). When everyone took part, `allIn()` shows the "Bütün aile" badge instead of avatars.
+
 **Comments on done wishes.** A done wish shows a chat under it (`cmHTML`, `cmList`). Each comment is its own record `wcm/{id} = {w, by, t, at}` (wish id, member, text ≤500), so two phones writing at once don't overwrite each other. Deleting a wish removes its comments. `cmRefresh()` (called from `render()`) redraws an open comment list in place, so incoming comments show up without losing the typed text.
 
 **Books in wishes.** For `kitap` wishes, `wish.book = {t, a, p, y, i}` (title, author, pages, year, cover URL). Typing the title in the wish form searches Google Books (keyless, CORS) and falls back to Open Library (`bkSearch`); picking a result fills it. `okCover()` only accepts https covers from Google Books / Open Library hosts; `norm()` drops anything else. Without a cover, `bkCover()` draws a coloured placeholder.
