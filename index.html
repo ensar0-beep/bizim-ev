@@ -464,6 +464,20 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .wdone{display:flex;flex-wrap:wrap;gap:6px}
 .wd1{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:.85rem;font-weight:600}
 .wd1 svg{width:1rem;height:1rem;color:var(--c)}
+.wd1 .cmn{display:inline-flex;align-items:center;gap:2px;color:var(--muted);font-size:.75rem}.wd1 .cmn svg{width:.9rem;height:.9rem;color:var(--muted)}
+/* İsteklerde yorum: yapılan isteğin altında sohbet balonları (Google Fotoğraflar paylaşılan albüm gibi) */
+.cmh{display:flex;align-items:center;gap:8px;margin:18px 0 8px;font-weight:700}.cmh small{color:var(--muted);font-weight:600}
+.cmb{display:flex;flex-direction:column;gap:8px}
+.cmb .b{display:flex;gap:8px;align-items:flex-end;max-width:88%}
+.cmb .b .tx{background:var(--sunk);border-radius:18px 18px 18px 6px;padding:8px 12px;line-height:1.35;overflow-wrap:anywhere;white-space:pre-wrap}
+.cmb .b .tx small{display:block;font-size:.72rem;font-weight:700;color:var(--muted);margin-bottom:1px}
+.cmb .b .tx time{display:block;font-size:.68rem;color:var(--muted);margin-top:2px}
+.cmb .b.me{align-self:flex-end;flex-direction:row-reverse}.cmb .b.me .tx{background:var(--accent-soft);color:var(--fg);border-radius:18px 18px 6px 18px}
+.cmb .b .del{width:32px;height:32px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--muted);opacity:.7}
+.cmb .t{align-self:center;font-size:.8rem;color:var(--muted);padding:4px 0}
+.cmin{display:flex;gap:8px;align-items:center;margin-top:10px}
+.cmin input{flex:1;min-width:0;height:46px;border:1px solid var(--line);border-radius:23px;padding:0 16px;background:var(--surface);color:var(--fg);font:inherit;font-size:16px}
+.cmin .go{width:46px;height:46px;border-radius:999px;flex:none;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center}
 
 /* Aile */
 .code{font-family:var(--f-display);font-size:2rem;font-weight:700;letter-spacing:.12em;font-variant-numeric:tabular-nums}
@@ -690,7 +704,7 @@ a.btn{text-decoration:none}
 (function(){
 'use strict';
 /* ---------- İkonlar ---------- */
-const P={grip:'<path d="M5 8h14M5 12h14M5 16h14"/>',arrUp:'<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',grid:'<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',listb:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>',sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
+const P={chat:'<path d="M20 12a8 8 0 0 1-11.5 7.2L4 20l1-4.3A8 8 0 1 1 20 12Z"/>',grip:'<path d="M5 8h14M5 12h14M5 16h14"/>',arrUp:'<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',grid:'<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',listb:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>',sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
  today:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
  cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
  cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h9a1.5 1.5 0 0 0 1.5-1.1L21.5 7H6"/>',
@@ -802,6 +816,9 @@ const MEMBERS=[
  {id:'can',avatar:'erkek-cocuk',name:'Can',role:'child',rel:'Oğlu, 9 yaşında',color:'#9A5B00',big:false},
  {id:'fatma',avatar:'babaanne',name:'Fatma Nine',role:'adult',rel:'Babaanne',color:'#2B8467',big:true}
 ];
+// Örnek ailede yapılmış isteklerin altında birkaç yorum
+function seedCm(o){const H=3600e3,by=t=>o.wishes.find(w=>w.title===t),L=[['Safranbolu','fatma','Çarşıdan lokum aldık, baharda yine gidelim.',2],['Safranbolu','ayse','Konağın bahçesinde kahvaltı çok güzeldi.',3],['Safranbolu','can','Cam terasta biraz korktum 😅',4],['Hababam Sınıfı','can','Kel Mahmut sahnesinde çok güldüm.',1],['Hababam Sınıfı','zeynep','Devamını da izleyelim!',2]];
+ o.wcm=L.filter(x=>by(x[0])).map(([t,b,tx,h])=>({id:uid(),w:by(t).id,by:b,t:tx,at:by(t).doneAt+h*H}));return o}
 function seed(){
  const t=T(),d=n=>add(t,n),now=Date.now(),H=3600e3;
  const all=MEMBERS.map(m=>m.id);
@@ -908,7 +925,7 @@ const FB_KEY='AIzaSyB6cyMIu_2Q5T1cAXTzDFPmXlPs0CWzQpg';
 const IDP_URL='https://identitytoolkit.googleapis.com/v1/accounts:signUp';
 const TOK_URL='https://securetoken.googleapis.com/v1/token';
 const KEY='bizim-ev.v1';
-const COLS=['members','events','tasks','lists','items','wishes','activity','freq','msgs'];
+const COLS=['members','events','tasks','lists','items','wishes','activity','freq','msgs','wcm'];
 let store;
 try{store=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{},auth:null,av:{},avi:{}},store&&typeof store==='object'?store:{});
@@ -972,7 +989,8 @@ function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
   case 'wishes':x.title=str(x.title)||'?';x.note=str(x.note);{const p=x.place;if(p&&typeof p==='object'&&(str(p.n)||okMapsUrl(str(p.u))))x.place={n:str(p.n).slice(0,120),a:str(p.a).slice(0,200),u:okMapsUrl(str(p.u))?str(p.u):''};else delete x.place}if(!WT[x.type])x.type='yer';{const b=x.book;if(x.type==='kitap'&&b&&typeof b==='object'&&str(b.t))x.book={t:str(b.t).slice(0,160),a:str(b.a).slice(0,120),p:Math.max(0,Math.min(20000,Math.round(+b.p)||0)),y:/^\d{4}$/.test(str(b.y))?str(b.y):'',i:okCover(str(b.i))?str(b.i):''};else delete x.book}x.want=idList(x.want);{const r={};if(x.rate&&typeof x.rate==='object')for(const k in x.rate){const v=Math.round(+x.rate[k]);if(okId(k)&&v>=1&&v<=5)r[k]=v}x.want.forEach(m=>{if(!r[m])r[m]=3});x.rate=r;x.want=Object.keys(r)}x.doneWith=idList(x.doneWith);if(!MOODS.includes(x.mood))x.mood='';x.planned=okDate(x.planned)?x.planned:'';x.done=!!x.done;break;
   case 'activity':x.text=str(x.text);x.at=+x.at||0;break;
   case 'freq':x.name=str(x.name)||'?';x.n=Math.max(0,+x.n||0);x.every=Math.max(0,+x.every||0);x.last=+x.last||0;break;
-  case 'msgs':x.t=str(x.t).slice(0,80);x.at=+x.at||0;break}
+  case 'msgs':x.t=str(x.t).slice(0,80);x.at=+x.at||0;break;
+  case 'wcm':x.w=okId(str(x.w))?x.w:'';x.by=okId(str(x.by))?x.by:'';x.t=str(x.t).slice(0,500);x.at=+x.at||0;break}
  return x}
 function flat(s){const o={};if(!s)return o;for(const c of COLS)for(const x of s[c]||[])o[c+'/'+x.id]=x;if(s.ann)o.ann=s.ann;if(s.meta)o.meta=s.meta;return o}
 function unflat(o){const s={meta:o.meta||{},ann:o.ann&&typeof o.ann==='object'?Object.assign({},o.ann,{text:str(o.ann.text)}):null};for(const c of COLS)s[c]=[];
@@ -1480,7 +1498,7 @@ function vWishes(){
   <span class="tot" aria-label="Ailenin toplamı ${rSum(w)} puan"><b>${rSum(w)}</b>puan</span>${rbarHTML(w.id,rOf(w)[me0]||0)}</div>`;
  return lTop(true)+itabs(Object.entries(WTAB).map(([k,[i,n]])=>({act:'wt',data:`data-v="${k}"`,on:f===k,i,n,cnt:cnt(k)})),'Tür')
  +(pend.length?`<div class="group" style="margin-top:12px">${pend.map(row).join('')}</div>`:`<div class="group" style="margin-top:12px">${emptyBox(f==='all'?'Henüz öneri yok':'Bu türde öneri yok','Gezmek, okumak, izlemek ya da yemek istediğiniz bir şeyi ekleyin.',`<br><button class="btn soft sm" data-act="newWish">${I('plus','sm')}Öneri ekle</button>`)}</div>`)
- +(done.length?`<div class="lbl"><span>Yaptıklarımız · ${done.length}</span></div><div class="wdone">${done.slice(0,UI.wdone?99:8).map(w=>`<button class="wd1" data-act="openWish" data-id="${w.id}" style="--c:${WCOL[w.type]}">${I(WT[w.type][2])}<span>${esc(w.title)}</span><span>${w.mood||''}</span></button>`).join('')}${done.length>8&&!UI.wdone?`<button class="link" data-act="wdone">Tümü (${done.length})</button>`:''}</div>`:'')}
+ +(done.length?`<div class="lbl"><span>Yaptıklarımız · ${done.length}</span></div><div class="wdone">${done.slice(0,UI.wdone?99:8).map(w=>`<button class="wd1" data-act="openWish" data-id="${w.id}" style="--c:${WCOL[w.type]}">${I(WT[w.type][2])}<span>${esc(w.title)}</span><span>${w.mood||''}</span>${cmOf(w).length?`<span class="cmn">${I('chat')}${cmOf(w).length}</span>`:''}</button>`).join('')}${done.length>8&&!UI.wdone?`<button class="link" data-act="wdone">Tümü (${done.length})</button>`:''}</div>`:'')}
 function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'?'yer':UI.wt)),edit:w?w.id:null,place:w?(w.place?{...w.place}:null):(pre.place||null),book:w&&w.book?{...w.book}:null,rate:4};
  sheet(w?'Öneriyi düzenle':'Yeni öneri',`<form data-form="wish" autocomplete="off">
  <div class="field"><span class="flabel">Ne türde?</span><div class="chips" style="flex-wrap:wrap" id="wf-type">${Object.entries(WT).map(([k,v])=>`<button type="button" class="chip" data-act="fWt" data-v="${k}" aria-pressed="${F.wtype===k}">${I(v[2],'sm')}${v[1]}</button>`).join('')}</div></div>
@@ -1520,12 +1538,21 @@ function wpHTML(){const p=F.place;
   <div class="wprow"><input class="inp" id="wf-link" placeholder="ya da bağlantıyı yapıştır" inputmode="url" aria-label="Google Haritalar bağlantısı"><button type="button" class="btn soft sm" data-act="wpPaste">Ekle</button></div>
   <span class="err" id="wf-lerr" hidden>Bu bir Google Haritalar bağlantısı değil.</span></div>`}
 function wpRefresh(){const b=document.getElementById('wf-place');if(!b)return;b.hidden=!isPlaceType(F.wtype);b.innerHTML=wpHTML()}
+// İsteklerde yorum: yapılmış bir isteğin altında serbest sohbet. Her yorum ayrı kayıt (wcm/{id} = {w, by, t, at}),
+// böylece iki telefon aynı anda yazınca biri ötekini silmez.
+const cmOf=w=>(S.wcm||[]).filter(c=>c.w===w.id&&c.by&&c.t).sort((a,b)=>a.at-b.at);
+function cmList(w){const me0=meId(),c=cmOf(w);
+ return `<div class="cmh">${I('chat','sm')}Yorumlar${c.length?`<small>${c.length}</small>`:''}</div><div class="cmb">${c.map(x=>`<div class="b${x.by===me0?' me':''}">${x.by===me0?'':av(x.by,'xs')}<div class="tx">${x.by===me0?'':`<small>${esc(first(M(x.by).name))}</small>`}${esc(x.t)}<time>${ago(x.at)}</time></div>${x.by===me0?`<button class="del" data-act="cmDel" data-id="${x.id}" aria-label="Yorumunu sil">${I('trash','sm')}</button>`:''}</div>`).join('')||'<div class="t">Henüz kimse yazmadı. İlk sen yaz.</div>'}</div>`}
+const cmHTML=w=>`<div id="cmw" data-id="${w.id}">${cmList(w)}</div><form class="cmin" data-form="cmSave" data-id="${w.id}" autocomplete="off"><input id="cm-in" maxlength="500" placeholder="Bir şey yaz…" aria-label="Yorum" enterkeyhint="send"><button class="go" aria-label="Gönder">${I('arrUp')}</button></form>`;
+// Açık pencerede yorumlar başka telefondan gelince ya da yazınca yalnız liste yenilenir, yazı kutusu yerinde kalır
+function cmRefresh(){const el=document.getElementById('cmw'),w=el&&S&&S.wishes.find(x=>x.id===el.dataset.id);if(w)el.innerHTML=cmList(w)}
 function wishDoneForm(w){F={wid:w.id,with:[...(w.want.length?w.want:[meId()])],mood:'😊'};
  sheet('Nasıldı?',`<form data-form="wishDone">
  <p style="margin:0 0 12px"><b>${esc(w.title)}</b></p>
  <div class="field"><label for="wd-date">Ne zaman?</label>${dtBox('wd-date','date',w.planned&&w.planned<=T()?w.planned:T())}</div>
  <div class="field"><span class="flabel">Kimler vardı?</span><div class="chips" style="flex-wrap:wrap" id="wd-with">${chipsHTML('fWith',F.with)}</div></div>
  <div class="field"><span class="flabel">Tek kelimeyle</span><div class="moods" id="wd-mood">${MOODS.map(m=>`<button type="button" data-act="fMood" data-v="${m}" aria-pressed="${F.mood===m}" aria-label="${m}">${m}</button>`).join('')}</div></div>
+ <div class="field"><label for="wd-cm">Yorumun <span style="color:var(--muted);font-weight:500">(isteğe bağlı)</span></label><textarea class="inp" id="wd-cm" rows="2" maxlength="500" placeholder="Aklında kalan bir şey yaz…"></textarea></div>
  <button class="btn primary block">${I('check','sm')}Yaptık olarak kaydet</button></form>`)}
 
 function itemForm(i){F={for:i.for||'',pri:i.pri||'yakinda',edit:i.id};
@@ -1664,7 +1691,7 @@ function render(keepScroll){
  else if(UI.err){html=vError(UI.err);nav.hidden=true}
  else if(!S){html=vLoading();nav.hidden=false}
  else{html={today:vToday,cal:vCal,lists:vLists,tasks:vTasks,family:vFamily}[UI.tab]();nav.hidden=false}
- sc.innerHTML=html;document.body.classList.toggle('wishc',!!S&&UI.tab==='lists'&&!UI.shop&&UI.lmode==='wish');
+ sc.innerHTML=html;cmRefresh();document.body.classList.toggle('wishc',!!S&&UI.tab==='lists'&&!UI.shop&&UI.lmode==='wish');
  const ss=document.getElementById('setsheet');if(ss&&S)ss.innerHTML=famSettingsHTML();
  sc.scrollTop=keepScroll?y:0;
  if(keep){const el=document.getElementById(keep.id);if(el){el.value=keep.v;el.focus();try{el.setSelectionRange(keep.s,keep.s)}catch(e){}}}
@@ -1838,7 +1865,7 @@ const A={
  close:()=>close(),
  undo:()=>{const u=toast.undo;document.getElementById('toastwrap').innerHTML='';u&&u()},
  // Karşılama, aile kurma ve katılma
- startDemo:()=>{store.mode='demo';store.demo=seed();store.demoMe='ayse';store.prefs.big=false;S=store.demo;UI.tab='today';UI.tf='all';UI.err=null;render();toast('Örnek aileye hoş geldin')},
+ startDemo:()=>{store.mode='demo';store.demo=seedCm(seed());store.demoMe='ayse';store.prefs.big=false;S=store.demo;UI.tab='today';UI.tf='all';UI.err=null;render();toast('Örnek aileye hoş geldin')},
  exitDemo:()=>{store.mode=null;store.demo=null;S=null;close();render()},
  createSheet:()=>{if(!FB_URL){toast('Sunucu adresi henüz ayarlanmadı.');return}
   sheet('Yeni aile',`<form data-form="create" autocomplete="off">
@@ -2047,6 +2074,7 @@ const A={
   <div class="actions" style="margin:8px 0 6px"><a class="btn soft" href="${esc(mapsUrl(w.place))}" target="_blank" rel="noopener">${I('pin','sm')}Haritada aç</a><a class="btn ghost" href="${esc(dirUrl({...w.place,n:w.place.n||w.title}))}" target="_blank" rel="noopener">Yol tarifi</a></div>`:''}
   <div class="dl">${w.done?`<div>${I('check')}<span><b>${w.mood} Yaptık</b> · ${long(iso(new Date(w.doneAt)))}<br><span style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">${w.doneWith.map(x=>`<span class="who">${av(x,'xs')}${esc(M(x).name)}</span>`).join('')}</span></span></div>`
    :`<div>${I('heart')}<span><b>Ailenin puanı: ${rSum(w)}</b><span class="rlist">${ppl.map(([x,v])=>`<span class="who">${av(x,'xs')}${esc(first(M(x).name))}<b>${v}</b> · ${RLBL[v]}</span>`).join('')||'Henüz puan veren yok'}</span></span></div>${w.planned?`<div>${I('cal')}<span>Takvime eklendi: <b>${long(w.planned)}</b></span></div>`:''}`}</div>
+  ${w.done?cmHTML(w):''}
   ${w.done?'':`<div class="field" id="ow-rate" style="margin:4px 0 14px"><span class="flabel">Senin puanın</span>${rbarHTML(w.id,rOf(w)[meId()]||0)}</div>
   <div class="actions"><button class="btn primary" data-act="planWish" data-id="${w.id}">${I('cal','sm')}Plana dök</button><button class="btn soft" data-act="doneWish" data-id="${w.id}">${I('check','sm')}Yaptık</button></div>`}
   <div style="display:flex;justify-content:center;gap:18px;margin-top:14px">${w.done?`<button class="link" data-act="undoneWish" data-id="${w.id}">Yapılmadı olarak geri al</button>`:`<button class="link" data-act="editWish" data-id="${w.id}"${lock(own,PARENT)}>${I('edit','sm')}Düzenle</button>`}<button class="link" style="color:var(--danger)" data-act="delWish" data-id="${w.id}"${lock(own,PARENT)}>${I('trash','sm')}Sil</button></div>`)},
@@ -2054,8 +2082,9 @@ const A={
  planWish:d=>{const w=S.wishes.find(x=>x.id===d.id);const dw=parse(T()).getDay();const sat=add(T(),dw===6?7:(6-dw));
   const pre={title:w.title,date:sat,time:w.type==='film'?'20:30':w.type==='mekan'?'13:00':'',cat:'aile',loc:w.place&&w.place.n?w.place.n+(w.place.a?', '+area(w.place):''):isPlaceType(w.type)?w.title:'',desc:w.note||'',members:w.want.length?w.want:[meId()],wish:w.id};eventForm(null,sat,pre)},
  doneWish:d=>wishDoneForm(S.wishes.find(x=>x.id===d.id)),
+ cmDel:d=>{const u=snap();S.wcm=(S.wcm||[]).filter(c=>c.id!==d.id);render(true);toast('Yorum silindi',u)},
  undoneWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);w.done=false;w.doneAt=null;w.doneWith=[];w.mood='';close();render(true);toast('Geri alındı',u)},
- delWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);S.wishes=S.wishes.filter(x=>x.id!==d.id);log(`“${w.title}” önerisini sildi`);close();render(true);toast('Öneri silindi',u)},
+ delWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);S.wishes=S.wishes.filter(x=>x.id!==d.id);S.wcm=(S.wcm||[]).filter(c=>c.w!==d.id);log(`“${w.title}” önerisini sildi`);close();render(true);toast('Öneri silindi',u)},
  fWith:(d,el)=>{F.with=F.with.includes(d.id)?F.with.filter(x=>x!==d.id):[...F.with,d.id];el.setAttribute('aria-pressed',F.with.includes(d.id))},
  fMood:d=>{F.mood=d.v;document.querySelectorAll('#wd-mood button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
  openItem:d=>{const i=S.items.find(x=>x.id===d.id);i&&itemForm(i)},
@@ -2141,8 +2170,10 @@ const FORMS={
   const place=isPlaceType(F.wtype)&&F.place?{n:F.place.n||t,a:F.place.a||'',u:F.place.u||''}:undefined,book=F.wtype==='kitap'&&F.book?{t:F.book.t,a:F.book.a||'',p:F.book.p||0,y:F.book.y||'',i:F.book.i||''}:undefined;
   if(F.edit){const ex=S.wishes.find(x=>x.id===F.edit);if(!ex){close();toast('Bu öneri başka bir cihazda silinmiş.');return}Object.assign(ex,{title:t,note,type:F.wtype});if(place)ex.place=place;else delete ex.place;if(book)ex.book=book;else delete ex.book}else{S.wishes.push({id:uid(),type:F.wtype,title:t,note,...(place?{place}:{}),...(book?{book}:{}),by:meId(),want:[meId()],rate:{[meId()]:F.rate||4},at:Date.now(),done:false,doneAt:null,doneWith:[],mood:'',planned:''});log(`${WT[F.wtype][0].toLocaleLowerCase('tr')} listesine “${t}” önerisini ekledi`)}
   close();render(true);toast(F.edit?'Kaydedildi':'Öneri eklendi',u)},
+ cmSave:()=>{const f=document.querySelector('[data-form="cmSave"]'),i=document.getElementById('cm-in'),t=i.value.trim().slice(0,500),w=f&&S.wishes.find(x=>x.id===f.dataset.id);if(!t||!w)return;
+  S.wcm=S.wcm||[];S.wcm.push({id:uid(),w:w.id,by:meId(),t,at:Date.now()});i.value='';render(true);const b=document.querySelector('#cmw .cmb');b&&b.lastElementChild&&b.lastElementChild.scrollIntoView({block:'nearest'})},
  wishDone:()=>{const w=S.wishes.find(x=>x.id===F.wid);if(!w)return;const u=snap();const dt=document.getElementById('wd-date').value||T();
-  Object.assign(w,{done:true,doneAt:parse(dt).getTime()+12*3600e3,doneWith:F.with.length?F.with:[meId()],mood:F.mood});log(`“${w.title}” için “yaptık” dedi ${F.mood}`);close();UI.wdone=true;render(true);toast(`${w.title} · Yaptıklarımız'a eklendi`,u)},
+  Object.assign(w,{done:true,doneAt:parse(dt).getTime()+12*3600e3,doneWith:F.with.length?F.with:[meId()],mood:F.mood});{const t=document.getElementById('wd-cm').value.trim().slice(0,500);if(t){S.wcm=S.wcm||[];S.wcm.push({id:uid(),w:w.id,by:meId(),t,at:Date.now()})}}log(`“${w.title}” için “yaptık” dedi ${F.mood}`);close();UI.wdone=true;render(true);toast(`${w.title} · Yaptıklarımız'a eklendi`,u)},
  item:()=>{const g=id=>document.getElementById(id),i=S.items.find(x=>x.id===F.edit);if(!i)return;const nm=g('it-name').value.trim();if(!nm)return;
   const u=snap();Object.assign(i,{name:nm,for:F.for,pri:F.pri,note:g('it-note').value.trim(),cat:g('it-cat').value});log(`${low(nm)} ayrıntılarını güncelledi`);close();render(true);toast('Kaydedildi',u)},
  renAll:()=>{if(!F.lo)return;loSync();const u=snap();let ch=false;
@@ -2280,11 +2311,12 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-22',items:[['edit','Liste adlarını değiştir','Alınacaklar’ın altında “Listeleri düzenle”'],['plus','Artı penceresi yenilendi','Yaz ve oka bas, ya da bir simgeye dokun'],['cal','Takvim ay görünümüyle açılır','']]};
+const NEWS={v:'2026-10-23',items:[['plus','Ekleme artık ortadaki artıda','Hangi sayfadaysan oraya ekler; Aile sağ üstteki resminde'],['board','Alınacaklar ve İstekler','İstekler kendi rengiyle, mor'],['chat','Yaptığınız isteklere yorum yazın','Yaptıklarımız’dan birini açın, altta sohbet var']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
  S.events.forEach(e=>{if(e.members.includes(me)&&e.by&&e.by!==me&&idAt(e.id)>since&&e.date>=T())out.push([e.by,`${nm(e.by)} seni bir etkinliğe ekledi`,`${esc(e.title)} · ${rel(e.date)}${e.time?' '+hm(e.time):''}`,idAt(e.id)])});
+ (S.wcm||[]).forEach(c=>{const w=c.by!==me&&c.at>since&&S.wishes.find(x=>x.id===c.w);if(w)out.push([c.by,`${nm(c.by)} “${esc(w.title)}” için yorum yazdı`,`“${esc(c.t)}”`,c.at])});
  (S.msgs||[]).forEach(m=>{if(m.id!==me&&m.t&&m.at>since&&S.members.some(x=>x.id===m.id))out.push([m.id,`${nm(m.id)} panoya yazdı`,`“${esc(m.t)}”`,m.at])});
  return out.sort((a,b)=>b[3]-a[3])}
 const popRow=(a,t,m)=>`<div class="popr">${a}<span><b>${t}</b>${m?`<small>${m}</small>`:''}</span></div>`;
@@ -2301,7 +2333,7 @@ function popCheck(n=0){if(UI.popped||store.mode!=='family'||document.hidden)retu
  if(store.news!==NEWS.v){UI.popped=true;store.news=NEWS.v;save();
   popShow('gift','#2F6DB5','Yenilikler',`<div class="popl">${NEWS.items.map(([i,t,m])=>popRow(`<span class="popdot">${I(i,'sm')}</span>`,t,m)).join('')}</div>`,`<button class="btn primary block" data-act="popX">Anladım</button>`)}}
 // Açılış
-if(store.mode==='demo'){S=store.demo||(store.demo=seed())}
+if(store.mode==='demo'){S=store.demo||(store.demo=seedCm(seed()))}
 else if(store.mode==='family'){if(store.R)fromRemote()}
 const qs=new URLSearchParams(location.search),qcode=qs.get('aile');
 // Google Haritalar'dan "Paylaş → Bizim Ev" ile gelen mekan (manifest share_target)
