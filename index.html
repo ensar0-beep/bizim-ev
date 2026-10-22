@@ -375,6 +375,17 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .item{min-height:58px}
 .qty{color:var(--muted);font-weight:500}
 .lnall{display:grid;gap:8px;margin-bottom:10px}.lnall .r{display:flex;align-items:center;gap:8px}.lnall .ic{width:36px;height:36px;border-radius:10px;background:var(--sunk);display:flex;align-items:center;justify-content:center;flex:none}.lnall .inp{flex:1;min-width:0}.lnall .x{width:40px;height:40px;border-radius:999px;color:var(--danger);display:flex;align-items:center;justify-content:center;flex:none}
+/* Açılış kartı */
+.popov{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--scrim);opacity:0;transition:opacity .2s}
+.popov.on{opacity:1}.popov.on .popc{transform:none;opacity:1}
+.popc{width:100%;max-width:360px;max-height:86vh;overflow:auto;background:var(--surface);border-radius:26px;padding:24px 20px 18px;box-shadow:0 20px 50px rgba(0,0,0,.25);text-align:center;transform:translateY(12px) scale(.97);opacity:0;transition:transform .25s,opacity .25s}
+.popc h2{font-family:var(--f-display);font-size:1.3rem;font-weight:700;margin:12px 0 8px;line-height:1.25}
+.popic{width:64px;height:64px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c) 15%,var(--surface));color:var(--c)}.popic .i{width:30px;height:30px}
+.popl{display:grid;gap:10px;text-align:left;margin:10px 0 4px}.popr{display:flex;align-items:center;gap:10px}.popr>span{display:flex;flex-direction:column;min-width:0}.popr b{font-size:.92rem;font-weight:600}.popr small{color:var(--muted);font-size:.82rem;overflow-wrap:anywhere}
+.popdot{width:34px;height:34px;border-radius:999px;background:var(--sunk);display:flex;align-items:center;justify-content:center;flex:none;color:var(--fg)}
+.popn{color:var(--muted);font-size:.86rem;margin:6px 0 0}
+.popb{display:flex;gap:8px;margin-top:16px}.popb .btn{flex:1}
+@media (prefers-reduced-motion:reduce){.popov,.popc{transition:none}}
 .donebar{display:flex;align-items:center;justify-content:space-between;margin-top:22px}
 /* Listeler: üstte büyük sekmeler (Alınacaklar | İsteklerimiz), altta çizgi ikonlu sekmeler (Airbnb gibi) */
 .ltabs{display:flex;align-items:center;gap:10px;margin:2px -18px 4px;padding:0 18px;border-bottom:1px solid var(--line)}
@@ -1051,7 +1062,7 @@ function openEs(code,t){
 }
 function remote(){setNet('online');clearTimeout(rq);rq=setTimeout(()=>{
  if(!store.R||!store.R.meta){UI.err='missing';render();return}
- UI.err=null;fromRemote();save();render(true);checkReminders();
+ UI.err=null;fromRemote();save();render(true);checkReminders();UI.synced=true;
  // Aile verisi ilk kez gelince avatarlara bak (aile adı ve üyeler o zaman belli olur)
  if(!avChecked){avChecked=true;loadAv()}
  // Yeni katılan kişi: veriler gelince avatar ve renk seçimi bir kez açılır
@@ -1799,6 +1810,8 @@ function addItemTo(list,raw){raw=raw.trim();if(!raw)return null;
 
 /* ---------- Eylemler ---------- */
 const A={
+ popX:()=>popClose(),
+ popTasks:()=>{popClose();A.tab({tab:'tasks'})},
  tab:d=>{UI.tab=d.tab;UI.wrHold=false;UI.dcKeep.clear();render()},
  close:()=>close(),
  undo:()=>{const u=toast.undo;document.getElementById('toastwrap').innerHTML='';u&&u()},
@@ -2063,7 +2076,7 @@ const FORMS={
    const now=Date.now(),mid=uid(),lid=uid(),aid=uid();
    const fam0={meta:{name:fam,createdAt:now,by:mid,v:1},uids:FB_KEY?{[myUid()]:mid}:{},members:{[mid]:{name,rel,role:'admin',color:COLORS[0],at:now}},lists:{[lid]:{name:'Alınacaklar',icon:'tag',at:now}},activity:{[aid]:{who:mid,text:'aileyi oluşturdu',at:now}}};
    await fbSend(code,'PUT',fam0);
-   Object.assign(store,{mode:'family',code,me:mid,R:fam0,pending:{}});UI.tab='today';UI.err=null;fromRemote();close();render();connect();toast('Aile oluşturuldu');UI.joinFor=mid;UI.joinShown=true;A.avPick({id:mid})}
+   Object.assign(store,{mode:'family',code,me:mid,R:fam0,pending:{},news:NEWS.v});UI.tab='today';UI.err=null;fromRemote();close();render();connect();toast('Aile oluşturuldu');UI.joinFor=mid;UI.joinShown=true;A.avPick({id:mid})}
   catch(e){busy(g('cf-btn'));err('Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.')}},
  join:async()=>{const g=id=>document.getElementById(id);const code=g('jf-code').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
   const err=t=>{g('jf-err').textContent=t;g('jf-err').hidden=false};
@@ -2127,7 +2140,7 @@ function joinWho(){const j=F.join;
  sheet(esc(j.meta.name||'Aile'),`<p style="margin:0 0 12px">Hoş geldin! Listede sen hangisisin?</p><div class="people">${j.members.map(m=>`<button data-act="joinAs" data-id="${m.id}"><span class="av" style="--c:${m.color}" aria-hidden="true">${esc(up(m.name[0]))}</span><span><b>${esc(m.name)}</b><small>${ROLES[m.role]}${m.rel?' · '+esc(m.rel):''}</small></span></button>`).join('')}</div>
  <button class="btn soft block" style="margin-top:12px" data-act="joinNewSheet">${I('plus','sm')}Listede yokum, beni ekle</button>`)}
 async function enterFamily(code,id){try{await claimUid(code,id)}catch(e){}
- Object.assign(store,{mode:'family',code,me:id,R:null,pending:{}});S=null;UI.err=null;UI.tab='today';close();UI.joinFor=id;UI.joinShown=false;save();render();connect();loadAv()}
+ Object.assign(store,{mode:'family',code,me:id,R:null,pending:{},news:NEWS.v});S=null;UI.err=null;UI.tab='today';close();UI.joinFor=id;UI.joinShown=false;save();render();connect();loadAv()}
 function copyText(t,msg){const fallback=()=>{const el=document.getElementById('fam-code');if(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}toast('Kopyalanamadı, kodu elle seçebilirsin')};
  try{navigator.clipboard.writeText(t).then(()=>toast(msg),fallback)}catch(e){fallback()}}
 let swReg=null,installEvt=null;
@@ -2231,6 +2244,7 @@ const unshift=()=>{const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT
 document.addEventListener('focusout',()=>setTimeout(unshift,120));
 window.visualViewport&&window.visualViewport.addEventListener('resize',()=>setTimeout(unshift,120));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)unshift()});
+document.addEventListener('visibilitychange',()=>{if(store.mode!=='family')return;if(document.hidden){if(store.seen){store.seen=Date.now();save()}UI.hidAt=Date.now()}else if(UI.hidAt&&Date.now()-UI.hidAt>30*60e3){UI.popped=false;setTimeout(popCheck,2500)}});
 window.addEventListener('online',()=>{setNet('reconnecting');flush();if(es&&es.readyState===2)connect()});
 window.addEventListener('offline',()=>setNet('offline'));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){checkReminders();if(store.mode==='family'&&(!es||es.readyState===2))ensureUid().then(connect);if(S)render(true)}});
@@ -2238,6 +2252,31 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=
 setInterval(checkReminders,30000);
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').then(r=>{swReg=r}).catch(()=>{});
 
+
+/* ---------- Açılış kartı: her açılışta en fazla biri ----------
+ 1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
+ 2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
+ store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
+const NEWS={v:'2026-10-22',items:[['edit','Liste adlarını değiştir','Alınacaklar’ın altında “Listeleri düzenle”'],['plus','Artı penceresi yenilendi','Yaz ve oka bas, ya da bir simgeye dokun'],['cal','Takvim ay görünümüyle açılır','']]};
+const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
+function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
+ S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
+ S.events.forEach(e=>{if(e.members.includes(me)&&e.by&&e.by!==me&&idAt(e.id)>since&&e.date>=T())out.push([e.by,`${nm(e.by)} seni bir etkinliğe ekledi`,`${esc(e.title)} · ${rel(e.date)}${e.time?' '+hm(e.time):''}`,idAt(e.id)])});
+ (S.msgs||[]).forEach(m=>{if(m.id!==me&&m.t&&m.at>since&&S.members.some(x=>x.id===m.id))out.push([m.id,`${nm(m.id)} panoya yazdı`,`“${esc(m.t)}”`,m.at])});
+ return out.sort((a,b)=>b[3]-a[3])}
+const popRow=(a,t,m)=>`<div class="popr">${a}<span><b>${t}</b>${m?`<small>${m}</small>`:''}</span></div>`;
+function popShow(ic,c,t,body,btns){popClose();const el=document.createElement('div');el.className='popov';el.id='popov';
+ el.innerHTML=`<div class="popc" role="dialog" aria-modal="true" aria-labelledby="pop-t"><span class="popic" style="--c:${c}">${I(ic)}</span><h2 id="pop-t">${t}</h2>${body}<div class="popb">${btns}</div></div>`;
+ el.addEventListener('click',e=>{if(e.target===el)popClose()});document.body.appendChild(el);requestAnimationFrame(()=>el.classList.add('on'))}
+function popClose(){const e=document.getElementById('popov');if(e)e.remove()}
+// Aile verisi sunucudan gelene kadar bekler (çevrimdışıysa en fazla ~15 sn); açık bir pencere varsa sonra yeniden dener
+function popCheck(n=0){if(UI.popped||store.mode!=='family'||document.hidden)return;
+ if((!UI.synced&&n<10)||!S||document.querySelector('.sheet')){if(n<40)setTimeout(()=>popCheck(n+1),1500);return}
+ const since=store.seen;store.seen=Date.now();save();
+ if(since){const n=awayNotes(since);if(n.length){UI.popped=true;const more=n.length>4?`<p class="popn">ve ${n.length-4} şey daha</p>`:'';
+  popShow('bell','var(--accent)','Sen yokken',`<div class="popl">${n.slice(0,4).map(([w,t,m])=>popRow(av(w,'sm'),t,m)).join('')}</div>${more}`,`<button class="btn ghost" data-act="popX">Tamam</button><button class="btn primary" data-act="popTasks">Görevlere git</button>`);return}}
+ if(store.news!==NEWS.v){UI.popped=true;store.news=NEWS.v;save();
+  popShow('gift','#2F6DB5','Yenilikler',`<div class="popl">${NEWS.items.map(([i,t,m])=>popRow(`<span class="popdot">${I(i,'sm')}</span>`,t,m)).join('')}</div>`,`<button class="btn primary block" data-act="popX">Anladım</button>`)}}
 // Açılış
 if(store.mode==='demo'){S=store.demo||(store.demo=seed())}
 else if(store.mode==='family'){if(store.R)fromRemote()}
@@ -2250,6 +2289,7 @@ UI.tf=S&&isChild()?'mine':'all';
 render();
 if(store.mode==='family'){ensureUid().then(()=>{connect();flush();loadAv()})}
 checkReminders();
+setTimeout(popCheck,2500);
 if(shared){if(S){UI.tab='lists';UI.lmode='wish';render(true);wishForm(null,{type:'mekan',title:shared.n,place:shared})}else toast('Önce aileye katıl, sonra mekanı yeniden paylaş.')}
 if(qcode&&!store.mode)A.joinSheet({code:qcode.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)});
 })();
