@@ -461,7 +461,6 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .rbarw em{font-style:normal;font-size:.78rem;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rbarw em.on{color:#C2502F}
 .rlist{display:flex;flex-direction:column;gap:6px;margin-top:6px}.rlist span.who b{margin-left:4px}
-.memh{display:flex;align-items:baseline;justify-content:space-between;margin:26px 2px 10px}.memh h2{margin:0;font-family:var(--f-display);font-size:1.25rem}.memh small{color:var(--muted);font-weight:600}
 .memm{font-size:.74rem;font-weight:800;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin:14px 0 6px 2px}
 .tl2{position:relative}
 .tle{position:relative;display:grid;grid-template-columns:40px 30px 1fr;gap:10px;align-items:start;width:100%;text-align:left;padding:4px 0 16px}
@@ -473,7 +472,13 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .tlb .t{display:flex;align-items:center;gap:6px;font-weight:700;font-size:1rem}.tlb .t>span{min-width:0;overflow-wrap:anywhere}.tlb .t i{font-style:normal;margin-left:auto;font-size:1.15rem}
 .tlb q{font-family:var(--f-display);font-size:.95rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;border-left:3px solid color-mix(in srgb,var(--c) 45%,transparent);padding-left:9px}
 .tlb .f{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.78rem}.tlb .f .fam{transform:scale(.8);margin:-3px}.tlb .f .cm{display:inline-flex;align-items:center;gap:3px;margin-left:auto}.tlb .f .cm svg{width:.9rem;height:.9rem}
-.memmore{display:block;margin:4px auto 0}
+.memsub{margin:-6px 0 4px;color:var(--muted);font-size:.85rem}
+.mcov{display:flex;align-items:center;gap:14px;width:100%;text-align:left;margin:24px 0 8px;padding:16px;border-radius:22px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 22%,var(--surface)),color-mix(in srgb,var(--coral) 14%,var(--surface)));box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.mcov .tx{flex:1;min-width:0;display:flex;flex-direction:column}.mcov b{font-family:var(--f-display);font-size:1.2rem}
+.mcov small{color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcov .st{position:relative;width:74px;height:48px;flex:none}
+.mcov .s{position:absolute;top:calc(var(--i)*-2px);left:calc(var(--i)*13px);width:46px;height:46px;border-radius:14px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 2px 6px rgba(0,0,0,.12);transform:rotate(calc((var(--i) - 1)*7deg));border:2px solid color-mix(in srgb,var(--c) 40%,var(--surface))}
+.mcov .s svg{width:20px;height:20px;color:var(--c)}
 /* İsteklerde yorum: yapılan isteğin altında sohbet balonları (Google Fotoğraflar paylaşılan albüm gibi) */
 .cmh{display:flex;align-items:center;gap:8px;margin:18px 0 8px;font-weight:700}.cmh small{color:var(--muted);font-weight:600}
 .cmb{display:flex;flex-direction:column;gap:8px}
@@ -946,7 +951,7 @@ let store;
 try{store=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{},auth:null,av:{},avi:{}},store&&typeof store==='object'?store:{});
 let S=null,baseC={};
-const UI={shop:null,shopAt:0,joinFor:null,joinShown:false,tab:'today',cal:'month',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,lmode:'buy',wt:'all',wdone:false,net:'online',err:null};
+const UI={shop:null,shopAt:0,joinFor:null,joinShown:false,tab:'today',cal:'month',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,lmode:'buy',wt:'all',net:'online',err:null};
 UI.dcKeep=new Set();
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){try{store.av={};store.avi={};localStorage.setItem(KEY,JSON.stringify(store))}catch(x){}}};
 const meId=()=>store.mode==='demo'?store.demoMe:store.me;
@@ -1516,16 +1521,17 @@ function vWishes(){
   <span class="tot" aria-label="Ailenin toplamı ${rSum(w)} puan"><b>${rSum(w)}</b>puan</span>${rbarHTML(w.id,rOf(w)[me0]||0)}</div>`;
  return lTop(true)+itabs(Object.entries(WTAB).map(([k,[i,n]])=>({act:'wt',data:`data-v="${k}"`,on:f===k,i,n,cnt:cnt(k)})),'Tür')
  +(pend.length?`<div class="group" style="margin-top:12px">${pend.map(row).join('')}</div>`:`<div class="group" style="margin-top:12px">${emptyBox(f==='all'?'Henüz öneri yok':'Bu türde öneri yok','Gezmek, okumak, izlemek ya da yemek istediğiniz bir şeyi ekleyin.',`<br><button class="btn soft sm" data-act="newWish">${I('plus','sm')}Öneri ekle</button>`)}</div>`)
- +memHTML(done,f)}
-// Yaptıklarımız: hatıra defteri gibi zaman çizgisi (Day One, Facebook Anılar). Ay ay gruplu; solda gün, ortada türün
-// simgesiyle çizgi, sağda anı kartı: his, ilk yorum alıntı gibi, kimler vardı (herkes varsa "Bütün aile"), yorum sayısı.
-function memHTML(done,f){if(!done.length)return '';
- const lim=UI.wdone?done:done.slice(0,5),grp=[];
- lim.forEach(w=>{const d=new Date(w.doneAt),m=MON[d.getMonth()]+' '+d.getFullYear();let g=grp.find(x=>x[0]===m);if(!g)grp.push(g=[m,[]]);g[1].push(w)});
+ +memCover(done,f)}
+// Yaptıklarımız: listenin altında bir kapak kartı (Apple Fotoğraflar Anılar gibi); dokununca hatıra defteri ayrı pencerede
+// açılır: ay ay zaman çizgisi (Day One gibi), solda gün, ortada türün simgesiyle çizgi, sağda anı kartı.
+function memCover(done,f){if(!done.length)return '';const last=done[0];
+ return `<button class="mcov" data-act="memOpen"><span class="st" aria-hidden="true">${done.slice(0,3).map((w,i)=>`<span class="s" style="--c:${WCOL[w.type]};--i:${i}">${w.mood||I(WT[w.type][2])}</span>`).join('')}</span><span class="tx"><b>${WDN[f]||WDN.all}</b><small>${done.length} anı · son: ${esc(last.title)}</small></span>${I('chevR')}</button>`}
+function memTL(done){const grp=[];
+ done.forEach(w=>{const d=new Date(w.doneAt),m=MON[d.getMonth()]+' '+d.getFullYear();let g=grp.find(x=>x[0]===m);if(!g)grp.push(g=[m,[]]);g[1].push(w)});
  const card=(w,last)=>{const d=new Date(w.doneAt),c=cmOf(w),fam=allIn(w.doneWith);
   return `<button class="tle${last?' last':''}" data-act="openWish" data-id="${w.id}" style="--c:${WCOL[w.type]}"><span class="tld"><b>${d.getDate()}</b><small>${DOW[(d.getDay()+6)%7]}</small></span><span class="tldot">${I(WT[w.type][2])}</span>
   <span class="tlb"><span class="t"><span>${esc(w.title)}</span><i>${w.mood||''}</i></span>${c[0]?`<q>${esc(c[0].t)}</q>`:''}<span class="f">${fam?famBadge():avs(w.doneWith)}<span>${fam?'Bütün aile':w.doneWith.length+' kişi'}</span>${c.length?`<span class="cm">${I('chat')}${c.length}</span>`:''}</span></span></button>`};
- return `<div class="memh"><h2>${WDN[f]||WDN.all}</h2><small>${done.length} anı</small></div><div class="tl2">${grp.map(([m,ws])=>`<div class="memm">${m}</div>`+ws.map((w,i)=>card(w,i===ws.length-1)).join('')).join('')}</div>${done.length>5?`<button class="btn soft sm memmore" data-act="wdone">${UI.wdone?'Daha az göster':`Tümünü gör (${done.length})`}</button>`:''}`}
+ return `<div class="tl2">${grp.map(([m,ws])=>`<div class="memm">${m}</div>`+ws.map((w,i)=>card(w,i===ws.length-1)).join('')).join('')}</div>`}
 function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'?'mekan':UI.wt)),edit:w?w.id:null,place:w?(w.place?{...w.place}:null):(pre.place||null),book:w&&w.book?{...w.book}:null,rate:4};
  sheet(w?'Öneriyi düzenle':'Yeni öneri',`<form data-form="wish" autocomplete="off">
  <div class="field"><span class="flabel">Ne türde?</span><div class="chips" style="flex-wrap:wrap" id="wf-type">${Object.entries(WT).map(([k,v])=>`<button type="button" class="chip" data-act="fWt" data-v="${k}" aria-pressed="${F.wtype===k}">${I(v[2],'sm')}${v[1]}</button>`).join('')}</div></div>
@@ -2082,7 +2088,7 @@ const A={
  lmode:d=>{UI.lmode=d.v;UI.wrHold=false;render(true)},
  goWishes:()=>{UI.tab='lists';UI.lmode='wish';render()},
  wt:d=>{UI.wt=d.v;UI.wrHold=false;render(true)},
- wdone:()=>{UI.wdone=!UI.wdone;render(true)},
+ memOpen:()=>{const f=UI.wt,done=(S.wishes||[]).filter(w=>w.done&&(f==='all'||w.type===f)).sort((a,b)=>b.doneAt-a.doneAt);if(!done.length)return;sheet(WDN[f]||WDN.all,`<p class="memsub">${done.length} anı</p>`+memTL(done))},
  newWish:()=>wishForm(null),
  fWt:d=>{F.wtype=d.v;document.querySelectorAll('#wf-type .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===d.v));wpRefresh();bkRefresh()},
  bkPick:d=>{const b=(UI.bkRes||[])[+d.i];if(!b)return;F.book=b;const t=document.getElementById('wf-title');if(t)t.value=b.t;bkRefresh()},
@@ -2202,7 +2208,7 @@ const FORMS={
  cmSave:()=>{const f=document.querySelector('[data-form="cmSave"]'),i=document.getElementById('cm-in'),t=i.value.trim().slice(0,500),w=f&&S.wishes.find(x=>x.id===f.dataset.id);if(!t||!w)return;
   S.wcm=S.wcm||[];S.wcm.push({id:uid(),w:w.id,by:meId(),t,at:Date.now()});i.value='';render(true);const b=document.querySelector('#cmw .cmb');b&&b.lastElementChild&&b.lastElementChild.scrollIntoView({block:'nearest'})},
  wishDone:()=>{const w=S.wishes.find(x=>x.id===F.wid);if(!w)return;const u=snap();const dt=document.getElementById('wd-date').value||T();
-  Object.assign(w,{done:true,doneAt:parse(dt).getTime()+12*3600e3,doneWith:F.with.length?F.with:[meId()],mood:F.mood});{const t=document.getElementById('wd-cm').value.trim().slice(0,500);if(t){S.wcm=S.wcm||[];S.wcm.push({id:uid(),w:w.id,by:meId(),t,at:Date.now()})}}log(`“${w.title}” için “yaptık” dedi ${F.mood}`);close();UI.wdone=true;render(true);toast(`${w.title} · Yaptıklarımız'a eklendi`,u)},
+  Object.assign(w,{done:true,doneAt:parse(dt).getTime()+12*3600e3,doneWith:F.with.length?F.with:[meId()],mood:F.mood});{const t=document.getElementById('wd-cm').value.trim().slice(0,500);if(t){S.wcm=S.wcm||[];S.wcm.push({id:uid(),w:w.id,by:meId(),t,at:Date.now()})}}log(`“${w.title}” için “yaptık” dedi ${F.mood}`);close();render(true);toast(`${w.title} · Yaptıklarımız'a eklendi`,u)},
  item:()=>{const g=id=>document.getElementById(id),i=S.items.find(x=>x.id===F.edit);if(!i)return;const nm=g('it-name').value.trim();if(!nm)return;
   const u=snap();Object.assign(i,{name:nm,for:F.for,pri:F.pri,note:g('it-note').value.trim(),cat:g('it-cat').value});log(`${low(nm)} ayrıntılarını güncelledi`);close();render(true);toast('Kaydedildi',u)},
  renAll:()=>{if(!F.lo)return;loSync();const u=snap();let ch=false;
