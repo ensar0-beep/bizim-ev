@@ -697,6 +697,8 @@ a.btn{text-decoration:none}
 .fam{width:2rem;height:2rem;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex:none;background:var(--coral-soft);color:var(--coral)}
 .fam svg{width:1.2rem;height:1.2rem}
 .chip .fam{width:1.6rem;height:1.6rem}
+.who .fam,.ctk .fam{width:1.5rem;height:1.5rem}.who .fam svg,.ctk .fam svg{width:1rem;height:1rem}
+.chip.famc{gap:6px}
 .chip .fam svg{width:1rem;height:1rem}
 </style>
 </head>
@@ -971,7 +973,8 @@ const avFace=(k,name,color,cls)=>{const src=k?avSrc(k):'';
  :`<span class="av${cls?' '+cls:''}" style="--c:${color}" aria-hidden="true">${esc(up((name||'?')[0]))}</span>`};
 const av=(id,cls)=>{const m=M(id);return avFace(m.avatar,m.name,m.color,cls)};
 const refocus=(act,v)=>{const b=document.querySelector(`#avp [data-act="${act}"][data-v="${v}"]`);b&&b.focus({preventScroll:true})};
-const avs=ids=>`<span class="avs">${ids.slice(0,4).map(i=>av(i,'xs')).join('')}</span>`;
+// Ailenin hepsiyse avatar yığını yerine tek "Bütün aile" simgesi (kalpli ev)
+const avs=ids=>allIn(ids)?famBadge():`<span class="avs">${ids.slice(0,4).map(i=>av(i,'xs')).join('')}</span>`;
 const log=text=>{S.activity.unshift({id:uid(),who:meId(),text,at:Date.now()});S.activity=S.activity.slice(0,40)};
 const first=n=>n.split(' ')[0];
 const COLORS=['#C2502F','#2F6DB5','#8B4FB8','#9A5B00','#2B8467','#B03A6A','#4F5BB3','#5F7A1F'];
@@ -1142,12 +1145,13 @@ function whoHTML(t,full){const w=ws(t),nm=x=>esc(full?M(x).name:first(M(x).name)
  if(w.length<2)return `<span class="who">${av(w[0],'xs')}${nm(w[0])}</span>`;
  if(t.done&&t.doneBy&&!allRule(t))return `<span class="who">${av(t.doneBy,'xs')}${nm(t.doneBy)} yaptı</span>`;
  if(allRule(t)){const dn=t.dn||[];return `<span class="who"><span class="avs">${w.map(x=>av(x,'xs'+(dn.includes(x)||t.done?'':' wait'))).join('')}</span>${t.done?'Hepsi yaptı':dn.length+'/'+w.length+' yaptı'}</span>`}
- return `<span class="who">${avs(w)}${w.map(nm).join(' ya da ')}</span>`}
+ return `<span class="who">${avs(w)}${allIn(w)?'Bütün aile':w.map(nm).join(' ya da ')}</span>`}
 const annVisible=()=>S.ann&&(!S.ann.until||Date.now()<S.ann.until);
 
 /* ---------- Bileşenler ---------- */
 // Bütün ailenin katıldığı etkinlik: avatar yığını yerine tek kalpli ev ikonu.
-const isAll=e=>S.members.length>1&&S.members.every(m=>e.members.includes(m.id));
+const allIn=ids=>!!S&&S.members.length>1&&S.members.every(m=>ids.includes(m.id));
+const isAll=e=>allIn(e.members);
 const famBadge=()=>`<span class="fam" aria-hidden="true">${I('homeheart')}</span>`;
 function evRow(e,day){const c=e.members.length>=S.members.length&&S.members.length>1?'var(--accent)':M(e.members[0]).color;
  return `<button class="row tap" data-act="openEvent" data-id="${e.id}" data-d="${day}">
@@ -1331,7 +1335,7 @@ const saUpd=()=>{const b=document.getElementById('sa-prev');if(b)b.innerHTML=saH
 const nowMin=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
 const toMin=t=>t?+t.slice(0,2)*60+ +t.slice(3,5):null;
 const evColor=e=>isAll(e)?'var(--accent)':M(e.members[0]).color;
-const whoMini=ids=>ids.length>=S.members.length&&S.members.length>1?famBadge():avs(ids.slice(0,2));
+const whoMini=ids=>allIn(ids)?famBadge():avs(ids.slice(0,2));
 // Duyuru buzdolabına iğnelenmiş not gibi: hafif eğik, yazanın avatarı raptiye
 function nextHTML(c){const t=T();let nx=null,day=t;
  for(let i=0;i<14&&!nx;i++){const d=add(t,i);nx=evsOn(d,c).find(e=>i>0||!e.time||toMin(e.time)>=nowMin()-30)||null;if(nx)day=d}
@@ -1416,7 +1420,7 @@ function calTop(){const k=UI.cal==='month'?'month':'flow';
 function ctkLine(d,tks){if(!tks.length)return '';const t=T();
  if(UI.ctk||(UI.ctkOpen||{})[d])return tks.sort((a,b)=>tkKey(a,d)<tkKey(b,d)?-1:1).map(x=>crow('t',x,d)).join('')+(UI.ctk?'':`<button class="ctk" data-act="ctkDay" data-d="${d}"><span class="ck0">${I('chevU','sm')}</span><span class="b">Görevleri gizle</span></button>`);
  const who=[...new Set(tks.flatMap(x=>ws(x)))];
- return `<button class="ctk" data-act="ctkDay" data-d="${d}"><span class="ck0">${I('tasks','sm')}</span><span class="b">${tks.length} görev${tks.some(x=>x.due<t)?' · <em>geciken var</em>':''}</span>${avs(who.slice(0,3))}${I('chevR','sm')}</button>`}
+ return `<button class="ctk" data-act="ctkDay" data-d="${d}"><span class="ck0">${I('tasks','sm')}</span><span class="b">${tks.length} görev${tks.some(x=>x.due<t)?' · <em>geciken var</em>':''}</span>${allIn(who)?famBadge():avs(who.slice(0,3))}${I('chevR','sm')}</button>`}
 function calFlow(c){const t=T();let h='',run=null;
  const flush=()=>{if(!run)return;h+=`<div class="dblock cemp" data-from="${run[0]}" data-to="${run[1]}">${run[0]===run[1]?shortD(run[0]):shortD(run[0])+' – '+shortD(run[1])} · boş</div>`;run=null};
  for(let i=0;i<UI.agN;i++){const d=add(UI.agStart,i),evs=evsOn(d,c),tks=tasksOn(d,c).filter(x=>!x.done);
@@ -1491,7 +1495,7 @@ function lAddSheet(){const L=S.lists.find(l=>l.id===UI.list)||S.lists[0];if(!L)r
 function topIdea(){return (S.wishes||[]).filter(w=>!w.done&&!w.planned&&w.want.length>=2).sort(byScore)[0]}
 function ideaHTML(){const w=topIdea();if(!w||isChild()&&!w.want.includes(meId()))return '';const dw=new Date().getDay();const when=dw===0||dw===6?'Bugün için':'Hafta sonu için';
  return `<div class="sec-h"><h2 class="sec">Bir fikir</h2><button class="link" data-act="goWishes">İstekler ${I('chevR','sm')}</button></div>
- <button class="idea" data-act="openWish" data-id="${w.id}"><span class="wic" style="background:var(--surface)">${I(WT[w.type][2])}</span><span style="flex:1;min-width:0"><span class="m">${when} · ${WT[w.type][1]}</span><span class="t">${esc(w.title)}</span><span class="m">${w.want.length} kişi istiyor: ${w.want.map(x=>esc(first(M(x).name))).join(', ')}</span></span>${I('chevR')}</button>`}
+ <button class="idea" data-act="openWish" data-id="${w.id}"><span class="wic" style="background:var(--surface)">${I(WT[w.type][2])}</span><span style="flex:1;min-width:0"><span class="m">${when} · ${WT[w.type][1]}</span><span class="t">${esc(w.title)}</span><span class="m">${allIn(w.want)?'Bütün aile istiyor':`${w.want.length} kişi istiyor: ${w.want.map(x=>esc(first(M(x).name))).join(', ')}`}</span></span>${I('chevR')}</button>`}
 // İsteklerimiz: çizgi ikonlu tür sekmeleri (Airbnb gibi), en çok istenenler şeridi ve kartlar
 const WTAB={all:['grid','Hepsi'],mekan:['fork','Mekan'],yer:['compass','Gezi'],kitap:['book','Kitap'],film:['film','Film']};
 const WCOL={yer:'#2B8467',kitap:'#8B4FB8',film:'#2F6DB5',mekan:'#C2502F'};
@@ -1515,7 +1519,6 @@ function vWishes(){
  +memHTML(done,f)}
 // Yaptıklarımız: hatıra defteri gibi zaman çizgisi (Day One, Facebook Anılar). Ay ay gruplu; solda gün, ortada türün
 // simgesiyle çizgi, sağda anı kartı: his, ilk yorum alıntı gibi, kimler vardı (herkes varsa "Bütün aile"), yorum sayısı.
-const allIn=ids=>S.members.length>1&&S.members.every(m=>ids.includes(m.id));
 function memHTML(done,f){if(!done.length)return '';
  const lim=UI.wdone?done:done.slice(0,5),grp=[];
  lim.forEach(w=>{const d=new Date(w.doneAt),m=MON[d.getMonth()]+' '+d.getFullYear();let g=grp.find(x=>x[0]===m);if(!g)grp.push(g=[m,[]]);g[1].push(w)});
@@ -1570,11 +1573,12 @@ function cmList(w){const me0=meId(),c=cmOf(w);
 const cmHTML=w=>`<div id="cmw" data-id="${w.id}">${cmList(w)}</div><form class="cmin" data-form="cmSave" data-id="${w.id}" autocomplete="off"><input id="cm-in" maxlength="500" placeholder="Bir şey yaz…" aria-label="Yorum" enterkeyhint="send"><button class="go" aria-label="Gönder">${I('arrUp')}</button></form>`;
 // Açık pencerede yorumlar başka telefondan gelince ya da yazınca yalnız liste yenilenir, yazı kutusu yerinde kalır
 function cmRefresh(){const el=document.getElementById('cmw'),w=el&&S&&S.wishes.find(x=>x.id===el.dataset.id);if(w)el.innerHTML=cmList(w)}
+const withChips=()=>`<button type="button" class="chip famc" data-act="fWithAll" aria-pressed="${allIn(F.with)}">${famBadge()}Bütün aile</button>`+chipsHTML('fWith',F.with);
 function wishDoneForm(w){F={wid:w.id,with:[...(w.want.length?w.want:[meId()])],mood:'😊'};
  sheet('Nasıldı?',`<form data-form="wishDone">
  <p style="margin:0 0 12px"><b>${esc(w.title)}</b></p>
  <div class="field"><label for="wd-date">Ne zaman?</label>${dtBox('wd-date','date',w.planned&&w.planned<=T()?w.planned:T())}</div>
- <div class="field"><span class="flabel">Kimler vardı?</span><div class="chips" style="flex-wrap:wrap" id="wd-with">${chipsHTML('fWith',F.with)}</div></div>
+ <div class="field"><span class="flabel">Kimler vardı?</span><div class="chips" style="flex-wrap:wrap" id="wd-with">${withChips()}</div></div>
  <div class="field"><span class="flabel">Tek kelimeyle</span><div class="moods" id="wd-mood">${MOODS.map(m=>`<button type="button" data-act="fMood" data-v="${m}" aria-pressed="${F.mood===m}" aria-label="${m}">${m}</button>`).join('')}</div></div>
  <div class="field"><label for="wd-cm">Yorumun <span style="color:var(--muted);font-weight:500">(isteğe bağlı)</span></label><textarea class="inp" id="wd-cm" rows="2" maxlength="500" placeholder="Aklında kalan bir şey yaz…"></textarea></div>
  <button class="btn primary block">${I('check','sm')}Yaptık olarak kaydet</button></form>`)}
@@ -1663,7 +1667,7 @@ function crow(k,x,day,past){const t=T();
   <button class="ti" data-act="openEvent" data-id="${x.id}" data-d="${day}"><b>${esc(x.title)}</b>${x.loc?`<small>${esc(x.loc)}</small>`:''}</button><span class="who">${whoMini(x.members)}</span></div>`;
  const late=!x.done&&x.due<t,ok=can('task.complete',x);
  return `<div class="cr" style="--c:${ws(x).length>1?'var(--accent)':M(ws(x)[0]).color}"><span class="tm${late?' late':x.time?'':' mu'}">${late?rel(x.due):x.time?hm(x.time):'Gün içi'}</span><span class="mk"><button class="ck" data-act="toggleTask" data-id="${x.id}" aria-pressed="${myTick(x)}" aria-label="${esc(x.title)}: ${myTick(x)?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}>${I('check','sm')}</button></span>
-  <button class="ti" data-act="openTask" data-id="${x.id}"><b>${esc(x.title)}</b>${allRule(x)?`<small>${(x.dn||[]).length}/${ws(x).length} yaptı</small>`:''}</button><span class="who">${avs(ws(x).slice(0,2))}</span></div>`}
+  <button class="ti" data-act="openTask" data-id="${x.id}"><b>${esc(x.title)}</b>${allRule(x)?`<small>${(x.dn||[]).length}/${ws(x).length} yaptı</small>`:''}</button><span class="who">${whoMini(ws(x))}</span></div>`}
 function wselHTML(id){const x=M(id),t=T(),c={mine:false,filter:[id]},dd=parse(t),mon=MON[dd.getMonth()];
  const last=iso(new Date(dd.getFullYear(),dd.getMonth()+1,0)),days=[];
  for(let d=t;d<=last;d=add(d,1)){const r=dayData(d,c),evs=d===t?r.evs.filter(e=>!e.time||toMin(e.time)>=nowMin()-30):r.evs,tks=r.tks.filter(k=>!k.done);
@@ -2055,7 +2059,7 @@ const A={
   log(`“${t.title}” görevini tamamladı`);render(true);toast(msg,u)},
  openTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const ok=can('task.edit',t),nx=nextIn(t);
   sheet(esc(t.title),`<div class="dl">
-   <div>${I(ws(t).length>1?'users':'user')}<span>${ws(t).length>1?`<span style="display:flex;flex-wrap:wrap;gap:8px">${ws(t).map(x=>`<span class="who">${av(x,'xs')}<b>${esc(M(x).name)}</b>${allRule(t)&&(t.dn||[]).includes(x)?' ✓':''}</span>`).join('')}</span>
+   <div>${I(ws(t).length>1?'users':'user')}<span>${ws(t).length>1?`<span style="display:flex;flex-wrap:wrap;gap:8px">${allIn(ws(t))&&!allRule(t)?`<span class="who">${famBadge()}<b>Bütün aile</b></span>`:ws(t).map(x=>`<span class="who">${av(x,'xs')}<b>${esc(M(x).name)}</b>${allRule(t)&&(t.dn||[]).includes(x)?' ✓':''}</span>`).join('')}</span>
     <span style="display:block;margin-top:4px;color:var(--muted);font-size:.875rem">${t.done&&t.doneBy&&!allRule(t)?esc(M(t.doneBy).name)+' yaptı':allRule(t)?'Her biri kendi payını işaretler, hepsi yapınca biter.':'İçlerinden biri yapınca görev biter.'}</span>`
     :`<span class="who">${av(t.assignee,'xs')}<b>${esc(M(t.assignee).name)}</b></span>`}</span></div>
    <div>${I('clock')}<span>${t.done?'Tamamlandı · '+ago(t.doneAt):long(t.due)+(t.time?' · '+hm(t.time):'')}${!t.done&&t.due<T()?' <span class="tag late">Gecikti</span>':''}</span></div>
@@ -2109,7 +2113,8 @@ const A={
  cmDel:d=>{const u=snap();S.wcm=(S.wcm||[]).filter(c=>c.id!==d.id);render(true);toast('Yorum silindi',u)},
  undoneWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);w.done=false;w.doneAt=null;w.doneWith=[];w.mood='';close();render(true);toast('Geri alındı',u)},
  delWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);S.wishes=S.wishes.filter(x=>x.id!==d.id);S.wcm=(S.wcm||[]).filter(c=>c.w!==d.id);log(`“${w.title}” önerisini sildi`);close();render(true);toast('Öneri silindi',u)},
- fWith:(d,el)=>{F.with=F.with.includes(d.id)?F.with.filter(x=>x!==d.id):[...F.with,d.id];el.setAttribute('aria-pressed',F.with.includes(d.id))},
+ fWith:(d,el)=>{F.with=F.with.includes(d.id)?F.with.filter(x=>x!==d.id):[...F.with,d.id];document.getElementById('wd-with').innerHTML=withChips()},
+ fWithAll:()=>{F.with=allIn(F.with)?[meId()]:S.members.map(m=>m.id);document.getElementById('wd-with').innerHTML=withChips()},
  fMood:d=>{F.mood=d.v;document.querySelectorAll('#wd-mood button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
  openItem:d=>{const i=S.items.find(x=>x.id===d.id);i&&itemForm(i)},
  fFor:d=>{F.for=F.for===d.id?'':d.id;document.getElementById('it-for').innerHTML=itemForm.forChips()},
