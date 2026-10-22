@@ -25,6 +25,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Shared tasks.** A task can have several people in `who` (`assignee` stays `who[0]`, rotation uses it). By default one of them finishing completes it; with `all` each person ticks their own part (`dn`) and it completes when everyone has. Use `ws(t)` / `isFor(t,id)` instead of reading `assignee` directly.
 
+**Listeler header.** Alınacaklar and İstekler sit on a camera-style strip (`lTop`, `rtPaint`): the selected one is centred, the other shows faded on both sides, and dragging the strip, tapping the other one, or swiping the list past its first/last sub-tab (`tsTarget` → `rtGo`) switches sides with a spring and a page push. `--buy`/`--wish` colours blend through `--mx` while dragging.
+
 **Places in wishes.** For `mekan`/`yer` wishes, `wish.place = {n, a, u}` (name, address, Google Maps link). It arrives through the manifest `share_target` (Google Maps → Paylaş → Bizim Ev opens `./?text=…`, parsed by `parsePlace()` at boot) or a pasted link in the wish form. No Maps API key: detail buttons use plain Google Maps URLs (`mapsUrl`, `dirUrl`). `okMapsUrl()` only accepts https Google Maps hosts; `norm()` drops anything else.
 
 **Done wishes (Yaptıklarımız).** `memHTML()` draws them as a month-grouped timeline under İstekler; the heading follows the type tab (`WDN`: Gittiklerimiz, Gezdiklerimiz, Okuduklarımız, İzlediklerimiz). Type order everywhere comes from `WT`/`WTAB` (Mekan, Gezi, Kitap, Film). When everyone took part, `allIn()` shows the "Bütün aile" badge instead of avatars.
