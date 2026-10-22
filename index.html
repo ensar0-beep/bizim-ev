@@ -23,7 +23,7 @@
 /* Telefonda tam ekran uygulama, altta 5 sekmeli menü; geniş ekranda ortada telefon genişliğinde bir çerçeve */
 :root{
   --bg:#FAF8F5; --surface:#FFFFFF; --sunk:#F2EEE8; --line:#E4DED4; --fg:#22201D; --muted:#625B52;
-  --accent:#2E6A51; --on-accent:#FFFFFF; --accent-soft:#E1EDE6; --accent-ink:#22533F;
+  --accent:#2E6A51; --on-accent:#FFFFFF; --accent-soft:#E1EDE6; --accent-ink:#22533F; --wish:#7A4FB5; --wish-soft:#EFE6F8; --wish-ink:#5B3690;
   --coral:#B9502F; --coral-soft:#FBE9E2; --on-coral:#FFFFFF; --danger:#B3261E; --danger-soft:#FBE4E2; --warn:#7D5200; --warn-soft:#FFF0D2;
   --stage:#ECE7DF; --scrim:rgba(30,24,18,.38);
   --shadow:0 1px 2px rgba(60,40,20,.06),0 8px 24px rgba(60,40,20,.08);
@@ -33,13 +33,13 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#16140F; --surface:#211E19; --sunk:#2B2721; --line:#3B362E; --fg:#F2EDE5; --muted:#ADA497;
-  --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD;
+  --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD; --wish:#C7A8EE; --wish-soft:#2E2438; --wish-ink:#D9C3F5;
   --coral:#F29A80; --coral-soft:#3A251E; --on-coral:#2A140C; --danger:#F3A69F; --danger-soft:#3E201D; --warn:#F2C46E; --warn-soft:#3A2E15;
   --stage:#0D0C0A; --scrim:rgba(0,0,0,.55);
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.4); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#16140F; --surface:#211E19; --sunk:#2B2721; --line:#3B362E; --fg:#F2EDE5; --muted:#ADA497;
-  --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD;
+  --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD; --wish:#C7A8EE; --wish-soft:#2E2438; --wish-ink:#D9C3F5;
   --coral:#F29A80; --coral-soft:#3A251E; --on-coral:#2A140C; --danger:#F3A69F; --danger-soft:#3E201D; --warn:#F2C46E; --warn-soft:#3A2E15;
   --stage:#0D0C0A; --scrim:rgba(0,0,0,.55);
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.4); color-scheme:dark}
@@ -383,7 +383,7 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .popb{display:flex;gap:8px;margin-top:16px}.popb .btn{flex:1}
 @media (prefers-reduced-motion:reduce){.popov,.popc{transition:none}}
 .donebar{display:flex;align-items:center;justify-content:space-between;margin-top:22px}
-/* Listeler: üstte büyük sekmeler (Alınacaklar | İsteklerimiz), altta çizgi ikonlu sekmeler (Airbnb gibi) */
+/* Listeler: üstte büyük sekmeler (Alınacaklar | İstekler), altta çizgi ikonlu sekmeler (Airbnb gibi) */
 .ltabs{display:flex;align-items:center;gap:10px;margin:2px -18px 4px;padding:0 18px;border-bottom:1px solid var(--line)}
 .ltabs>.lt{position:relative;display:inline-flex;align-items:center;gap:6px;font-family:var(--f-display);font-size:clamp(.9rem,4.2vw,1.1rem);white-space:nowrap;font-weight:700;color:var(--muted);opacity:.75;min-height:52px;flex:none}
 .ltabs>.lt[aria-pressed="true"]{color:var(--fg);opacity:1}
@@ -391,6 +391,9 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .ltabs>.lt em{font-style:normal;font-family:var(--f-body);font-size:.72rem;font-weight:800;border-radius:999px;padding:1px 7px;background:var(--accent-soft);color:var(--accent-ink)}
 .ltabs+.wtabs{margin-top:2px}
 .ltabs .sp{flex:1;min-width:0}
+/* Renkli: her tarafın kendi rengi (Apple Anımsatıcılar gibi); İstekler'de çizgi, sayılar ve ortadaki artı mor */
+.ltabs{background:linear-gradient(to bottom,transparent,color-mix(in srgb,var(--accent) 10%,transparent))}
+body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--accent-soft:var(--wish-soft);--accent-ink:var(--wish-ink)}
 .lbtn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:999px;flex:none;background:var(--accent-soft);color:var(--accent-ink)}
 .lbtn.pl{background:var(--accent);color:var(--on-accent)}
 @media (max-width:359px){.ltabs{gap:8px}.lbtn{width:36px;height:36px}.ltabs>.lt em{display:none}}
@@ -1410,7 +1413,7 @@ function bindMore(){const m=document.getElementById('cmore');if(!m||!window.Inte
 const LCOL=['#2B8467','#8B4FB8','#A0692B','#2F6DB5','#C2502F','#B5487A'];
 function itabs(arr,label){return `<div class="wtabs${arr.length>5?' scr':''}" role="tablist" aria-label="${label}">${arr.map(t=>`<button role="tab" data-act="${t.act}" ${t.data} aria-pressed="${t.on}" aria-selected="${t.on}" aria-label="${esc(t.n)}${t.cnt?', '+t.cnt:''}"><span class="ic">${I(t.i)}${t.cnt?`<i>${t.cnt}</i>`:''}</span><span class="tl">${esc(t.n)}</span></button>`).join('')}</div>`}
 function lTop(wish){const mk=S.items.filter(i=>!i.done&&i.cat==='Market').length,n=wish?(S.wishes||[]).filter(w=>!w.done).length:S.items.filter(i=>!i.done).length,cnt=`<em aria-hidden="true">${n}</em>`;
- return `<div class="ltabs" role="tablist" aria-label="Liste türü"><button class="lt" role="tab" data-act="lmode" data-v="buy" aria-pressed="${!wish}" aria-selected="${!wish}">Alınacaklar${!wish&&n?cnt:''}</button><button class="lt" role="tab" data-act="lmode" data-v="wish" aria-pressed="${!!wish}" aria-selected="${!!wish}">İsteklerimiz${wish&&n?cnt:''}</button><span class="sp"></span>
+ return `<div class="ltabs" role="tablist" aria-label="Liste türü"><button class="lt" role="tab" data-act="lmode" data-v="buy" aria-pressed="${!wish}" aria-selected="${!wish}">Alınacaklar${!wish&&n?cnt:''}</button><button class="lt" role="tab" data-act="lmode" data-v="wish" aria-pressed="${!!wish}" aria-selected="${!!wish}">İstekler${wish&&n?cnt:''}</button><span class="sp"></span>
  ${!wish&&mk?`<button class="lbtn" data-act="shopStart" data-v="Market" aria-label="Marketteyim, bütün listelerden ${mk} ürün">${I('cart')}<span class="n">${mk}</span></button>`:''}
  </div>`}
 function vLists(){
@@ -1455,7 +1458,7 @@ function lAddSheet(){const L=S.lists.find(l=>l.id===UI.list)||S.lists[0];if(!L)r
  <p class="lhint">${I('sparkle','sm')}<span>Virgülle birden çok şey yazabilirsin.</span></p><div class="sugg" id="sugg">${suggHTML('')}</div>`)}
 function topIdea(){return (S.wishes||[]).filter(w=>!w.done&&!w.planned&&w.want.length>=2).sort(byScore)[0]}
 function ideaHTML(){const w=topIdea();if(!w||isChild()&&!w.want.includes(meId()))return '';const dw=new Date().getDay();const when=dw===0||dw===6?'Bugün için':'Hafta sonu için';
- return `<div class="sec-h"><h2 class="sec">Bir fikir</h2><button class="link" data-act="goWishes">İsteklerimiz ${I('chevR','sm')}</button></div>
+ return `<div class="sec-h"><h2 class="sec">Bir fikir</h2><button class="link" data-act="goWishes">İstekler ${I('chevR','sm')}</button></div>
  <button class="idea" data-act="openWish" data-id="${w.id}"><span class="wic" style="background:var(--surface)">${I(WT[w.type][2])}</span><span style="flex:1;min-width:0"><span class="m">${when} · ${WT[w.type][1]}</span><span class="t">${esc(w.title)}</span><span class="m">${w.want.length} kişi istiyor: ${w.want.map(x=>esc(first(M(x).name))).join(', ')}</span></span>${I('chevR')}</button>`}
 // İsteklerimiz: çizgi ikonlu tür sekmeleri (Airbnb gibi), en çok istenenler şeridi ve kartlar
 const WTAB={all:['grid','Hepsi'],yer:['compass','Gezi'],kitap:['book','Kitap'],film:['film','Film'],mekan:['fork','Mekan']};
@@ -1661,7 +1664,7 @@ function render(keepScroll){
  else if(UI.err){html=vError(UI.err);nav.hidden=true}
  else if(!S){html=vLoading();nav.hidden=false}
  else{html={today:vToday,cal:vCal,lists:vLists,tasks:vTasks,family:vFamily}[UI.tab]();nav.hidden=false}
- sc.innerHTML=html;
+ sc.innerHTML=html;document.body.classList.toggle('wishc',!!S&&UI.tab==='lists'&&!UI.shop&&UI.lmode==='wish');
  const ss=document.getElementById('setsheet');if(ss&&S)ss.innerHTML=famSettingsHTML();
  sc.scrollTop=keepScroll?y:0;
  if(keep){const el=document.getElementById(keep.id);if(el){el.value=keep.v;el.focus();try{el.setSelectionRange(keep.s,keep.s)}catch(e){}}}
