@@ -551,8 +551,11 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .nav{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
 .nav button{min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:.78rem;font-weight:600;color:var(--muted);border-radius:16px}
 .nav button .pill{width:3.5rem;height:2rem;border-radius:999px;display:flex;align-items:center;justify-content:center;transition:background .15s}
-.nav button[aria-current="page"]{color:var(--fg)}
-.nav button[aria-current="page"] .pill{background:var(--accent-soft);color:var(--accent-ink)}
+/* Seçili sekme "Dolgu" (Apple, Instagram gibi): hap yok; simge dolar, koyulaşır ve hafifçe büyür */
+.nav button .i{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.nav button[aria-current="page"]{color:var(--accent-ink);font-weight:800}
+.nav button[aria-current="page"] .i{transform:scale(1.12);stroke-width:2.2}
+.nav button[aria-current="page"] .i *{fill:color-mix(in srgb,var(--accent) 28%,transparent)}
 /* Ortadaki artı: her sekmede tek ekleme düğmesi */
 .nav .navadd{border-radius:999px}
 .navadd span{width:54px;height:54px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--on-accent);background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 80%,#fff),var(--accent));box-shadow:0 0 0 4px var(--surface),0 8px 18px color-mix(in srgb,var(--accent) 45%,transparent);transform:translateY(-10px);transition:transform .2s}
