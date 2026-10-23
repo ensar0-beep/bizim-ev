@@ -1756,8 +1756,10 @@ function sheet(title,body){lastFocus=document.activeElement;
 // Artıdan büyüyen pencere (Google Keep gibi): ortadaki artı daire olarak büyüyüp pencereye dönüşür, kapanınca artıya geri küçülür
 function plusGrow(){const L=document.getElementById('layer'),sh=L.querySelector('.sheet'),sc=L.querySelector('.scrim'),b=document.querySelector('.nav .navadd span');
  if(!sh||!b||b.offsetParent===null||rtRM())return;
- const sr=sh.getBoundingClientRect(),br=b.getBoundingClientRect(),x=br.left+br.width/2-sr.left,y=br.top+br.height/2-sr.top,r0=br.width/2,R=Math.hypot(Math.max(x,sr.width-x),Math.max(y,sr.height-y))+8;
- sh.classList.add('pgrow');sc&&sc.classList.add('pgrow');sh._pg={x,y,r0,R};
+ // yeri, kayma animasyonundan etkilenmeyen offsetTop ile ölçülür (getBoundingClientRect alttan kayan hâli verip daireyi yukarıdan başlatıyordu)
+ sh.classList.add('pgrow');sc&&sc.classList.add('pgrow');
+ const op=(sh.offsetParent||document.body).getBoundingClientRect(),sl=op.left+sh.offsetLeft,st=op.top+sh.offsetTop,W=sh.offsetWidth,H=sh.offsetHeight,br=b.getBoundingClientRect(),
+  x=br.left+br.width/2-sl,y=br.top+br.height/2-st,r0=br.width/2,R=Math.hypot(Math.max(x,W-x),Math.max(y,H-y))+8;sh._pg={x,y,r0,R};
  sh.animate([{clipPath:`circle(${r0}px at ${x}px ${y}px)`,background:'var(--accent)'},{background:'var(--surface)',offset:.45},{clipPath:`circle(${R}px at ${x}px ${y}px)`,background:'var(--surface)'}],{duration:500,easing:'cubic-bezier(.4,0,.2,1)'});
  [...sh.querySelectorAll('.sh,.sb>*')].slice(0,8).forEach((el,i)=>el.animate([{opacity:0,transform:'translateY(10px) scale(.97)'},{opacity:1,transform:'none'}],{duration:340,delay:190+i*30,easing:'cubic-bezier(.2,.9,.3,1)',fill:'backwards'}))}
 function close(){const L=document.getElementById('layer'),sh=L.querySelector('.sheet.pgrow');
