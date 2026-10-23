@@ -398,9 +398,9 @@ h2.sec{font-family:var(--f-display);font-weight:600;font-size:1.125rem;margin:0}
 .lsw{position:relative;flex:1;min-width:0;height:56px;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 21%,#000 79%,transparent);mask-image:linear-gradient(90deg,transparent,#000 21%,#000 79%,transparent)}
 .lsi{position:absolute;left:50%;top:50%;--on:0;display:inline-flex;align-items:center;gap:6px;padding:10px 6px;white-space:nowrap;font-family:var(--f-display);font-weight:800;font-size:clamp(.9rem,4.3vw,1.02rem);letter-spacing:.08em;color:color-mix(in srgb,var(--c) calc(var(--on)*100%),var(--muted));transform:translate(-50%,-50%);will-change:transform,opacity}
 .lsi em{font-style:normal;font-family:var(--f-body);letter-spacing:0;font-size:.7rem;font-weight:800;border-radius:999px;padding:1px 7px;background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c);opacity:var(--on)}
-.lsd{position:absolute;left:50%;bottom:6px;width:var(--dw,6px);height:5px;border-radius:9px;transform:translateX(-50%);background:color-mix(in srgb,var(--wish) calc(var(--mx)*100%),var(--buy))}
-.rtgh{position:absolute;z-index:3;pointer-events:none;overflow:hidden;background:var(--bg)}
-.rtgh .ltabs{visibility:hidden}
+.lsd{position:absolute;left:50%;bottom:6px;width:6px;margin-left:-3px;height:5px;border-radius:9px;will-change:transform;background:color-mix(in srgb,var(--wish) calc(var(--mx)*100%),var(--buy))}
+.rtgh{position:absolute;z-index:3;pointer-events:none;overflow:hidden;background:var(--bg);will-change:transform}
+.rtgi{padding:0 18px}
 body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--accent-soft:var(--wish-soft);--accent-ink:var(--wish-ink)}
 .lbtn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:999px;flex:none;background:var(--accent-soft);color:var(--accent-ink)}
 .lbtn.pl{background:var(--accent);color:var(--on-accent)}
@@ -2326,7 +2326,7 @@ document.addEventListener('pointerdown',e=>{if(UI.tab!=='lists'||UI.shop||e.butt
  const tb=t.closest('.wtabs');if(tb&&tb.scrollWidth>tb.clientWidth+2)return;if(!document.querySelector('#screen .wtabs'))return;
  TS={x0:e.clientX,y0:e.clientY,t0:performance.now(),dx:0,on:false,pid:e.pointerId}},true);
 document.addEventListener('pointermove',e=>{if(!TS||e.pointerId!==TS.pid)return;const dx=e.clientX-TS.x0,dy=e.clientY-TS.y0;
- if(!TS.on){if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){TS=null;return}if(Math.abs(dx)<12)return;TS.on=true;TS.els=tsBody();
+ if(!TS.on){if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){TS=null;return}if(Math.abs(dx)<12)return;TS.on=true;TS.els=tsBody();TS.els.forEach(el=>el.style.willChange='transform');
   TS.pill=document.createElement('div');TS.pill.className='tsedge';document.body.appendChild(TS.pill)}
  const dir=dx<0?1:-1;if(TS.dir!==dir){TS.dir=dir;TS.tg=tsTarget(dir);document.querySelectorAll('.wtabs .peek').forEach(b=>b.classList.remove('peek'));if(TS.tg&&TS.tg.b)TS.tg.b.classList.add('peek');
   TS.pill.innerHTML=TS.tg?(dir>0?`${esc(TS.tg.n)} ${I('chevR','sm')}`:`${I('chevL','sm')} ${esc(TS.tg.n)}`):'';TS.pill.style.left=dir>0?'':'12px';TS.pill.style.right=dir>0?'12px':''}
@@ -2335,53 +2335,57 @@ document.addEventListener('pointermove',e=>{if(!TS||e.pointerId!==TS.pid)return;
 function tsEnd(e){if(!TS||e.pointerId!==TS.pid)return;const s=TS;TS=null;if(!s.on)return;
  swallow=true;setTimeout(()=>swallow=false,350);s.pill.remove();document.querySelectorAll('.wtabs .peek').forEach(b=>b.classList.remove('peek'));
  const fast=Math.abs(s.dx)/(performance.now()-s.t0)>.45&&Math.abs(s.dx)>30,go=s.tg&&e.type!=='pointercancel'&&(Math.abs(s.dx)>70||fast);
- if(!go)return s.els.forEach(el=>{el.style.transition='transform .2s ease,opacity .2s';el.style.transform='';el.style.opacity='';setTimeout(()=>{el.style.transition=''},220)});
+ if(!go)return s.els.forEach(el=>{el.style.transition='transform .2s ease,opacity .2s';el.style.transform='';el.style.opacity='';setTimeout(()=>{el.style.transition='';el.style.willChange=''},220)});
  if(s.tg.x)return rtGo(s.dir,true);
- s.els.forEach(el=>{el.style.transition='transform .14s ease-in,opacity .14s';el.style.transform=`translateX(${s.dir>0?'-':''}60%)`;el.style.opacity='0'});
- setTimeout(()=>{const d=s.tg.b.dataset;A[d.act](d);const sc=document.getElementById('screen');sc.style.scrollBehavior='auto';sc.scrollTop=0;sc.style.scrollBehavior='';
-  tsBody().forEach(el=>{el.classList.add(s.dir>0?'tsin-r':'tsin-l');el.addEventListener('animationend',()=>el.classList.remove('tsin-l','tsin-r'),{once:true})});
-  const on=document.querySelector('#screen .wtabs button[aria-pressed="true"]');if(on)on.scrollIntoView({block:'nearest',inline:'center'})},140)}
+ const d=s.tg.b.dataset,sc=document.getElementById('screen');try{navigator.vibrate&&navigator.vibrate(6)}catch(e){}
+ pushSwap(s.dir,()=>{A[d.act](d);sc.style.scrollBehavior='auto';sc.scrollTop=0;sc.style.scrollBehavior='';
+  const on=document.querySelector('#screen .wtabs button[aria-pressed="true"]');if(on)on.scrollIntoView({block:'nearest',inline:'center'})},tsBody)}
 document.addEventListener('pointerup',tsEnd,true);document.addEventListener('pointercancel',tsEnd,true);
 // Alınacaklar ⇄ İstekler kamera şeridi. t: şeridin kayması (0 yerinde, 1 sağdaki ortada, -1 soldaki ortada)
 const rtRM=()=>window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-function rtPaint(w,t){w._t=t;const W=w.clientWidth,sp=Math.min(W*.5,170);let mx=0;
+function rtPaint(w,t){w._t=t;const W=w._W||(w._W=w.clientWidth),sp=Math.min(W*.5,170);let mx=0;
  w.querySelectorAll('.lsi').forEach(el=>{const d=+el.dataset.k-t,a=Math.min(Math.abs(d),2),on=Math.max(0,1-a);if(el.dataset.w==='1')mx+=on;
   el.style.transform=`translate(-50%,-50%) translateX(${(d*sp).toFixed(1)}px) scale(${(1-.2*Math.min(a,1)).toFixed(3)})`;
   el.style.opacity=(a>1?Math.max(0,.5-(a-1)*.9):1-.5*a).toFixed(3);el.style.setProperty('--on',on.toFixed(3))});
- const f=Math.abs(t-Math.round(t)),h=w.parentNode;h.style.setProperty('--mx',mx.toFixed(3));w.style.setProperty('--dw',(6+44*f).toFixed(1)+'px')}
+ const f=Math.abs(t-Math.round(t)),h=w.parentNode;h.style.setProperty('--mx',mx.toFixed(3));if(w._d||(w._d=w.querySelector('.lsd')))w._d.style.transform=`scaleX(${(1+7.3*f).toFixed(3)})`}
 // yay gibi oturma: hedefi biraz geçip geri döner
 const rtSpring=x=>1-Math.exp(-6.5*x)*Math.cos(8.5*x)*(1-x);
 function rtTween(w,from,to,ms,ease,cb){const t0=performance.now();cancelAnimationFrame(w._raf);
  const step=now=>{const x=Math.min(1,(now-t0)/ms);rtPaint(w,from+(to-from)*ease(x));if(x<1)w._raf=requestAnimationFrame(step);else cb&&cb()};w._raf=requestAnimationFrame(step)}
-function rtInit(){const w=document.querySelector('#screen .lsw');if(w)rtPaint(w,0)}
+function rtInit(){const w=document.querySelector('#screen .lsw');if(w){w._W=0;rtPaint(w,0)}}
 const rtBody=()=>{const h=document.querySelector('#screen .ltabs'),out=[];for(let m=h&&h.nextElementSibling;m;m=m.nextElementSibling)out.push(m);return out};
+// Sayfa itme: eski içerik bir yana çıkarken yenisi yanı başında öbür yandan girer. Eski düğümler kopyalanmaz, üstte bir katmana taşınır;
+// ağır iş (yeniden çizim) bırakılan anda bir kez yapılır, sonra yalnız transform oynar.
+function pushSwap(dir,apply,get){const sc=document.getElementById('screen'),old=get();
+ if(rtRM()||!old.length||old.some(n=>n.parentNode!==sc))return apply();
+ const par=sc.parentNode,r=sc.getBoundingClientRect(),pr=par.getBoundingClientRect(),pv=old[0].previousElementSibling,top=Math.max(r.top,pv?pv.getBoundingClientRect().bottom:r.top),y0=old[0].getBoundingClientRect().top,cs=getComputedStyle(sc);
+ const gh=document.createElement('div'),inn=document.createElement('div');gh.className='rtgh';gh.setAttribute('aria-hidden','true');gh.inert=true;inn.className='rtgi';
+ Object.assign(gh.style,{left:(r.left-pr.left)+'px',top:(top-pr.top)+'px',width:r.width+'px',height:Math.max(0,r.bottom-top)+'px'});
+ ['--accent','--accent-soft','--accent-ink'].forEach(k=>gh.style.setProperty(k,cs.getPropertyValue(k)));
+ old.forEach(n=>inn.appendChild(n));gh.appendChild(inn);par.insertBefore(gh,sc.nextSibling);
+ inn.style.transform=`translateY(${(y0-top-(parseFloat(getComputedStyle(old[0]).marginTop)||0)).toFixed(1)}px)`;
+ apply();
+ const ez='cubic-bezier(.25,.9,.28,1)',ms=420;
+ gh.animate([{transform:'translateX(0)'},{transform:`translateX(${dir>0?-100:100}%)`,opacity:.4}],{duration:ms,easing:ez,fill:'forwards'}).finished.then(()=>gh.remove(),()=>gh.remove());
+ get().forEach(el=>el.animate([{transform:`translateX(${dir>0?100:-100}%)`},{transform:'none'}],{duration:ms,easing:ez}))}
 function rtGo(dir,edge){const v=UI.lmode==='wish'?'buy':'wish',sc=document.getElementById('screen'),w=sc.querySelector('.lsw'),t0=w?(w._t||0):0;
  const apply=()=>{UI.lmode=v;UI.wrHold=false;render();if(edge){const tb=tsTabs(),g=dir>0?tb[0]:tb[tb.length-1];if(g&&g.getAttribute('aria-pressed')!=='true')A[g.dataset.act](g.dataset)}sc.scrollTop=0};
  if(rtRM())return apply();
  try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}
- // sayfa itilir: eski içeriğin kopyası (başlığın altı) bir yana çıkarken yenisi yanı başında öbür yandan girer
- const hd=sc.querySelector('.ltabs'),par=sc.parentNode,r=sc.getBoundingClientRect(),hb=hd?Math.max(0,hd.getBoundingClientRect().bottom-r.top):0,pr=par.getBoundingClientRect(),cs=getComputedStyle(sc),gh=sc.cloneNode(true),st=sc.scrollTop;
- gh.removeAttribute('id');gh.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));gh.classList.add('rtgh');gh.setAttribute('aria-hidden','true');
- Object.assign(gh.style,{left:(r.left-pr.left)+'px',top:(r.top-pr.top)+'px',width:r.width+'px',height:r.height+'px',clipPath:`inset(${hb}px 0 0 0)`});
- ['--accent','--accent-soft','--accent-ink'].forEach(k=>gh.style.setProperty(k,cs.getPropertyValue(k)));
- par.insertBefore(gh,sc.nextSibling);gh.scrollTop=st;
- apply();
- const ez='cubic-bezier(.25,.9,.28,1)',ms=420;
- gh.animate([{transform:'translateX(0)',opacity:1},{transform:`translateX(${dir>0?-100:100}%)`,opacity:.5}],{duration:ms,easing:ez,fill:'forwards'}).finished.then(()=>gh.remove(),()=>gh.remove());
- rtBody().forEach(el=>el.animate([{transform:`translateX(${dir>0?100:-100}%)`},{transform:'none'}],{duration:ms,easing:ez}));
+ pushSwap(dir,apply,rtBody);
  const w2=sc.querySelector('.lsw');if(w2)rtTween(w2,t0-dir,0,560,rtSpring)}
 let RTD=null;
 document.addEventListener('pointerdown',e=>{if(UI.tab!=='lists'||UI.shop||e.button>0||!S)return;const w=e.target.closest&&e.target.closest('#screen .lsw');if(!w)return;
  cancelAnimationFrame(w._raf);RTD={w,x0:e.clientX,y0:e.clientY,t0:performance.now(),dx:0,on:false,pid:e.pointerId,t:w._t||0}},true);
 document.addEventListener('pointermove',e=>{const R=RTD;if(!R||e.pointerId!==R.pid)return;const dx=e.clientX-R.x0,dy=e.clientY-R.y0;
- if(!R.on){if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){RTD=null;return}if(Math.abs(dx)<8)return;R.on=true;R.els=rtBody()}
+ if(!R.on){if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){RTD=null;return}if(Math.abs(dx)<8)return;R.on=true;R.els=rtBody();R.els.forEach(el=>el.style.willChange='transform')}
  R.dx=dx;const W=R.w.clientWidth,t=Math.max(-1.1,Math.min(1.1,R.t-dx/Math.min(W*.5,170)));rtPaint(R.w,t);
  // içerik parmağı biraz arkadan izler
  const p=Math.min(1,Math.abs(dx)/W);R.els.forEach(el=>{el.style.transition='none';el.style.transform=`translateX(${(dx*.35).toFixed(1)}px)`;el.style.opacity=(1-p*.45).toFixed(3)})},true);
 function rtEnd(e){const R=RTD;if(!R||e.pointerId!==R.pid)return;RTD=null;if(!R.on)return;swallow=true;setTimeout(()=>swallow=false,350);
  const W=R.w.clientWidth,fast=Math.abs(R.dx)/(performance.now()-R.t0)>.4&&Math.abs(R.dx)>20,go=e.type!=='pointercancel'&&(Math.abs(R.dx)>Math.min(W*.5,170)*.4||fast);
- if(go){R.els.forEach(el=>{el.style.transition='';el.style.transform='';el.style.opacity=''});return rtGo(R.dx<0?1:-1)}
- rtTween(R.w,R.w._t||0,0,420,rtSpring);R.els.forEach(el=>{el.style.transition='transform .3s cubic-bezier(.2,.85,.25,1),opacity .3s';el.style.transform='';el.style.opacity='';setTimeout(()=>{el.style.transition=''},320)})}
+ if(go)return rtGo(R.dx<0?1:-1);
+ rtTween(R.w,R.w._t||0,0,420,rtSpring);R.els.forEach(el=>{el.style.transition='transform .3s cubic-bezier(.2,.85,.25,1),opacity .3s';el.style.transform='';el.style.opacity='';setTimeout(()=>{el.style.transition='';el.style.willChange=''},320)})}
 document.addEventListener('pointerup',rtEnd,true);document.addEventListener('pointercancel',rtEnd,true);
 window.addEventListener('resize',rtInit);
 
