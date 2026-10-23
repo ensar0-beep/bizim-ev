@@ -587,6 +587,7 @@ body:has(#layer .sheet) .navadd .i{transform:rotate(45deg)}
 
 /* Sheet, toast */
 .scrim{position:absolute;inset:0;background:var(--scrim);z-index:20;animation:fade .2s}
+.sheet.pgrow{animation:none}.scrim.pgrow{animation:fade .3s}
 .sheet{position:absolute;left:0;right:0;bottom:0;max-height:92%;background:var(--surface);border-radius:26px 26px 0 0;z-index:21;display:flex;flex-direction:column;animation:up .25s cubic-bezier(.2,.8,.2,1)}
 .sheet .sh{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 4px 20px;gap:8px}
 .sheet .sh h3{font-family:var(--f-display);font-size:1.3rem;margin:0}
@@ -1752,7 +1753,20 @@ let lastFocus=null;
 function sheet(title,body){lastFocus=document.activeElement;
  document.getElementById('layer').innerHTML=`<div class="scrim" data-act="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t"><div class="grip" aria-hidden="true"></div><div class="sh"><h3 id="sh-t">${title}</h3><button class="icon-btn" data-act="close" aria-label="Kapat">${I('x')}</button></div><div class="sb">${body}</div></div>`;
  setTimeout(()=>{const f=document.querySelector('.sheet [autofocus]')||document.querySelector('.sheet .icon-btn');f&&f.focus()},60);dragSheet();const t=document.querySelector('.toast');t&&t.classList.add('top')}
-function close(){document.getElementById('layer').innerHTML='';UI.joinFor=null;const t=document.querySelector('.toast');t&&t.classList.remove('top');lastFocus&&document.body.contains(lastFocus)&&lastFocus.focus()}
+// Artıdan büyüyen pencere (Google Keep gibi): ortadaki artı daire olarak büyüyüp pencereye dönüşür, kapanınca artıya geri küçülür
+function plusGrow(){const L=document.getElementById('layer'),sh=L.querySelector('.sheet'),sc=L.querySelector('.scrim'),b=document.querySelector('.nav .navadd span');
+ if(!sh||!b||b.offsetParent===null||rtRM())return;
+ const sr=sh.getBoundingClientRect(),br=b.getBoundingClientRect(),x=br.left+br.width/2-sr.left,y=br.top+br.height/2-sr.top,r0=br.width/2,R=Math.hypot(Math.max(x,sr.width-x),Math.max(y,sr.height-y))+8;
+ sh.classList.add('pgrow');sc&&sc.classList.add('pgrow');sh._pg={x,y,r0,R};
+ sh.animate([{clipPath:`circle(${r0}px at ${x}px ${y}px)`,background:'var(--accent)'},{background:'var(--surface)',offset:.45},{clipPath:`circle(${R}px at ${x}px ${y}px)`,background:'var(--surface)'}],{duration:500,easing:'cubic-bezier(.4,0,.2,1)'});
+ [...sh.querySelectorAll('.sh,.sb>*')].slice(0,8).forEach((el,i)=>el.animate([{opacity:0,transform:'translateY(10px) scale(.97)'},{opacity:1,transform:'none'}],{duration:340,delay:190+i*30,easing:'cubic-bezier(.2,.9,.3,1)',fill:'backwards'}))}
+function close(){const L=document.getElementById('layer'),sh=L.querySelector('.sheet.pgrow');
+ if(sh&&sh._pg&&!sh._closing&&!sh.style.transform&&!rtRM()){sh._closing=1;const {x,y,r0,R}=sh._pg,sc=L.querySelector('.scrim');
+  sc&&sc.animate([{opacity:1},{opacity:0}],{duration:300,fill:'forwards'});sh.querySelector('.sb').animate([{opacity:1},{opacity:0}],{duration:110,fill:'forwards'});
+  sh.animate([{clipPath:`circle(${R}px at ${x}px ${y}px)`,background:'var(--surface)'},{background:'var(--surface)',offset:.55},{clipPath:`circle(${r0}px at ${x}px ${y}px)`,background:'var(--accent)'}],{duration:360,easing:'cubic-bezier(.4,0,.6,1)',fill:'forwards'})
+   .finished.then(()=>{if(L.contains(sh))closeNow()},()=>{});return}
+ closeNow()}
+function closeNow(){document.getElementById('layer').innerHTML='';UI.joinFor=null;const t=document.querySelector('.toast');t&&t.classList.remove('top');lastFocus&&document.body.contains(lastFocus)&&lastFocus.focus()}
 function dragSheet(){const sh=document.querySelector('.sheet');if(!sh)return;let y0=null,dy=0,t0=0;
  const scrim=()=>document.querySelector('.scrim');
  const start=e=>{if(e.target.closest('button'))return;y0=e.clientY;dy=0;t0=Date.now();sh.style.animation='none';sh.style.transition='none';e.currentTarget.setPointerCapture(e.pointerId)};
@@ -2062,7 +2076,7 @@ const A={
  tkb:d=>{UI.tkb=d.v;UI.tkUp=false;UI.dcKeep.clear();render(true)},
  tkUp:()=>{UI.tkUp=!UI.tkUp;render(true)},
  newTask:()=>taskForm(null),
- navAdd:()=>{if(UI.tab==='lists'&&!UI.shop){if(UI.lmode==='wish')return A.newWish();if(S.lists.length)return lAddSheet()}if(UI.tab==='tasks')return A.newTask();A.tdAdd()},
+ navAdd:()=>{(()=>{if(UI.tab==='lists'&&!UI.shop){if(UI.lmode==='wish')return A.newWish();if(S.lists.length)return lAddSheet()}if(UI.tab==='tasks')return A.newTask();A.tdAdd()})();plusGrow()},
  sugAdd:d=>{const it=addItemTo(UI.list,d.v);if(!it)return;render(true);const g=document.getElementById('sugg'),q=document.getElementById('item-input');if(g)g.innerHTML=suggHTML(q?q.value:'');toast(`${it.name} eklendi`)},
  toggleTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;if(!t.done&&UI.tab==='tasks')UI.dcKeep.add(t.id);else UI.dcKeep.delete(t.id);A.tkDone(d);if(!t.done){UI.dcKeep.delete(t.id);return}if(UI.dcKeep.has(t.id))dcSettle(t.id)},
  tkDone:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const u=snap();
