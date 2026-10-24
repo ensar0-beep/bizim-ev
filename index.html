@@ -98,6 +98,15 @@ h2.sec .qty{font-weight:700}
 .avs{display:flex;flex:none}
 .avs .av{box-shadow:0 0 0 2px var(--surface)}
 .avs .av+.av{margin-left:-8px}
+/* Gelişmeler zili ve listesi */
+.bellb{position:relative}.thx .thbtn .bellb{width:44px;height:44px;color:var(--fg)}
+.bellb em{position:absolute;top:4px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--danger);color:var(--surface);font:700 .68rem/18px var(--f-body);font-style:normal;text-align:center;box-shadow:0 0 0 2px var(--bg)}
+.brow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 14px;min-height:60px;position:relative}
+.brow+.brow{border-top:1px solid var(--line)}.brow .tx{flex:1;min-width:0;display:grid;gap:1px}.brow .tx b{font-weight:600;font-size:.94rem;line-height:1.3}.brow .tx small{color:var(--muted);font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brow time{font-size:.75rem;color:var(--muted);flex:none;align-self:flex-start;margin-top:3px}
+.brow.un{background:color-mix(in srgb,var(--accent) 7%,var(--surface))}.brow.un::before{content:"";position:absolute;left:5px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:999px;background:var(--accent)}
+.bgrp{margin-bottom:6px}
+.flyav{position:absolute;z-index:50;pointer-events:none;display:flex}.flyav .av{width:100%!important;height:100%!important}
 /* Şu an burada (Google Dokümanlar gibi): uygulamada olan diğer kişiler */
 .onhere{display:flex;align-items:center;gap:8px;margin:0 2px 14px;font-size:.88rem;color:var(--muted)}.onhere b{color:var(--fg);font-weight:600}.onhere .avs .av{box-shadow:0 0 0 2px var(--bg)}
 .onhere i{width:8px;height:8px;border-radius:999px;background:var(--live);margin-left:auto;flex:none;animation:onp 2s ease-in-out infinite}@keyframes onp{50%{opacity:.35}}
@@ -1464,12 +1473,38 @@ function msgStrip(){const L=msgList(),pen=`<button class="pmw" data-act="msgEdit
  if(!L.length)return `<div class="pstrip"><button class="pmc" data-act="msgEdit"><span class="in"><span class="tx">Aileye bir mesaj bırak</span></span></button>${pen}</div>`;
  const i=(UI.msgI||0)%L.length,x=L[i];
  return `<div class="pstrip"><button class="pmc" data-act="msgNext" aria-label="${esc(M(x.id).name)}: ${esc(x.t)}${L.length>1?`. ${i+1}/${L.length}, sıradaki için dokun`:''}">${pmcInner(L,i)}</button>${pen}</div>`}
+/* Gelişmeler (Instagram gibi): Bugün'de zil, okunmamış sayısı ve dokununca açılan liste.
+   Liste verinin kendisinden çıkar (görev, etkinlik, yorum, pano, alınacak, istek), satıra dokununca o şey açılır.
+   Neyin görüldüğü bu telefonda, kişi başına saklanır (store.bell[üye] = son açılış zamanı). */
+function bellItems(){const me=meId(),nm=x=>esc(first(M(x).name)),out=[],o=x=>out.push(x),ok=x=>x&&x!==me&&S.members.some(m=>m.id===x);
+ S.tasks.forEach(t=>{if(isFor(t,me)&&ok(t.by)&&!t.done)o({w:t.by,t:`${nm(t.by)} sana bir görev verdi`,s:`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,at:idAt(t.id),act:'openTask',id:t.id})});
+ S.tasks.forEach(t=>{if(t.done&&ok(t.doneBy)&&t.by===me)o({w:t.doneBy,t:`${nm(t.doneBy)} verdiğin görevi bitirdi`,s:esc(t.title),at:t.doneAt||0,act:'openTask',id:t.id})});
+ S.events.forEach(e=>{if(e.members.includes(me)&&ok(e.by)&&e.date>=T())o({w:e.by,t:`${nm(e.by)} seni bir etkinliğe ekledi`,s:`${esc(e.title)} · ${rel(e.date)}${e.time?' '+hm(e.time):''}`,at:idAt(e.id),act:'openEvent',id:e.id,d:e.date})});
+ (S.wcm||[]).forEach(c=>{const w=ok(c.by)&&S.wishes.find(x=>x.id===c.w);if(w)o({w:c.by,t:`${nm(c.by)} “${esc(w.title)}” isteğine yazdı`,s:`“${esc(c.t)}”`,at:c.at,act:'openWish',id:w.id,cm:1})});
+ (S.msgs||[]).forEach(m=>{if(ok(m.id)&&m.t)o({w:m.id,t:`${nm(m.id)} panoya yazdı`,s:`“${esc(m.t)}”`,at:m.at,act:'bellMsg',id:m.id})});
+ S.items.forEach(i=>{if(i.for===me&&ok(i.by)&&!i.done)o({w:i.by,t:`${nm(i.by)} senin için bir şey ekledi`,s:esc(i.name),at:idAt(i.id)||i.at||0,act:'openItem',id:i.id})});
+ (S.wishes||[]).forEach(w=>{if(ok(w.by)&&!w.done)o({w:w.by,t:`${nm(w.by)} yeni bir istek ekledi`,s:esc(w.title),at:w.at||0,act:'openWish',id:w.id})});
+ return out.filter(x=>x.at&&x.at<=Date.now()+6e4).sort((a,b)=>b.at-a.at).slice(0,30)}
+// İlk açılışta son bir gün "yeni" sayılır; örnek ailede en yeni dördü
+function bellSeen(L){const me=meId();store.bell=store.bell&&typeof store.bell==='object'?store.bell:{};
+ if(!store.bell[me])store.bell[me]=store.mode==='demo'?((L||bellItems())[4]||{at:1}).at:Date.now()-864e5;return store.bell[me]}
+const bellNew=()=>{const L=bellItems(),s=bellSeen(L);return L.filter(x=>x.at>s).length};
+const bellRows=(L,s,from)=>L.map((x,i)=>`<button class="brow${x.at>s?' un':''}" data-act="bellGo" data-i="${from+i}">${av(x.w)}<span class="tx"><b>${x.t}</b><small>${x.s}</small></span><time>${ago(x.at)}</time>${x.at>s?'<span class="sr">, yeni</span>':''}</button>`).join('');
+function bellBtn(){const n=bellNew();return `<button class="icon-btn bellb" data-act="bellOpen" aria-label="Gelişmeler${n?', '+n+' yeni':''}">${I('bell')}${n?`<em aria-hidden="true">${n>9?'9+':n}</em>`:''}</button>`}
+// Aile açılırken sağ üstteki avatar Aile'deki kendi kartına uçar (Telegram gibi), sayfa arkasında belirir
+function famFly(r){const sc=document.getElementById('screen'),ph=document.getElementById('phone');if(!r||!sc||!ph||rtRM())return;
+ const pr=ph.getBoundingClientRect(),img=document.createElement('div'),at=b=>({left:(b.left-pr.left)+'px',top:(b.top-pr.top)+'px',width:b.width+'px',height:b.height+'px'});
+ img.className='flyav';img.setAttribute('aria-hidden','true');img.innerHTML=av(meId(),'xl');Object.assign(img.style,at(r));ph.appendChild(img);
+ sc.animate([{opacity:0},{opacity:1}],{duration:320,easing:'ease-out'});
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{const t=sc.querySelector(`.wcard[data-c="1"][data-id="${meId()}"] .av`);if(!t){img.remove();return}
+  t.style.visibility='hidden';const done=()=>{t.style.visibility='';img.remove()};
+  img.animate([at(r),at(t.getBoundingClientRect())],{duration:560,easing:'cubic-bezier(.3,.7,.2,1)',fill:'forwards'}).finished.then(done,done)}))}
 function todayHead(){const m=me(),d=new Date(),h=d.getHours(),hj=hnum(d),x=holy(d),sk=h>=5&&h<11?'m':h>=11&&h<17?'d':h>=17&&h<21?'e':'n';
  const n=x?null:nextHoly(),ch=x?`<span class="hchip on">✦ <span>Bugün ${x[0]}</span></span>`:n&&n.n?`<span class="hchip">✦ <span>${n.n} · ${n.i===1?'yarın':n.i+' gün kaldı'}</span></span>`:'';
  const stars=sk==='e'||sk==='n'?[[75,12],[95,20],[88,8],[78,86],[96,78]].map(([a,b])=>`<i class="st" style="left:${a}%;top:${b}%"></i>`).join(''):'';
  const hjt=hj?`<div class="hj">${hj.d} ${HAY[hj.m-1]} ${hj.y} · ${phaseN(hj.d).replace(' ','&nbsp;')}</div>`:'',mb=hj?`<button class="mbtn" data-act="moonInfo" data-d="${hj.d}" aria-label="Ay: ${phaseN(hj.d)}">${moonSVG(hj.d)}</button>`:'';
  const pa=msgStrip();
- return `<div class="th thx thn sky-${sk}"><div class="r1"><div class="ov">${long(T())}</div></div><div class="thbtn"><button class="icon-btn" data-act="myProfile" aria-label="Aile">${av(m.id)}</button></div>
+ return `<div class="th thx thn sky-${sk}"><div class="r1"><div class="ov">${long(T())}</div></div><div class="thbtn">${bellBtn()}<button class="icon-btn" data-act="myProfile" aria-label="Aile">${av(m.id)}</button></div>
  <div class="panel${pa?' wa':''}"${hj?'':' style="padding-right:16px"'}>${stars}<h1>${selam(h,x,hj,d.getDay()===5)}</h1>${hjt}${ch}${mb}</div>${pa}</div>`}
 function vToday(){
  const child=isChild();
@@ -2069,7 +2104,16 @@ const A={
  copyCode:()=>{if(store.mode!=='family'){toast('Örnek ailede gerçek kod yok.');return}copyText(fmtCode(store.code),'Kod kopyalandı')},
  // Üyeler
  // Sağ üstteki avatar: kendi profilin (Apple hesap kartı gibi). Kişi değiştirme Ayarlar > Bu cihazda'da.
- myProfile:()=>{UI.wsel=meId();A.tab({tab:'family'})},
+ myProfile:()=>{UI.wsel=meId();const a=document.querySelector('#screen [data-act="myProfile"] .av'),r=a&&a.getBoundingClientRect();A.tab({tab:'family'});famFly(r)},
+ bellOpen:()=>{const L=bellItems(),s=bellSeen(L),nw=L.filter(x=>x.at>s),old=L.filter(x=>x.at<=s);UI.bellL=[...nw,...old];
+  sheet('Gelişmeler',(nw.length?`<div class="lbl"><span>Yeni</span></div><div class="group bgrp">${bellRows(nw,s,0)}</div>`:'')+(old.length?`<div class="lbl"><span>Daha önce</span></div><div class="group bgrp">${bellRows(old,s,nw.length)}</div>`:'')
+   +(L.length?'':`<div class="empty"><b>Şimdilik yeni bir şey yok</b>Biri sana görev verince, isteklere yazınca ya da senin için bir şey ekleyince burada görünür.</div>`));
+  store.bell[meId()]=Date.now();save();const b=document.querySelector('.bellb em');if(b)b.remove()},
+ bellGo:d=>{const x=(UI.bellL||[])[+d.i];if(!x)return;closeNow();
+  if(x.act==='bellMsg'){if(UI.tab!=='today')A.tab({tab:'today'});return}
+  if(x.act==='openItem'){const i=S.items.find(y=>y.id===x.id);if(i){UI.tab='lists';UI.lmode='buy';UI.shop=null;UI.list=i.list;render()}}
+  if(x.act==='openWish'){UI.tab='lists';UI.lmode='wish';UI.shop=null;render()}
+  A[x.act]({id:x.id,d:x.d});if(x.cm)setTimeout(()=>{const c=document.getElementById('cmw');c&&c.scrollIntoView({block:'start',behavior:'smooth'})},250)},
  openMember:d=>{const m=M(d.id),t=T();const up7=[];for(let i=0;i<14;i++){const c=add(t,i);S.events.filter(e=>occurs(e,c)&&e.members.includes(m.id)).sort(sortEv).forEach(e=>up7.push([e,c]))}
   const tk=S.tasks.filter(x=>!x.done&&isFor(x,m.id)).sort((a,b)=>a.due.localeCompare(b.due));const adm=can('member.manage'),self=m.id===meId();
   const face=adm||self?`<button class="avedit" data-act="avPick" data-id="${m.id}" aria-label="Avatarı ve rengi değiştir">${av(m.id,'lg')}<span class="pen">${I('edit')}</span></button>`:av(m.id,'lg');
@@ -2528,7 +2572,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-24c',items:[['chat','İsteklere yorum','Yapmadan önce de bir isteğin altında konuşabilirsiniz: ne zaman, kiminle, nasıl'],['users','Kim şu an burada','Bugün ve Listeler’in üstünde, uygulamayı o an açmış olanlar görünür. Ayarlar’dan gizleyebilirsin'],['cal','Tarihler her yerde aynı','Yakın günler adıyla yazılır: Pazar · 25 Ekim'],['edit','Düzenle ve Sil başlıkta','Bir şeyi açınca kalem ve çöp sağ üstte durur']]};
+const NEWS={v:'2026-10-24d',items:[['bell','Gelişmeler','Bugün’de zile dokun: sana verilen görevler, yorumlar, pano. Birine dokununca o şey açılır'],['chat','İsteklere yorum','Yapmadan önce de bir isteğin altında konuşabilirsiniz: ne zaman, kiminle, nasıl'],['users','Kim şu an burada','Bugün ve Listeler’in üstünde, uygulamayı o an açmış olanlar görünür. Ayarlar’dan gizleyebilirsin'],['cal','Tarihler her yerde aynı','Yakın günler adıyla yazılır: Pazar · 25 Ekim']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
