@@ -497,6 +497,7 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .mcov .s svg{width:20px;height:20px;color:var(--c)}
 /* İsteklerde yorum: yapılan isteğin altında sohbet balonları (Google Fotoğraflar paylaşılan albüm gibi) */
 .cmh{display:flex;align-items:center;gap:8px;margin:18px 0 8px;font-weight:700}.cmh small{color:var(--muted);font-weight:600}
+.wr small .cmc{display:inline-flex;align-items:center;gap:3px}.wr small .cmc .i{width:.9rem;height:.9rem}
 .cmb{display:flex;flex-direction:column;gap:8px}
 .cmb .b{display:flex;gap:8px;align-items:flex-end;max-width:88%}
 .cmb .b .tx{background:var(--sunk);border-radius:18px 18px 18px 6px;padding:8px 12px;line-height:1.35;overflow-wrap:anywhere;white-space:pre-wrap}
@@ -1598,7 +1599,7 @@ function vWishes(){
  const done=all.filter(w=>w.done&&(f==='all'||w.type===f)).sort((a,b)=>b.doneAt-a.doneAt);
  const cnt=k=>all.filter(w=>!w.done&&(k==='all'||w.type===k)).length;
  const row=w=>`<div class="wr" data-wid="${w.id}" style="--c:${WCOL[w.type]}">${w.book?bkCover(w.book,'xs'):`<span class="wi" aria-hidden="true">${I(WT[w.type][2])}</span>`}
-  <button class="tx" data-act="openWish" data-id="${w.id}"><b>${esc(w.title)}</b><small>${w.planned?`<span class="pl">${I('cal','sm')}${rel(w.planned)}</span>`:''}<span>${w.book&&(w.book.a||w.book.p)?esc([w.book.a,w.book.p?w.book.p+' sayfa':''].filter(Boolean).join(' · ')):w.place?esc(area(w.place)):esc(first(M(w.by).name))+' istedi'}</span></small></button>
+  <button class="tx" data-act="openWish" data-id="${w.id}"><b>${esc(w.title)}</b><small>${w.planned?`<span class="pl">${I('cal','sm')}${rel(w.planned)}</span>`:''}<span>${w.book&&(w.book.a||w.book.p)?esc([w.book.a,w.book.p?w.book.p+' sayfa':''].filter(Boolean).join(' · ')):w.place?esc(area(w.place)):esc(first(M(w.by).name))+' istedi'}</span>${cmOf(w).length?`<span class="cmc" aria-label="${cmOf(w).length} yorum">${I('chat','sm')}${cmOf(w).length}</span>`:''}</small></button>
   <span class="tot" aria-label="Ailenin toplamı ${rSum(w)} puan"><b>${rSum(w)}</b>puan</span>${rbarHTML(w.id,rOf(w)[me0]||0)}</div>`;
  return lTop(true)+itabs(Object.entries(WTAB).map(([k,[i,n]])=>({act:'wt',data:`data-v="${k}"`,on:f===k,i,n,cnt:cnt(k)})),'Tür')
  +(pend.length?`<div class="group" style="margin-top:12px">${pend.map(row).join('')}</div>`:`<div class="group" style="margin-top:12px">${emptyBox(f==='all'?'Henüz istek yok':'Bu türde istek yok','Gezmek, okumak, izlemek ya da yemek istediğiniz bir şeyi ekleyin.',`<br><button class="btn soft sm" data-act="newWish">${I('plus','sm')}İstek ekle</button>`)}</div>`)
@@ -1652,7 +1653,7 @@ function wpHTML(){const p=F.place;
   <div class="wprow"><input class="inp" id="wf-link" placeholder="ya da bağlantıyı yapıştır" inputmode="url" aria-label="Google Haritalar bağlantısı"><button type="button" class="btn soft sm" data-act="wpPaste">Ekle</button></div>
   <span class="err" id="wf-lerr" hidden>Bu bir Google Haritalar bağlantısı değil.</span></div>`}
 function wpRefresh(){const b=document.getElementById('wf-place');if(!b)return;b.hidden=!isPlaceType(F.wtype);b.innerHTML=wpHTML()}
-// İsteklerde yorum: yapılmış bir isteğin altında serbest sohbet. Her yorum ayrı kayıt (wcm/{id} = {w, by, t, at}),
+// İsteklerde yorum: her isteğin altında (yapılmadan önce de) serbest sohbet. Her yorum ayrı kayıt (wcm/{id} = {w, by, t, at}),
 // böylece iki telefon aynı anda yazınca biri ötekini silmez.
 const cmOf=w=>(S.wcm||[]).filter(c=>c.w===w.id&&c.by&&c.t).sort((a,b)=>a.at-b.at);
 function cmList(w){const me0=meId(),c=cmOf(w);
@@ -1831,10 +1832,11 @@ function plusGrow(){const L=document.getElementById('layer'),sh=L.querySelector(
  if(!sh||!b||b.offsetParent===null||rtRM())return;
  // yeri, kayma animasyonundan etkilenmeyen offsetTop ile ölçülür (getBoundingClientRect alttan kayan hâli verip daireyi yukarıdan başlatıyordu)
  sh.classList.add('pgrow');sc&&sc.classList.add('pgrow');
+ // önce cam çarpıyı koy: altına boşluk ekleyip sayfanın boyunu değiştirdiği için ölçüm ondan sonra yapılır (yoksa daire artının ~45px üstünden çıkıyordu)
+ plusX(sh,b);
  const op=(sh.offsetParent||document.body).getBoundingClientRect(),sl=op.left+sh.offsetLeft,st=op.top+sh.offsetTop,W=sh.offsetWidth,H=sh.offsetHeight,br=b.getBoundingClientRect(),
   x=br.left+br.width/2-sl,y=br.top+br.height/2-st,r0=br.width/2,R=Math.hypot(Math.max(x,W-x),Math.max(y,H-y))+8;sh._pg={x,y,r0,R};
  sh.animate([{clipPath:`circle(${r0}px at ${x}px ${y}px)`,background:'var(--accent)'},{background:'var(--surface)',offset:.45},{clipPath:`circle(${R}px at ${x}px ${y}px)`,background:'var(--surface)'}],{duration:500,easing:'cubic-bezier(.4,0,.2,1)'});
- plusX(sh,b);
  [...sh.querySelectorAll('.sh,.sb>*')].slice(0,8).forEach((el,i)=>el.animate([{opacity:0,transform:'translateY(10px) scale(.97)'},{opacity:1,transform:'none'}],{duration:340,delay:190+i*30,easing:'cubic-bezier(.2,.9,.3,1)',fill:'backwards'}))}
 function plusX(sh,b){const L=document.getElementById('layer'),ph=L.parentNode.getBoundingClientRect(),br=b.getBoundingClientRect(),x=document.createElement('button');
  x.className='pxc';x.dataset.act='close';x.setAttribute('aria-label','Kapat');x.innerHTML=I('plus');
@@ -2225,7 +2227,7 @@ const A={
    :`<div>${I('heart')}<span><b>Ailenin puanı: ${rSum(w)}</b><span class="rlist">${ppl.map(([x,v])=>`<span class="who">${av(x,'xs')}${esc(first(M(x).name))}<b>${v}</b> · ${RLBL[v]}</span>`).join('')||'Henüz puan veren yok'}</span></span></div>${w.planned?`<div>${I('cal')}<span>Takvime eklendi: <b>${dFull(w.planned)}</b></span></div>`:''}`}</div>
   ${w.done?cmHTML(w):''}
   ${w.done?'':`<div class="field" id="ow-rate" style="margin:4px 0 14px"><span class="flabel">Senin puanın</span>${rbarHTML(w.id,rOf(w)[meId()]||0)}</div>
-  <div class="actions"><button class="btn primary" data-act="planWish" data-id="${w.id}">${I('cal','sm')}Plana dök</button><button class="btn soft" data-act="doneWish" data-id="${w.id}">${I('check','sm')}Yaptık</button></div>`}
+  <div class="actions"><button class="btn primary" data-act="planWish" data-id="${w.id}">${I('cal','sm')}Plana dök</button><button class="btn soft" data-act="doneWish" data-id="${w.id}">${I('check','sm')}Yaptık</button></div>${cmHTML(w)}`}
   ${w.done?`<button class="btn soft block" style="margin-top:14px" data-act="undoneWish" data-id="${w.id}">${I('refresh','sm')}Yapılmadı olarak geri al</button>`:''}`,
   shTools(!w.done&&['editWish',w.id,'edit','Düzenle',own,PARENT],['delWish',w.id,'trash','Sil',own,PARENT,1]))},
  editWish:d=>wishForm(S.wishes.find(x=>x.id===d.id)),
@@ -2526,7 +2528,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-24b',items:[['users','Kim şu an burada','Bugün ve Listeler’in üstünde, uygulamayı o an açmış olanlar görünür. Ayarlar’dan gizleyebilirsin'],['cal','Tarihler her yerde aynı','Yakın günler adıyla yazılır: Pazar · 25 Ekim'],['edit','Düzenle ve Sil başlıkta','Bir şeyi açınca kalem ve çöp sağ üstte durur'],['board','Alınacaklar ⇄ İstekler','Başlığı sağa sola kaydırın, dönerek öne gelir']]};
+const NEWS={v:'2026-10-24c',items:[['chat','İsteklere yorum','Yapmadan önce de bir isteğin altında konuşabilirsiniz: ne zaman, kiminle, nasıl'],['users','Kim şu an burada','Bugün ve Listeler’in üstünde, uygulamayı o an açmış olanlar görünür. Ayarlar’dan gizleyebilirsin'],['cal','Tarihler her yerde aynı','Yakın günler adıyla yazılır: Pazar · 25 Ekim'],['edit','Düzenle ve Sil başlıkta','Bir şeyi açınca kalem ve çöp sağ üstte durur']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
