@@ -1019,6 +1019,8 @@ const refocus=(act,v)=>{const b=document.querySelector(`#avp [data-act="${act}"]
 // Ailenin hepsiyse avatar yığını yerine tek "Bütün aile" simgesi (kalpli ev)
 const avs=ids=>allIn(ids)?famBadge():`<span class="avs">${ids.slice(0,4).map(i=>av(i,'xs')).join('')}</span>`;
 const log=text=>{S.activity.unshift({id:uid(),who:meId(),text,at:Date.now()});S.activity=S.activity.slice(0,40)};
+// Bir işaret kısa süre içinde geri alınınca (aldı → tik kaldırıldı) o kayıt da silinir, "Son değişiklikler"de iz kalmaz
+const unlog=(...ts)=>{const k=S.activity.findIndex(a=>a.who===meId()&&ts.includes(a.text)&&Date.now()-a.at<15*60e3);if(k<0)return false;S.activity.splice(k,1);return true};
 const first=n=>n.split(' ')[0];
 const COLORS=['#C2502F','#2F6DB5','#8B4FB8','#9A5B00','#2B8467','#B03A6A','#4F5BB3','#5F7A1F'];
 const freeColor=used=>COLORS.find(c=>!used.includes(c))||COLORS[used.length%COLORS.length];
@@ -1043,7 +1045,7 @@ function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
  switch(c){
   case 'members':x.name=str(x.name)||'?';x.rel=str(x.rel);if(!ROLES[x.role])x.role='adult';if(!/^#[0-9a-fA-F]{6}$/.test(x.color||''))x.color='#8A8178';x.avatar=str(x.avatar).replace(/^[a-z]+\/(?=[A-Za-z0-9_-]+$)/,OZ);if(!(isOz(x.avatar)&&okOzId(ozId(x.avatar)))&&!AVN(x.avatar))x.avatar='';break;
   case 'events':x.title=str(x.title);if(!okDate(x.date))x.date=T();x.time=okTime(x.time)?x.time:'';x.members=idList(x.members);if(!CATS[x.cat])x.cat='aile';if(!REM[x.rem])x.rem='none';if(!REP[x.repeat])x.repeat='none';x.loc=str(x.loc);x.desc=str(x.desc);break;
-  case 'tasks':x.title=str(x.title);if(!okDate(x.due))x.due=T();x.time=okTime(x.time)?x.time:'';x.rot=idList(x.rot);x.assignee=typeof x.assignee==='string'&&okId(x.assignee)?x.assignee:'';x.who=idList(x.who);x.dn=idList(x.dn);x.all=!!x.all;if(!TREP[x.repeat])x.repeat='none';x.done=!!x.done;break;
+  case 'tasks':x.title=str(x.title);if(!okDate(x.due))x.due=T();x.time=okTime(x.time)?x.time:'';x.rot=idList(x.rot);x.assignee=typeof x.assignee==='string'&&okId(x.assignee)?x.assignee:'';x.who=idList(x.who);x.dn=idList(x.dn);x.all=!!x.all;if(!TREP[x.repeat])x.repeat='none';x.done=!!x.done;if(!(typeof x.from==='string'&&okId(x.from)))delete x.from;break;
   case 'lists':x.name=str(x.name)||'Liste';if(!P[x.icon])x.icon='tag';x.at=+x.at||0;break;
   case 'items':x.name=str(x.name)||'?';x.note=str(x.note);x.cat=str(x.cat)||'Diğer';if(!PRI[x.pri])x.pri='yakinda';x.for=str(x.for);x.list=str(x.list);x.done=!!x.done;x.doneAt=+x.doneAt||0;break;
   case 'wishes':x.title=str(x.title)||'?';x.note=str(x.note);{const p=x.place;if(p&&typeof p==='object'&&(str(p.n)||okMapsUrl(str(p.u))))x.place={n:str(p.n).slice(0,120),a:str(p.a).slice(0,200),u:okMapsUrl(str(p.u))?str(p.u):''};else delete x.place}if(!WT[x.type])x.type='yer';{const b=x.book;if(x.type==='kitap'&&b&&typeof b==='object'&&str(b.t))x.book={t:str(b.t).slice(0,160),a:str(b.a).slice(0,120),p:Math.max(0,Math.min(20000,Math.round(+b.p)||0)),y:/^\d{4}$/.test(str(b.y))?str(b.y):'',i:okCover(str(b.i))?str(b.i):''};else delete x.book}x.want=idList(x.want);{const r={};if(x.rate&&typeof x.rate==='object')for(const k in x.rate){const v=Math.round(+x.rate[k]);if(okId(k)&&v>=1&&v<=5)r[k]=v}x.want.forEach(m=>{if(!r[m])r[m]=3});x.rate=r;x.want=Object.keys(r)}x.doneWith=idList(x.doneWith);if(!MOODS.includes(x.mood))x.mood='';x.planned=okDate(x.planned)?x.planned:'';x.done=!!x.done;break;
@@ -1125,24 +1127,32 @@ async function flush(){
   retryMs=3000;save();setNet('online')}
  catch(e){setNet('offline');clearTimeout(retryT);retryT=setTimeout(flush,retryMs);retryMs=Math.min(retryMs*2,60000)}
  finally{flushing=false;if(ok&&Object.keys(store.pending).length)flush()}}
-let es=null,rq=0;
+let es=null,rq=0,lastEvt=0,esRetry=null,esMs=5000;
+// Akış tamamen kapanırsa (ör. eski jetonla yeniden bağlanmaya çalışıp reddedilince) kendi kendine dönmez: artan aralıklarla yeniden kur
+function esLater(){clearTimeout(esRetry);esRetry=setTimeout(()=>ensureUid().then(connect),esMs);esMs=Math.min(esMs*2,60000)}
 function connect(){
- if(es){es.close();es=null}
+ if(es){es.close();es=null}clearTimeout(esRetry);
  if(store.mode!=='family'||!FB_URL||typeof EventSource==='undefined')return;
  const code=store.code;
- authTok().then(t=>{if(store.mode!=='family'||store.code!==code)return;openEs(code,t)})
-  .catch(()=>setNet(navigator.onLine?'reconnecting':'offline'))}
+ authTok().then(t=>{if(store.mode!=='family'||store.code!==code)return;
+  // Kimlik alınamadıysa (ağ yok) jetonsuz akış açmanın anlamı yok, kurallar reddeder
+  if(FB_KEY&&!t){setNet(navigator.onLine?'reconnecting':'offline');esLater();return}openEs(code,t)})
+  .catch(()=>{setNet(navigator.onLine?'reconnecting':'offline');esLater()})}
 function openEs(code,t){
  if(es){es.close();es=null}
- es=new EventSource(fbUrl(code,'',t));
- es.addEventListener('put',e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}store.R=m.path==='/'?(m.data&&typeof m.data==='object'?m.data:{}):setAt(store.R,m.path,m.data);remote()});
- es.addEventListener('patch',e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}for(const k in m.data||{})store.R=setAt(store.R,m.path+'/'+k,m.data[k]);remote()});
- es.addEventListener('cancel',()=>{UI.err='denied';render()});
+ es=new EventSource(fbUrl(code,'',t));lastEvt=Date.now();
+ es.addEventListener('keep-alive',()=>{lastEvt=Date.now()});
+ es.addEventListener('put',e=>{lastEvt=Date.now();let m;try{m=JSON.parse(e.data)}catch(x){return}store.R=m.path==='/'?(m.data&&typeof m.data==='object'?m.data:{}):setAt(store.R,m.path,m.data);remote()});
+ es.addEventListener('patch',e=>{lastEvt=Date.now();let m;try{m=JSON.parse(e.data)}catch(x){return}for(const k in m.data||{})store.R=setAt(store.R,m.path+'/'+k,m.data[k]);remote()});
+ es.addEventListener('cancel',()=>{if(es){es.close();es=null}UI.err='denied';render()});
  // Kimlik jetonu bir saat sonra düşer: akış kapanınca yeni jetonla yeniden bağlan
  es.addEventListener('auth_revoked',()=>{setNet('reconnecting');connect()});
- es.onopen=()=>{setNet('online');flush()};
- es.onerror=()=>setNet(navigator.onLine?'reconnecting':'offline');
+ es.onopen=()=>{lastEvt=Date.now();esMs=5000;setNet('online');flush()};
+ es.onerror=()=>{setNet(navigator.onLine?'reconnecting':'offline');if(es&&es.readyState===2)esLater()};
 }
+/* Telefon uygulamayı arka plana atınca akış sessizce ölebilir (açık görünür ama veri gelmez).
+   Sunucu yarım dakikada bir "keep-alive" yollar; iki dakikadır hiçbir şey gelmediyse bağlantıyı yeniden kur. */
+setInterval(()=>{if(store.mode==='family'&&es&&es.readyState===1&&document.visibilityState==='visible'&&navigator.onLine&&Date.now()-lastEvt>120000)connect()},20000);
 function remote(){setNet('online');clearTimeout(rq);rq=setTimeout(()=>{
  if(!store.R||!store.R.meta){UI.err='missing';render();return}
  UI.err=null;fromRemote();save();render(true);checkReminders();UI.synced=true;
@@ -2106,7 +2116,7 @@ const A={
    <div style="color:var(--muted);font-size:.875rem">${av(e.by,'xs')}<span>${esc(M(e.by).name)} ekledi${e.at?' · '+ago(e.at):''}</span></div></div>`,
    shTools(['editEvent',e.id,'edit','Düzenle',ok,PARENT],['delEvent',e.id,'trash','Sil',ok,PARENT,1]))},
  editEvent:d=>eventForm(S.events.find(x=>x.id===d.id)),
- delEvent:d=>{const u=snap(),e=S.events.find(x=>x.id===d.id);S.events=S.events.filter(x=>x.id!==d.id);log(`“${e.title}” etkinliğini sildi`);close();render(true);toast('Etkinlik silindi',u)},
+ delEvent:d=>{const u=snap(),e=S.events.find(x=>x.id===d.id);if(!e){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.events=S.events.filter(x=>x.id!==d.id);log(`“${e.title}” etkinliğini sildi`);close();render(true);toast('Etkinlik silindi',u)},
  fMem:d=>{F.members=F.members.includes(d.id)?F.members.filter(x=>x!==d.id):[...F.members,d.id];memRefresh()},
  fAll:()=>{const all=S.members.every(m=>F.members.includes(m.id));F.members=all?[meId()]:S.members.map(m=>m.id);F.pick=false;all?flyOut():flyIn()},
  fPick:()=>{F.pick=true;flyOut()},
@@ -2126,14 +2136,17 @@ const A={
  sugAdd:d=>{const it=addItemTo(UI.list,d.v);if(!it)return;render(true);const g=document.getElementById('sugg'),q=document.getElementById('item-input');if(g)g.innerHTML=suggHTML(q?q.value:'');toast(`${it.name} eklendi`)},
  toggleTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;if(!t.done&&UI.tab==='tasks')UI.dcKeep.add(t.id);else UI.dcKeep.delete(t.id);A.tkDone(d);if(!t.done){UI.dcKeep.delete(t.id);return}if(UI.dcKeep.has(t.id))dcSettle(t.id)},
  tkDone:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const u=snap();
-  if(t.done){t.done=false;delete t.doneAt;t.dn=[];log(`“${t.title}” görevini yeniden açtı`);render(true);toast('Görev yeniden açıldı',u);return}
+  if(t.done){t.done=false;delete t.doneAt;delete t.doneBy;t.dn=allRule(t)&&isFor(t,meId())?(t.dn||[]).filter(x=>x!==meId()):[];
+   // Tekrarlayan görev tamamlanınca eklenen bir sonraki kopya, görev yeniden açılınca kaldırılır (yoksa iki tane olur)
+   const nd=t.repeat!=='none'&&nextDue(t.due,t.repeat);S.tasks=S.tasks.filter(x=>x.id===t.id||x.done||(x.dn||[]).length||!(x.from===t.id||(!x.from&&nd&&x.title===t.title&&x.repeat===t.repeat&&x.due===nd)));
+   if(!unlog(`“${t.title}” görevini tamamladı`))log(`“${t.title}” görevini yeniden açtı`);render(true);toast('Görev yeniden açıldı',u);return}
   const mm=meId();
   if(allRule(t)&&isFor(t,mm)){t.dn=[...(t.dn||[])];
-   if(t.dn.includes(mm)){t.dn=t.dn.filter(x=>x!==mm);render(true);toast('İşaretin kaldırıldı',u);return}
+   if(t.dn.includes(mm)){t.dn=t.dn.filter(x=>x!==mm);unlog(`“${t.title}” görevinde kendi payını yaptı`);render(true);toast('İşaretin kaldırıldı',u);return}
    t.dn.push(mm);if(t.dn.length<ws(t).length){celebrate(t.id);log(`“${t.title}” görevinde kendi payını yaptı`);render(true);
     toast(`Senin payın tamam · ${ws(t).filter(x=>!t.dn.includes(x)).map(x=>first(M(x).name)).join(', ')} bekleniyor`,u);return}}
   celebrate(t.id);t.done=true;t.doneAt=Date.now();t.doneBy=meId();let msg=isChild()?'Görev tamamlandı ⭐':'Görev tamamlandı';
-  if(t.repeat!=='none'){const nx=nextIn(t)||t.assignee;S.tasks.push({...t,id:uid(),done:false,doneAt:undefined,doneBy:undefined,dn:[],due:nextDue(t.due,t.repeat),assignee:nx,who:nextIn(t)?[nx]:[...ws(t)]});if(nextIn(t))msg+=` · Sırada ${M(nx).name}`}
+  if(t.repeat!=='none'){const nx=nextIn(t)||t.assignee;S.tasks.push({...t,id:uid(),from:t.id,done:false,doneAt:undefined,doneBy:undefined,dn:[],due:nextDue(t.due,t.repeat),assignee:nx,who:nextIn(t)?[nx]:[...ws(t)]});if(nextIn(t))msg+=` · Sırada ${M(nx).name}`}
   log(`“${t.title}” görevini tamamladı`);render(true);toast(msg,u)},
  openTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const ok=can('task.edit',t),nx=nextIn(t);
   sheet(esc(t.title),`<div class="dl">
@@ -2148,7 +2161,7 @@ const A={
 `,shTools(['editTask',t.id,'edit','Düzenle',ok,PARENT],['delTask',t.id,'trash','Sil',ok,PARENT,1]))},
  toggleTask2:d=>{close();A.toggleTask(d)},
  editTask:d=>taskForm(S.tasks.find(x=>x.id===d.id)),
- delTask:d=>{const u=snap(),t=S.tasks.find(x=>x.id===d.id);S.tasks=S.tasks.filter(x=>x.id!==d.id);log(`“${t.title}” görevini sildi`);close();render(true);toast('Görev silindi',u)},
+ delTask:d=>{const u=snap(),t=S.tasks.find(x=>x.id===d.id);if(!t){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.tasks=S.tasks.filter(x=>x.id!==d.id);log(`“${t.title}” görevini sildi`);close();render(true);toast('Görev silindi',u)},
  // Listeler
  goList:d=>{UI.list=d.id;UI.tab='lists';render()},
  pickList:d=>{UI.list=d.id;UI.doneOpen=false;render(true)},
@@ -2156,7 +2169,7 @@ const A={
  shopStart:d=>{UI.shop=d.v;UI.shopAt=Date.now();render()},
  shopCat:d=>{UI.shop=d.v;render(true)},
  shopEnd:()=>{const n=S.items.filter(i=>i.done&&(i.doneAt||0)>=UI.shopAt).length;UI.shop=null;render();toast(n?`Alışveriş bitti · ${n} ürün alındı`:'Alışveriş modu kapandı')},
- toggleItem:d=>{const i=S.items.find(x=>x.id===d.id);if(!i)return;i.done=!i.done;i.doneAt=i.done?Date.now():null;i.doneBy=meId();if(i.done)log(`${low(i.name)} aldı`);render(true)},
+ toggleItem:d=>{const i=S.items.find(x=>x.id===d.id);if(!i)return;i.done=!i.done;i.doneAt=i.done?Date.now():null;if(i.done){i.doneBy=meId();log(`${low(i.name)} aldı`)}else{delete i.doneBy;unlog(`${low(i.name)} aldı`)}render(true)},
  lmode:d=>{if(d.v===UI.lmode)return;if(UI.tab==='lists'&&!UI.shop&&document.querySelector('#screen .lsw'))return rtGo(+d.dir||(d.v==='wish'?1:-1));UI.lmode=d.v;UI.wrHold=false;render(true)},
  goWishes:()=>{UI.tab='lists';UI.lmode='wish';render()},
  wt:d=>{UI.wt=d.v;UI.wrHold=false;render(true)},
@@ -2169,8 +2182,8 @@ const A={
  wpPaste:()=>{const i=document.getElementById('wf-link'),v=i.value.trim(),p=v&&parsePlace('',v,'');
   if(!p||(!p.u&&/https?:\/\//.test(v))){document.getElementById('wf-lerr').hidden=false;i.focus();return}
   F.place=p;const t=document.getElementById('wf-title');if(!t.value.trim()&&p.n)t.value=p.n;wpRefresh()},
- rateSet:d=>{const w=S.wishes.find(x=>x.id===d.id);if(!w)return;const mm=meId(),v=Math.max(0,Math.min(5,+d.v||0)),r={...rOf(w)},had=!!r[mm];
-  if(!v||(r[mm]===v&&d.tap))delete r[mm];else r[mm]=v;w.rate=r;w.want=Object.keys(r);if(!had&&r[mm])log(`“${w.title}” için ${RLBL[v].toLocaleLowerCase('tr')} dedi`);
+ rateSet:d=>{const w=S.wishes.find(x=>x.id===d.id);if(!w)return;const mm=meId(),v=Math.max(0,Math.min(5,+d.v||0)),r={...rOf(w)},had=r[mm];
+  if(!v||(r[mm]===v&&d.tap))delete r[mm];else r[mm]=v;w.rate=r;w.want=Object.keys(r);if(!had&&r[mm])log(`“${w.title}” için ${RLBL[v].toLocaleLowerCase('tr')} dedi`);if(had&&!r[mm])unlog(...RLBL.slice(1).map(l=>`“${w.title}” için ${l.toLocaleLowerCase('tr')} dedi`));
   UI.wrHold=true;render(true);if(document.getElementById('ow-rate'))A.openWish({id:w.id});wrSettle(w.id)},
  fRate:d=>{F.rate=+d.v;const b=document.querySelector('.rbar[data-f]');if(b)rbPaint(b,F.rate)},
  openWish:d=>{const w=S.wishes.find(x=>x.id===d.id);if(!w)return;const own=w.by===meId()||!isChild(),ppl=Object.entries(rOf(w)).sort((a,b)=>b[1]-a[1]);
@@ -2190,8 +2203,8 @@ const A={
   const pre={title:w.title,date:sat,time:w.type==='film'?'20:30':w.type==='mekan'?'13:00':'',cat:'aile',loc:w.place&&w.place.n?w.place.n+(w.place.a?', '+area(w.place):''):isPlaceType(w.type)?w.title:'',desc:w.note||'',members:w.want.length?w.want:[meId()],wish:w.id};eventForm(null,sat,pre)},
  doneWish:d=>wishDoneForm(S.wishes.find(x=>x.id===d.id)),
  cmDel:d=>{const u=snap();S.wcm=(S.wcm||[]).filter(c=>c.id!==d.id);render(true);toast('Yorum silindi',u)},
- undoneWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);w.done=false;w.doneAt=null;w.doneWith=[];w.mood='';close();render(true);toast('Geri alındı',u)},
- delWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);S.wishes=S.wishes.filter(x=>x.id!==d.id);S.wcm=(S.wcm||[]).filter(c=>c.w!==d.id);log(`“${w.title}” isteğini sildi`);close();render(true);toast('İstek silindi',u)},
+ undoneWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);if(!w)return;unlog(`“${w.title}” için “yaptık” dedi ${w.mood}`);w.done=false;w.doneAt=null;w.doneWith=[];w.mood='';close();render(true);toast('Geri alındı',u)},
+ delWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);if(!w){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.wishes=S.wishes.filter(x=>x.id!==d.id);S.wcm=(S.wcm||[]).filter(c=>c.w!==d.id);log(`“${w.title}” isteğini sildi`);close();render(true);toast('İstek silindi',u)},
  fWith:(d,el)=>{F.with=F.with.includes(d.id)?F.with.filter(x=>x!==d.id):[...F.with,d.id];document.getElementById('wd-with').innerHTML=withChips()},
  fWithAll:()=>{F.with=allIn(F.with)?[meId()]:S.members.map(m=>m.id);document.getElementById('wd-with').innerHTML=withChips()},
  fMood:d=>{F.mood=d.v;document.querySelectorAll('#wd-mood button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
@@ -2209,7 +2222,7 @@ const A={
  fFor:d=>{F.for=F.for===d.id?'':d.id;document.getElementById('it-for').innerHTML=itemForm.forChips()},
  fPri:(d,el)=>{F.pri=d.v;document.querySelectorAll('#it-pri button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
  toggleItem2:d=>{close();A.toggleItem(d)},
- delItem:d=>{const u=snap(),i=S.items.find(x=>x.id===d.id);S.items=S.items.filter(x=>x.id!==d.id);log(`listeden ${low(i.name)} sildi`);close();render(true);toast(`${i.name} silindi`,u)},
+ delItem:d=>{const u=snap(),i=S.items.find(x=>x.id===d.id);if(!i){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.items=S.items.filter(x=>x.id!==d.id);log(`listeden ${low(i.name)} sildi`);close();render(true);toast(`${i.name} silindi`,u)},
  toggleDone:()=>{UI.doneOpen=!UI.doneOpen;render(true)},
  clearDone:()=>{const u=snap(),n=S.items.filter(i=>i.list===UI.list&&i.done).length;S.items=S.items.filter(i=>!(i.list===UI.list&&i.done));render(true);toast(`${n} ürün temizlendi`,u)},
  newList:()=>sheet('Yeni liste',`<form data-form="newList" autocomplete="off"><div class="field"><label for="nl-name">Liste adı</label><input class="inp" id="nl-name" placeholder="örn. Kışlık giyim" autofocus></div><div class="chips" style="flex-wrap:wrap;margin-bottom:14px">${['Kışlık giyim','Bayram alışverişi','Taşınma','Doğum günü hediyeleri'].map(x=>`<button type="button" class="chip plain" data-act="nlFill" data-v="${x}">${x}</button>`).join('')}</div><button class="btn primary block">Listeyi ekle</button></form>`),
@@ -2221,7 +2234,7 @@ const A={
  loPick:d=>{if(!P[d.v])return;loSync();F.ic[d.id]=d.v;F.icOpen=null;loDraw()},
  lnDel:d=>{if(!S.lists.some(l=>l.id===d.id))return;UI.list=d.id;A.delList()},
  delList:()=>{const L=S.lists.find(l=>l.id===UI.list),n=S.items.filter(i=>i.list===L.id).length;sheet('Liste silinsin mi?',`<p>“${esc(L.name)}” listesi ve içindeki ${n} ürün silinecek. Silme sonrası birkaç saniye içinde geri alabilirsin.</p><div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" data-act="delList2">Sil</button></div>`)},
- delList2:()=>{const u=snap(),L=S.lists.find(l=>l.id===UI.list);S.lists=S.lists.filter(l=>l.id!==L.id);S.items=S.items.filter(i=>i.list!==L.id);log(`“${L.name}” listesini sildi`);UI.list=(S.lists[0]||{}).id;close();render(true);toast('Liste silindi',u)},
+ delList2:()=>{const u=snap(),L=S.lists.find(l=>l.id===UI.list);if(!L){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.lists=S.lists.filter(l=>l.id!==L.id);S.items=S.items.filter(i=>i.list!==L.id);log(`“${L.name}” listesini sildi`);UI.list=(S.lists[0]||{}).id;close();render(true);toast('Liste silindi',u)},
  quickItem:()=>quickItem(),
  qiList:(d,el)=>{F.list=d.id;document.querySelectorAll('#qi-lists .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.id===d.id));document.getElementById('qi-input').focus()},
  // Aile
@@ -2466,9 +2479,13 @@ document.addEventListener('focusout',()=>setTimeout(unshift,120));
 window.visualViewport&&window.visualViewport.addEventListener('resize',()=>setTimeout(unshift,120));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)unshift()});
 document.addEventListener('visibilitychange',()=>{if(store.mode!=='family')return;if(document.hidden){if(store.seen){store.seen=Date.now();save()}UI.hidAt=Date.now()}else if(UI.hidAt&&Date.now()-UI.hidAt>30*60e3){UI.popped=false;setTimeout(popCheck,2500)}});
-window.addEventListener('online',()=>{setNet('reconnecting');flush();if(es&&es.readyState===2)connect()});
+window.addEventListener('online',()=>{if(store.mode!=='family')return;setNet('reconnecting');clearTimeout(retryT);retryMs=3000;flush();ensureUid().then(connect)});
 window.addEventListener('offline',()=>setNet('offline'));
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){checkReminders();if(store.mode==='family'&&(!es||es.readyState===2))ensureUid().then(connect);if(S)render(true)}});
+// Ön plana dönünce: birkaç saniyeden uzun arka planda kaldıysa akışı tazele (iPhone arka planda bağlantıyı keser ama "açık" gösterebilir) ve bekleyenleri gönder
+let bgAt=0;
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible'){bgAt=Date.now();return}checkReminders();
+ if(store.mode==='family'){if(!es||es.readyState!==1||Date.now()-bgAt>10000)ensureUid().then(connect);flush()}if(S)render(true)});
+window.addEventListener('pageshow',e=>{if(e.persisted&&store.mode==='family'){ensureUid().then(connect);flush()}});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;if(UI.tab==='family'&&S)render(true)});
 setInterval(checkReminders,30000);
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').then(r=>{swReg=r}).catch(()=>{});
