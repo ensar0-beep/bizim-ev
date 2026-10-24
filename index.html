@@ -22,7 +22,7 @@
 <style>
 /* Telefonda tam ekran uygulama, altta 5 sekmeli menü; geniş ekranda ortada telefon genişliğinde bir çerçeve */
 :root{
-  --bg:#FAF8F5; --surface:#FFFFFF; --sunk:#F2EEE8; --line:#E4DED4; --fg:#22201D; --muted:#625B52;
+  --bg:#FAF8F5; --surface:#FFFFFF; --sunk:#F2EEE8; --line:#E4DED4; --fg:#22201D; --muted:#625B52; --live:#2EB872;
   --accent:#2E6A51; --on-accent:#FFFFFF; --accent-soft:#E1EDE6; --accent-ink:#22533F; --buy:#2E6A51; --buy-ink:#22533F; --wish:#7A4FB5; --wish-soft:#EFE6F8; --wish-ink:#5B3690;
   --coral:#B9502F; --coral-soft:#FBE9E2; --on-coral:#FFFFFF; --danger:#B3261E; --danger-soft:#FBE4E2; --warn:#7D5200; --warn-soft:#FFF0D2;
   --stage:#ECE7DF; --scrim:rgba(30,24,18,.38);
@@ -32,13 +32,13 @@
   --r-lg:22px; --r-md:16px; --r-sm:12px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#16140F; --surface:#211E19; --sunk:#2B2721; --line:#3B362E; --fg:#F2EDE5; --muted:#ADA497;
+  --bg:#16140F; --surface:#211E19; --sunk:#2B2721; --line:#3B362E; --fg:#F2EDE5; --muted:#ADA497; --live:#4CC98A;
   --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD; --buy:#8BCBA9; --buy-ink:#A5DABD; --wish:#C7A8EE; --wish-soft:#2E2438; --wish-ink:#D9C3F5;
   --coral:#F29A80; --coral-soft:#3A251E; --on-coral:#2A140C; --danger:#F3A69F; --danger-soft:#3E201D; --warn:#F2C46E; --warn-soft:#3A2E15;
   --stage:#0D0C0A; --scrim:rgba(0,0,0,.55);
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.4); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#16140F; --surface:#211E19; --sunk:#2B2721; --line:#3B362E; --fg:#F2EDE5; --muted:#ADA497;
+  --bg:#16140F; --surface:#211E19; --sunk:#2B2721; --line:#3B362E; --fg:#F2EDE5; --muted:#ADA497; --live:#4CC98A;
   --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD; --buy:#8BCBA9; --buy-ink:#A5DABD; --wish:#C7A8EE; --wish-soft:#2E2438; --wish-ink:#D9C3F5;
   --coral:#F29A80; --coral-soft:#3A251E; --on-coral:#2A140C; --danger:#F3A69F; --danger-soft:#3E201D; --warn:#F2C46E; --warn-soft:#3A2E15;
   --stage:#0D0C0A; --scrim:rgba(0,0,0,.55);
@@ -98,6 +98,10 @@ h2.sec .qty{font-weight:700}
 .avs{display:flex;flex:none}
 .avs .av{box-shadow:0 0 0 2px var(--surface)}
 .avs .av+.av{margin-left:-8px}
+/* Şu an burada (Google Dokümanlar gibi): uygulamada olan diğer kişiler */
+.onhere{display:flex;align-items:center;gap:8px;margin:0 2px 14px;font-size:.88rem;color:var(--muted)}.onhere b{color:var(--fg);font-weight:600}.onhere .avs .av{box-shadow:0 0 0 2px var(--bg)}
+.onhere i{width:8px;height:8px;border-radius:999px;background:var(--live);margin-left:auto;flex:none;animation:onp 2s ease-in-out infinite}@keyframes onp{50%{opacity:.35}}
+.ltabs+.onhere{margin:10px 4px 4px}
 /* Avatar görseli: kişinin renginin açık tonu üstünde, renkli halkayla */
 .av.pic{overflow:hidden;background:color-mix(in srgb,var(--c) 16%,var(--surface));border:2px solid var(--c)}
 .av.pic img{width:100%;height:100%;object-fit:cover;object-position:50% 100%;display:block;transform:translateY(6%) scale(1.06)}
@@ -1142,12 +1146,15 @@ function openEs(code,t){
  if(es){es.close();es=null}
  es=new EventSource(fbUrl(code,'',t));lastEvt=Date.now();
  es.addEventListener('keep-alive',()=>{lastEvt=Date.now()});
- es.addEventListener('put',e=>{lastEvt=Date.now();let m;try{m=JSON.parse(e.data)}catch(x){return}store.R=m.path==='/'?(m.data&&typeof m.data==='object'?m.data:{}):setAt(store.R,m.path,m.data);remote()});
+ es.addEventListener('put',e=>{lastEvt=Date.now();let m;try{m=JSON.parse(e.data)}catch(x){return}
+  // "Şu an burada" sinyalleri sık gelir: bütün ekranı değil yalnızca o satırı tazele
+  if(/^\/on(\/|$)/.test(m.path)){store.R=setAt(store.R,m.path,m.data);onPaint();return}
+  store.R=m.path==='/'?(m.data&&typeof m.data==='object'?m.data:{}):setAt(store.R,m.path,m.data);remote()});
  es.addEventListener('patch',e=>{lastEvt=Date.now();let m;try{m=JSON.parse(e.data)}catch(x){return}for(const k in m.data||{})store.R=setAt(store.R,m.path+'/'+k,m.data[k]);remote()});
  es.addEventListener('cancel',()=>{if(es){es.close();es=null}UI.err='denied';render()});
  // Kimlik jetonu bir saat sonra düşer: akış kapanınca yeni jetonla yeniden bağlan
  es.addEventListener('auth_revoked',()=>{setNet('reconnecting');connect()});
- es.onopen=()=>{lastEvt=Date.now();esMs=5000;setNet('online');flush()};
+ es.onopen=()=>{lastEvt=Date.now();esMs=5000;setNet('online');flush();beat()};
  es.onerror=()=>{setNet(navigator.onLine?'reconnecting':'offline');if(es&&es.readyState===2)esLater()};
 }
 /* Telefon uygulamayı arka plana atınca akış sessizce ölebilir (açık görünür ama veri gelmez).
@@ -1160,6 +1167,25 @@ function remote(){setNet('online');clearTimeout(rq);rq=setTimeout(()=>{
  if(!avChecked){avChecked=true;loadAv()}
  // Yeni katılan kişi: veriler gelince avatar ve renk seçimi bir kez açılır
  if(UI.joinFor&&!UI.joinShown&&S.members.some(m=>m.id===UI.joinFor)){UI.joinShown=true;A.avPick({id:UI.joinFor})}},40)}
+/* Şu an burada: uygulama açıkken dakikada bir on/{üye} = {at} yazılır, kapanınca silinir.
+   REST'te bağlantı kopunca sunucu haber vermez; 2,5 dakikadır sinyali gelmeyen burada sayılmaz.
+   "Uygulamada olduğumu göster" kapalıysa bu cihaz hiç yazmaz. */
+let beatT=null;
+const onOk=()=>store.mode==='family'&&!!store.code&&!!store.me&&!store.prefs.hideOn;
+async function beat(){clearTimeout(beatT);if(!onOk()||document.visibilityState!=='visible')return;beatT=setTimeout(beat,60000);
+ try{await fbSend(store.code,'PUT',{at:Date.now()},'/on/'+store.me)}catch(e){}}
+function beatOff(mid){clearTimeout(beatT);mid=mid||store.me;if(store.mode!=='family'||!store.code||!mid||!FB_URL)return;
+ const a=store.auth,t=a&&a.tok&&a.exp>Date.now()?a.tok:'';
+ try{fetch(fbUrl(store.code,'/on/'+mid,t),{method:'DELETE',keepalive:true}).catch(()=>{})}catch(e){}}
+function onIds(){if(!S)return [];const mm=meId(),ok=id=>id!==mm&&S.members.some(m=>m.id===id);
+ if(store.mode==='demo')return ['mehmet','zeynep'].filter(ok);
+ const on=store.R&&store.R.on;if(!on||typeof on!=='object')return [];const t=Date.now();
+ return ordMe().map(m=>m.id).filter(id=>ok(id)&&on[id]&&typeof on[id]==='object'&&t-(+on[id].at||0)<150000)}
+function onHereHTML(){const ids=onIds(),n=ids.map(x=>esc(first(M(x).name)));
+ const txt=n.length>3?`${n.slice(0,2).join(', ')} ve ${n.length-2} kişi daha`:n.length>1?`${n.slice(0,-1).join(', ')} ve ${n[n.length-1]}`:n[0]||'';
+ return `<div class="onhere" id="onhere"${ids.length?'':' hidden'}>${ids.length?`<span class="avs">${ids.slice(0,4).map(x=>av(x,'xs')).join('')}</span><span><b>${txt}</b> şu an burada</span><i aria-hidden="true"></i>`:''}</div>`}
+function onPaint(){const el=document.getElementById('onhere');if(!el)return;const h=onHereHTML();if(el.outerHTML!==h)el.outerHTML=h}
+setInterval(onPaint,30000);
 let netT=null;
 function setNet(v){UI.net=v;clearTimeout(netT);if(v==='online')renderNet();else netT=setTimeout(renderNet,1500)}
 function renderNet(){const b=document.getElementById('netbar');if(!b)return;const n=Object.keys(store.pending||{}).length;
@@ -1444,7 +1470,7 @@ function todayHead(){const m=me(),d=new Date(),h=d.getHours(),hj=hnum(d),x=holy(
  <div class="panel${pa?' wa':''}"${hj?'':' style="padding-right:16px"'}>${stars}<h1>${selam(h,x,hj,d.getDay()===5)}</h1>${hjt}${ch}${mb}</div>${pa}</div>`}
 function vToday(){
  const child=isChild();
- return `${todayHead()}
+ return `${todayHead()}${onHereHTML()}
  ${demoBar()}${inviteCard()}
  ${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>${starsHTML()}`:''}
  <div class="lbl"><span>Sıradaki</span></div>${nextHTML({mine:child,filter:[]})}
@@ -1509,7 +1535,7 @@ function lTop(wish){const mk=S.items.filter(i=>!i.done&&i.cat==='Market').length
   return `<button class="lsi" ${real?`role="tab" aria-selected="${k===0}"`:'aria-hidden="true" tabindex="-1"'} data-act="lmode" data-v="${v}" data-dir="${k<0?-1:1}" data-k="${k}" data-w="${i}" aria-pressed="${k===0}" style="--c:var(${c})"><span>${n.toLocaleUpperCase('tr')}</span>${cn[i]?`<em aria-hidden="true">${cn[i]}</em>`:''}</button>`}).join('');
  return `<div class="ltabs lsx" role="tablist" aria-label="Liste türü: kaydırarak değiştir"><div class="lsw" data-s="${sel}">${it}<i class="lsd" aria-hidden="true"></i></div>
  ${!wish&&mk?`<button class="lbtn" data-act="shopStart" data-v="Market" aria-label="Marketteyim, bütün listelerden ${mk} ürün">${I('cart')}<span class="n">${mk}</span></button>`:''}
- </div>`}
+ </div>${onHereHTML()}`}
 function vLists(){
  if(UI.lmode==='wish')return vWishes();
  if(UI.shop&&S.items.some(i=>i.cat===UI.shop))return vShop();UI.shop=null;
@@ -1704,6 +1730,7 @@ function famSettingsHTML(){const {m,demo,np,standalone,ios,sync,sub}=famCtx();
   <div class="setrow"><span><b>Hatırlatmalar</b>${sub(np==='granted'?'Açık. Bildirim şimdilik uygulama açıkken gelir.':np==='denied'?'Bildirimler bu cihazda kapalı. Tarayıcı ayarlarından açabilirsin.':np==='unsupported'?(ios&&!standalone?'iPhone\'da bildirim için önce uygulamayı ana ekrana ekle.':'Bu tarayıcı bildirim desteklemiyor.'):'Etkinlik hatırlatmaları için izin ver.')}</span>${np==='default'?'<button class="btn ghost sm" data-act="askNotify">İzin ver</button>':''}</div></div>
  <div class="setsec">Bu cihaz</div><div class="group">
   <div class="setrow"><span><b>Bu cihazda</b>${sub(esc(m.name))}</span><button class="btn ghost sm" data-act="who">Değiştir</button></div>
+  ${demo?'':`<div class="setrow"><span id="lbl-on"><b>Burada olduğumu göster</b>${sub('Uygulama açıkken ailen Bugün ve Listeler’de “şu an burada” görür')}</span><button class="switch" role="switch" aria-labelledby="lbl-on" aria-checked="${!store.prefs.hideOn}" data-act="onToggle"></button></div>`}
   ${standalone?'':`<div class="setrow"><span><b>Telefona yükle</b>${sub(installEvt?'Bizim Ev ana ekranında uygulama gibi açılır.':ios?'Safari\'de Paylaş düğmesine, sonra “Ana Ekrana Ekle”ye dokun.':'Tarayıcı menüsünden “Ana ekrana ekle”yi seç.')}</span>${installEvt?'<button class="btn ghost sm" data-act="install">Yükle</button>':''}</div>`}
   ${demo?'':`<div class="setrow"><span><b>Eşitleme</b>${sub(sync)}</span></div>`}</div>
  <div class="group" style="margin-top:16px">
@@ -2003,14 +2030,15 @@ const A={
  fRole:(d,el)=>{F.role=d.v;el.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
  leaveAsk:()=>{if(store.mode==='demo'){A.exitDemo();return}const n=Object.keys(store.pending).length;
   sheet('Bu cihazdan çıkılsın mı?',`<p>Ailenin bilgileri silinmez, diğerleri kullanmaya devam eder. Tekrar girmek için aile kodunu not al: <b style="font-family:var(--f-display);letter-spacing:.08em">${fmtCode(store.code)}</b></p>${n?`<p class="err">${n} değişiklik henüz gönderilmedi. Çıkarsan bunlar kaybolur.</p>`:''}<div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" data-act="leave">Çık</button></div>`)},
- leave:()=>{if(es){es.close();es=null}
+ leave:()=>{if(es){es.close();es=null}beatOff();
   if(FB_KEY&&store.mode==='family'&&store.code)fbSend(store.code,'PUT',null,'/uids/'+myUid()).catch(()=>{});
   Object.assign(store,{mode:null,code:null,me:null,R:null,pending:{}});S=null;UI.err=null;close();render()},
  // Kişi, tema, ayarlar
  who:()=>sheet('Bu cihazda kim var?',`<p class="note" style="margin:0 0 12px">${I('info','sm')}<span>Ortak kullanılan bir tablet gibi cihazlarda kişiler arasında geçebilirsin.</span></p><div class="people">${ordMe().map(m=>`<button data-act="asUser" data-id="${m.id}" aria-pressed="${meId()===m.id}">${av(m.id)}<span><b>${esc(m.name)}</b><small>${ROLES[m.role]}${m.rel?' · '+esc(m.rel):''}</small></span></button>`).join('')}</div>`),
- asUser:d=>{if(store.mode==='demo'){store.demoMe=d.id;store.prefs.big=!!M(d.id).big}else store.me=d.id;UI.tf=isChild()?'mine':'all';close();render();toast(`Artık ${M(d.id).name} olarak bakıyorsun`)},
+ asUser:d=>{if(store.mode==='demo'){store.demoMe=d.id;store.prefs.big=!!M(d.id).big}else{if(d.id!==store.me)beatOff();store.me=d.id;beat()}UI.tf=isChild()?'mine':'all';close();render();toast(`Artık ${M(d.id).name} olarak bakıyorsun`)},
  theme:d=>{store.prefs.theme=d.v;render(true)},
  bigToggle:()=>{store.prefs.big=!store.prefs.big;render(true)},
+ onToggle:()=>{store.prefs.hideOn=!store.prefs.hideOn;if(store.prefs.hideOn)beatOff();else beat();render(true);const el=document.getElementById('setsheet');if(el)el.innerHTML=famSettingsHTML()},
  askNotify:()=>askNotify(),
  famSettings:()=>sheet('Ayarlar',`<div id="setsheet">${famSettingsHTML()}</div>`),
  famInvite:()=>sheet('Aileye davet et',famInviteHTML()),
@@ -2483,8 +2511,9 @@ window.addEventListener('online',()=>{if(store.mode!=='family')return;setNet('re
 window.addEventListener('offline',()=>setNet('offline'));
 // Ön plana dönünce: birkaç saniyeden uzun arka planda kaldıysa akışı tazele (iPhone arka planda bağlantıyı keser ama "açık" gösterebilir) ve bekleyenleri gönder
 let bgAt=0;
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible'){bgAt=Date.now();return}checkReminders();
- if(store.mode==='family'){if(!es||es.readyState!==1||Date.now()-bgAt>10000)ensureUid().then(connect);flush()}if(S)render(true)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible'){bgAt=Date.now();beatOff();return}checkReminders();
+ if(store.mode==='family'){if(!es||es.readyState!==1||Date.now()-bgAt>10000)ensureUid().then(connect);else beat();flush()}if(S)render(true)});
+window.addEventListener('pagehide',()=>beatOff());
 window.addEventListener('pageshow',e=>{if(e.persisted&&store.mode==='family'){ensureUid().then(connect);flush()}});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;if(UI.tab==='family'&&S)render(true)});
 setInterval(checkReminders,30000);
@@ -2495,7 +2524,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-24',items:[['cal','Tarihler her yerde aynı','Yakın günler adıyla yazılır: Pazar · 25 Ekim'],['edit','Düzenle ve Sil başlıkta','Bir şeyi açınca kalem ve çöp sağ üstte durur'],['board','Alınacaklar ⇄ İstekler','Başlığı sağa sola kaydırın, dönerek öne gelir'],['clock','Yaptıklarımız bir hatıra defteri','Listenin altındaki karta dokunun; ay ay zaman çizgisi']]};
+const NEWS={v:'2026-10-24b',items:[['users','Kim şu an burada','Bugün ve Listeler’in üstünde, uygulamayı o an açmış olanlar görünür. Ayarlar’dan gizleyebilirsin'],['cal','Tarihler her yerde aynı','Yakın günler adıyla yazılır: Pazar · 25 Ekim'],['edit','Düzenle ve Sil başlıkta','Bir şeyi açınca kalem ve çöp sağ üstte durur'],['board','Alınacaklar ⇄ İstekler','Başlığı sağa sola kaydırın, dönerek öne gelir']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
