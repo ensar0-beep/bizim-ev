@@ -712,8 +712,10 @@ a.btn{text-decoration:none}
 @keyframes flash{0%,55%{box-shadow:0 0 0 3px var(--accent)}}
 .strip{background:var(--bg);margin:0 -18px 12px;padding:4px 14px 8px}
 .strip.sticky{position:sticky;top:-20px;z-index:3;padding-top:24px;border-bottom:1px solid var(--line)}
-.strip .sh{display:flex;align-items:center;gap:2px;margin-bottom:4px}
-.strip .sh .ttl{flex:1;text-align:center;font-family:var(--f-display);font-weight:600;font-size:1.05rem}
+.strip .sh{display:flex;align-items:center;gap:4px;margin-bottom:4px;padding:0 4px}
+.strip .sh .ttl{flex:1;text-align:center;font-family:var(--f-display);font-weight:600;font-size:1.15rem}
+/* Takvim'de Akış ile Ay görünümünün ay satırı aynı yerde ve aynı boyutta durur (yapışkan şerit aynı kalır) */
+.ctop+.strip.sticky{padding-top:4px}
 .strip .days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .strip .days button{min-height:64px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-variant-numeric:tabular-nums;padding:4px 0}
 .strip .days small{font-size:.66rem;font-weight:700;color:var(--muted);letter-spacing:.03em;text-transform:uppercase}
@@ -1533,7 +1535,7 @@ function lTop(wish){const mk=S.items.filter(i=>!i.done&&i.cat==='Market').length
  // Kamera şeridi (iPhone Kamera gibi): seçilen ortada ve renkli, öbürü iki yanda soluk. Daireseldir: iki yana da öbürü görünür, kaydırınca döner.
  const it=[-2,-1,0,1,2].map(k=>{const i=((sel+k)%2+2)%2,[v,n,c]=opt[i],real=k===0||k===1;
   return `<button class="lsi" ${real?`role="tab" aria-selected="${k===0}"`:'aria-hidden="true" tabindex="-1"'} data-act="lmode" data-v="${v}" data-dir="${k<0?-1:1}" data-k="${k}" data-w="${i}" aria-pressed="${k===0}" style="--c:var(${c})"><span>${n.toLocaleUpperCase('tr')}</span>${cn[i]?`<em aria-hidden="true">${cn[i]}</em>`:''}</button>`}).join('');
- return `<div class="ltabs lsx" role="tablist" aria-label="Liste türü: kaydırarak değiştir"><div class="lsw" data-s="${sel}">${it}<i class="lsd" aria-hidden="true"></i></div>
+ return `<div class="hdr"><div class="h"><h1>Listeler</h1></div></div><div class="ltabs lsx" role="tablist" aria-label="Liste türü: kaydırarak değiştir"><div class="lsw" data-s="${sel}">${it}<i class="lsd" aria-hidden="true"></i></div>
  ${!wish&&mk?`<button class="lbtn" data-act="shopStart" data-v="Market" aria-label="Marketteyim, bütün listelerden ${mk} ürün">${I('cart')}<span class="n">${mk}</span></button>`:''}
  </div>${onHereHTML()}`}
 function vLists(){
