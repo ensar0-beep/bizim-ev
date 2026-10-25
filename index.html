@@ -450,6 +450,14 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .lin input{flex:1;min-width:0;border:0;background:none;font-size:1rem;color:var(--fg);outline:none;min-height:52px}
 .lin .btn{min-height:42px;padding:0 14px}
 .lhint{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:.8rem;margin:8px 4px 2px}
+.addbar .adm{flex:none;width:52px;height:52px;border-radius:999px;display:flex;align-items:center;justify-content:center;align-self:center;color:var(--muted);background:var(--sunk);transition:background .15s,color .15s}
+.adm .i{width:22px;height:22px}.adm.on{background:var(--accent-soft);color:var(--accent-ink)}.adm[aria-expanded="true"]{background:var(--accent);color:var(--on-accent)}
+.addet{display:grid;gap:16px;margin:10px 0 6px;padding:14px 14px 16px;border-radius:20px;background:var(--sunk)}
+.adf{display:grid;gap:8px}.adh{font-size:.75rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.addet .inp,.addet .seg{background:var(--surface)}.addet .seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-ink);box-shadow:none}
+.lgrid .lic{width:2.4rem;height:2.4rem;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--surface);color:var(--fg);box-shadow:0 0 0 2px var(--surface),0 0 0 3.5px var(--line);transition:box-shadow .15s}
+.lgrid .lic svg{width:1.3rem;height:1.3rem;stroke-width:1.7}
+.lgrid .pp[aria-pressed="true"] .lic{box-shadow:0 0 0 2px var(--surface),0 0 0 4.5px var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
 /* İsteklerimiz: sade satırlar, satırda 1-5 isteme puanı çubuğu (Instagram kaydırıcısı gibi) */
 .bkc{position:relative;display:block;flex:none;box-sizing:border-box;border-radius:2px 5px 5px 2px;overflow:hidden;background:var(--sunk);box-shadow:0 1px 3px rgba(0,0,0,.22)}.bkc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
 .bkc.css,.bkc>.css{display:flex;align-items:flex-start;background:linear-gradient(165deg,var(--a) 0 64%,#E8DCC8 64%);color:#fff;padding:3px 3px 3px 5px;box-shadow:inset 3px 0 0 rgba(0,0,0,.18)}.bkc.md.css,.bkc.md>.css{padding:7px 7px 7px 9px}.bkc>.css{position:absolute;inset:0;border-radius:0}.bkc i{font-style:normal;font-weight:800;line-height:1.05;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
@@ -1610,10 +1618,31 @@ document.addEventListener('pointermove',e=>{if(!LD||e.pointerId!==LD.pid)return;
 ['pointerup','pointercancel'].forEach(t=>document.addEventListener(t,()=>{if(!LD)return;LD.r.classList.remove('dragging');F.lo=[...document.querySelectorAll('.lnall .r')].map(x=>x.dataset.id);LD=null},true));
 const lvRow=i=>`<div class="lr${i.done?' done':''}" data-id="${i.id}"><button class="ck" data-act="toggleItem" data-id="${i.id}" aria-pressed="${i.done}" aria-label="${esc(i.name)}: ${i.done?'alınmadı olarak işaretle':'alındı olarak işaretle'}"><span>${I('check','sm')}</span></button>
  <button class="ti" data-act="openItem" data-id="${i.id}"><b>${esc(i.name)}</b>${i.note||i.for&&i.for!=='ev'?`<small>${[i.note?esc(i.note):'',i.for&&i.for!=='ev'?esc(forName(i.for)):''].filter(Boolean).join(' · ')}</small>`:''}</button>${i.pri==='acil'&&!i.done?'<span class="acil">Acil</span>':''}${i.for&&i.for!=='ev'?av(i.for,'xs'):''}</div>`;
-// Ekleme: artıya dokununca alttan açılır; virgülle birden çok şey yazılabilir, art arda eklenir
-function lAddSheet(){const L=S.lists.find(l=>l.id===UI.list)||S.lists[0];if(!L)return;
- sheet('Yeni alınacak',`<form class="addbar" data-form="addItem" autocomplete="off"><label class="sr" for="item-input">Ne alınacak?</label><input id="item-input" placeholder="örn. süt, ekmek, spor ayakkabı" autofocus enterkeyhint="done"><button class="btn primary" aria-label="Alınacağı ekle">${I('plus')}</button></form>
- <p class="lhint">${I('sparkle','sm')}<span>${esc(L.name)} listesine eklenir. Virgülle birden çok şey yazabilirsin.</span></p><div class="sugg" id="sugg">${suggHTML('')}</div>`)}
+// Ekleme: artıya dokununca alttan açılır; virgülle birden çok şey yazılabilir, art arda eklenir.
+// ⋯ ayrıntıları altta açar (Apple Hatırlatıcılar gibi): liste, kimin için, ne zaman, not. Seçilenler ipucu satırında yazar,
+// bir sonraki eklenene uygulanır, sonra sıfırlanır. Ayrıntılar açıkken sık eklenenler gizlenir.
+const DOTS='<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.9" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.9" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.9" fill="currentColor" stroke="none"/></svg>';
+function lAddSheet(lid){const L=S.lists.find(l=>l.id===(lid||UI.list))||S.lists[0];if(!L){toast('Önce bir liste oluştur.');return}
+ F={list:L.id,list0:L.id,for:'',pri:'yakinda',note:'',more:false};
+ sheet('Yeni alınacak',`<form class="addbar" data-form="addItem" autocomplete="off"><label class="sr" for="item-input">Ne alınacak?</label><input id="item-input" placeholder="örn. süt, ekmek, spor ayakkabı" autofocus enterkeyhint="done"><button type="button" class="adm" data-act="addMore" aria-expanded="false" aria-label="Ayrıntı ekle">${DOTS}</button><button class="btn primary" aria-label="Alınacağı ekle">${I('plus')}</button></form>
+ <p class="lhint" id="add-hint">${addHint()}</p><div id="add-det"></div><div class="sugg" id="sugg">${suggHTML('')}</div>`)}
+const addL=()=>S.lists.find(l=>l.id===F.list)||S.lists[0];
+const addSet=()=>!!(F.for||F.pri!=='yakinda'||F.note.trim()||F.list!==F.list0);
+const addCk=()=>`<span class="ck">${I('check','sm')}</span>`;
+function addHint(){const b=[];if(F.for)b.push(esc(F.for==='ev'?'Bütün aile':first(M(F.for).name))+' için');if(F.pri!=='yakinda')b.push(PRI[F.pri][0]);if(F.note.trim())b.push(esc(F.note.trim()));
+ return `${I('sparkle','sm')}<span><b>${esc(addL().name)}</b> listesine eklenir${b.length?' · '+b.join(' · '):'. Virgülle birden çok şey yazabilirsin.'}</span>`}
+// Listeler simgeleriyle, kişiler etkinlik/görev formundaki gibi yuvarlak avatarlarla seçilir
+function addDet(){return `<div class="addet">
+ <div class="adf"><span class="adh">Hangi listeye?</span><div class="pgrid lgrid" role="group" aria-label="Hangi liste">${S.lists.map(l=>`<button type="button" class="pp" data-act="adList" data-id="${l.id}" aria-pressed="${l.id===F.list}"><span class="lic">${I(l.icon||'tag')}</span>${addCk()}${esc(l.name)}</button>`).join('')}</div></div>
+ <div class="adf"><span class="adh">Kimin için?</span><div class="pgrid" role="group" aria-label="Kimin için"><button type="button" class="pp famchip" data-act="adFor" data-id="ev" aria-pressed="${F.for==='ev'}">${famBadge()}${addCk()}Bütün aile</button>${faceGrid('adFor',[F.for])}</div></div>
+ <div class="adf"><span class="adh">Ne zaman lazım?</span><div class="seg">${Object.entries(PRI).map(([k,[n]])=>`<button type="button" data-act="adPri" data-v="${k}" aria-pressed="${F.pri===k}">${n}</button>`).join('')}</div></div>
+ <div class="adf"><label class="adh" for="ad-note">Not</label><input class="inp" id="ad-note" value="${esc(F.note)}" placeholder="Beden, numara, model, renk…" enterkeyhint="done"></div></div>`}
+function addPaint(){const g=id=>document.getElementById(id),m=document.querySelector('.adm');
+ if(g('add-det'))g('add-det').innerHTML=F.more?addDet():'';if(g('add-hint'))g('add-hint').innerHTML=addHint();if(g('sugg'))g('sugg').hidden=F.more;
+ if(m){m.classList.toggle('on',addSet());m.setAttribute('aria-expanded',F.more)}}
+const addSync=()=>{const n=document.getElementById('ad-note');if(n)F.note=n.value};
+// Ayrıntılar bir sonraki eklenene uygulanır ve sıfırlanır (liste seçili kalır)
+function addApply(its){addSync();its.forEach(it=>{if(F.for)it.for=F.for;it.pri=F.pri;if(F.note.trim())it.note=F.note.trim()});const had=addSet();Object.assign(F,{for:'',pri:'yakinda',note:'',more:false,list0:F.list});addPaint();return had}
 function topIdea(){return (S.wishes||[]).filter(w=>!w.done&&!w.planned&&w.want.length>=2).sort(byScore)[0]}
 function ideaHTML(){const w=topIdea();if(!w||isChild()&&!w.want.includes(meId()))return '';const dw=new Date().getDay();const when=dw===0||dw===6?'Bugün için':'Hafta sonu için';
  return `<div class="sec-h"><h2 class="sec">Bir fikir</h2><button class="link" data-act="goWishes">İstekler ${I('chevR','sm')}</button></div>
@@ -1987,11 +2016,8 @@ function taskForm(t,day){const child=isChild();
  </details>
  <button class="btn primary block">${t?'Kaydet':'Görevi ekle'}</button></form>`)}
 
-function quickItem(){const lid=UI.list&&S.lists.find(l=>l.id===UI.list)?UI.list:(S.lists[0]||{}).id;F={list:lid};
- if(!lid){toast('Önce bir liste oluştur.');return}
- sheet('Yeni alınacak',`<div class="chips" id="qi-lists">${S.lists.map(l=>`<button type="button" class="chip plain" data-act="qiList" data-id="${l.id}" aria-pressed="${l.id===lid}">${esc(l.name)}</button>`).join('')}</div>
- <form class="addbar" data-form="quickItem" autocomplete="off"><label class="sr" for="qi-input">Ne alınacak?</label><input id="qi-input" placeholder="örn. Kışlık mont" autofocus enterkeyhint="done"><button class="btn primary" aria-label="Alınacağı ekle">${I('plus')}</button></form>
- <p class="note" style="margin-top:8px">${I('info','sm')}<span>Art arda ekleyebilirsin. Kategori otomatik seçilir; beden, numara gibi ayrıntıları sonra ürüne dokunarak eklersin.</span></p><div id="qi-added"></div>`)}
+// Bugün'deki artıdan da Listeler'deki ekleme penceresi açılır
+function quickItem(){lAddSheet()}
 
 // Sık alınanlar: listede bekleyenler hariç, yazdıkça süzülür. Önce genel market ürünleri, sonra ailenin daha önce aldıkları.
 // Alışveriş hafızası (freq): her eklenen ürün sayılır; öneriler en çok eklenenlerden gelir.
@@ -2002,7 +2028,7 @@ const fid=n=>{let h=5381;const k=low(n.trim());for(let i=0;i<k.length;i++)h=(h*3
 function remember(nm){S.freq=S.freq||[];const id=fid(nm),f=S.freq.find(x=>x.id===id),now=Date.now();
  if(!f){S.freq.push({id,name:nm,n:1,every:0,last:now});return}
  const gap=(now-f.last)/864e5;f.n++;if(gap>.5)f.every=f.every?Math.round((f.every*.7+gap*.3)*10)/10:Math.round(gap*10)/10;f.last=now;f.name=nm}
-function suggHTML(q){const L=UI.list,have=new Set(S.items.filter(i=>i.list===L&&!i.done).map(i=>low(i.name)));q=low(q.trim());
+function suggHTML(q){const L=F.list||UI.list,have=new Set(S.items.filter(i=>i.list===L&&!i.done).map(i=>low(i.name)));q=low(q.trim());
  const fr=(S.freq||[]).filter(f=>f.n>=2);
  const pool=(fr.length?[...fr].sort((a,b)=>b.n-a.n).map(f=>f.name):COMMON).filter(n=>!have.has(low(n))&&(!q||low(n).includes(q))&&low(n)!==q).slice(0,8);
  return pool.length?`<small>${q?'Öneriler':fr.length?'En çok eklediklerin':'Sık alınanlar'}</small>${pool.map(n=>`<button type="button" data-act="sugAdd" data-v="${esc(n)}">${I('plus','sm')}${esc(n)}</button>`).join('')}`:''}
@@ -2091,7 +2117,7 @@ const A={
  saKind:d=>{F.saKind=d.v;saUpd()},
  saMore:()=>{const p=F.sa;if(!p)return;const k=F.saKind||p.kind;
   if(k==='e')return eventForm(null,p.date||F.day||T(),{title:p.title,time:p.time,members:p.members.length?p.members:[meId()],cat:p.cat,loc:p.loc,repeat:p.repeat});
-  if(k==='i'){quickItem();const q=document.getElementById('qi-input');if(q)q.value=p.title;return}
+  if(k==='i'){quickItem();const q=document.getElementById('item-input');if(q)q.value=p.title;return}
   taskForm(null,p.date||F.day||T());const g=id=>document.getElementById(id);g('tk-title').value=p.title;if(p.time)g('tk-time').value=p.time;if(TREP[p.repeat])g('tk-rep').value=p.repeat;
   if(p.members.length){F.who=[...p.members];F.many=p.members.length>1;const a=g('tk-as');if(a)a.innerHTML=asHTML()}
   document.querySelectorAll('.dtp input,.dtr input').forEach(x=>{try{dtSync(x)}catch(e){}})},
@@ -2209,7 +2235,11 @@ const A={
  tkUp:()=>{UI.tkUp=!UI.tkUp;render(true)},
  newTask:d=>taskForm(null,d&&d.d||undefined),
  navAdd:()=>{(()=>{if(UI.tab==='lists'&&!UI.shop){if(UI.lmode==='wish')return A.newWish();if(S.lists.length)return lAddSheet()}if(UI.tab==='tasks')return A.newTask();A.tdAdd()})();plusGrow()},
- sugAdd:d=>{const it=addItemTo(UI.list,d.v);if(!it)return;render(true);const g=document.getElementById('sugg'),q=document.getElementById('item-input');if(g)g.innerHTML=suggHTML(q?q.value:'');toast(`${it.name} eklendi`)},
+ sugAdd:d=>{const it=addItemTo(F.list,d.v);if(!it)return;addApply([it]);render(true);const g=document.getElementById('sugg'),q=document.getElementById('item-input');if(g)g.innerHTML=suggHTML(q?q.value:'');toast(`${it.name} ${addL().name} listesine eklendi`)},
+ addMore:()=>{addSync();F.more=!F.more;addPaint()},
+ adList:d=>{addSync();F.list=d.id;addPaint()},
+ adFor:d=>{addSync();F.for=F.for===d.id?'':d.id;addPaint()},
+ adPri:d=>{addSync();F.pri=d.v;addPaint()},
  toggleTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;if(!t.done&&UI.tab==='tasks')UI.dcKeep.add(t.id);else UI.dcKeep.delete(t.id);A.tkDone(d);if(!t.done){UI.dcKeep.delete(t.id);return}if(UI.dcKeep.has(t.id))dcSettle(t.id)},
  tkDone:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const u=snap();
   if(t.done){t.done=false;delete t.doneAt;delete t.doneBy;t.dn=allRule(t)&&isFor(t,meId())?(t.dn||[]).filter(x=>x!==meId()):[];
@@ -2312,7 +2342,6 @@ const A={
  delList:()=>{const L=S.lists.find(l=>l.id===UI.list),n=S.items.filter(i=>i.list===L.id).length;sheet('Liste silinsin mi?',`<p>“${esc(L.name)}” listesi ve içindeki ${n} ürün silinecek. Silme sonrası birkaç saniye içinde geri alabilirsin.</p><div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" data-act="delList2">Sil</button></div>`)},
  delList2:()=>{const u=snap(),L=S.lists.find(l=>l.id===UI.list);if(!L){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.lists=S.lists.filter(l=>l.id!==L.id);S.items=S.items.filter(i=>i.list!==L.id);log(`“${L.name}” listesini sildi`);UI.list=(S.lists[0]||{}).id;close();render(true);toast('Liste silindi',u)},
  quickItem:()=>quickItem(),
- qiList:(d,el)=>{F.list=d.id;document.querySelectorAll('#qi-lists .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.id===d.id));document.getElementById('qi-input').focus()},
  // Aile
  msgEdit:()=>{const me=meId(),m=msgList().find(x=>x.id===me),L=msgList().filter(x=>x.id!==me);close();
   sheet('Mesajın',`<form data-form="msg" autocomplete="off"><div class="field"><label for="ms-t">Ailedeki herkes Bugün'de panoda görür</label><textarea class="inp" id="ms-t" maxlength="80" placeholder="örn. Bu akşam geç geleceğim" autofocus>${m?esc(m.t):''}</textarea></div>
@@ -2369,10 +2398,8 @@ const FORMS={
   const u=snap();
   if(F.edit){const ex=S.tasks.find(x=>x.id===F.edit);if(!ex){close();toast('Bu görev başka bir cihazda silinmiş.');return}Object.assign(ex,o);ex.dn=(ex.dn||[]).filter(y=>who.includes(y));log(`“${title}” görevini güncelledi`)}else{S.tasks.push({id:uid(),by:meId(),done:false,dn:[],...o});log(who.length===1&&who[0]===meId()?`“${title}” görevini ekledi`:`${nm} için “${title}” görevini ekledi`)}
   close();render(true);toast(F.edit?'Görev güncellendi':`Görev ${nm} için eklendi`,u)},
- addItem:()=>{const inp=document.getElementById('item-input');const add=inp.value.split(/[,\n]/).map(x=>addItemTo(UI.list,x)).filter(Boolean);if(!add.length)return;inp.value='';render(true);inp.focus();const g=document.getElementById('sugg');if(g)g.innerHTML=suggHTML('');
-  if(add.length>1)toast(`${add.length} şey eklendi: ${add.map(x=>x.name).join(', ')}`);else toast(`${add[0].name} eklendi · ${add[0].cat}`,()=>itemForm(add[0]),'Ayrıntı ekle')},
- quickItem:()=>{const inp=document.getElementById('qi-input');const it=addItemTo(F.list,inp.value);if(!it)return;inp.value='';inp.focus();
-  document.getElementById('qi-added').insertAdjacentHTML('afterbegin',`<div class="note">${I('check','sm')}<span>${esc(it.name)} → ${esc(S.lists.find(l=>l.id===F.list).name)} (${esc(it.cat)})</span></div>`);render(true)},
+ addItem:()=>{const inp=document.getElementById('item-input');const add=inp.value.split(/[,\n]/).map(x=>addItemTo(F.list,x)).filter(Boolean);if(!add.length)return;const det=addApply(add),ln=addL().name;inp.value='';render(true);inp.focus();const g=document.getElementById('sugg');if(g)g.innerHTML=suggHTML('');
+  if(add.length>1)toast(`${add.length} şey ${ln} listesine eklendi: ${add.map(x=>x.name).join(', ')}`);else if(det)toast(`${add[0].name} ${ln} listesine eklendi`);else toast(`${add[0].name} eklendi · ${add[0].cat}`,()=>itemForm(add[0]),'Ayrıntı ekle')},
  wish:()=>{const g=id=>document.getElementById(id),t=g('wf-title').value.trim();if(!t){g('wf-err').hidden=false;return}const u=snap(),note=g('wf-note').value.trim();
   const place=isPlaceType(F.wtype)&&F.place?{n:F.place.n||t,a:F.place.a||'',u:F.place.u||''}:undefined,book=F.wtype==='kitap'&&F.book?{t:F.book.t,a:F.book.a||'',p:F.book.p||0,y:F.book.y||'',i:F.book.i||''}:undefined;
   if(F.edit){const ex=S.wishes.find(x=>x.id===F.edit);if(!ex){close();toast('Bu istek başka bir cihazda silinmiş.');return}Object.assign(ex,{title:t,note,type:F.wtype});if(place)ex.place=place;else delete ex.place;if(book)ex.book=book;else delete ex.book}else{S.wishes.push({id:uid(),type:F.wtype,title:t,note,...(place?{place}:{}),...(book?{book}:{}),by:meId(),want:[meId()],rate:{[meId()]:F.rate||4},at:Date.now(),done:false,doneAt:null,doneWith:[],mood:'',planned:''});log(`${WT[F.wtype][0].toLocaleLowerCase('tr')} listesine “${t}” isteğini ekledi`)}
@@ -2429,7 +2456,8 @@ document.addEventListener('input',e=>{if(e.target.id==='sa-in'){F.saKind=null;sa
 // Masaüstü tarayıcıda görünmez tarih kutusuna tıklayınca seçici açılsın (telefonda zaten açılır)
 document.addEventListener('click',e=>{const i=e.target.closest&&e.target.closest('.dtp input');if(i&&!i.disabled&&i.showPicker){try{i.showPicker()}catch(x){}}});
 document.addEventListener('input',e=>{if(e.target.id==='an-text')document.getElementById('an-count').textContent=e.target.value.length+'/140';
- if(e.target.id==='item-input'){const g=document.getElementById('sugg');if(g)g.innerHTML=suggHTML(e.target.value)}});
+ if(e.target.id==='item-input'){const g=document.getElementById('sugg');if(g)g.innerHTML=suggHTML(e.target.value)}
+ if(e.target.id==='ad-note'){F.note=e.target.value;const h=document.getElementById('add-hint'),m=document.querySelector('.adm');if(h)h.innerHTML=addHint();if(m)m.classList.toggle('on',addSet())}});
 // Satırı yatay kaydırma: sağ = tamam/alındı, sol = sil. Dikey hareket sayfa kaydırmaya bırakılır.
 document.addEventListener('pointerdown',e=>{const r=e.target.closest('[data-sw]');if(!r||e.button>0||r.closest('.sheet'))return;SW={r,x0:e.clientX,y0:e.clientY,dx:0,on:false,pid:e.pointerId}},true);
 document.addEventListener('pointermove',e=>{if(!SW||e.pointerId!==SW.pid)return;const dx=e.clientX-SW.x0,dy=e.clientY-SW.y0;
@@ -2572,7 +2600,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-24d',items:[['bell','Gelişmeler','Bugün’de zile dokun: sana verilen görevler, yorumlar, pano. Birine dokununca o şey açılır'],['chat','İsteklere yorum','Yapmadan önce de bir isteğin altında konuşabilirsiniz: ne zaman, kiminle, nasıl'],['users','Kim şu an burada','Bugün ve Listeler’in üstünde, uygulamayı o an açmış olanlar görünür. Ayarlar’dan gizleyebilirsin'],['cal','Tarihler her yerde aynı','Yakın günler adıyla yazılır: Pazar · 25 Ekim']]};
+const NEWS={v:'2026-10-25',items:[['tag','Alınacağa ayrıntı','Eklerken üç noktaya dokun: hangi liste, kimin için, ne zaman lazım, not. İstemeyen dokunmaz, her şey eskisi gibi'],['bell','Gelişmeler','Bugün’de zile dokun: sana verilen görevler, yorumlar, pano. Birine dokununca o şey açılır'],['chat','İsteklere yorum','Yapmadan önce de bir isteğin altında konuşabilirsiniz: ne zaman, kiminle, nasıl'],['users','Kim şu an burada','Bugün ve Listeler’in üstünde, uygulamayı o an açmış olanlar görünür. Ayarlar’dan gizleyebilirsin']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
