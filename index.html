@@ -445,6 +445,14 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .lr .ti b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lr .ti small{display:block;color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lr .acil{font-size:.7rem;font-weight:800;color:var(--danger);background:var(--danger-soft);border-radius:999px;padding:2px 8px;flex:none}
+.lr .dd{flex:none;font-size:.8rem;color:var(--muted);white-space:nowrap}
+.dpg{margin-top:8px}
+.dph{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 14px;text-align:left;position:relative;background:var(--surface)}
+.dph+.dph::before,.lr+.dph::before{content:"";position:absolute;top:0;left:14px;right:0;border-top:1px solid var(--line)}
+.dph>span{flex:1;min-width:0}.dph b{display:block;font-weight:700}.dph small{display:block;color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dph em{font-style:normal;font-size:.8rem;font-weight:700;color:var(--muted);background:var(--sunk);border-radius:999px;padding:2px 9px}
+.dph .i{color:var(--muted);transition:transform .2s}.dph[aria-expanded="true"] .i{transform:rotate(180deg)}
+.dph[aria-expanded="true"]+.lr::before{left:48px}
 .lr.done .ti b{text-decoration:line-through;color:var(--muted)}
 .lin{display:flex;align-items:center;gap:8px;min-height:56px;padding:0 6px 0 14px;border-radius:14px;background:var(--surface);border:1.5px solid var(--accent);color:var(--muted)}
 .lin input{flex:1;min-width:0;border:0;background:none;font-size:1rem;color:var(--fg);outline:none;min-height:52px}
@@ -1007,8 +1015,14 @@ function seed(){
    ['genel','Muz','can','yakinda','','can'],
    ['genel','Deterjan','ev','yakinda','Sıvı, 3 lt','mehmet'],
    ['okul','Kurabiye','can','yakinda','Beslenme çantası için','can'],
-   ['evyen','Çamaşır suyu','ev','biara','','fatma']
-  ].map(([list,name,forWho,pri,note,by,done],i)=>({id:uid(),list,name,for:forWho,pri,note,by,done:!!done,cat:guessCat(name),at:now-(i+1)*3*H})),
+   ['evyen','Çamaşır suyu','ev','biara','','fatma'],
+    ['genel','Süt','ev','yakinda','','ayse',0,'ayse'],['genel','Yumurta','ev','yakinda','30\'lu','fatma',1,'mehmet'],['genel','Pil (AA)','ev','biara','','mehmet',4,'zeynep'],
+    ['genel','Çay','ev','yakinda','','fatma',8,'fatma'],['genel','Ütü','ev','acil','Buharlı','ayse',10,'mehmet'],['genel','Diş macunu','ev','yakinda','','ayse',12,'ayse'],
+    ['genel','Nevresim takımı','zeynep','biara','Tek kişilik','zeynep',17,'ayse'],['genel','Termos','mehmet','biara','','mehmet',21,'mehmet'],
+    ['genel','Yağmurluk','can','yakinda','','ayse',33,'ayse'],['genel','Kahve makinesi','ev','biara','','mehmet',41,'mehmet'],['genel','Ayakkabı boyası','ev','biara','','fatma',50,'fatma'],
+    ['genel','Masa lambası','zeynep','yakinda','','zeynep',62,'zeynep'],['genel','Valiz','ev','biara','Kabin boy','mehmet',75,'mehmet'],
+    ['okul','Defter seti','can','yakinda','','ayse',9,'ayse'],['okul','Boya kalemi','can','yakinda','','can',30,'ayse']
+  ].map(([list,name,forWho,pri,note,by,done,buyer],i)=>{const dn=done===true?2:done;return {id:uid(),list,name,for:forWho,pri,note,by,done:dn!==undefined,doneAt:dn!==undefined?now-dn*24*H-(2+i%5)*H:0,...(dn!==undefined?{doneBy:buyer||by}:{}),cat:guessCat(name),at:now-(i+1)*3*H}}),
   wishes:[
    ['yer','Kapadokya','Balon turu için erken kalkmak lazım','mehmet',['mehmet','ayse','zeynep','can']],
    ['yer','Bozcaada','Yaz tatili, 3-4 gün','zeynep',['zeynep','ayse','mehmet']],
@@ -1055,7 +1069,7 @@ let store;
 try{store=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{},auth:null,av:{},avi:{}},store&&typeof store==='object'?store:{});
 let S=null,baseC={};
-const UI={shop:null,shopAt:0,joinFor:null,joinShown:false,tab:'today',cal:'month',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,lmode:'buy',wt:'all',net:'online',err:null};
+const UI={shop:null,shopAt:0,joinFor:null,joinShown:false,tab:'today',cal:'month',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,dpo:{},lmode:'buy',wt:'all',net:'online',err:null};
 UI.dcKeep=new Set();
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){try{store.av={};store.avi={};localStorage.setItem(KEY,JSON.stringify(store))}catch(x){}}};
 const meId=()=>store.mode==='demo'?store.demoMe:store.me;
@@ -1113,7 +1127,7 @@ function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
   case 'events':x.title=str(x.title);if(!okDate(x.date))x.date=T();x.time=okTime(x.time)?x.time:'';x.members=idList(x.members);if(!CATS[x.cat])x.cat='aile';if(!REM[x.rem])x.rem='none';if(!REP[x.repeat])x.repeat='none';x.loc=str(x.loc);x.desc=str(x.desc);break;
   case 'tasks':x.title=str(x.title);if(!okDate(x.due))x.due=T();x.time=okTime(x.time)?x.time:'';x.rot=idList(x.rot);x.assignee=typeof x.assignee==='string'&&okId(x.assignee)?x.assignee:'';x.who=idList(x.who);x.dn=idList(x.dn);x.all=!!x.all;if(!TREP[x.repeat])x.repeat='none';x.done=!!x.done;if(!(typeof x.from==='string'&&okId(x.from)))delete x.from;break;
   case 'lists':x.name=str(x.name)||'Liste';if(!P[x.icon])x.icon='tag';x.at=+x.at||0;break;
-  case 'items':x.name=str(x.name)||'?';x.note=str(x.note);x.cat=str(x.cat)||'Diğer';if(!PRI[x.pri])x.pri='yakinda';x.for=str(x.for);x.list=str(x.list);x.done=!!x.done;x.doneAt=+x.doneAt||0;break;
+  case 'items':x.name=str(x.name)||'?';x.note=str(x.note);x.cat=str(x.cat)||'Diğer';if(!PRI[x.pri])x.pri='yakinda';x.for=str(x.for);x.list=str(x.list);x.done=!!x.done;x.doneAt=+x.doneAt||0;if(typeof x.doneBy==='string'&&x.done)x.doneBy=x.doneBy.slice(0,40);else delete x.doneBy;break;
   case 'wishes':x.title=str(x.title)||'?';x.note=str(x.note);{const p=x.place;if(p&&typeof p==='object'&&(str(p.n)||okMapsUrl(str(p.u))))x.place={n:str(p.n).slice(0,120),a:str(p.a).slice(0,200),u:okMapsUrl(str(p.u))?str(p.u):''};else delete x.place}if(!WT[x.type])x.type='yer';{const t=x.trip;if(x.type==='yer'&&t&&typeof t==='object'){const n=v=>Math.max(0,Math.min(1e8,Math.round(+v)||0)),k=t.k&&typeof t.k==='object'?t.k:{},r=Array.isArray(t.r)?t.r:t.r&&typeof t.r==='object'?Object.values(t.r):[];
    x.trip={g:Math.max(0,Math.min(60,Math.round(+t.g)||0)),b:n(t.b),k:{u:n(k.u),k:n(k.k),y:n(k.y),g:n(k.g)},r:r.map(v=>str(v).slice(0,80)).filter(Boolean).slice(0,30),v:TV[t.v]?t.v:'',m:TM.includes(t.m)?t.m:''}}else delete x.trip}{const b=x.book;if(x.type==='kitap'&&b&&typeof b==='object'&&str(b.t))x.book={t:str(b.t).slice(0,160),a:str(b.a).slice(0,120),p:Math.max(0,Math.min(20000,Math.round(+b.p)||0)),y:/^\d{4}$/.test(str(b.y))?str(b.y):'',i:okCover(str(b.i))?str(b.i):''};else delete x.book}x.want=idList(x.want);{const r={};if(x.rate&&typeof x.rate==='object')for(const k in x.rate){const v=Math.round(+x.rate[k]);if(okId(k)&&v>=1&&v<=5)r[k]=v}x.want.forEach(m=>{if(!r[m])r[m]=3});x.rate=r;x.want=Object.keys(r)}x.doneWith=idList(x.doneWith);if(!MOODS.includes(x.mood))x.mood='';x.planned=okDate(x.planned)?x.planned:'';x.done=!!x.done;break;
   case 'activity':x.text=str(x.text);x.at=+x.at||0;break;
@@ -1641,7 +1655,7 @@ function vLists(){
  return lTop(false)+itabs(tabs,'Listeler')
  +(order.length?order.map(g=>`${one?'':`<div class="rh"><span>${esc(g)}</span><span class="n">${groups[g].length}</span></div>`}<div class="group"${one?' style="margin-top:12px"':''}>${groups[g].map(lvRow).join('')}</div>`).join('')
   :`<div class="group" style="margin-top:12px">${emptyBox(done.length?'Hepsi alındı 🎉':'Liste boş',done.length?'Bu listede bekleyen bir şey kalmadı.':'Eklemek için alttaki artıya dokun.',done.length?'':`<br><button class="btn soft sm" data-act="lAdd">${I('plus','sm')}Ekle</button>`)}</div>`)
- +(done.length?`<div class="donebar"><button class="link" data-act="toggleDone" aria-expanded="${UI.doneOpen}">${I('chevD','sm')}Alınanlar ${done.length}</button><button class="link" data-act="clearDone">Alınanları temizle</button></div>${UI.doneOpen?`<div class="group">${done.map(lvRow).join('')}</div>`:''}`:'')
+ +(done.length?`<div class="donebar"><button class="link" data-act="toggleDone" aria-expanded="${UI.doneOpen}">${I('chevD','sm')}Alınanlar ${done.length}</button><button class="link" data-act="clearDone">Alınanları temizle</button></div>${UI.doneOpen?doneHTML(done):''}`:'')
  +(can('list.manage')?`<div style="text-align:center;margin-top:26px"><button class="link" data-act="lnAll">${I('edit','sm')}Listeleri düzenle</button></div>`:'')}
 // Listeleri düzenle sayfasının satırları (F.lo sıra, F.nm yazılan adlar, F.ic seçilen simgeler)
 const LOICS=['tag','cart','fork','shirt','book','laptop','sofa','home','spray','pill','heart','gift','cake','bike','film','compass'];
@@ -1659,6 +1673,19 @@ document.addEventListener('pointerdown',e=>{const h=e.target.closest&&e.target.c
 document.addEventListener('pointermove',e=>{if(!LD||e.pointerId!==LD.pid)return;e.preventDefault();const rows=[...document.querySelectorAll('.lnall .r')];
  for(const o of rows){if(o===LD.r)continue;const b=o.getBoundingClientRect();if(e.clientY>b.top&&e.clientY<b.bottom){o.parentNode.insertBefore(LD.r,rows.indexOf(o)<rows.indexOf(LD.r)?o:o.nextSibling);navigator.vibrate&&navigator.vibrate(5);break}}},true);
 ['pointerup','pointercancel'].forEach(t=>document.addEventListener(t,()=>{if(!LD)return;LD.r.classList.remove('dragging');F.lo=[...document.querySelectorAll('.lnall .r')].map(x=>x.dataset.id);LD=null},true));
+// Alınanlar dönemlere ayrılır (Things'in Kayıt Defteri gibi): Bu hafta, Geçen hafta, Bu ay, sonra ay adları; tarihi olmayanlar en sonda.
+// En yeni dönem açık gelir, öbürleri kapalı (kapalıyken ilk iki ürünün adı görünür). Satırda kimin aldığı, sağda alındığı gün.
+function donePer(done){const t=T(),w0=monday(t),w1=add(w0,-7),m0=t.slice(0,8)+'01',y=t.slice(0,4),out=[];
+ const key=i=>{if(!i.doneAt)return ['x','Daha eski'];const d=iso(new Date(i.doneAt));if(d>=w0)return ['w0','Bu hafta'];if(d>=w1)return ['w1','Geçen hafta'];if(d>=m0)return ['m0','Bu ay'];
+  const dt=parse(d);return [d.slice(0,7),MON[dt.getMonth()]+(d.slice(0,4)===y?'':' '+d.slice(0,4))]};
+ [...done].sort((a,b)=>(b.doneAt||0)-(a.doneAt||0)).forEach(i=>{const [k,n]=key(i);let g=out.find(x=>x.k===k);if(!g)out.push(g={k,n,a:[]});g.a.push(i)});return out}
+const dDay=ts=>{const s=iso(new Date(ts)),r=relW(s);if(r)return r;const n=Math.round((parse(T())-parse(s))/864e5);return n>1&&n<7?DAYS[parse(s).getDay()]:shortD(s)};
+const boughtBy=i=>i.doneBy&&S.members.some(m=>m.id===i.doneBy)?esc(M(i.doneBy).name)+' aldı':'Alındı';
+const dnRow=i=>`<div class="lr done" data-id="${i.id}"><button class="ck" data-act="toggleItem" data-id="${i.id}" aria-pressed="true" aria-label="${esc(i.name)}: alınmadı olarak işaretle"><span>${I('check','sm')}</span></button>
+ <button class="ti" data-act="openItem" data-id="${i.id}"><b>${esc(i.name)}</b><small>${boughtBy(i)}${i.for&&i.for!=='ev'?' · '+esc(forName(i.for)):''}</small></button>${i.doneAt?`<span class="dd">${dDay(i.doneAt)}</span>`:''}</div>`;
+const dpPrev=a=>esc(a.slice(0,2).map(i=>i.name).join(', '))+(a.length>2?` ve ${a.length-2} daha`:'');
+function doneHTML(done){return `<div class="group dpg">${donePer(done).map((g,ix)=>{const o=g.k in UI.dpo?UI.dpo[g.k]:ix===0;
+  return `<button class="dph" data-act="dpT" data-k="${g.k}" data-o="${o}" aria-expanded="${o}"><span><b>${g.n}</b>${o?'':`<small>${dpPrev(g.a)}</small>`}</span><em>${g.a.length}</em>${I('chevD','sm')}</button>${o?g.a.map(dnRow).join(''):''}`}).join('')}</div>`}
 const lvRow=i=>`<div class="lr${i.done?' done':''}" data-id="${i.id}"><button class="ck" data-act="toggleItem" data-id="${i.id}" aria-pressed="${i.done}" aria-label="${esc(i.name)}: ${i.done?'alınmadı olarak işaretle':'alındı olarak işaretle'}"><span>${I('check','sm')}</span></button>
  <button class="ti" data-act="openItem" data-id="${i.id}"><b>${esc(i.name)}</b>${i.note||i.for&&i.for!=='ev'?`<small>${[i.note?esc(i.note):'',i.for&&i.for!=='ev'?esc(forName(i.for)):''].filter(Boolean).join(' · ')}</small>`:''}</button>${i.pri==='acil'&&!i.done?'<span class="acil">Acil</span>':''}${i.for&&i.for!=='ev'?av(i.for,'xs'):''}</div>`;
 // Ekleme: artıya dokununca alttan açılır; virgülle birden çok şey yazılabilir, art arda eklenir.
@@ -2338,7 +2365,7 @@ const A={
  delTask:d=>{const u=snap(),t=S.tasks.find(x=>x.id===d.id);if(!t){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.tasks=S.tasks.filter(x=>x.id!==d.id);log(`“${t.title}” görevini sildi`);close();render(true);toast('Görev silindi',u)},
  // Listeler
  goList:d=>{UI.list=d.id;UI.tab='lists';render()},
- pickList:d=>{UI.list=d.id;UI.doneOpen=false;render(true)},
+ pickList:d=>{UI.list=d.id;UI.doneOpen=false;UI.dpo={};render(true)},
  lAdd:()=>lAddSheet(),
  shopStart:d=>{UI.shop=d.v;UI.shopAt=Date.now();render()},
  shopCat:d=>{UI.shop=d.v;render(true)},
@@ -2396,7 +2423,7 @@ const A={
   sheet(esc(i.name),`<div class="dl">
    ${L?`<div>${I(L.icon||'tag')}<span><b>${esc(L.name)}</b> listesi${i.cat?` · ${esc(i.cat)}`:''}</span></div>`:''}
    <div>${i.for&&i.for!=='ev'?av(i.for,'xs'):famBadge()}<span>${i.for&&i.for!=='ev'?esc(M(i.for).name)+' için':'Bütün aile'}</span></div>
-   <div>${I('clock')}<span>${PRI[i.pri]?PRI[i.pri][0]:'Bir ara'} lazım</span></div>
+   ${i.done?`<div>${I('check')}<span><b>${boughtBy(i)}</b>${i.doneAt?' · '+dFull(iso(new Date(i.doneAt))):''}</span></div>`:`<div>${I('clock')}<span>${PRI[i.pri]?PRI[i.pri][0]:'Bir ara'} lazım</span></div>`}
    ${i.note?`<div>${I('edit')}<span>${esc(i.note)}</span></div>`:''}
    <div style="color:var(--muted);font-size:.875rem">${av(i.by,'xs')}<span>${esc(M(i.by).name)} ekledi · ${ago(i.at)}</span></div></div>
    <button class="btn primary block" data-act="toggleItem2" data-id="${i.id}">${I('check','sm')}${i.done?'Alınmadı':'Alındı'}</button>`,
@@ -2407,6 +2434,7 @@ const A={
  fPri:(d,el)=>{F.pri=d.v;document.querySelectorAll('#it-pri button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
  toggleItem2:d=>{close();A.toggleItem(d)},
  delItem:d=>{const u=snap(),i=S.items.find(x=>x.id===d.id);if(!i){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.items=S.items.filter(x=>x.id!==d.id);log(`listeden ${low(i.name)} sildi`);close();render(true);toast(`${i.name} silindi`,u)},
+ dpT:d=>{UI.dpo[d.k]=d.o!=='true';render(true)},
  toggleDone:()=>{UI.doneOpen=!UI.doneOpen;render(true)},
  clearDone:()=>{const u=snap(),n=S.items.filter(i=>i.list===UI.list&&i.done).length;S.items=S.items.filter(i=>!(i.list===UI.list&&i.done));render(true);toast(`${n} ürün temizlendi`,u)},
  newList:()=>sheet('Yeni liste',`<form data-form="newList" autocomplete="off"><div class="field"><label for="nl-name">Liste adı</label><input class="inp" id="nl-name" placeholder="örn. Kışlık giyim" autofocus></div><div class="chips" style="flex-wrap:wrap;margin-bottom:14px">${['Kışlık giyim','Bayram alışverişi','Taşınma','Doğum günü hediyeleri'].map(x=>`<button type="button" class="chip plain" data-act="nlFill" data-v="${x}">${x}</button>`).join('')}</div><button class="btn primary block">Listeyi ekle</button></form>`),
@@ -2681,7 +2709,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-25b',items:[['route','Gezi planı','Gezi isteğine gün, bütçe ve rota ekle. Bütçenin kalemleri dokununca açılır, rota haritada açılır'],['tag','Alınacağa ayrıntı','Eklerken üç noktaya dokun: hangi liste, kimin için, ne zaman lazım, not. İstemeyen dokunmaz, her şey eskisi gibi'],['bell','Gelişmeler','Bugün’de zile dokun: sana verilen görevler, yorumlar, pano. Birine dokununca o şey açılır'],['chat','İsteklere yorum','Yapmadan önce de bir isteğin altında konuşabilirsiniz: ne zaman, kiminle, nasıl']]};
+const NEWS={v:'2026-10-25c',items:[['cart','Alınanlar dönem dönem','Alınanlar artık Bu hafta, Geçen hafta, Bu ay diye ayrılır. Her üründe kimin aldığı ve hangi gün alındığı yazar'],['route','Gezi planı','Gezi isteğine gün, bütçe ve rota ekle. Bütçenin kalemleri dokununca açılır, rota haritada açılır'],['tag','Alınacağa ayrıntı','Eklerken üç noktaya dokun: hangi liste, kimin için, ne zaman lazım, not. İstemeyen dokunmaz, her şey eskisi gibi'],['chat','İsteklere yorum','Yapmadan önce de bir isteğin altında konuşabilirsiniz: ne zaman, kiminle, nasıl']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
