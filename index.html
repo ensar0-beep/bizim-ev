@@ -99,7 +99,7 @@ h2.sec .qty{font-weight:700}
 .avs .av{box-shadow:0 0 0 2px var(--surface)}
 .avs .av+.av{margin-left:-8px}
 /* Gelişmeler zili ve listesi */
-.bellb{position:relative}.thx .thbtn .bellb{width:44px;height:44px;color:var(--fg)}
+.bellb{position:relative}.brow .bic{width:2rem;height:2rem;color:var(--accent-ink)}.thx .thbtn .bellb{width:44px;height:44px;color:var(--fg)}
 .bellb em{position:absolute;top:4px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--danger);color:var(--surface);font:700 .68rem/18px var(--f-body);font-style:normal;text-align:center;box-shadow:0 0 0 2px var(--bg)}
 .brow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 14px;min-height:60px;position:relative}
 .brow+.brow{border-top:1px solid var(--line)}.brow .tx{flex:1;min-width:0;display:grid;gap:1px}.brow .tx b{font-weight:600;font-size:.94rem;line-height:1.3}.brow .tx small{color:var(--muted);font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -172,7 +172,7 @@ h2.sec .qty{font-weight:700}
 .hol{display:inline-flex;align-items:center;gap:4px;font-size:.74rem;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--sunk);color:var(--muted)}
 .hol.resmi{background:var(--danger-soft);color:var(--danger)}
 .hol.okul{background:var(--warn-soft);color:var(--warn)}
-.mdet{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;background:var(--surface);border-radius:var(--r-lg);padding:6px;box-shadow:var(--shadow)}
+.mdet{touch-action:pan-y;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;background:var(--surface);border-radius:var(--r-lg);padding:6px;box-shadow:var(--shadow)}
 .mdet .dow{font-size:.7rem;color:var(--muted);text-align:center;padding:4px 0;font-weight:600}
 .mdet .d{min-height:74px;border-radius:10px;display:flex;flex-direction:column;align-items:stretch;gap:2px;padding:3px 2px;min-width:0;text-align:left}
 .mdet .d .num{align-self:center;font-weight:700;font-size:.85rem;font-variant-numeric:tabular-nums;width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;border-radius:999px}
@@ -1549,12 +1549,15 @@ function bellItems(){const me=meId(),nm=x=>esc(first(M(x).name)),out=[],o=x=>out
  (S.msgs||[]).forEach(m=>{if(ok(m.id)&&m.t)o({w:m.id,t:`${nm(m.id)} panoya yazdı`,s:`“${esc(m.t)}”`,at:m.at,act:'bellMsg',id:m.id})});
  S.items.forEach(i=>{if(i.for===me&&ok(i.by)&&!i.done)o({w:i.by,t:`${nm(i.by)} senin için bir şey ekledi`,s:esc(i.name),at:idAt(i.id)||i.at||0,act:'openItem',id:i.id})});
  (S.wishes||[]).forEach(w=>{if(ok(w.by)&&!w.done)o({w:w.by,t:`${nm(w.by)} yeni bir istek ekledi`,s:esc(w.title),at:w.at||0,act:'openWish',id:w.id})});
+ o({ic:'gift',t:'Uygulamada yenilikler',s:esc(NEWS.items.slice(0,2).map(x=>x[1]).join(', '))+(NEWS.items.length>2?` ve ${NEWS.items.length-2} yenilik daha`:''),at:newsAt(),act:'newsOpen'});
  return out.filter(x=>x.at&&x.at<=Date.now()+6e4).sort((a,b)=>b.at-a.at).slice(0,30)}
+// Yenilikler zilde de durur: zamanı, bu cihazın yeni sürümü ilk gördüğü an
+const newsAt=()=>{let n=store.newsAt;if(!n||n.v!==NEWS.v||!(+n.at>0)){n=store.newsAt={v:NEWS.v,at:Date.now()};save()}return n.at};
 // İlk açılışta son bir gün "yeni" sayılır; örnek ailede en yeni dördü
 function bellSeen(L){const me=meId();store.bell=store.bell&&typeof store.bell==='object'?store.bell:{};
  if(!store.bell[me])store.bell[me]=store.mode==='demo'?((L||bellItems())[4]||{at:1}).at:Date.now()-864e5;return store.bell[me]}
 const bellNew=()=>{const L=bellItems(),s=bellSeen(L);return L.filter(x=>x.at>s).length};
-const bellRows=(L,s,from)=>L.map((x,i)=>`<button class="brow${x.at>s?' un':''}" data-act="bellGo" data-i="${from+i}">${av(x.w)}<span class="tx"><b>${x.t}</b><small>${x.s}</small></span><time>${ago(x.at)}</time>${x.at>s?'<span class="sr">, yeni</span>':''}</button>`).join('');
+const bellRows=(L,s,from)=>L.map((x,i)=>`<button class="brow${x.at>s?' un':''}" data-act="bellGo" data-i="${from+i}">${x.ic?`<span class="popdot bic">${I(x.ic)}</span>`:av(x.w)}<span class="tx"><b>${x.t}</b><small>${x.s}</small></span><time>${ago(x.at)}</time>${x.at>s?'<span class="sr">, yeni</span>':''}</button>`).join('');
 function bellBtn(){const n=bellNew();return `<button class="icon-btn bellb" data-act="bellOpen" aria-label="Gelişmeler${n?', '+n+' yeni':''}">${I('bell')}${n?`<em aria-hidden="true">${n>9?'9+':n}</em>`:''}</button>`}
 // Aile açılırken sağ üstteki avatar Aile'deki kendi kartına uçar (Telegram gibi), sayfa arkasında belirir
 function famFly(r){const sc=document.getElementById('screen'),ph=document.getElementById('phone');if(!r||!sc||!ph||rtRM())return;
@@ -1626,6 +1629,19 @@ function calMonth(c){const d=UI.calDate,dd=parse(d),t=T(),f1=iso(new Date(dd.get
  <div class="cdh" style="margin-top:16px"><b>${dHead(sel).b}</b><span>${dHead(sel).s}</span>${holChip(sel)}<button class="cadd" data-act="addOn" data-d="${sel}" aria-label="${long(sel)} için ekle">${I('plus','sm')}</button></div>
  <div class="cl">${evs.map(e=>crow('e',e,sel,evPast(e,sel))).join('')+ctkLine(sel,tks)||`<div class="tlempty" style="padding:14px">Bu gün boş 🌿</div>`}</div>`}
 function vCal(){const c={mine:false,filter:UI.filter};return calTop()+(UI.cal==='month'?calMonth(c):calFlow(c))}
+// Ay görünümünde ızgarayı sağa sola kaydırınca ay değişir (Google Takvim gibi): parmakla kayar, bırakınca öbür ay yandan gelir
+let MS=null;
+document.addEventListener('pointerdown',e=>{if(UI.tab!=='cal'||UI.cal!=='month'||e.button>0||!S)return;const g=e.target.closest&&e.target.closest('#screen .mdet');if(!g)return;MS={g,x0:e.clientX,y0:e.clientY,dx:0,on:false,pid:e.pointerId,t0:Date.now()}},true);
+document.addEventListener('pointermove',e=>{if(!MS||e.pointerId!==MS.pid)return;const dx=e.clientX-MS.x0,dy=e.clientY-MS.y0;
+ if(!MS.on){if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){MS=null;return}if(Math.abs(dx)<10)return;MS.on=true;MS.g.style.transition='none'}
+ MS.dx=dx;MS.g.style.transform=`translateX(${dx}px)`;MS.g.style.opacity=String(1-Math.min(Math.abs(dx)/MS.g.offsetWidth,1)*.5)});
+function endMs(){if(!MS)return;const s=MS;MS=null;if(!s.on)return;swallow=true;setTimeout(()=>swallow=false,350);
+ const g=s.g,w=g.offsetWidth,a=Math.abs(s.dx),go=a>w*.22||a>40&&a/(Date.now()-s.t0)>.5;
+ if(!go){g.style.transition='transform .2s ease,opacity .2s ease';g.style.transform='';g.style.opacity='';return}
+ const n=s.dx<0?1:-1;if(calm()){A.calMove({n});return}
+ g.style.transition='transform .15s ease-in,opacity .15s ease-in';g.style.transform=`translateX(${-n*w}px)`;g.style.opacity='0';
+ setTimeout(()=>{A.calMove({n});const x=document.querySelector('#screen .mdet');x&&x.animate([{transform:`translateX(${n*w*.6}px)`,opacity:0},{transform:'none',opacity:1}],{duration:240,easing:'cubic-bezier(.2,.8,.2,1)'})},150)}
+document.addEventListener('pointerup',endMs);document.addEventListener('pointercancel',()=>{if(MS){MS.dx=0;endMs()}});
 function bindMore(){const m=document.getElementById('cmore');if(!m||!window.IntersectionObserver)return;const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){io.disconnect();UI.agN+=14;render()}});io.observe(m)}
 
 // Listeler (seçilen: 3 Sekmeli + Listeler sekmesi + Çizgi ikonlar). Üstte Alınacaklar | İsteklerimiz, altında çizgi ikonlu sekmeler.
@@ -2230,6 +2246,7 @@ const A={
   sheet('Gelişmeler',(nw.length?`<div class="lbl"><span>Yeni</span></div><div class="group bgrp">${bellRows(nw,s,0)}</div>`:'')+(old.length?`<div class="lbl"><span>Daha önce</span></div><div class="group bgrp">${bellRows(old,s,nw.length)}</div>`:'')
    +(L.length?'':`<div class="empty"><b>Şimdilik yeni bir şey yok</b>Biri sana görev verince, isteklere yazınca ya da senin için bir şey ekleyince burada görünür.</div>`));
   store.bell[meId()]=Date.now();save();const b=document.querySelector('.bellb em');if(b)b.remove()},
+ newsOpen:()=>sheet('Yenilikler',`<div class="popl">${NEWS.items.map(([i,t,m])=>popRow(`<span class="popdot">${I(i,'sm')}</span>`,t,m)).join('')}</div>`),
  bellGo:d=>{const x=(UI.bellL||[])[+d.i];if(!x)return;closeNow();
   if(x.act==='bellMsg'){if(UI.tab!=='today')A.tab({tab:'today'});return}
   if(x.act==='openItem'){const i=S.items.find(y=>y.id===x.id);if(i){UI.tab='lists';UI.lmode='buy';UI.shop=null;UI.list=i.list;render()}}
@@ -2709,7 +2726,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-25c',items:[['cart','Alınanlar dönem dönem','Alınanlar artık Bu hafta, Geçen hafta, Bu ay diye ayrılır. Her üründe kimin aldığı ve hangi gün alındığı yazar'],['route','Gezi planı','Gezi isteğine gün, bütçe ve rota ekle. Bütçenin kalemleri dokununca açılır, rota haritada açılır'],['tag','Alınacağa ayrıntı','Eklerken üç noktaya dokun: hangi liste, kimin için, ne zaman lazım, not. İstemeyen dokunmaz, her şey eskisi gibi'],['chat','İsteklere yorum','Yapmadan önce de bir isteğin altında konuşabilirsiniz: ne zaman, kiminle, nasıl']]};
+const NEWS={v:'2026-10-26',items:[['cal','Ay ay kaydır','Takvim’in ay görünümünde ayı parmağınla sağa sola kaydırarak değiştir. Yenilikler artık zilde de durur'],['cart','Alınanlar dönem dönem','Alınanlar artık Bu hafta, Geçen hafta, Bu ay diye ayrılır. Her üründe kimin aldığı ve hangi gün alındığı yazar'],['route','Gezi planı','Gezi isteğine gün, bütçe ve rota ekle. Bütçenin kalemleri dokununca açılır, rota haritada açılır'],['tag','Alınacağa ayrıntı','Eklerken üç noktaya dokun: hangi liste, kimin için, ne zaman lazım, not. İstemeyen dokunmaz, her şey eskisi gibi']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
