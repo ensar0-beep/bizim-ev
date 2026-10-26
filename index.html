@@ -172,7 +172,7 @@ h2.sec .qty{font-weight:700}
 .hol{display:inline-flex;align-items:center;gap:4px;font-size:.74rem;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--sunk);color:var(--muted)}
 .hol.resmi{background:var(--danger-soft);color:var(--danger)}
 .hol.okul{background:var(--warn-soft);color:var(--warn)}
-.mdet{touch-action:pan-y;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;background:var(--surface);border-radius:var(--r-lg);padding:6px;box-shadow:var(--shadow)}
+.strip .days{touch-action:pan-y}.mdet{touch-action:pan-y;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;background:var(--surface);border-radius:var(--r-lg);padding:6px;box-shadow:var(--shadow)}
 .mdet .dow{font-size:.7rem;color:var(--muted);text-align:center;padding:4px 0;font-weight:600}
 .mdet .d{min-height:74px;border-radius:10px;display:flex;flex-direction:column;align-items:stretch;gap:2px;padding:3px 2px;min-width:0;text-align:left}
 .mdet .d .num{align-self:center;font-weight:700;font-size:.85rem;font-variant-numeric:tabular-nums;width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;border-radius:999px}
@@ -1391,7 +1391,9 @@ function trackStrip(){const st=document.getElementById('strip');if(!st)return;
  const lim=st.getBoundingClientRect().bottom+10;let cur=null;
  for(const b of st.parentElement.querySelectorAll('.dblock')){if(b.getBoundingClientRect().top<=lim)cur=b;else break}
  cur=cur||st.parentElement.querySelector('.dblock');if(!cur)return;
- const day=UI.sel&&UI.sel>=cur.dataset.from&&UI.sel<=cur.dataset.to?UI.sel:cur.dataset.from;
+ // listenin sonunda seçilen gün yukarı çıkamaz: o zaman seçilen gün geçerli
+ const sc=document.getElementById('screen'),end=sc&&sc.scrollTop+sc.clientHeight>=sc.scrollHeight-4;
+ const day=UI.sel&&(UI.sel>=cur.dataset.from&&UI.sel<=cur.dataset.to||end&&UI.sel>cur.dataset.to)?UI.sel:cur.dataset.from;
  if(st.dataset.mode==='week'&&monday(day)!==st.dataset.start)updStrip(monday(day),day);else markStrip(day)}
 // Android geri tuşu: Bugün dışındaki bir sekmede tek bir geçmiş kaydı tutulur; geri basınca Bugün'e dönülür, Bugün'de basınca uygulama kapanır.
 function syncBack(){const st=history.state&&history.state.bz;
@@ -1629,20 +1631,23 @@ function calMonth(c){const d=UI.calDate,dd=parse(d),t=T(),f1=iso(new Date(dd.get
  <div class="cdh" style="margin-top:16px"><b>${dHead(sel).b}</b><span>${dHead(sel).s}</span>${holChip(sel)}<button class="cadd" data-act="addOn" data-d="${sel}" aria-label="${long(sel)} için ekle">${I('plus','sm')}</button></div>
  <div class="cl">${evs.map(e=>crow('e',e,sel,evPast(e,sel))).join('')+ctkLine(sel,tks)||`<div class="tlempty" style="padding:14px">Bu gün boş 🌿</div>`}</div>`}
 function vCal(){const c={mine:false,filter:UI.filter};return calTop()+(UI.cal==='month'?calMonth(c):calFlow(c))}
-// Ay görünümünde ızgarayı sağa sola kaydırınca ay değişir (Google Takvim gibi): parmakla kayar, bırakınca öbür ay yandan gelir
+// Ay görünümünde ızgarayı sağa sola kaydırınca ay, akışta üstteki gün şeridini kaydırınca hafta değişir (Google Takvim gibi): parmakla kayar, bırakınca öbürü yandan gelir
 let MS=null;
-document.addEventListener('pointerdown',e=>{if(UI.tab!=='cal'||UI.cal!=='month'||e.button>0||!S)return;const g=e.target.closest&&e.target.closest('#screen .mdet');if(!g)return;MS={g,x0:e.clientX,y0:e.clientY,dx:0,on:false,pid:e.pointerId,t0:Date.now()}},true);
+const MS_SEL=()=>UI.cal==='month'?'#screen .mdet':'#screen #strip[data-mode="week"] .days';
+document.addEventListener('pointerdown',e=>{if(UI.tab!=='cal'||e.button>0||!S)return;const g=e.target.closest&&e.target.closest(MS_SEL());if(!g)return;MS={g,x0:e.clientX,y0:e.clientY,dx:0,on:false,pid:e.pointerId,t0:Date.now()}},true);
 document.addEventListener('pointermove',e=>{if(!MS||e.pointerId!==MS.pid)return;const dx=e.clientX-MS.x0,dy=e.clientY-MS.y0;
  if(!MS.on){if(Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){MS=null;return}if(Math.abs(dx)<10)return;MS.on=true;MS.g.style.transition='none'}
  MS.dx=dx;MS.g.style.transform=`translateX(${dx}px)`;MS.g.style.opacity=String(1-Math.min(Math.abs(dx)/MS.g.offsetWidth,1)*.5)});
 function endMs(){if(!MS)return;const s=MS;MS=null;if(!s.on)return;swallow=true;setTimeout(()=>swallow=false,350);
  const g=s.g,w=g.offsetWidth,a=Math.abs(s.dx),go=a>w*.22||a>40&&a/(Date.now()-s.t0)>.5;
  if(!go){g.style.transition='transform .2s ease,opacity .2s ease';g.style.transform='';g.style.opacity='';return}
- const n=s.dx<0?1:-1;if(calm()){A.calMove({n});return}
+ const n=s.dx<0?1:-1,mv=()=>UI.cal==='month'?A.calMove({n}):A.stripWeek({n});if(calm()){mv();return}
  g.style.transition='transform .15s ease-in,opacity .15s ease-in';g.style.transform=`translateX(${-n*w}px)`;g.style.opacity='0';
- setTimeout(()=>{A.calMove({n});const x=document.querySelector('#screen .mdet');x&&x.animate([{transform:`translateX(${n*w*.6}px)`,opacity:0},{transform:'none',opacity:1}],{duration:240,easing:'cubic-bezier(.2,.8,.2,1)'})},150)}
+ setTimeout(()=>{mv();const x=document.querySelector(MS_SEL());x&&x.animate([{transform:`translateX(${n*w*.6}px)`,opacity:0},{transform:'none',opacity:1}],{duration:240,easing:'cubic-bezier(.2,.8,.2,1)'})},150)}
 document.addEventListener('pointerup',endMs);document.addEventListener('pointercancel',()=>{if(MS){MS.dx=0;endMs()}});
-function bindMore(){const m=document.getElementById('cmore');if(!m||!window.IntersectionObserver)return;const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){io.disconnect();UI.agN+=14;render()}});io.observe(m)}
+function bindMore(){const m=document.getElementById('cmore');if(!m||!window.IntersectionObserver)return;const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){io.disconnect();
+ // bir güne kayarken yükleme kaydırmayı yarıda keser: kayma bitene kadar bekle
+ const w=UI.goTo?1200-(Date.now()-UI.goTo.at):0,run=()=>{UI.agN+=14;render(true)};w>0?setTimeout(run,w):run()}});io.observe(m)}
 
 // Listeler (seçilen: 3 Sekmeli + Listeler sekmesi + Çizgi ikonlar). Üstte Alınacaklar | İsteklerimiz, altında çizgi ikonlu sekmeler.
 const LCOL=['#2B8467','#8B4FB8','#A0692B','#2F6DB5','#C2502F','#B5487A'];
@@ -2311,9 +2316,10 @@ const A={
  addTk:d=>taskForm(null,d.d),
  agMore:()=>{UI.agN+=14;render(true)},
  agPrev:()=>{UI.agStart=add(UI.agStart,-7);UI.agN+=7;render(true)},
- goDay:d=>{const day=d.d;UI.sel=day;const end=add(UI.agStart,UI.agN-1);
+ goDay:d=>{const day=d.d;UI.sel=day;UI.goTo={d:day,at:Date.now()};const end=add(UI.agStart,UI.agN-1);
   if(day<UI.agStart){UI.agN+=daysBetween(day,UI.agStart);UI.agStart=day;UI.pending=day;render(true);return}
-  if(day>end){UI.agN=daysBetween(UI.agStart,day)+14;UI.pending=day;render(true);return}
+  // sona yakın bir güne giderken önce günleri uzat: yoksa kaydırırken 'daha fazla' yüklemesi kaydırmayı yarıda keser
+  if(day>add(end,-14)){UI.agN=daysBetween(UI.agStart,day)+14;UI.pending=day;render(true);return}
   markStrip(day);scrollToDay(day)},
  homeDay:d=>{UI.sel=d.d;markStrip(d.d);scrollToDay(d.d)},
  stripWeek:d=>{const st=document.getElementById('strip');A.goDay({d:add(st?st.dataset.start:monday(T()),7*(+d.n))})},
@@ -2726,7 +2732,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-26',items:[['cal','Ay ay kaydır','Takvim’in ay görünümünde ayı parmağınla sağa sola kaydırarak değiştir. Yenilikler artık zilde de durur'],['cart','Alınanlar dönem dönem','Alınanlar artık Bu hafta, Geçen hafta, Bu ay diye ayrılır. Her üründe kimin aldığı ve hangi gün alındığı yazar'],['route','Gezi planı','Gezi isteğine gün, bütçe ve rota ekle. Bütçenin kalemleri dokununca açılır, rota haritada açılır'],['tag','Alınacağa ayrıntı','Eklerken üç noktaya dokun: hangi liste, kimin için, ne zaman lazım, not. İstemeyen dokunmaz, her şey eskisi gibi']]};
+const NEWS={v:'2026-10-26b',items:[['cal','Kaydırarak gez','Takvim’de ayı ızgarayı, haftayı üstteki gün şeridini sağa sola kaydırarak değiştir. Yenilikler artık zilde de durur'],['cart','Alınanlar dönem dönem','Alınanlar artık Bu hafta, Geçen hafta, Bu ay diye ayrılır. Her üründe kimin aldığı ve hangi gün alındığı yazar'],['route','Gezi planı','Gezi isteğine gün, bütçe ve rota ekle. Bütçenin kalemleri dokununca açılır, rota haritada açılır'],['tag','Alınacağa ayrıntı','Eklerken üç noktaya dokun: hangi liste, kimin için, ne zaman lazım, not. İstemeyen dokunmaz, her şey eskisi gibi']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
