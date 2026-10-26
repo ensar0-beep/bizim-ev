@@ -524,7 +524,7 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 @keyframes tsinL{from{transform:translateX(-22%) scale(.98);opacity:0}}@keyframes tsinR{from{transform:translateX(22%) scale(.98);opacity:0}}
 .tsedge{position:fixed;top:50%;z-index:30;display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:var(--fg);color:var(--surface);font-size:.82rem;font-weight:700;pointer-events:none;opacity:0;transition:opacity .12s;transform:translateY(-50%)}
 .rbarw{grid-column:2/4;display:flex;align-items:center;gap:8px}
-.rbar{flex:1;max-width:200px;display:flex;gap:3px;touch-action:none;cursor:pointer}
+.rbar{flex:1;max-width:200px;display:flex;gap:3px;touch-action:pan-y;cursor:pointer}
 .rbar button{flex:1;height:34px;display:flex;align-items:center;padding:0}
 .rbar button i{display:block;width:100%;height:10px;background:var(--sunk);border-radius:2px;transition:background .12s}
 .rbar button:first-child i{border-radius:6px 2px 2px 6px}.rbar button:last-child i{border-radius:2px 6px 6px 2px}
@@ -2658,11 +2658,19 @@ function wrSettle(id){clearTimeout(UI.wrT);UI.wrT=setTimeout(()=>{if(UI.tab!=='l
   requestAnimationFrame(()=>requestAnimationFrame(()=>{x.style.transition='transform .5s cubic-bezier(.2,.8,.2,1)';x.style.transform='';setTimeout(()=>{x.style.zIndex='';x.style.transition=''},550)}))})},1000)}
 let RB=null;const rbAt=(bar,x)=>{const r=bar.getBoundingClientRect();return Math.max(1,Math.min(5,Math.ceil((x-r.left)/r.width*5)))};
 function rbPaint(bar,n){bar.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',i<n));bar.setAttribute('aria-valuenow',n);const em=bar.parentElement.querySelector('em');if(em){em.textContent=n?RLBL[n]:'Ne kadar istiyorsun?';em.classList.toggle('on',!!n)}}
-document.addEventListener('pointerdown',e=>{const bar=e.target.closest&&e.target.closest('.rbar');if(!bar||e.button>0)return;RB={bar,n:rbAt(bar,e.clientX),x0:e.clientX,moved:false};rbPaint(bar,RB.n)},true);
-document.addEventListener('pointermove',e=>{if(!RB)return;if(Math.abs(e.clientX-RB.x0)>6)RB.moved=true;const n=rbAt(RB.bar,e.clientX);if(n!==RB.n){RB.n=n;rbPaint(RB.bar,n)}});
+// Sayfa kaydırılırken puan değişmesin: çubuk dikey kaydırmaya izin verir (pan-y); parmak yukarı aşağı giderse puan eski haline döner.
+// Dokunmada puan parmak kalkınca ya da yana sürükleyince boyanır; kaydırma yeni durduysa (kayan sayfayı durdurmak için dokunuş) yok sayılır.
+let rbScr=0;document.addEventListener('scroll',()=>{rbScr=Date.now()},true);
+const rbOff=()=>{if(!RB)return;rbPaint(RB.bar,RB.o);RB=null};
+document.addEventListener('pointerdown',e=>{const bar=e.target.closest&&e.target.closest('.rbar');if(!bar||e.button>0)return;const touch=e.pointerType!=='mouse';
+ if(touch&&Date.now()-rbScr<400){rbSwallow=true;setTimeout(()=>rbSwallow=false,600);return}
+ RB={bar,n:rbAt(bar,e.clientX),x0:e.clientX,y0:e.clientY,o:+bar.getAttribute('aria-valuenow')||0,moved:false,touch};if(!touch)rbPaint(bar,RB.n)},true);
+document.addEventListener('pointermove',e=>{if(!RB)return;const dx=Math.abs(e.clientX-RB.x0),dy=Math.abs(e.clientY-RB.y0);
+ if(!RB.moved&&dy>8&&dy>dx){rbOff();return}
+ if(dx>6)RB.moved=true;if(!RB.moved&&RB.touch)return;const n=rbAt(RB.bar,e.clientX);if(n!==RB.n||RB.touch){RB.n=n;rbPaint(RB.bar,n)}});
 // Değer dokunulan andaki noktadan alınır: boyayınca yazı kısalıp çubuk genişler, sonraki click yan bölmeye düşebilir
-document.addEventListener('pointerup',()=>{if(!RB)return;const {bar,n,moved}=RB;RB=null;rbSwallow=true;setTimeout(()=>rbSwallow=false,600);setTimeout(()=>{bar.dataset.f?A.fRate({v:n}):A.rateSet({id:bar.dataset.id,v:n,tap:moved?'':'1'})},0)});
-document.addEventListener('pointercancel',()=>{RB=null});
+document.addEventListener('pointerup',()=>{if(!RB)return;const {bar,n,moved}=RB;RB=null;rbPaint(bar,n);rbSwallow=true;setTimeout(()=>rbSwallow=false,600);setTimeout(()=>{bar.dataset.f?A.fRate({v:n}):A.rateSet({id:bar.dataset.id,v:n,tap:moved?'':'1'})},0)});
+document.addEventListener('pointercancel',rbOff);
 let rbSwallow=false;document.addEventListener('click',e=>{if(rbSwallow&&e.target.closest&&e.target.closest('.rbar')){rbSwallow=false;e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener('keydown',e=>{const bar=e.target.closest&&e.target.closest('.rbar');if(!bar||!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const n=Math.max(1,Math.min(5,(+bar.getAttribute('aria-valuenow')||0)+(e.key==='ArrowRight'?1:-1)));bar.dataset.f?A.fRate({v:n}):A.rateSet({id:bar.dataset.id,v:n})});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.sheet'))close()});
