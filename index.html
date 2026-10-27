@@ -344,6 +344,7 @@ h2.sec .qty{font-weight:700}
 .pgrid .pp .ck{position:absolute;top:0;right:calc(50% - 1.55rem);width:20px;height:20px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:none;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--surface)}
 .pgrid .pp[aria-pressed="true"] .ck{display:flex}
 .pgrid .pp .ck .i{width:12px;height:12px}
+.pgrid .pp .ck{font-size:.7rem;font-weight:700}
 .pgrid .link{align-self:center;grid-column:span 4;justify-self:start}
 .pgrid .kbr{display:none}
 .calpg{margin-top:12px}
@@ -364,7 +365,6 @@ h2.sec .qty{font-weight:700}
 .chip.kid .av{width:1.3rem;height:1.3rem}
 .chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
 .chip .n{font-size:.8rem;background:var(--sunk);border-radius:999px;padding:1px 7px;color:var(--fg)}
-.chip .ord{font-size:.75rem;background:var(--accent);color:var(--on-accent);border-radius:999px;width:1.25rem;height:1.25rem;display:inline-flex;align-items:center;justify-content:center}
 
 /* Takvim */
 .calnav{display:flex;align-items:center;gap:4px;margin:14px 0 6px}
@@ -821,7 +821,6 @@ a.btn{text-decoration:none}
 .fam svg{width:1.2rem;height:1.2rem}
 .chip .fam{width:1.6rem;height:1.6rem}
 .who .fam,.ctk .fam{width:1.5rem;height:1.5rem}.who .fam svg,.ctk .fam svg{width:1rem;height:1rem}
-.chip.famc{gap:6px}
 .chip .fam svg{width:1rem;height:1rem}
 </style>
 </head>
@@ -1817,16 +1816,20 @@ function addHint(){const b=[];if(F.for)b.push(esc(F.for==='ev'?'Bütün aile':fi
 // Listeler simgeleriyle, kişiler etkinlik/görev formundaki gibi yuvarlak avatarlarla seçilir
 function addDet(){return `<div class="addet">
  <div class="adf"><span class="adh">Hangi listeye?</span><div class="pgrid lgrid" role="group" aria-label="Hangi liste">${S.lists.map(l=>`<button type="button" class="pp" data-act="adList" data-id="${l.id}" aria-pressed="${l.id===F.list}"><span class="lic">${I(l.icon||'tag')}</span>${addCk()}${esc(l.name)}</button>`).join('')}</div></div>
- <div class="adf"><span class="adh">Kimin için?</span><div class="pgrid" role="group" aria-label="Kimin için"><button type="button" class="pp famchip" data-act="adFor" data-id="ev" aria-pressed="${F.for==='ev'}">${famBadge()}${addCk()}Bütün aile</button>${faceGrid('adFor',[F.for])}</div></div>
+ <div class="adf"><span class="adh">Kimin için?</span><div class="pgrid" id="ad-for" role="group" aria-label="Kimin için">${adForHTML()}</div></div>
  <div class="adf"><span class="adh">Ne zaman lazım?</span><div class="seg">${Object.entries(PRI).map(([k,[n]])=>`<button type="button" data-act="adPri" data-v="${k}" aria-pressed="${F.pri===k}">${n}</button>`).join('')}</div></div>
  <div class="adf"><label class="adh" for="ad-cost">Tahmini fiyat</label><span class="tpm"><input class="inp" id="ad-cost" inputmode="numeric" value="${esc(F.cost)}" placeholder="örn. 250" enterkeyhint="done"><em>₺</em></span></div>
  <div class="adf"><label class="adh" for="ad-note">Not</label><input class="inp" id="ad-note" value="${esc(F.note)}" placeholder="Beden, numara, model, renk…" enterkeyhint="done"></div></div>`}
+const adForHTML=()=>famGrid({box:'ad-for',fam:'adFor',kind:'adFor',sel:[F.for],on:F.for==='ev',one:true});
+// Yalnızca "Kimin için?" ızgarası ve özet satırı yenilenir; uçuş animasyonu ızgara yerinde kalınca çalışır
+function adForPaint(){const g=document.getElementById('ad-for');if(!g){addPaint();return}g.innerHTML=adForHTML();
+ const h=document.getElementById('add-hint'),m=document.querySelector('.adm');if(h)h.innerHTML=addHint();if(m)m.classList.toggle('on',addSet())}
 function addPaint(){const g=id=>document.getElementById(id),m=document.querySelector('.adm');
  if(g('add-det'))g('add-det').innerHTML=F.more?addDet():'';if(g('add-hint'))g('add-hint').innerHTML=addHint();if(g('sugg'))g('sugg').hidden=F.more;
  if(m){m.classList.toggle('on',addSet());m.setAttribute('aria-expanded',F.more)}}
 const addSync=()=>{const n=document.getElementById('ad-note');if(n)F.note=n.value;const c=document.getElementById('ad-cost');if(c)F.cost=c.value};
 // Ayrıntılar bir sonraki eklenene uygulanır ve sıfırlanır (liste seçili kalır)
-function addApply(its){addSync();its.forEach(it=>{if(F.for)it.for=F.for;it.pri=F.pri;if(F.note.trim())it.note=F.note.trim();if(parseTL(F.cost))it.cost=parseTL(F.cost)});const had=addSet();Object.assign(F,{for:'',pri:'yakinda',note:'',cost:'',more:false,list0:F.list});addPaint();return had}
+function addApply(its){addSync();its.forEach(it=>{if(F.for)it.for=F.for;it.pri=F.pri;if(F.note.trim())it.note=F.note.trim();if(parseTL(F.cost))it.cost=parseTL(F.cost)});const had=addSet();Object.assign(F,{for:'',pick:false,pri:'yakinda',note:'',cost:'',more:false,list0:F.list});addPaint();return had}
 function topIdea(){return (S.wishes||[]).filter(w=>!w.done&&!w.planned&&w.want.length>=2).sort(byScore)[0]}
 function ideaHTML(){const w=topIdea();if(!w||isChild()&&!w.want.includes(meId()))return '';const dw=new Date().getDay();const when=dw===0||dw===6?'Bugün için':'Hafta sonu için';
  return `<div class="sec-h"><h2 class="sec">Bir fikir</h2><button class="link" data-act="goWishes">İstekler ${I('chevR','sm')}</button></div>
@@ -1934,22 +1937,26 @@ function cmList(w){const me0=meId(),c=cmOf(w);
 const cmHTML=w=>`<div id="cmw" data-id="${w.id}">${cmList(w)}</div><form class="cmin" data-form="cmSave" data-id="${w.id}" autocomplete="off"><input id="cm-in" maxlength="500" placeholder="Bir şey yaz…" aria-label="Yorum" enterkeyhint="send"><button class="go" aria-label="Gönder">${I('arrUp')}</button></form>`;
 // Açık pencerede yorumlar başka telefondan gelince ya da yazınca yalnız liste yenilenir, yazı kutusu yerinde kalır
 function cmRefresh(){const el=document.getElementById('cmw'),w=el&&S&&S.wishes.find(x=>x.id===el.dataset.id);if(w)el.innerHTML=cmList(w)}
-const withChips=()=>`<button type="button" class="chip famc" data-act="fWithAll" aria-pressed="${allIn(F.with)}">${famBadge()}Bütün aile</button>`+chipsHTML('fWith',F.with);
+const withChips=()=>famGrid({box:'wd-with',fam:'fWithAll',kind:'fWith',sel:F.with,on:allOf(F.with)});
+const withRefresh=()=>{const e=document.getElementById('wd-with');if(e)e.innerHTML=withChips()};
 function wishDoneForm(w){F={wid:w.id,with:[...(w.want.length?w.want:[meId()])],mood:'😊'};
  sheet('Nasıldı?',`<form data-form="wishDone">
  <p style="margin:0 0 12px"><b>${esc(w.title)}</b></p>
  <div class="field"><label for="wd-date">Ne zaman?</label>${dtBox('wd-date','date',w.planned&&w.planned<=T()?w.planned:T())}</div>
- <div class="field"><span class="flabel">Kimler vardı?</span><div class="chips" style="flex-wrap:wrap" id="wd-with">${withChips()}</div></div>
+ <div class="field"><span class="flabel">Kimler vardı?</span><div class="pgrid" id="wd-with">${withChips()}</div></div>
  <div class="field"><span class="flabel">Tek kelimeyle</span><div class="moods" id="wd-mood">${MOODS.map(m=>`<button type="button" data-act="fMood" data-v="${m}" aria-pressed="${F.mood===m}" aria-label="${m}">${m}</button>`).join('')}</div></div>
  <div class="field"><label for="wd-cm">Yorumun</label><textarea class="inp" id="wd-cm" rows="2" maxlength="500" placeholder="Aklında kalan bir şey yaz…"></textarea></div>
  <button class="btn primary block">${I('check','sm')}Yaptık olarak kaydet</button></form>`)}
 
+// "Kimin için?" tek kişi ya da Bütün aile (ev)
+const forChips=()=>famGrid({box:'it-for',fam:'fFor',kind:'fFor',sel:[F.for],on:F.for==='ev',one:true});
+const forRefresh=()=>{const e=document.getElementById('it-for');if(e)e.innerHTML=forChips()};
+// Bütün aileye geçince kişiler eve uçar, çıkınca geri gelir; kişiden kişiye geçişte yalnızca yeniden çizilir
+const forFly=(id,was,now)=>now==='ev'?flyIn(id):was==='ev'?flyOut(id):PAINT[id]();
 function itemForm(i){F={for:i.for||'',pri:i.pri||'yakinda',edit:i.id,cat:i.cat||'Diğer'};
- const forChips=()=>[['ev','Bütün aile',famBadge()],...ordMe().map(m=>[m.id,first(m.name),av(m.id,'xs')])].map(([k,n,ic])=>`<button type="button" class="chip" data-act="fFor" data-id="${k}" aria-pressed="${F.for===k}">${ic}${esc(n)}</button>`).join('');
- itemForm.forChips=forChips;
- sheet('Alınacağı düzenle',`<form data-form="item" autocomplete="off">
+  sheet('Alınacağı düzenle',`<form data-form="item" autocomplete="off">
  <div class="field"><label for="it-name">Ne alınacak?</label><input class="inp" id="it-name" value="${esc(i.name)}"></div>
- <div class="field"><span class="flabel">Kimin için?</span><div class="chips" style="flex-wrap:wrap" id="it-for">${forChips()}</div></div>
+ <div class="field"><span class="flabel">Kimin için?</span><div class="pgrid" id="it-for">${forChips()}</div></div>
  <div class="field"><span class="flabel">Ne zaman lazım?</span><div class="seg" id="it-pri">${Object.entries(PRI).map(([k,[n]])=>`<button type="button" data-act="fPri" data-v="${k}" aria-pressed="${F.pri===k}">${n}</button>`).join('')}</div></div>
  <div class="field"><label for="it-note">Not</label><input class="inp" id="it-note" value="${esc(i.note||'')}" placeholder="Beden, numara, model, renk…"></div>
  <div class="field"><label for="it-cost">${i.done?'Fiyat':'Tahmini fiyat'}</label><span class="tpm"><input class="inp" id="it-cost" inputmode="numeric" value="${hasC(i)?i.cost:''}" placeholder="örn. 250"><em>₺</em></span></div>
@@ -2149,8 +2156,9 @@ const snap=()=>{const before=clone(flat(S));const f=()=>{if(!S)return;const cur=
 let F={};
 // "Bütün aile" tek dokunuşla herkesi seçer; herkes seçiliyken kişi çipleri gizlenir ("Kişileri tek tek seç" ile açılır).
 // Avatar ızgarası: etkinlikte "Kimler katılacak?", görevde "Kim yapacak?"
-function faceGrid(kind,sel,lockMsg){const ck=`<span class="ck">${I('check','sm')}</span>`;
- const one=m=>`<button type="button" class="pp${m.role==='child'?' kid':''}" data-act="${kind}" data-id="${m.id}" aria-pressed="${sel.includes(m.id)}"${lockMsg?lock(false,lockMsg):''}>${av(m.id)}${ck}${esc(first(m.name))}${m.role==='child'?'<span class="sr">, çocuk</span>':''}</button>`;
+// ord: seçilenlerde tik yerine sıra numarası (sırayla yapılan görev)
+function faceGrid(kind,sel,lockMsg,ord){const ck=m=>`<span class="ck">${ord?sel.indexOf(m.id)+1:I('check','sm')}</span>`;
+ const one=m=>`<button type="button" class="pp${m.role==='child'?' kid':''}" data-act="${kind}" data-id="${m.id}" aria-pressed="${sel.includes(m.id)}"${lockMsg?lock(false,lockMsg):''}>${av(m.id)}${ck(m)}${esc(first(m.name))}${m.role==='child'?'<span class="sr">, çocuk</span>':''}</button>`;
  const o=ordMe(),ad=o.filter(m=>m.role!=='child'),ki=o.filter(m=>m.role==='child');
  return ad.map(one).join('')+(ad.length&&ki.length?'<span class="kbr" aria-hidden="true"></span>':'')+ki.map(one).join('')}
 // Tarih/saat kutusu: kimlikler (ev-date, tk-time…) aynı kalır, formlar değeri yine input'tan okur
@@ -2159,32 +2167,31 @@ const dtBox=(id,type,val,off)=>`<label class="dtp${off?' off':''}">${I(type==='d
 const dtHTML=(p,date,time,off,dl,tl)=>`<div class="two"><div class="field"><label for="${p}-date">${dl}</label>${dtBox(p+'-date','date',date)}</div><div class="field"><label for="${p}-time">${tl}</label>${dtBox(p+'-time','time',time,off)}</div></div>`;
 function dtSync(inp){const l=inp.closest('.dtp');if(!l)return;const v=l.querySelector('.v');
  if(inp.type==='date'){v.textContent=dTxt(inp.value);v.classList.toggle('ph',!inp.value)}else{v.textContent=inp.value?hm(inp.value):'Saat seç';v.classList.toggle('ph',!inp.value)}}
+// Her kişi seçicide aynı: "Bütün aile" + avatarlar. Bütün aile seçiliyken avatarlar gizlenir, "Kişileri tek tek seç" ile açılır.
+// box: kapsayıcının id'si (fPick ve uçuş onu yeniden çizer), one: tek kişilik seçim ("Kimin için?")
+const allOf=sel=>S.members.length>1&&S.members.every(m=>sel.includes(m.id));
+function famGrid({box,fam,kind,sel,on,one,lockMsg,famLock}){
+ const f=`<button type="button" class="pp famchip" data-act="${fam}"${one?' data-id="ev"':''} aria-pressed="${on}"${famLock||''}>${famBadge()}<span class="ck">${I('check','sm')}</span>Bütün aile</button>`;
+ if(on&&!F.pick)return f+`<button type="button" class="link" data-act="fPick" data-box="${box}">${one?'Bir kişi seç':'Kişileri tek tek seç'}</button>`;
+ return f+faceGrid(kind,sel,lockMsg)}
 function memChips(){const child=isChild(),msg='Çocuk hesapları yalnızca kendi etkinliğini ekleyebilir.';
- const all=S.members.length>1&&S.members.every(m=>F.members.includes(m.id));
- const fam=`<button type="button" class="pp famchip" data-act="fAll" aria-pressed="${all}"${lock(!child,msg)}>${famBadge()}<span class="ck">${I('check','sm')}</span>Bütün aile</button>`;
- if(all&&!F.pick)return fam+`<button type="button" class="link" data-act="fPick">Kişileri tek tek seç</button>`;
- return fam+faceGrid('fMem',F.members,child?msg:'')}
+ return famGrid({box:'ev-mem',fam:'fAll',kind:'fMem',sel:F.members,on:allOf(F.members),lockMsg:child?msg:'',famLock:lock(!child,msg)})}
 const memRefresh=()=>{const e=document.getElementById('ev-mem');if(e)e.innerHTML=memChips()};
+const PAINT={'ev-mem':memRefresh,'tk-as':()=>asRefresh(),'wd-with':()=>withRefresh(),'it-for':()=>forRefresh(),'ad-for':()=>adForPaint()};
 // Kişiler kalpli evin içine uçar (ya da evden çıkar); kutunun yüksekliği yumuşakça değişir.
 const calm=()=>matchMedia('(prefers-reduced-motion: reduce)').matches||!Element.prototype.animate;
 const homePt=box=>{const h=box.querySelector('.famchip .fam').getBoundingClientRect();return [h.left+h.width/2,h.top+h.height/2]};
 function boxResize(box,h0){const h1=box.offsetHeight;if(h0!==h1)box.animate([{height:h0+'px'},{height:h1+'px'}],{duration:260,easing:'ease-out'})}
-function flyIn(){const box=document.getElementById('ev-mem');const chips=box?[...box.querySelectorAll('[data-act=fMem]')]:[];
- if(!chips.length||calm()){memRefresh();return}
+const faces=box=>[...box.querySelectorAll('.pp[data-id]:not(.famchip)')];
+function flyIn(id){const box=document.getElementById(id),paint=PAINT[id],chips=box?faces(box):[];
+ if(!chips.length||calm()){paint();return}
  const [hx,hy]=homePt(box);box.style.pointerEvents='none';chips.forEach(c=>c.setAttribute('aria-pressed','true'));
  const an=chips.map((c,i)=>{const r=c.getBoundingClientRect();return c.animate([{transform:'none',opacity:1},{transform:`translate(${hx-r.left-r.width/2}px,${hy-r.top-r.height/2}px) scale(.12)`,opacity:.2}],{duration:460,delay:i*60,easing:'cubic-bezier(.55,0,.8,.3)',fill:'forwards'})});
- an[an.length-1].finished.then(()=>{const h0=box.offsetHeight;memRefresh();box.style.pointerEvents='';boxResize(box,h0);
+ an[an.length-1].finished.then(()=>{const h0=box.offsetHeight;paint();box.style.pointerEvents='';boxResize(box,h0);
   const f=box.querySelector('.famchip .fam');f&&f.animate([{transform:'scale(1)'},{transform:'scale(1.45) rotate(-8deg)'},{transform:'scale(.92)'},{transform:'scale(1)'}],{duration:520,easing:'ease-out'})})}
-function flyOut(){const box=document.getElementById('ev-mem');if(!box)return;const h0=box.offsetHeight;memRefresh();if(calm())return;
+function flyOut(id){const box=document.getElementById(id);if(!box)return;const h0=box.offsetHeight;PAINT[id]();if(calm())return;
  const [hx,hy]=homePt(box);boxResize(box,h0);
- [...box.querySelectorAll('[data-act=fMem]')].forEach((c,i)=>{const r=c.getBoundingClientRect();c.animate([{transform:`translate(${hx-r.left-r.width/2}px,${hy-r.top-r.height/2}px) scale(.12)`,opacity:0},{transform:'none',opacity:1}],{duration:440,delay:i*55,easing:'cubic-bezier(.2,.7,.3,1)',fill:'backwards'})})}
-// Kişi seçimi: büyükler üstte, çocuklar alt satırda ve bir boy küçük.
-function chipsHTML(kind,sel,opts){
- const one=m=>{const on=sel.includes(m.id),kid=m.role==='child';const ord=opts&&opts.ord&&on?`<span class="ord">${sel.indexOf(m.id)+1}</span>`:'';
-  return `<button type="button" class="chip${kid?' kid':''}" data-act="${kind}" data-id="${m.id}" aria-pressed="${on}"${opts&&opts.lockMsg?lock(false,opts.lockMsg):''}>${ord||av(m.id,'xs')}${esc(first(m.name))}${kid?'<span class="sr">, çocuk</span>':''}</button>`};
- const o=ordMe(),ad=o.filter(m=>m.role!=='child'),ki=o.filter(m=>m.role==='child');
- if(!ad.length||!ki.length)return o.map(one).join('');
- return ad.map(one).join('')+'<span class="kbr" aria-hidden="true"></span>'+ki.map(one).join('')}
+ faces(box).forEach((c,i)=>{const r=c.getBoundingClientRect();c.animate([{transform:`translate(${hx-r.left-r.width/2}px,${hy-r.top-r.height/2}px) scale(.12)`,opacity:0},{transform:'none',opacity:1}],{duration:440,delay:i*55,easing:'cubic-bezier(.2,.7,.3,1)',fill:'backwards'})})}
 function eventForm(e,day,pre){const child=isChild();
  F={members:e?[...e.members]:pre&&pre.members&&!child?[...pre.members]:[meId()],edit:e?e.id:null,fromWish:pre&&pre.wish||null};
  const v=e||Object.assign({title:'',date:day||T(),time:'',loc:'',desc:'',cat:'aile',rem:'h1',repeat:'none'},pre||{});
@@ -2205,7 +2212,7 @@ function eventForm(e,day,pre){const child=isChild();
  <button class="btn primary block">${e?'Kaydet':'Etkinliği ekle'}</button></form>`)}
 function asHTML(){const child=isChild(),lk=child?{lockMsg:'Başkasına görev vermeyi annen ya da baban yapabilir.'}:null,n=F.who.length;
  const nt=t=>`<p class="note" style="margin:8px 0 0">${I('info','sm')}<span>${t}</span></p>`;
- let h=`<div class="pgrid"><button type="button" class="pp famchip" data-act="fAsAll" aria-pressed="${S.members.every(m=>F.who.includes(m.id))}"${lk?lock(false,lk.lockMsg):''}>${famBadge()}<span class="ck">${I('check','sm')}</span>Bütün aile</button>${faceGrid('fAs',F.who,lk&&lk.lockMsg)}</div>`;
+ let h=`<div class="pgrid">${famGrid({box:'tk-as',fam:'fAsAll',kind:'fAs',sel:F.who,on:allOf(F.who),lockMsg:lk&&lk.lockMsg,famLock:lk?lock(false,lk.lockMsg):''})}</div>`;
  if(child)return h;
  const rc=document.getElementById('tk-rot'),names=S.members.every(m=>F.who.includes(m.id))?'Bütün aile':esc(F.who.map(x=>first(M(x).name)).join(', '));
  if(rc&&rc.checked)return h;
@@ -2224,7 +2231,7 @@ function taskForm(t,day){const child=isChild();
  <details class="more"${t&&(t.repeat!=='none')?' open':''}><summary>Daha fazla seçenek ${I('chevD','sm')}</summary>
   <div class="field"><label for="tk-rep">Tekrar</label><select class="inp" id="tk-rep">${Object.entries(TREP).map(([k,n])=>`<option value="${k}"${v.repeat===k?' selected':''}>${n}</option>`).join('')}</select></div>
   ${child?'':`<label class="check"><input type="checkbox" id="tk-rot"${F.rot.length>1?' checked':''}>Sırayla yapılsın</label>
-  <div id="rot-area"${F.rot.length>1?'':' hidden'}><p class="note">${I('info','sm')}<span>Görev her tamamlandığında bir sonraki tekrar sıradaki kişiye geçer. Seçtiğin sıra geçerli olur.</span></p><div class="chips" style="flex-wrap:wrap" id="tk-rotc">${chipsHTML('fRot',F.rot,{ord:true})}</div><span class="err" id="rot-err" hidden>Sıra için en az iki kişi seç ve tekrar ayarla.</span></div>`}
+  <div id="rot-area"${F.rot.length>1?'':' hidden'}><p class="note">${I('info','sm')}<span>Görev her tamamlandığında bir sonraki tekrar sıradaki kişiye geçer. Seçtiğin sıra geçerli olur.</span></p><div class="pgrid" id="tk-rotc">${faceGrid('fRot',F.rot,'',true)}</div><span class="err" id="rot-err" hidden>Sıra için en az iki kişi seç ve tekrar ayarla.</span></div>`}
  </details>
  <button class="btn primary block">${t?'Kaydet':'Görevi ekle'}</button></form>`)}
 
@@ -2435,15 +2442,15 @@ const A={
  editEvent:d=>eventForm(S.events.find(x=>x.id===d.id)),
  delEvent:d=>{const u=snap(),e=S.events.find(x=>x.id===d.id);if(!e){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.events=S.events.filter(x=>x.id!==d.id);S.rsv=(S.rsv||[]).filter(r=>r.e!==d.id);log(`“${e.title}” etkinliğini sildi`);close();render(true);toast('Etkinlik silindi',u)},
  fMem:d=>{F.members=F.members.includes(d.id)?F.members.filter(x=>x!==d.id):[...F.members,d.id];memRefresh()},
- fAll:()=>{const all=S.members.every(m=>F.members.includes(m.id));F.members=all?[meId()]:S.members.map(m=>m.id);F.pick=false;all?flyOut():flyIn()},
- fPick:()=>{F.pick=true;flyOut()},
+ fAll:()=>{const all=allOf(F.members);F.members=all?[meId()]:S.members.map(m=>m.id);F.pick=false;all?flyOut('ev-mem'):flyIn('ev-mem')},
+ fPick:(d,el)=>{F.pick=true;flyOut(el.dataset.box)},
  fAs:d=>{const rc=document.getElementById('tk-rot');
   if(rc&&rc.checked)F.who=[d.id];else F.who=F.who.includes(d.id)?(F.who.length>1?F.who.filter(x=>x!==d.id):F.who):[...F.who,d.id];
   if(rc&&rc.checked&&!F.rot.includes(F.who[0]))F.rot.unshift(F.who[0]);asRefresh()},
  fAsAll:()=>{const rc=document.getElementById('tk-rot');if(rc&&rc.checked){toast('Sırayla yapılan görevde tek kişi seçilir');return}
-  const all=S.members.every(m=>F.who.includes(m.id));F.who=all?[meId()]:S.members.map(m=>m.id);asRefresh()},
+  const all=allOf(F.who);F.who=all?[meId()]:S.members.map(m=>m.id);F.pick=false;all?flyOut('tk-as'):flyIn('tk-as')},
  fAllRule:d=>{F.all=d.v==='1';asRefresh()},
- fRot:d=>{F.rot=F.rot.includes(d.id)?F.rot.filter(x=>x!==d.id):[...F.rot,d.id];document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true});if(F.rot[0]){F.who=[F.rot[0]];asRefresh()}},
+ fRot:d=>{F.rot=F.rot.includes(d.id)?F.rot.filter(x=>x!==d.id):[...F.rot,d.id];document.getElementById('tk-rotc').innerHTML=faceGrid('fRot',F.rot,'',true);if(F.rot[0]){F.who=[F.rot[0]];asRefresh()}},
  // Görevler
  tf:d=>{UI.tf=d.v;render(true)},
  tkb:d=>{UI.tkb=d.v;UI.tkUp=false;UI.dcKeep.clear();render(true)},
@@ -2453,7 +2460,7 @@ const A={
  sugAdd:d=>{const it=addItemTo(F.list,d.v);if(!it)return;addApply([it]);render(true);const g=document.getElementById('sugg'),q=document.getElementById('item-input');if(g)g.innerHTML=suggHTML(q?q.value:'');toast(`${it.name} ${addL().name} listesine eklendi`)},
  addMore:()=>{addSync();F.more=!F.more;addPaint()},
  adList:d=>{addSync();F.list=d.id;addPaint()},
- adFor:d=>{addSync();F.for=F.for===d.id?'':d.id;addPaint()},
+ adFor:d=>{addSync();const was=F.for;F.for=was===d.id?'':d.id;F.pick=false;forFly('ad-for',was,F.for)},
  adPri:d=>{addSync();F.pri=d.v;addPaint()},
  toggleTask:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;if(!t.done&&UI.tab==='tasks')UI.dcKeep.add(t.id);else UI.dcKeep.delete(t.id);A.tkDone(d);if(!t.done){UI.dcKeep.delete(t.id);return}if(UI.dcKeep.has(t.id))dcSettle(t.id)},
  tkDone:d=>{const t=S.tasks.find(x=>x.id===d.id);if(!t)return;const u=snap();
@@ -2546,8 +2553,8 @@ const A={
  cmDel:d=>{const u=snap();S.wcm=(S.wcm||[]).filter(c=>c.id!==d.id);render(true);toast('Yorum silindi',u)},
  undoneWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);if(!w)return;unlog(`“${w.title}” için “yaptık” dedi ${w.mood}`);w.done=false;w.doneAt=null;w.doneWith=[];w.mood='';close();render(true);toast('Geri alındı',u)},
  delWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);if(!w){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.wishes=S.wishes.filter(x=>x.id!==d.id);S.wcm=(S.wcm||[]).filter(c=>c.w!==d.id);log(`“${w.title}” isteğini sildi`);close();render(true);toast('İstek silindi',u)},
- fWith:(d,el)=>{F.with=F.with.includes(d.id)?F.with.filter(x=>x!==d.id):[...F.with,d.id];document.getElementById('wd-with').innerHTML=withChips()},
- fWithAll:()=>{F.with=allIn(F.with)?[meId()]:S.members.map(m=>m.id);document.getElementById('wd-with').innerHTML=withChips()},
+ fWith:d=>{F.with=F.with.includes(d.id)?F.with.filter(x=>x!==d.id):[...F.with,d.id];withRefresh()},
+ fWithAll:()=>{const all=allOf(F.with);F.with=all?[meId()]:S.members.map(m=>m.id);F.pick=false;all?flyOut('wd-with'):flyIn('wd-with')},
  fMood:d=>{F.mood=d.v;document.querySelectorAll('#wd-mood button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
  openItem:d=>{const i=S.items.find(x=>x.id===d.id);if(!i)return;const L=S.lists.find(l=>l.id===i.list);
   sheet(esc(i.name),`<div class="dl">
@@ -2561,7 +2568,7 @@ const A={
    shTools(['editItem',i.id,'edit','Düzenle'],['delItem',i.id,'trash','Sil',undefined,'',1]))},
  editItem:d=>{const i=S.items.find(x=>x.id===d.id);i&&itemForm(i)},
  fCat:d=>{F.cat=d.v;document.querySelectorAll('#it-cat .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===d.v))},
- fFor:d=>{F.for=F.for===d.id?'':d.id;document.getElementById('it-for').innerHTML=itemForm.forChips()},
+ fFor:d=>{const was=F.for;F.for=was===d.id?'':d.id;F.pick=false;forFly('it-for',was,F.for)},
  fPri:(d,el)=>{F.pri=d.v;document.querySelectorAll('#it-pri button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
  toggleItem2:d=>{close();A.toggleItem(d)},
  delItem:d=>{const u=snap(),i=S.items.find(x=>x.id===d.id);if(!i){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.items=S.items.filter(x=>x.id!==d.id);log(`listeden ${low(i.name)} sildi`);close();render(true);toast(`${i.name} silindi`,u)},
@@ -2699,7 +2706,7 @@ document.addEventListener('change',e=>{
  if(e.target.id==='ev-end'){const l=e.target.closest('.dtp');l&&l.classList.remove('bad')}
  if(e.target.id==='ev-allday'){const t=document.getElementById('ev-time');t.disabled=e.target.checked;const l=t.closest('.dtp');l&&l.classList.toggle('off',e.target.checked)}
  if(e.target.matches('.dtp input'))dtSync(e.target);
- if(e.target.id==='tk-rot'){const a=document.getElementById('rot-area');a.hidden=!e.target.checked;F.who=[F.who[0]];asRefresh();if(e.target.checked){if(!F.rot.length)F.rot=[F.who[0]];const r=document.getElementById('tk-rep');if(r.value==='none')r.value='weekly';document.getElementById('tk-rotc').innerHTML=chipsHTML('fRot',F.rot,{ord:true})}}});
+ if(e.target.id==='tk-rot'){const a=document.getElementById('rot-area');a.hidden=!e.target.checked;F.who=[F.who[0]];asRefresh();if(e.target.checked){if(!F.rot.length)F.rot=[F.who[0]];const r=document.getElementById('tk-rep');if(r.value==='none')r.value='weekly';document.getElementById('tk-rotc').innerHTML=faceGrid('fRot',F.rot,'',true)}}});
 document.addEventListener('input',e=>{if(e.target.matches&&e.target.matches('.dtp input'))dtSync(e.target)});
 document.addEventListener('input',e=>{if(e.target.id==='sa-in'){F.saKind=null;saUpd()}});
 // Masaüstü tarayıcıda görünmez tarih kutusuna tıklayınca seçici açılsın (telefonda zaten açılır)
