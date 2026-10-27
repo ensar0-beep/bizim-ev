@@ -1803,8 +1803,9 @@ function itabs(arr,label){return `<div class="wtabs${arr.length>5?' scr':''}" ro
 P.scan='<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M17 8v8"/>';
 const LKAT={tr:['Türk edebiyatı','#8A3B2B'],dk:['Dünya edebiyatı','#2E5A8A'],cg:['Çocuk ve genç','#B8662B'],dt:['Düşünce ve tarih','#3E6B4C'],dg:['Diğer','#6B6359']};
 const LIB=()=>S.books||(S.books=[]);
-// Kitap adı: her kelimenin ilk harfi büyük, gerisi küçük ("Beş Şehir"). Roma rakamları (II, IV) olduğu gibi kalır. Elle düzenlenen ad dokunulmadan kalır.
-const tcase=t=>String(t).split(/(\s+)/).map(w=>/^[IVXLC]{2,}[.,:;]?$/.test(w)?w:w.replace(/^([^\p{L}\p{N}]*)([\p{L}\p{N}])(.*)$/u,(m,a,b,c)=>a+b.toLocaleUpperCase('tr')+c.toLocaleLowerCase('tr'))).join('');
+// Kitap ve yazar adı: her kelimenin ilk harfi büyük, gerisi küçük ("Beş Şehir", "Saint-Exupéry"). Roma rakamları (II, IV) olduğu gibi kalır. Elle düzenlenen ad dokunulmadan kalır.
+// Küçültmede Türkçe kural (I→ı) yalnız adda Türkçe harf varsa: "İLBER ORTAYLI" → Ortaylı, "SABAHATTIN ALI" → Ali. Büyütmede yabancı harf yoksa Türkçe (ince → İnce).
+const tcase=t=>{t=String(t);const tr=/[çğıöşüÇĞİŞÖÜ]/.test(t),up=tr||!/[\u00C0-\u024F]/.test(t)?'tr':'en',lo=tr?'tr':'en';return t.split(/(\s+|-)/).map(w=>/^[IVXLC]{2,}[.,:;]?$/.test(w)?w:w.replace(/^([^\p{L}\p{N}]*)([\p{L}\p{N}])(.*)$/u,(m,a,b,c)=>a+b.toLocaleUpperCase(up)+c.toLocaleLowerCase(lo))).join('')};
 // Kategori adları aile aile değiştirilebilir: bkat/{anahtar} = {n, at}; boşsa varsayılan ad
 const katN=k=>{const x=(S.bkat||[]).find(z=>z.id===k&&z.n);return x?x.n:LKAT[k][0]};
 const trl=x=>String(x||'').toLocaleLowerCase('tr');
@@ -1863,7 +1864,7 @@ function libBody(){const L=LIB(),me=meId(),f=UI.lf||'all';
  const ring=`<div class="rdc${f!=='all'?' on':''}"><span class="ring" role="img" aria-label="Okuduğun: yüzde ${pct}"><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" class="bg"/><circle cx="22" cy="22" r="18" class="fg" stroke-dasharray="${(pct*C/100).toFixed(1)} ${C}"/></svg><b>%${pct}</b></span>${[['rd','Okuduklarım',nr],['un','Okumadıklarım',L.length-nr]].map(([v,n,c])=>`<button class="rdb ${v}" data-act="libF" data-v="${v}" aria-pressed="${f===v}"><b>${c}</b><small>${n}</small>${f===v?`<span class="rx" aria-hidden="true">${I('x','sm')}</span>`:''}</button>`).join('')}</div>`;
  return `<div class="libtop">${btn}<div class="qrow"><label class="libq">${I('search','sm')}<input id="lib-q" type="search" placeholder="${L.length} kitapta ara" aria-label="Kitaplarda ara" value="${esc(UI.lq||'')}" autocomplete="off"></label><button class="dzs${k!=='ad'?' on':''}" data-act="dzSheet" aria-label="Sırala: ${DZ[k][0]}">${I('sliders')}</button></div>${ring}</div><div id="libres">${libList()}</div>`}
 const libPaint=()=>{const r=document.getElementById('libres');if(r)r.innerHTML=libList()};
-function vLib(){if(!store.libTc&&S.books&&S.books.length){S.books.forEach(b=>{const t=tcase(b.t);if(t!==b.t)b.t=t});store.libTc=1;save()}return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="family">${I('chevL','sm')}Aile</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
+function vLib(){if(store.libTc!==2&&S.books&&S.books.length){S.books.forEach(b=>{const t=tcase(b.t),a=tcase(b.a);if(t!==b.t)b.t=t;if(a!==b.a)b.a=a});store.libTc=2;save()}return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="family">${I('chevL','sm')}Aile</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
 function libCard(){const L=LIB();return `<button class="libcard" data-act="libGo"><span class="st">${L.length?libSort(L).slice(0,4).map(b=>`<i style="--c:${bcol(b)}"></i>`).join(''):`<i style="--c:#8A3B2B"></i><i style="--c:#2E5A8A"></i><i style="--c:#B8662B"></i>`}</span><span class="tx"><b>Ev kütüphanesi</b><small>${L.length?L.length+' kitap':'Evdeki kitaplarınızı ekleyin'}</small></span>${I('chevR')}</button>`}
 // Kitap ayrıntısı: kapak, kategori, Kim okudu, yorumlar (isteklerdeki sohbet)
 function libSheet(b){const own=b.by===meId()||!isChild(),meta=[b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · ');
@@ -1872,7 +1873,7 @@ function libSheet(b){const own=b.by===meId()||!isChild(),meta=[b.p?b.p+' sayfa':
  return `<div class="bkhead">${bkCover(b,'md')}<span class="bktx">${b.a?`<b>${esc(b.a)}</b>`:''}${meta?`<span>${meta}</span>`:''}${b.isbn?`<span>ISBN ${b.isbn}</span>`:''}<span>${b.by?esc(first(M(b.by).name))+' ekledi · ':''}${ago(b.at)}</span></span></div>${kat}${rd}<div class="lcmw">${cmHTML(b)}</div>`}
 // Aynı kitap evde var mı: ISBN ya da ad (ve yazar)
 const libHas=x=>LIB().find(b=>x.n&&b.isbn===x.n||trl(b.t)===trl(x.t)&&(!x.a||!b.a||trl(b.a)===trl(x.a)));
-function libNew(x){const b={id:uid(),t:tcase(String(x.t||'?').trim()).slice(0,160),a:String(x.a||'').slice(0,120),p:Math.max(0,Math.min(20000,Math.round(+x.p)||0)),y:/^\d{4}$/.test(x.y||'')?x.y:'',k:LKAT[x.k]?x.k:'dg',i:okCover(x.i||'')?x.i:'',rd:[],by:meId(),at:Date.now()};
+function libNew(x){const b={id:uid(),t:tcase(String(x.t||'?').trim()).slice(0,160),a:tcase(String(x.a||'').trim()).slice(0,120),p:Math.max(0,Math.min(20000,Math.round(+x.p)||0)),y:/^\d{4}$/.test(x.y||'')?x.y:'',k:LKAT[x.k]?x.k:'dg',i:okCover(x.i||'')?x.i:'',rd:[],by:meId(),at:Date.now()};
  if(okIsbn(x.n||''))b.isbn=x.n;LIB().push(b);libLog(b.t);render(true);
  if(b.i)coverTint(b.i).then(c=>{const z=c&&LIB().find(y=>y.id===b.id);if(z&&!z.c){z.c=c;render(true)}});return b}
 // Arka arkaya eklenen kitaplar "Son değişiklikler"i doldurmasın: 10 dakika içinde tek satırda sayılır
