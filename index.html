@@ -498,7 +498,7 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .rdc.on .rdb[aria-pressed="false"]{opacity:.55}
 .lcnt{margin:0 2px 8px;color:var(--muted);font-size:.84rem;font-weight:600}
 .lempty{padding:18px;text-align:center;color:var(--muted)}
-.lsec{margin:4px 0 18px}.lsh{display:flex;align-items:center;gap:8px;margin:14px 2px 10px}.lsh b{font-size:1rem}.lsh em{font-style:normal;color:var(--muted);font-size:.85rem}
+.lsec{margin:4px 0 18px}.lsh{display:flex;align-items:center;gap:8px;margin:14px 2px 10px;min-height:32px;color:var(--fg);text-align:left}.lsh .i{color:var(--muted);opacity:.7}.lsh b{font-size:1rem}.lsh em{font-style:normal;color:var(--muted);font-size:.85rem}
 .kd{width:10px;height:10px;border-radius:3px;background:var(--c)}
 /* sırtlar: gerçek kitaplık gibi, raf tahtası her 160px'de */
 .spines{--w1:#B98A5A;--w2:#8C5E35;display:flex;flex-wrap:wrap;align-content:flex-start;row-gap:18px;column-gap:2px;padding:0 10px 18px;border-radius:var(--r-lg);overflow:hidden;
@@ -1153,7 +1153,7 @@ const FB_KEY='AIzaSyB6cyMIu_2Q5T1cAXTzDFPmXlPs0CWzQpg';
 const IDP_URL='https://identitytoolkit.googleapis.com/v1/accounts:signUp';
 const TOK_URL='https://securetoken.googleapis.com/v1/token';
 const KEY='bizim-ev.v1';
-const COLS=['members','events','tasks','lists','items','wishes','activity','freq','msgs','wcm','rsv','books'];
+const COLS=['members','events','tasks','lists','items','wishes','activity','freq','msgs','wcm','rsv','books','bkat'];
 let store;
 try{store=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{},auth:null,av:{},avi:{}},store&&typeof store==='object'?store:{});
@@ -1224,7 +1224,8 @@ function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
   case 'msgs':x.t=str(x.t).slice(0,80);x.at=+x.at||0;break;
   case 'wcm':x.w=okId(str(x.w))?x.w:'';x.by=okId(str(x.by))?x.by:'';x.t=str(x.t).slice(0,500);x.at=+x.at||0;break;
   case 'rsv':x.e=okId(str(x.e))?x.e:'';x.m=okId(str(x.m))?x.m:'';if(!RSV[x.v])x.v='';x.at=+x.at||0;if(x.v==='a'&&okDate(x.d)){x.t=okTime(x.t)?x.t:''}else{delete x.d;delete x.t}break;
-  case 'books':x.t=str(x.t).slice(0,160)||'?';x.a=str(x.a).slice(0,120);x.p=Math.max(0,Math.min(20000,Math.round(+x.p)||0));x.y=/^\d{4}$/.test(str(x.y))?x.y:'';if(!LKAT[x.k])x.k='dg';x.i=okCover(str(x.i))?x.i:'';if(!/^#[0-9a-fA-F]{6}$/.test(str(x.c)))delete x.c;if(!okIsbn(str(x.isbn)))delete x.isbn;x.rd=idList(x.rd);x.by=okId(str(x.by))?x.by:'';x.at=+x.at||0;break}
+  case 'books':x.t=str(x.t).slice(0,160)||'?';x.a=str(x.a).slice(0,120);x.p=Math.max(0,Math.min(20000,Math.round(+x.p)||0));x.y=/^\d{4}$/.test(str(x.y))?x.y:'';if(!LKAT[x.k])x.k='dg';x.i=okCover(str(x.i))?x.i:'';if(!/^#[0-9a-fA-F]{6}$/.test(str(x.c)))delete x.c;if(!okIsbn(str(x.isbn)))delete x.isbn;x.rd=idList(x.rd);x.by=okId(str(x.by))?x.by:'';x.at=+x.at||0;break;
+  case 'bkat':x.n=str(x.n).trim().slice(0,40);x.at=+x.at||0;break}
  return x}
 function flat(s){const o={};if(!s)return o;for(const c of COLS)for(const x of s[c]||[])o[c+'/'+x.id]=x;if(s.ann)o.ann=s.ann;if(s.meta)o.meta=s.meta;return o}
 function unflat(o){const s={meta:o.meta||{},ann:o.ann&&typeof o.ann==='object'?Object.assign({},o.ann,{text:str(o.ann.text)}):null};for(const c of COLS)s[c]=[];
@@ -1802,6 +1803,10 @@ function itabs(arr,label){return `<div class="wtabs${arr.length>5?' scr':''}" ro
 P.scan='<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M17 8v8"/>';
 const LKAT={tr:['Türk edebiyatı','#8A3B2B'],dk:['Dünya edebiyatı','#2E5A8A'],cg:['Çocuk ve genç','#B8662B'],dt:['Düşünce ve tarih','#3E6B4C'],dg:['Diğer','#6B6359']};
 const LIB=()=>S.books||(S.books=[]);
+// Kitap adı: her kelimenin ilk harfi büyük, gerisi küçük ("Beş Şehir"). Roma rakamları (II, IV) olduğu gibi kalır. Elle düzenlenen ad dokunulmadan kalır.
+const tcase=t=>String(t).split(/(\s+)/).map(w=>/^[IVXLC]{2,}[.,:;]?$/.test(w)?w:w.replace(/^([^\p{L}\p{N}]*)([\p{L}\p{N}])(.*)$/u,(m,a,b,c)=>a+b.toLocaleUpperCase('tr')+c.toLocaleLowerCase('tr'))).join('');
+// Kategori adları aile aile değiştirilebilir: bkat/{anahtar} = {n, at}; boşsa varsayılan ad
+const katN=k=>{const x=(S.bkat||[]).find(z=>z.id===k&&z.n);return x?x.n:LKAT[k][0]};
 const trl=x=>String(x||'').toLocaleLowerCase('tr');
 const okIsbn=v=>{if(!/^97[89]\d{10}$/.test(v))return false;let s=0;for(let i=0;i<12;i++)s+=+v[i]*(i%2?3:1);return (10-s%10)%10===+v[12]};
 // Kategori tahmini: Google Books / Open Library konularından. Romanda yazar adı Türkçeyse Türk edebiyatı; kitaba dokunup değiştirilebilir.
@@ -1849,7 +1854,7 @@ function libList(){const a=libFilter(),f=UI.lf||'all',w=f==='rd'?' okuduğun':f=
  const top=f!=='all'||UI.lq?`<div class="lcnt">${a.length}${w} kitap</div>`:'';
  if(!a.length)return top+`<div class="group lempty">${UI.lq?'Bu adla kitap yok. Eklemek için “Adla ara”ya dokun.':f==='rd'?'Okuduğun kitapları, kitaba dokunup “Kim okudu”dan kendini seçerek işaretle.':'Okumadığın kitap kalmadı.'}</div>`;
  if(UI.lq)return top+shelf(a);
- return top+Object.entries(LKAT).map(([k,[n,c]])=>{const g=a.filter(b=>b.k===k);return g.length?`<section class="lsec"><div class="lsh"><span class="kd" style="--c:${c}"></span><b>${n}</b><em>${g.length}</em></div>${shelf(g)}</section>`:''}).join('')}
+ return top+Object.entries(LKAT).map(([k,[n,c]])=>{const g=a.filter(b=>b.k===k);return g.length?`<section class="lsec"><button class="lsh" data-act="katEdit" data-v="${k}" aria-label="${esc(katN(k))}, ${g.length} kitap. Adını değiştir"${lock(!isChild(),PARENT)}><span class="kd" style="--c:${c}"></span><b>${esc(katN(k))}</b><em>${g.length}</em>${isChild()?'':I('edit','sm')}</button>${shelf(g)}</section>`:''}).join('')}
 function libBody(){const L=LIB(),me=meId(),f=UI.lf||'all';
  const btn=`<div class="libadd"><button class="btn primary" data-act="libScan">${I('scan','sm')}Barkod tara</button><button class="btn soft" data-act="libFind">${I('search','sm')}Adla ara</button></div>`;
  if(!L.length)return `<div class="libtop">${btn}</div>${emptyBox('Kitaplığınız boş','Kitabın arkasındaki barkodu okut ya da adıyla ara. Kapak, yazar ve sayfa sayısı kendiliğinden gelir.')}`;
@@ -1858,16 +1863,16 @@ function libBody(){const L=LIB(),me=meId(),f=UI.lf||'all';
  const ring=`<div class="rdc${f!=='all'?' on':''}"><span class="ring" role="img" aria-label="Okuduğun: yüzde ${pct}"><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" class="bg"/><circle cx="22" cy="22" r="18" class="fg" stroke-dasharray="${(pct*C/100).toFixed(1)} ${C}"/></svg><b>%${pct}</b></span>${[['rd','Okuduklarım',nr],['un','Okumadıklarım',L.length-nr]].map(([v,n,c])=>`<button class="rdb ${v}" data-act="libF" data-v="${v}" aria-pressed="${f===v}"><b>${c}</b><small>${n}</small>${f===v?`<span class="rx" aria-hidden="true">${I('x','sm')}</span>`:''}</button>`).join('')}</div>`;
  return `<div class="libtop">${btn}<div class="qrow"><label class="libq">${I('search','sm')}<input id="lib-q" type="search" placeholder="${L.length} kitapta ara" aria-label="Kitaplarda ara" value="${esc(UI.lq||'')}" autocomplete="off"></label><button class="dzs${k!=='ad'?' on':''}" data-act="dzSheet" aria-label="Sırala: ${DZ[k][0]}">${I('sliders')}</button></div>${ring}</div><div id="libres">${libList()}</div>`}
 const libPaint=()=>{const r=document.getElementById('libres');if(r)r.innerHTML=libList()};
-function vLib(){return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="family">${I('chevL','sm')}Aile</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
+function vLib(){if(!store.libTc&&S.books&&S.books.length){S.books.forEach(b=>{const t=tcase(b.t);if(t!==b.t)b.t=t});store.libTc=1;save()}return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="family">${I('chevL','sm')}Aile</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
 function libCard(){const L=LIB();return `<button class="libcard" data-act="libGo"><span class="st">${L.length?libSort(L).slice(0,4).map(b=>`<i style="--c:${bcol(b)}"></i>`).join(''):`<i style="--c:#8A3B2B"></i><i style="--c:#2E5A8A"></i><i style="--c:#B8662B"></i>`}</span><span class="tx"><b>Ev kütüphanesi</b><small>${L.length?L.length+' kitap':'Evdeki kitaplarınızı ekleyin'}</small></span>${I('chevR')}</button>`}
 // Kitap ayrıntısı: kapak, kategori, Kim okudu, yorumlar (isteklerdeki sohbet)
 function libSheet(b){const own=b.by===meId()||!isChild(),meta=[b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · ');
- const kat=`<div class="kchips" role="group" aria-label="Kategori">${Object.entries(LKAT).map(([k,[n,c]])=>`<button data-act="libKat" data-id="${b.id}" data-v="${k}" aria-pressed="${b.k===k}" style="--c:${c}"${lock(own,PARENT)}>${n}</button>`).join('')}</div>`;
+ const kat=`<div class="kchips" role="group" aria-label="Kategori">${Object.entries(LKAT).map(([k,[n,c]])=>`<button data-act="libKat" data-id="${b.id}" data-v="${k}" aria-pressed="${b.k===k}" style="--c:${c}"${lock(own,PARENT)}>${esc(katN(k))}</button>`).join('')}</div>`;
  const rd=`<div class="lbl" style="margin-top:16px"><span>Kim okudu</span></div><div class="pgrid">${ordMe().map(m=>`<button class="pp${m.role==='child'?' kid':''}" data-act="libRead" data-id="${b.id}" data-m="${m.id}" aria-pressed="${b.rd.includes(m.id)}"${lock(!isChild()||m.id===meId(),'Yalnızca kendini işaretleyebilirsin.')}>${av(m.id)}<span class="ck">${I('check','sm')}</span>${esc(first(m.name))}</button>`).join('')}</div>`;
  return `<div class="bkhead">${bkCover(b,'md')}<span class="bktx">${b.a?`<b>${esc(b.a)}</b>`:''}${meta?`<span>${meta}</span>`:''}${b.isbn?`<span>ISBN ${b.isbn}</span>`:''}<span>${b.by?esc(first(M(b.by).name))+' ekledi · ':''}${ago(b.at)}</span></span></div>${kat}${rd}<div class="lcmw">${cmHTML(b)}</div>`}
 // Aynı kitap evde var mı: ISBN ya da ad (ve yazar)
 const libHas=x=>LIB().find(b=>x.n&&b.isbn===x.n||trl(b.t)===trl(x.t)&&(!x.a||!b.a||trl(b.a)===trl(x.a)));
-function libNew(x){const b={id:uid(),t:String(x.t||'?').slice(0,160),a:String(x.a||'').slice(0,120),p:Math.max(0,Math.min(20000,Math.round(+x.p)||0)),y:/^\d{4}$/.test(x.y||'')?x.y:'',k:LKAT[x.k]?x.k:'dg',i:okCover(x.i||'')?x.i:'',rd:[],by:meId(),at:Date.now()};
+function libNew(x){const b={id:uid(),t:tcase(String(x.t||'?').trim()).slice(0,160),a:String(x.a||'').slice(0,120),p:Math.max(0,Math.min(20000,Math.round(+x.p)||0)),y:/^\d{4}$/.test(x.y||'')?x.y:'',k:LKAT[x.k]?x.k:'dg',i:okCover(x.i||'')?x.i:'',rd:[],by:meId(),at:Date.now()};
  if(okIsbn(x.n||''))b.isbn=x.n;LIB().push(b);libLog(b.t);render(true);
  if(b.i)coverTint(b.i).then(c=>{const z=c&&LIB().find(y=>y.id===b.id);if(z&&!z.c){z.c=c;render(true)}});return b}
 // Arka arkaya eklenen kitaplar "Son değişiklikler"i doldurmasın: 10 dakika içinde tek satırda sayılır
@@ -2744,10 +2749,19 @@ const A={
   e.date=r.d;if(r.t)e.time=r.t;if(e.end)delete e.end;e.askAt=now;S.rsv.push({id:uid(),e:e.id,m:r.m,v:'y',at:now+1});if(!e.members.includes(r.m))e.members.push(r.m);
   const w=e.wish&&(S.wishes||[]).find(x=>x.id===e.wish);if(w&&!w.done)w.planned=e.date;const o=e.ask.filter(m=>m!==r.m);
   log(`“${e.title}” planını ${rel(e.date)} gününe aldı`);closeNow();render(true);toast(`Plan ${rel(e.date)} gününe alındı${o.length?'. '+nmList(o)+' için yeniden soruldu':''}`,u)},
+ libEdit:d=>{const b=LIB().find(x=>x.id===d.id);if(!b)return;F={bookId:b.id};
+  sheet('Kitabı düzenle',`<form data-form="libEdit" autocomplete="off">
+  <div class="field"><label for="le-t">Kitabın adı</label><input class="inp" id="le-t" maxlength="160" value="${esc(b.t)}"><span class="err" id="le-err" hidden>Bir ad yaz.</span></div>
+  <div class="field"><label for="le-a">Yazar</label><input class="inp" id="le-a" maxlength="120" value="${esc(b.a)}"></div>
+  <div class="row2"><div class="field"><label for="le-p">Sayfa sayısı</label><input class="inp" id="le-p" inputmode="numeric" maxlength="5" value="${b.p||''}"></div><div class="field"><label for="le-y">Basım yılı</label><input class="inp" id="le-y" inputmode="numeric" maxlength="4" value="${esc(b.y)}"></div></div>
+  <button class="btn primary block">Kaydet</button></form>`)},
+ katEdit:d=>{if(!LKAT[d.v])return;F={kat:d.v};
+  sheet('Kategori adı',`<form data-form="katEdit" autocomplete="off"><div class="field"><label for="ke-n">Ad</label><input class="inp" id="ke-n" maxlength="40" value="${esc(katN(d.v))}" placeholder="${esc(LKAT[d.v][0])}" autofocus></div>
+  <p class="note" style="margin:0 0 14px">${I('info','sm')}<span>Ailede herkes bu adı görür. Boş bırakırsan “${esc(LKAT[d.v][0])}” olur.</span></p><button class="btn primary block">Kaydet</button></form>`)},
  libGo:()=>{UI.tab='lib';UI.lq='';UI.lf='all';toastOff();render()},
  openBook:d=>{if(UI.tab!=='lib'){UI.tab='lib';UI.lq='';UI.lf='all';render()}A.libOpen(d)},
  libF:d=>{UI.lf=d.v===UI.lf?'all':d.v;render(true)},
- libOpen:d=>{const b=LIB().find(x=>x.id===d.id);if(!b){toast('Bu kitap başka bir cihazda silinmiş.');return}sheet(esc(b.t),libSheet(b),shTools(['libDel',b.id,'trash','Sil',b.by===meId()||!isChild(),PARENT,1]))},
+ libOpen:d=>{const b=LIB().find(x=>x.id===d.id);if(!b){toast('Bu kitap başka bir cihazda silinmiş.');return}sheet(esc(b.t),libSheet(b),shTools(['libEdit',b.id,'edit','Düzenle',b.by===meId()||!isChild(),PARENT],['libDel',b.id,'trash','Sil',b.by===meId()||!isChild(),PARENT,1]))},
  libRead:d=>{const b=LIB().find(x=>x.id===d.id);if(!b)return;const on=!b.rd.includes(d.m);b.rd=on?[...b.rd,d.m]:b.rd.filter(x=>x!==d.m);
   if(d.m===meId()){const t=`“${b.t}” kitabını okudu`;if(on)log(t);else unlog(t)}
   const el=document.querySelector(`.sheet [data-act="libRead"][data-m="${d.m}"]`);el&&el.setAttribute('aria-pressed',on);render(true)},
@@ -2872,6 +2886,11 @@ const FORMS={
   const trip=F.wtype==='yer'?tripOut():null,place=isPlaceType(F.wtype)&&F.place?{n:F.place.n||t,a:F.place.a||'',u:F.place.u||''}:undefined,book=F.wtype==='kitap'&&F.book?{t:F.book.t,a:F.book.a||'',p:F.book.p||0,y:F.book.y||'',i:F.book.i||''}:undefined;
   if(F.edit){const ex=S.wishes.find(x=>x.id===F.edit);if(!ex){close();toast('Bu istek başka bir cihazda silinmiş.');return}Object.assign(ex,{title:t,note,type:F.wtype});if(place)ex.place=place;else delete ex.place;if(trip)ex.trip=trip;else delete ex.trip;if(book)ex.book=book;else delete ex.book}else{S.wishes.push({id:uid(),type:F.wtype,title:t,note,...(place?{place}:{}),...(trip?{trip}:{}),...(book?{book}:{}),by:meId(),want:[meId()],rate:{[meId()]:F.rate||4},at:Date.now(),done:false,doneAt:null,doneWith:[],mood:'',planned:''});log(`${WT[F.wtype][0].toLocaleLowerCase('tr')} listesine “${t}” isteğini ekledi`)}
   close();render(true);toast(F.edit?'Kaydedildi':'İstek eklendi',u)},
+ libEdit:()=>{const b=LIB().find(x=>x.id===F.bookId),g=id=>document.getElementById(id);if(!b){close();toast('Bu kitap başka bir cihazda silinmiş.');return}
+  const t=g('le-t').value.trim().slice(0,160);if(!t){g('le-err').hidden=false;return}const u=snap(),p=Math.round(+g('le-p').value.replace(/\D/g,''))||0,y=g('le-y').value.trim();
+  Object.assign(b,{t,a:g('le-a').value.trim().slice(0,120),p:Math.min(20000,p),y:/^\d{4}$/.test(y)?y:''});render(true);A.libOpen({id:b.id});toast('Kaydedildi',u)},
+ katEdit:()=>{const k=F.kat,n=document.getElementById('ke-n').value.trim().slice(0,40);if(!LKAT[k])return;const u=snap();S.bkat=(S.bkat||[]).filter(x=>x.id!==k);
+  if(n&&n!==LKAT[k][0])S.bkat.push({id:k,n,at:Date.now()});close();render(true);toast('Kategori adı kaydedildi',u)},
  cmSave:()=>{const f=document.querySelector('[data-form="cmSave"]'),i=document.getElementById('cm-in'),t=i.value.trim().slice(0,500),w=f&&(S.wishes.find(x=>x.id===f.dataset.id)||LIB().find(x=>x.id===f.dataset.id));if(!t||!w)return;
   S.wcm=S.wcm||[];S.wcm.push({id:uid(),w:w.id,by:meId(),t,at:Date.now()});i.value='';render(true);const b=document.querySelector('#cmw .cmb');b&&b.lastElementChild&&b.lastElementChild.scrollIntoView({block:'nearest'})},
  wishDone:()=>{const w=S.wishes.find(x=>x.id===F.wid);if(!w)return;const u=snap();const dt=document.getElementById('wd-date').value||T();
@@ -3081,7 +3100,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-27c',items:[['book','Ev kütüphanesi','Aile sayfasında evdeki kitaplarınız: barkodu okut ya da adıyla ara, kapak ve yazar kendiliğinden gelir. Raf kategori kategori sırtlarla dizilir, kimin okuduğunu işaretler, kitaplara yorum yazarsınız'],['cal','Plana katılım','Bir isteği plana dökünce eklediğin yetişkinlere “Katılıyor musun?” diye sorulur. Başka gün de önerebilirler, sen de planı o güne alırsın'],['cart','Tahmini fiyat','Alınacak eklerken ⋯ içinde tahmini fiyat yazabilirsin. Listenin altında bekleyenlerin toplam tutarı görünür'],['cal','Birkaç günlük etkinlik','Etkinlik eklerken “Birkaç gün sürüyor”a dokun, bitiş gününü seç. Ay görünümünde o günler ve tatiller tek şerit olur']]};
+const NEWS={v:'2026-10-27c',items:[['book','Ev kütüphanesi','Aile sayfasında evdeki kitaplarınız: barkodu okut ya da adıyla ara, kapak ve yazar kendiliğinden gelir. Kitabı düzenleyebilir, kategori başlığına dokunup adını değiştirebilirsin. Kimin okuduğunu işaretler, kitaplara yorum yazarsınız'],['cal','Plana katılım','Bir isteği plana dökünce eklediğin yetişkinlere “Katılıyor musun?” diye sorulur. Başka gün de önerebilirler, sen de planı o güne alırsın'],['cart','Tahmini fiyat','Alınacak eklerken ⋯ içinde tahmini fiyat yazabilirsin. Listenin altında bekleyenlerin toplam tutarı görünür'],['cal','Birkaç günlük etkinlik','Etkinlik eklerken “Birkaç gün sürüyor”a dokun, bitiş gününü seç. Ay görünümünde o günler ve tatiller tek şerit olur']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
