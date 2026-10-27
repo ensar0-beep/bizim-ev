@@ -879,6 +879,15 @@ a.btn{text-decoration:none}
 .chip .fam{width:1.6rem;height:1.6rem}
 .who .fam,.ctk .fam{width:1.5rem;height:1.5rem}.who .fam svg,.ctk .fam svg{width:1rem;height:1rem}
 .chip .fam svg{width:1rem;height:1rem}
+.rpick .row{min-height:52px;padding:8px 14px}
+.rpick .row .t{font-weight:500}.rpick .rph .t{font-weight:600}
+.rpv{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-weight:500;min-width:0}
+.rph>.i{color:var(--muted);transition:transform .2s;flex:none}.rph[aria-expanded="true"]>.i{transform:rotate(180deg)}
+.rpi{width:30px;height:30px;border-radius:9px;background:var(--sunk);display:flex;align-items:center;justify-content:center;flex:none}
+.rpi .i{width:17px;height:17px}
+.rpick .ok{color:var(--accent);visibility:hidden;display:flex}
+.rpick .row[aria-pressed="true"] .ok{visibility:visible}
+.rpick .row[aria-pressed="true"] .rpi{background:var(--accent-soft);color:var(--accent-ink)}
 </style>
 </head>
 <body>
@@ -897,7 +906,7 @@ a.btn{text-decoration:none}
 (function(){
 'use strict';
 /* ---------- İkonlar ---------- */
-const P={chat:'<path d="M20 12a8 8 0 0 1-11.5 7.2L4 20l1-4.3A8 8 0 1 1 20 12Z"/>',grip:'<path d="M5 8h14M5 12h14M5 16h14"/>',arrUp:'<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',grid:'<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',listb:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>',sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
+const P={sprout:'<path d="M12 21v-9"/><path d="M12 12C12 8 9 5.5 5 5.5 5 9.5 8 12 12 12Z"/><path d="M12 14c0-3.5 2.5-6 6.5-6 0 3.8-2.6 6-6.5 6Z"/>',leaf:'<path d="M5 19C5 10 10 5 20 4c0 10-5 15-14 15"/><path d="M5 19 13 11"/>',snow:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="m9 4 3 2 3-2M9 20l3-2 3 2"/>',chat:'<path d="M20 12a8 8 0 0 1-11.5 7.2L4 20l1-4.3A8 8 0 1 1 20 12Z"/>',grip:'<path d="M5 8h14M5 12h14M5 16h14"/>',arrUp:'<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',grid:'<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',listb:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>',sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
  today:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
  cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
  cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h9a1.5 1.5 0 0 0 1.5-1.1L21.5 7H6"/>',
@@ -1007,7 +1016,7 @@ const WT={mekan:['Gidilecek mekanlar','Mekan','fork'],yer:['Gezilecek yerler','G
 // Kalemler girildiyse toplam onların toplamıdır. Bütçe dökümü TravelSpend gibi; kalemler dokununca açılır.
 const TK=[['u','Ulaşım','#2F6DB5'],['k','Konaklama','#8B4FB8'],['y','Yemek','#C2502F'],['g','Gezi','#2B8467']];
 const TV={araba:['Araba','car'],ucak:['Uçak','plane'],otobus:['Otobüs','bus'],tren:['Tren','train']};
-const TM=['İlkbahar','Yaz','Sonbahar','Kış'];
+const TM=['İlkbahar','Yaz','Sonbahar','Kış'],TMI=['sprout','sun','leaf','snow'];
 Object.assign(P,{car:'<path d="M4 16.5V13l2-5h12l2 5v3.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M4 13h16M7 17.5V19M17 17.5V19"/>',
  plane:'<path d="M10.5 4.2a1.5 1.5 0 0 1 3 0V9l7 4.2V15l-7-2.2v4.7l2 1.5v1.5L12 19.6l-3.5.9V19l2-1.5v-4.7L3.5 15v-1.8l7-4.2Z"/>',
  bus:'<rect x="5" y="3" width="14" height="15" rx="2.5"/><path d="M5 11h14M8 18v2.5M16 18v2.5"/>',
@@ -2075,8 +2084,8 @@ function tripForm(){const t=F.trip;
   :`<span class="tpm"><input class="inp" inputmode="numeric" id="tp-b" value="${t.b||''}" placeholder="Toplam, örn. 15000" aria-label="Toplam bütçe"><em>₺</em></span>`}
   <button type="button" class="link tpl" data-act="tpSplit">${F.tpSplit?'Tek toplam yaz':'Kalemlere ayır: ulaşım, konaklama, yemek, gezi'}</button></div>
  <div class="field"><span class="flabel">Rota</span>${list}<div class="tpadd"><input class="inp" id="tp-stop" placeholder="Durak ekle, örn. Uçhisar" enterkeyhint="done" aria-label="Durak"><button type="button" class="btn soft" data-act="tpAdd">Ekle</button></div></div>
- <div class="field"><span class="flabel">Nasıl gideriz?</span><div class="chips" style="flex-wrap:wrap">${Object.entries(TV).map(([k,[n,ic]])=>`<button type="button" class="chip" data-act="tpV" data-v="${k}" aria-pressed="${t.v===k}">${I(ic,'sm')}${n}</button>`).join('')}</div></div>
- <div class="field"><span class="flabel">Ne zaman?</span><div class="chips" style="flex-wrap:wrap">${TM.map(m=>`<button type="button" class="chip plain" data-act="tpM" data-v="${m}" aria-pressed="${t.m===m}">${m}</button>`).join('')}</div></div>
+ <div class="field"><span class="flabel">Nasıl gideriz?</span>${icGrid('tpV',Object.entries(TV).map(([k,[n,ic]])=>[k,n,ic]),t.v)}</div>
+ <div class="field"><span class="flabel">Ne zaman?</span>${icGrid('tpM',TM.map((m,i)=>[m,m,TMI[i]]),t.m)}</div>
  <button type="button" class="link tpl" data-act="tpClear">${I('trash','sm')}Gezi planını kaldır</button>`}
 function tpSync(){const t=F.trip;if(!t)return;const g=id=>document.getElementById(id),num=v=>Math.max(0,Math.min(1e8,parseInt(String(v).replace(/\D/g,''))||0));if(g('tp-b'))t.b=num(g('tp-b').value);TK.forEach(([k])=>{if(g('tp-k-'+k))t.k[k]=num(g('tp-k-'+k).value)})}
 function tpPaint(){tpSync();const e=document.getElementById('wf-trip');if(e)e.innerHTML=tripForm()}
@@ -2090,7 +2099,7 @@ function tripHTML(w){const t=w.type==='yer'&&w.trip;if(!t)return '';const tot=tS
  ${st.length?`<div class="lbl"><span>Rota</span></div><div class="tpc">${st.map(x=>`<span>${esc(x)}</span>`).join(I('chevR','sm'))}</div><a class="btn soft block" style="margin-bottom:8px" href="${esc(routeUrl(st,w))}" target="_blank" rel="noopener">${I('route','sm')}Rotayı haritada aç</a>`:''}`}
 function wishForm(w,pre){pre=pre||{};F={wtype:w?w.type:(pre.type||(UI.wt==='all'?'mekan':UI.wt)),edit:w?w.id:null,place:w?(w.place?{...w.place}:null):(pre.place||null),book:w&&w.book?{...w.book}:null,rate:4};F.trip=w&&w.trip?JSON.parse(JSON.stringify(w.trip)):tpEmpty();F.tpOpen=!!(w&&w.trip);F.tpSplit=sumK(F.trip)>0;
  sheet(w?'İsteği düzenle':'Yeni istek',`<form data-form="wish" autocomplete="off">
- <div class="field"><span class="flabel">Ne türde?</span><div class="chips" style="flex-wrap:wrap" id="wf-type">${Object.entries(WT).map(([k,v])=>`<button type="button" class="chip" data-act="fWt" data-v="${k}" aria-pressed="${F.wtype===k}">${I(v[2],'sm')}${v[1]}</button>`).join('')}</div></div>
+ <div class="field"><span class="flabel">Ne türde?</span><div id="wf-type">${icGrid('fWt',Object.entries(WT).map(([k,v])=>[k,v[1],v[2]]),F.wtype)}</div></div>
  <div class="field"><label for="wf-title">Ne yapmak istiyoruz?</label><input class="inp" id="wf-title" value="${w?esc(w.title):pre.title?esc(pre.title):''}" placeholder="örn. Kapadokya, Küçük Prens, Çiya Sofrası" autofocus><span class="err" id="wf-err" hidden>Bir ad yaz.</span></div>
  <div class="field" id="wf-book"${F.wtype==='kitap'?'':' hidden'}>${bkHTML()}</div>
  <div class="field" id="wf-place"${isPlaceType(F.wtype)?'':' hidden'}>${wpHTML()}</div>
@@ -2160,7 +2169,7 @@ function itemForm(i){F={for:i.for||'',pri:i.pri||'yakinda',edit:i.id,cat:i.cat||
  <div class="field"><span class="flabel">Ne zaman lazım?</span><div class="seg" id="it-pri">${Object.entries(PRI).map(([k,[n]])=>`<button type="button" data-act="fPri" data-v="${k}" aria-pressed="${F.pri===k}">${n}</button>`).join('')}</div></div>
  <div class="field"><label for="it-note">Not</label><input class="inp" id="it-note" value="${esc(i.note||'')}" placeholder="Beden, numara, model, renk…"></div>
  <div class="field"><label for="it-cost">${i.done?'Fiyat':'Tahmini fiyat'}</label><span class="tpm"><input class="inp" id="it-cost" inputmode="numeric" value="${hasC(i)?i.cost:''}" placeholder="örn. 250"><em>₺</em></span></div>
- <div class="field"><span class="flabel">Kategori</span><div class="chips" style="flex-wrap:wrap" id="it-cat">${[...ICAT.map(c=>c[0]),'Diğer'].map(c=>`<button type="button" class="chip plain" data-act="fCat" data-v="${esc(c)}" aria-pressed="${c===F.cat}">${esc(c)}</button>`).join('')}</div></div>
+ <div class="field"><div id="it-cat">${catPick()}</div></div>
  <button class="btn primary block">Kaydet</button></form>`)}
 
 // Görevler: Bugün · Yaklaşan · Rutinler (Todoist/Things'in Bugün–Yaklaşan ayrımı + Hearth'ın rutinleri).
@@ -2354,6 +2363,12 @@ const snap=()=>{const before=clone(flat(S));const f=()=>{if(!S)return;const cur=
  setS(unflat(clone(cur)));render(true);toast('Geri alındı')};f.before=before;return f};
 
 /* ---------- Formlar ---------- */
+// Az seçenekli sorular (istek türü, ulaşım, mevsim): kişi seçicideki gibi yuvarlak simgeler, Apple Anımsatıcılar'ın liste simgeleri gibi
+const icGrid=(act,items,cur)=>`<div class="pgrid lgrid" role="group">${items.map(([v,n,ic])=>`<button type="button" class="pp" data-act="${act}" data-v="${esc(v)}" aria-pressed="${v===cur}"><span class="lic">${I(ic)}</span><span class="ck">${I('check','sm')}</span>${esc(n)}</button>`).join('')}</div>`;
+// Kategori: kapalıyken tek satırda seçili olan görünür, dokununca seçenekler açılır (Things, iPhone Ayarlar gibi)
+function catPick(){const items=[...ICAT.map(c=>[c[0],c[1]]),['Diğer','tag']],c=items.find(x=>x[0]===F.cat)||items[items.length-1];
+ return `<div class="group rpick"><button type="button" class="row rph" data-act="catTog" aria-expanded="${!!F.catOpen}"><span class="body t">Kategori</span><span class="rpv">${I(c[1],'sm')}${esc(c[0])}</span>${I('chevD','sm')}</button>${F.catOpen?items.map(([v,ic])=>`<button type="button" class="row" data-act="fCat" data-v="${esc(v)}" aria-pressed="${v===F.cat}"><span class="rpi">${I(ic)}</span><span class="body t">${esc(v)}</span><span class="ok">${I('check')}</span></button>`).join(''):''}</div>`}
+const catPaint=()=>{const e=document.getElementById('it-cat');if(e)e.innerHTML=catPick()};
 let F={};
 // "Bütün aile" tek dokunuşla herkesi seçer; herkes seçiliyken kişi çipleri gizlenir ("Kişileri tek tek seç" ile açılır).
 // Avatar ızgarası: etkinlikte "Kimler katılacak?", görevde "Kim yapacak?"
@@ -2704,7 +2719,7 @@ const A={
  wt:d=>{UI.wt=d.v;UI.wrHold=false;render(true)},
  memOpen:()=>{const f=UI.wt,done=(S.wishes||[]).filter(w=>w.done&&(f==='all'||w.type===f)).sort((a,b)=>b.doneAt-a.doneAt);if(!done.length)return;sheet(WDN[f]||WDN.all,`<p class="memsub">${done.length} anı</p>`+memTL(done))},
  newWish:()=>wishForm(null),
- fWt:d=>{F.wtype=d.v;{const e=document.getElementById('wf-trip');if(e)e.hidden=d.v!=='yer'}document.querySelectorAll('#wf-type .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===d.v));wpRefresh();bkRefresh()},
+ fWt:d=>{F.wtype=d.v;{const e=document.getElementById('wf-trip');if(e)e.hidden=d.v!=='yer'}document.querySelectorAll('#wf-type [data-act=fWt]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===d.v));wpRefresh();bkRefresh()},
  bkPick:d=>{const b=(UI.bkRes||[])[+d.i];if(!b)return;F.book=b;const t=document.getElementById('wf-title');if(t)t.value=b.t;bkRefresh()},
  bkClear:()=>{F.book=null;UI.bkRes=[];bkRefresh();const t=document.getElementById('wf-title');t&&t.focus()},
  wpClear:()=>{F.place=null;wpRefresh()},
@@ -2798,7 +2813,8 @@ const A={
    <button class="btn primary block" data-act="toggleItem2" data-id="${i.id}">${I('check','sm')}${i.done?'Alınmadı':'Alındı'}</button>`,
    shTools(['editItem',i.id,'edit','Düzenle'],['delItem',i.id,'trash','Sil',undefined,'',1]))},
  editItem:d=>{const i=S.items.find(x=>x.id===d.id);i&&itemForm(i)},
- fCat:d=>{F.cat=d.v;document.querySelectorAll('#it-cat .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===d.v))},
+ fCat:d=>{F.cat=d.v;F.catOpen=false;catPaint()},
+ catTog:()=>{F.catOpen=!F.catOpen;catPaint()},
  fFor:d=>{const was=F.for;F.for=was===d.id?'':d.id;F.pick=false;forFly('it-for',was,F.for)},
  fPri:(d,el)=>{F.pri=d.v;document.querySelectorAll('#it-pri button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
  toggleItem2:d=>{close();A.toggleItem(d)},
