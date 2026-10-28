@@ -1027,6 +1027,14 @@ function parsePlace(title,text,url){text=str(text);let u=str(url).trim();const m
  let n=str(title).trim()||lines[0]||'';const a=lines.filter(x=>x!==n)[0]||'';
  if(!n&&u){const pm=u.match(/\/maps\/place\/([^/@?]+)/);if(pm)try{n=decodeURIComponent(pm[1].replace(/\+/g,' '))}catch(e){}}
  if(!n&&!u)return null;return {n:n.slice(0,120),a:a.slice(0,200),u}}
+// Hepsiburada'dan "Paylaş → Bizim Ev" ile gelen ürün: ad + bağlantı (fiyat ve resim sayfadan okunamaz). Yalnızca Hepsiburada adresleri kabul edilir.
+const okHbUrl=u=>{try{const x=new URL(u);return x.protocol==='https:'&&/^([a-z0-9-]+\.)*(hepsiburada\.com|hb\.biz)$/.test(x.hostname)}catch(e){return false}};
+function parseHb(title,text,url){text=str(text);let u=str(url).trim();const m=text.match(/https?:\/\/\S+/);if(!u&&m)u=m[0];
+ if(!u||!okHbUrl(u))return null;
+ const lines=text.replace(m?m[0]:'','').split('\n').map(x=>x.trim()).filter(Boolean);
+ let n=lines[0]||str(title).trim();
+ if(!n||/^hepsiburada/i.test(n)){try{const sl=new URL(u).pathname.split('/').filter(Boolean).pop()||'';n=decodeURIComponent(sl).replace(/-p-[A-Za-z0-9]+$/,'').replace(/[-_]+/g,' ').trim();n=n&&n[0].toLocaleUpperCase('tr')+n.slice(1)}catch(e){n=''}}
+ return {n:(n||'Hepsiburada ürünü').slice(0,120),u}}
 const WT={mekan:['Gidilecek mekanlar','Mekan','fork'],yer:['Gezilecek yerler','Gezi','compass'],kitap:['Okunacak kitaplar','Kitap','book'],film:['İzlenecek filmler','Film','film']};
 // Gezi planı (wish.trip, yalnızca gezilerde): g gün, b toplam bütçe, k kalemler (ulaşım, konaklama, yemek, gezi), r rota durakları, v ulaşım, m mevsim.
 // Kalemler girildiyse toplam onların toplamıdır. Bütçe dökümü TravelSpend gibi; kalemler dokununca açılır.
@@ -1241,7 +1249,7 @@ function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
   case 'events':x.title=str(x.title);if(!okDate(x.date))x.date=T();x.time=okTime(x.time)?x.time:'';x.members=idList(x.members);if(!CATS[x.cat])x.cat='aile';if(!REM[x.rem])x.rem='none';if(!REP[x.repeat])x.repeat='none';if(okDate(x.end)&&x.end>x.date&&daysBetween(x.date,x.end)<=60);else delete x.end;x.loc=str(x.loc);x.desc=str(x.desc);x.ask=idList(x.ask);x.askAt=+x.askAt||0;if(!x.ask.length){delete x.ask;delete x.askAt}if(!(typeof x.wish==='string'&&okId(x.wish)))delete x.wish;break;
   case 'tasks':x.title=str(x.title);if(!okDate(x.due))x.due=T();x.time=okTime(x.time)?x.time:'';x.rot=idList(x.rot);x.assignee=typeof x.assignee==='string'&&okId(x.assignee)?x.assignee:'';x.who=idList(x.who);x.dn=idList(x.dn);x.all=!!x.all;if(!TREP[x.repeat])x.repeat='none';x.done=!!x.done;if(!(typeof x.from==='string'&&okId(x.from)))delete x.from;break;
   case 'lists':x.name=str(x.name)||'Liste';if(!P[x.icon])x.icon='tag';x.at=+x.at||0;break;
-  case 'items':x.name=str(x.name)||'?';x.note=str(x.note);x.cat=str(x.cat)||'Diğer';if(!PRI[x.pri])x.pri='yakinda';x.for=str(x.for);x.list=str(x.list);{const c=Math.round(+x.cost);if(c>0&&c<1e8)x.cost=c;else delete x.cost}x.done=!!x.done;x.doneAt=+x.doneAt||0;if(typeof x.doneBy==='string'&&x.done)x.doneBy=x.doneBy.slice(0,40);else delete x.doneBy;break;
+  case 'items':x.name=str(x.name)||'?';if(!okHbUrl(x.link))delete x.link;x.note=str(x.note);x.cat=str(x.cat)||'Diğer';if(!PRI[x.pri])x.pri='yakinda';x.for=str(x.for);x.list=str(x.list);{const c=Math.round(+x.cost);if(c>0&&c<1e8)x.cost=c;else delete x.cost}x.done=!!x.done;x.doneAt=+x.doneAt||0;if(typeof x.doneBy==='string'&&x.done)x.doneBy=x.doneBy.slice(0,40);else delete x.doneBy;break;
   case 'wishes':x.title=str(x.title)||'?';x.note=str(x.note);{const p=x.place;if(p&&typeof p==='object'&&(str(p.n)||okMapsUrl(str(p.u))))x.place={n:str(p.n).slice(0,120),a:str(p.a).slice(0,200),u:okMapsUrl(str(p.u))?str(p.u):''};else delete x.place}if(!WT[x.type])x.type='yer';{const t=x.trip;if(x.type==='yer'&&t&&typeof t==='object'){const n=v=>Math.max(0,Math.min(1e8,Math.round(+v)||0)),k=t.k&&typeof t.k==='object'?t.k:{},r=Array.isArray(t.r)?t.r:t.r&&typeof t.r==='object'?Object.values(t.r):[];
    x.trip={g:Math.max(0,Math.min(60,Math.round(+t.g)||0)),b:n(t.b),k:{u:n(k.u),k:n(k.k),y:n(k.y),g:n(k.g)},r:r.map(v=>str(v).slice(0,80)).filter(Boolean).slice(0,30),v:TV[t.v]?t.v:'',m:TM.includes(t.m)?t.m:''}}else delete x.trip}{const b=x.book;if(x.type==='kitap'&&b&&typeof b==='object'&&str(b.t))x.book={t:str(b.t).slice(0,160),a:str(b.a).slice(0,120),p:Math.max(0,Math.min(20000,Math.round(+b.p)||0)),y:/^\d{4}$/.test(str(b.y))?str(b.y):'',i:okCover(str(b.i))?str(b.i):''};else delete x.book}x.want=idList(x.want);{const r={};if(x.rate&&typeof x.rate==='object')for(const k in x.rate){const v=Math.round(+x.rate[k]);if(okId(k)&&v>=1&&v<=5)r[k]=v}x.want.forEach(m=>{if(!r[m])r[m]=3});x.rate=r;x.want=Object.keys(r)}x.doneWith=idList(x.doneWith);if(!MOODS.includes(x.mood))x.mood='';x.planned=okDate(x.planned)?x.planned:'';x.done=!!x.done;break;
   case 'activity':x.text=str(x.text);x.at=+x.at||0;break;
@@ -2835,6 +2843,7 @@ const A={
    ${i.done?`<div>${I('check')}<span><b>${boughtBy(i)}</b>${i.doneAt?' · '+dFull(iso(new Date(i.doneAt))):''}</span></div>`:`<div>${I('clock')}<span>${PRI[i.pri]?PRI[i.pri][0]:'Bir ara'} lazım</span></div>`}
    ${i.note?`<div>${I('edit')}<span>${esc(i.note)}</span></div>`:''}
    ${hasC(i)?`<div>${I('tag')}<span>${i.done?'Fiyat':'Tahmini fiyat'}: <b>${tl(+i.cost)}</b></span></div>`:''}
+   ${i.link?`<div>${I('link')}<span><a href="${esc(i.link)}" target="_blank" rel="noopener" style="color:var(--accent-ink);font-weight:600">Hepsiburada'da aç</a></span></div>`:''}
    <div style="color:var(--muted);font-size:.875rem">${av(i.by,'xs')}<span>${esc(M(i.by).name)} ekledi · ${ago(i.at)}</span></div></div>
    <button class="btn primary block" data-act="toggleItem2" data-id="${i.id}">${I('check','sm')}${i.done?'Alınmadı':'Alındı'}</button>`,
    shTools(['editItem',i.id,'edit','Düzenle'],['delItem',i.id,'trash','Sil',undefined,'',1]))},
@@ -3170,7 +3179,8 @@ if(store.mode==='demo'){S=store.demo||(store.demo=seedCm(seed()));if(!S.books)se
 else if(store.mode==='family'){if(store.R)fromRemote()}
 const qs=new URLSearchParams(location.search),qcode=qs.get('aile');
 // Google Haritalar'dan "Paylaş → Bizim Ev" ile gelen mekan (manifest share_target)
-const shared=(qs.has('text')||qs.has('url'))?parsePlace(qs.get('title'),qs.get('text'),qs.get('url')):null;
+const sharedHb=(qs.has('text')||qs.has('url'))?parseHb(qs.get('title'),qs.get('text'),qs.get('url')):null;
+const shared=sharedHb?null:(qs.has('text')||qs.has('url'))?parsePlace(qs.get('title'),qs.get('text'),qs.get('url')):null;
 if(qcode||qs.has('text')||qs.has('url')||qs.has('title'))history.replaceState(null,'',location.pathname);
 let rafS=0;document.getElementById('screen').addEventListener('scroll',()=>{if(rafS)return;rafS=requestAnimationFrame(()=>{rafS=0;trackStrip()})},{passive:true});
 UI.tf=S&&isChild()?'mine':'all';
@@ -3179,6 +3189,9 @@ if(store.mode==='family'){ensureUid().then(()=>{connect();flush();loadAv()})}
 checkReminders();
 setTimeout(popCheck,2500);
 if(shared){if(S){UI.tab='lists';UI.lmode='wish';render(true);wishForm(null,{type:'mekan',title:shared.n,place:shared})}else toast('Önce aileye katıl, sonra mekanı yeniden paylaş.')}
+if(sharedHb){if(S&&S.lists.length){const L=S.lists.find(l=>l.id===UI.list)||S.lists[0];UI.tab='lists';UI.lmode='buy';UI.shop=null;UI.list=L.id;
+ const had=S.items.find(i=>!i.done&&i.link===sharedHb.u);if(had)toast('Bu ürün zaten listede');else{const it=addItemTo(L.id,sharedHb.n);if(it){it.link=sharedHb.u;render(true);toast(`${it.name} ${L.name} listesine eklendi`)}}}
+ else toast('Önce aileye katıl, sonra ürünü yeniden paylaş.')}
 if(qcode&&!store.mode)A.joinSheet({code:qcode.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)});
 })();
 </script>
