@@ -1053,14 +1053,14 @@ function parsePlace(title,text,url){text=str(text);let u=str(url).trim();const m
  if(!n&&!u)return null;return {n:n.slice(0,120),a:a.slice(0,200),u}}
 // Hepsiburada'dan "Paylaş → Bizim Ev" ile gelen ürün: ad + bağlantı (fiyat ve resim sayfadan okunamaz). Yalnızca Hepsiburada adresleri kabul edilir.
 const okHbUrl=u=>{try{const x=new URL(u);return x.protocol==='https:'&&/^([a-z0-9-]+\.)*(hepsiburada\.com|hb\.biz)$/.test(x.hostname)}catch(e){return false}};
-function parseHb(title,text,url){text=str(text);let u=str(url).trim();const m=text.match(/https?:\/\/\S+/);if(!u&&m)u=m[0];
+function parseHb(title,text,url){text=str(text);title=str(title);let u=str(url).trim();const m=text.match(/https?:\/\/\S+/);if(!u&&m)u=m[0];
  if(!u||!okHbUrl(u))return null;
- // Paylaşım metni ürün adı dışında "Paylaş", "göz atın" gibi sözler de taşıyabilir: bunlar ad sayılmaz, ad boş kalırsa formda yazılır
- const bad=x=>x.length<4||/payla[sş]|göz at|bak\s?ın|hepsiburada|kampanya|^https?:/i.test(x);
- const lines=text.replace(m?m[0]:'','').split('\n').map(x=>x.trim()).filter(Boolean);
- let n=[...lines,str(title).trim()].find(x=>x&&!bad(x))||'';
+ // Paylaşım metni ürün adının yanında "Paylaş", "göz atın", "- Hepsiburada" gibi sözler de taşıyabilir: önce bunlar kırpılır, kalan yoksa ad boş kalır ve formda yazılır
+ const clean=x=>x.replace(/https?:\/\/\S+/g,'').replace(/\s*[-–—|:]\s*hepsiburada(\.com)?\s*$/i,'').replace(/^\s*hepsiburada(\.com)?(['’]?(da|de))?\s*[-–—|:]\s*/i,'').trim();
+ const bad=x=>x.length<4||/^payla[sş]$/i.test(x)||/göz at|bak\s?ın|payla[sş]ıyor|kampanya|^hepsiburada(\.com)?$/i.test(x);
+ let n=[...text.split('\n').map(clean),clean(title)].find(x=>x&&!bad(x))||'';
  if(!n){try{const sl=decodeURIComponent(new URL(u).pathname.split('/').filter(Boolean).pop()||'');if(sl.includes('-')){n=sl.replace(/-p-[A-Za-z0-9]+$/,'').replace(/[-_]+/g,' ').trim();n=n&&n[0].toLocaleUpperCase('tr')+n.slice(1)}}catch(e){n=''}}
- return {n:n.slice(0,120),u}}
+ return {n:n.slice(0,120),u,raw:[title&&'Başlık: '+title,text&&'Metin: '+text].filter(Boolean).join('\n').slice(0,600)}}
 const WT={mekan:['Gidilecek mekanlar','Mekan','fork'],yer:['Gezilecek yerler','Gezi','compass'],kitap:['Okunacak kitaplar','Kitap','book'],film:['İzlenecek filmler','Film','film']};
 // Gezi planı (wish.trip, yalnızca gezilerde): g gün, b toplam bütçe, k kalemler (ulaşım, konaklama, yemek, gezi), r rota durakları, v ulaşım, m mevsim.
 // Kalemler girildiyse toplam onların toplamıdır. Bütçe dökümü TravelSpend gibi; kalemler dokununca açılır.
@@ -2294,6 +2294,7 @@ function hbForm(h,list){F={hb:{u:h.u,list}};
  sheet('Ürünü ekle',`<form data-form="hbAdd" autocomplete="off">
  <div class="field"><label for="hb-name">Ürün adı</label><input class="inp" id="hb-name" value="${esc(h.n)}" placeholder="örn. Philips Airfryer XL" autofocus>${h.n?'':'<span class="note" style="margin-top:6px">'+I('info','sm')+'<span>Ad paylaşımla gelmedi. Hepsiburada\'daki ürün adını yazın ya da yapıştırın.</span></span>'}<span class="err" id="hb-err" hidden>Ürüne bir ad ver.</span></div>
  ${hbLists()}
+ ${h.raw?`<details class="more"><summary>Paylaşımla gelen metin ${I('chevD','sm')}</summary><p class="note" style="white-space:pre-wrap;word-break:break-word;user-select:text;-webkit-user-select:text">${esc(h.raw)}</p></details>`:''}
  <div class="field"><span class="flabel">Bağlantı</span><a href="${esc(h.u)}" target="_blank" rel="noopener" style="color:var(--accent-ink);font-weight:600;word-break:break-all;font-size:.9rem">${esc(h.u)}</a></div>
  <button class="btn primary block">Alınacağı ekle</button></form>`)}
 function itemForm(i){F={for:i.for||'',pri:i.pri||'yakinda',edit:i.id,cat:i.cat||'Diğer'};
