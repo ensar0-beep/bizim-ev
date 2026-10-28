@@ -533,6 +533,8 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .scan video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .scan i{position:absolute;width:30px;height:30px;border:3px solid #fff;border-radius:6px}
 .scan .c1{left:14%;top:24%;border-right:0;border-bottom:0}.scan .c2{right:14%;top:24%;border-left:0;border-bottom:0}.scan .c3{left:14%;bottom:24%;border-right:0;border-top:0}.scan .c4{right:14%;bottom:24%;border-left:0;border-top:0}
+.sctorch{position:absolute;top:10px;right:10px;width:42px;height:42px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff;display:flex;align-items:center;justify-content:center}
+.sctorch[hidden]{display:none}.sctorch[aria-pressed="true"]{background:#fff;color:#14120f}
 .scan .ray{position:absolute;left:16%;right:16%;top:50%;height:2px;background:#ff5a4a;box-shadow:0 0 12px #ff5a4a;animation:ray 1.6s ease-in-out infinite alternate}
 @keyframes ray{from{transform:translateY(-40px)}to{transform:translateY(40px)}}
 @media (prefers-reduced-motion:reduce){.scan .ray{animation:none}}
@@ -1952,11 +1954,21 @@ function katGuess(cs,a){const s=(Array.isArray(cs)?cs:[]).join(' ').toLowerCase(
  if(!s||/fiction|literar|poetry|drama|novel|roman|şiir|hikâye|hikaye|literature|edebiyat/.test(s))return tr?'tr':s?'dk':'dg';
  return 'dg'}
 const bkGet=async u=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),7000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)throw 0;return await r.json()}finally{clearTimeout(t)}};
-// Barkoddan (ISBN) kitap: önce Google Books, olmazsa Open Library. null = bulunamadı, undefined = ulaşılamadı
-async function bkIsbn(n){let net=0;
- try{const j=await bkGet(`https://www.googleapis.com/books/v1/volumes?q=isbn:${n}&maxResults=1`),v=j.items&&j.items[0]&&j.items[0].volumeInfo;net=1;if(v&&v.title)return Object.assign(gbMap(v),{n})}catch(e){}
- try{const j=await bkGet(`https://openlibrary.org/api/books?bibkeys=ISBN:${n}&format=json&jscmd=data`),d=j['ISBN:'+n];net=1;
-  if(d&&d.title){const a=(d.authors||[]).map(x=>String(x.name||'')).slice(0,2).join(', ');return {t:String(d.title+(d.subtitle?': '+d.subtitle:'')).slice(0,160),a:a.slice(0,120),p:+d.number_of_pages||0,y:(String(d.publish_date||'').match(/\d{4}/)||[''])[0],i:String(d.cover&&(d.cover.medium||d.cover.small)||'').replace(/^http:/,'https:'),k:katGuess((d.subjects||[]).map(x=>String(x.name||'')).slice(0,12),a),n}}}catch(e){}
+// Barkoddan (ISBN) kitap. Türkçe kitapların çoğu tek bir kaynakta bulunmadığı için hepsi aynı anda sorulur, öncelik sırasıyla ilk bulunan alınır:
+// Google Books isbn:13, isbn:10, düz numara araması (yalnız kimliği tutan sonuç), Open Library kitap kaydı ve arama dizini. null = bulunamadı, undefined = ulaşılamadı
+const isbn10=n=>{if(!/^978\d{10}$/.test(n))return '';const b=n.slice(3,12);let s=0;for(let i=0;i<9;i++)s+=(10-i)*+b[i];const c=(11-s%11)%11;return b+(c===10?'X':c)};
+const olMap=(d,n)=>{const a=(d.authors||[]).map(x=>String(x.name||'')).slice(0,2).join(', ');return {t:String(d.title+(d.subtitle?': '+d.subtitle:'')).slice(0,160),a:a.slice(0,120),p:+d.number_of_pages||0,y:(String(d.publish_date||'').match(/\d{4}/)||[''])[0],i:String(d.cover&&(d.cover.medium||d.cover.small)||'').replace(/^http:/,'https:'),k:katGuess((d.subjects||[]).map(x=>String(x.name||'')).slice(0,12),a),n}};
+async function bkIsbn(n){let net=0;const t10=isbn10(n),gb='https://www.googleapis.com/books/v1/volumes?maxResults=';
+ const has=v=>(v.industryIdentifiers||[]).some(x=>String(x.identifier).replace(/\D/g,'')===n||(t10&&String(x.identifier).toUpperCase()===t10));
+ const src=[
+  async()=>{const j=await bkGet(`${gb}1&q=isbn:${n}`);net=1;const v=j.items&&j.items[0]&&j.items[0].volumeInfo;return v&&v.title?gbMap(v):null},
+  async()=>{if(!t10)return null;const j=await bkGet(`${gb}1&q=isbn:${t10}`);net=1;const v=j.items&&j.items[0]&&j.items[0].volumeInfo;return v&&v.title?gbMap(v):null},
+  async()=>{const j=await bkGet(`${gb}5&q=${n}`);net=1;const v=(j.items||[]).map(x=>x.volumeInfo||{}).find(x=>x.title&&has(x));return v?gbMap(v):null},
+  async()=>{const j=await bkGet(`https://openlibrary.org/api/books?bibkeys=ISBN:${n}&format=json&jscmd=data`);net=1;const d=j['ISBN:'+n];return d&&d.title?olMap(d,n):null},
+  async()=>{const j=await bkGet(`https://openlibrary.org/search.json?isbn=${n}&limit=1&fields=title,author_name,number_of_pages_median,first_publish_year,cover_i,subject`);net=1;const d=j.docs&&j.docs[0];
+   return d&&d.title?{t:String(d.title).slice(0,160),a:(d.author_name||[]).slice(0,2).join(', ').slice(0,120),p:+d.number_of_pages_median||0,y:String(d.first_publish_year||''),i:d.cover_i?`https://covers.openlibrary.org/b/id/${+d.cover_i}-M.jpg`:'',k:katGuess((d.subject||[]).slice(0,12),(d.author_name||[]).join(' '))}:null}];
+ const r=await Promise.all(src.map(f=>f().catch(()=>null)));const x=r.find(Boolean);
+ if(x){const o=Object.assign({},x,{n});if(!o.i){const c=r.find(z=>z&&z.i);if(c)o.i=c.i}return o}
  return net?null:undefined}
 // Sırt rengi: kapağın baskın rengi (telefonda okunur, beyaz yazı okunsun diye koyulaştırılır). Kapak okunamazsa addan bir renk.
 const SPC=['#6E2B2B','#2E5A8A','#3E7C6B','#6B4C9A','#B8662B','#2F4F4F','#8A1E1E','#4B5B2E','#1F3A5F','#7A5C2E','#5C3B5E','#2B6A73'];
@@ -2022,30 +2034,44 @@ async function scReader(){if(scR)return scR;
  if(!window.ZXing)await new Promise((ok,no)=>{const s=document.createElement('script');s.src='vendor/zxing-0.21.3.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});
  const Z=window.ZXing,h=new Map(),rd=new Z.MultiFormatReader(),cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});
  h.set(Z.DecodeHintType.POSSIBLE_FORMATS,[Z.BarcodeFormat.EAN_13]);h.set(Z.DecodeHintType.TRY_HARDER,true);rd.setHints(h);
- // çerçevenin ortasındaki şerit okunur (barkod genelde yatay durur), küçültülerek
- return scR=async v=>{const w=v.videoWidth,ht=v.videoHeight;if(!w||!ht)return null;const sw=Math.min(w,1000),sx=(w-sw)/2,sh=Math.round(ht*.5),sy=(ht-sh)/2,k=Math.min(1,720/sw);
+ // Her karede başka bir kesit: ortadaki dar şerit, geniş şerit, bütün kare; ikili yöntem de sırayla değişir (parlak ya da gölgeli kapakta biri tutar)
+ const CR=[[.62,.34,900],[.9,.5,1100],[1,1,960]];let f=0;
+ return scR=async v=>{const w=v.videoWidth,ht=v.videoHeight;if(!w||!ht)return null;const [fw,fh,mx]=CR[f%3],B=f%2?Z.GlobalHistogramBinarizer:Z.HybridBinarizer;f++;
+  const sw=Math.round(w*fw),sh=Math.round(ht*fh),sx=(w-sw)/2,sy=(ht-sh)/2,k=Math.min(1,mx/sw);
   cv.width=Math.round(sw*k);cv.height=Math.round(sh*k);cx.drawImage(v,sx,sy,sw,sh,0,0,cv.width,cv.height);
-  try{return rd.decode(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.HTMLCanvasElementLuminanceSource(cv)))).getText()}catch(e){return null}}}
+  try{return rd.decode(new Z.BinaryBitmap(new B(new Z.HTMLCanvasElementLuminanceSource(cv)))).getText()}catch(e){return null}}}
 async function scStart(){const v=document.getElementById('scv');if(!v||v.srcObject)return;
  const msg=t=>{const m=document.getElementById('scmsg');if(m){m.textContent=t;m.hidden=!t}};
  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){msg('Bu telefonda kamera açılamıyor. Kitabı adıyla arayabilirsin.');return}
- let st;try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false})}
+ let st;try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false})}
  catch(e){msg(e&&e.name==='NotAllowedError'?'Kameraya izin verilmedi. Telefonun ayarlarından izin verebilir ya da kitabı adıyla arayabilirsin.':'Kamera açılamadı. Kitabı adıyla arayabilirsin.');return}
  const stop=()=>{st.getTracks().forEach(t=>t.stop());if(v.srcObject===st)v.srcObject=null};
  if(!document.body.contains(v)||v.srcObject){stop();return}
  v.srcObject=st;try{await v.play()}catch(e){}
+ scTune(st.getVideoTracks()[0]);
  let rd;try{rd=await scReader()}catch(e){stop();msg('Barkod okuyucu yüklenemedi. Kitabı adıyla arayabilirsin.');return}
  msg('');
  const tick=async()=>{if(!document.body.contains(v)||document.hidden||v.srcObject!==st){stop();return}
   if(v.readyState>=2&&!scBusy){scBusy=1;try{const c=await rd(v);if(c)scGot(String(c))}catch(e){}scBusy=0}
-  setTimeout(tick,200)};tick()}
+  setTimeout(tick,120)};tick()}
+// Telefon destekliyorsa (çoğu Android): sürekli odak; kitabı uzak tutunca da okunsun diye hafif yakınlaştırma; el feneri düğmesi.
+// iPhone tarayıcısı bunları vermez, orada düğme görünmez.
+function scTune(tr){if(!tr||!tr.getCapabilities)return;let c={};try{c=tr.getCapabilities()}catch(e){return}const adv={};
+ if((c.focusMode||[]).includes('continuous'))adv.focusMode='continuous';
+ if(c.zoom&&c.zoom.max>=1.6)adv.zoom=Math.min(2,c.zoom.max);
+ if(Object.keys(adv).length)tr.applyConstraints({advanced:[adv]}).catch(()=>{});
+ const b=document.getElementById('sctorch');if(b&&c.torch){b.hidden=false;b.onclick=()=>{const on=b.getAttribute('aria-pressed')!=='true';tr.applyConstraints({advanced:[{torch:on}]}).then(()=>b.setAttribute('aria-pressed',on)).catch(()=>{b.hidden=true})}}}
 // uygulamadan çıkınca kamera kapanır, dönünce pencere hâlâ açıksa yeniden açılır
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&document.getElementById('scv'))scStart()});
-function scGot(c){c=c.replace(/\D/g,'');const seen=F.seen||(F.seen={});if(!okIsbn(c)||seen[c])return;seen[c]=1;try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
+function scGot(c){c=c.replace(/\D/g,'');const seen=F.seen||(F.seen={});
+ if(!okIsbn(c)){const m=document.getElementById('scmsg');if(m&&!seen[c]){seen[c]=1;m.textContent='Bu barkod kitap barkodu değil. Kitabın ISBN barkodu genelde arka kapakta, 978 ile başlar.';m.hidden=false;setTimeout(()=>{if(m.textContent.startsWith('Bu barkod'))m.hidden=true},3500)}return}
+ if(seen[c])return;seen[c]=1;try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
  const l=document.getElementById('scanl');const row=document.createElement('div');row.className='lfr';row.innerHTML=libRow({t:''},`ISBN ${c}`,'').replace('<b></b>','<b>Aranıyor…</b>');l&&l.prepend(row);
  const ex=LIB().find(b=>b.isbn===c);if(ex){row.classList.add('dup');row.innerHTML=libRow(ex,'Bu kitap zaten evde','<span class="lbt ev">Evde var</span>');return}
  bkIsbn(c).then(x=>{
-  if(!x){if(x===undefined)delete seen[c];row.innerHTML=libRow({t:'?'},(x===null?'Bulunamadı':'Kitap bilgisine ulaşılamadı')+` · ISBN ${c}`,`<button type="button" class="btn soft sm" data-act="libFind" data-n="${c}">Adla ekle</button>`);return}
+  if(!x){if(x===undefined)delete seen[c];row.innerHTML=libRow({t:'?'},(x===null?'Bulunamadı':'Kitap bilgisine ulaşılamadı')+` · ISBN ${c}`,`<button type="button" class="btn soft sm" data-act="libFind" data-n="${c}">Adla ekle</button>`);
+   // hiçbir kaynakta yoksa adla arama açılır, barkod eklenen kitaba yazılır (o sırada başka barkod aranmıyorsa)
+   if(x===null&&document.getElementById('scv')&&![...document.querySelectorAll('#scanl .lfr b')].some(e=>e.textContent.startsWith('Aranıyor')))setTimeout(()=>{if(document.getElementById('scv'))A.libFind({n:c})},900);return}
   const ex2=libHas(x);if(ex2){row.classList.add('dup');row.innerHTML=libRow(ex2,'Bu kitap zaten evde','<span class="lbt ev">Evde var</span>');return}
   const b=libNew(x);F.scan=(F.scan||0)+1;row.innerHTML=libRow(b,`${b.a?esc(b.a)+' · ':''}eklendi`,`<span class="lbt in">${I('check','sm')}</span>`);
   const h=document.getElementById('sh-t');if(h&&document.getElementById('scv'))h.textContent=`Barkod tara · ${F.scan} eklendi`})}
@@ -2932,11 +2958,11 @@ const A={
  dzSheet:()=>{const k=lsrt();sheet('Sırala',`<div class="dzl" role="radiogroup" aria-label="Dizilim">${Object.entries(DZ).map(([x,[n,s]])=>`<button role="radio" aria-checked="${x===k}" data-act="dzSet" data-v="${x}"><span>${n}<small>${s}</small></span><i class="rb" aria-hidden="true"></i></button>`).join('')}</div>`)},
  dzSet:d=>{if(!DZ[d.v])return;store.prefs.lsrt=d.v;save();close();render(true)},
  libScan:()=>{if(!S)return;F={scan:0,seen:{}};
-  sheet('Barkod tara',`<div class="scan"><video id="scv" playsinline muted autoplay aria-hidden="true"></video><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><span class="ray"></span><p class="scmsg" id="scmsg">Kamera açılıyor…</p></div>
-  <p class="note" style="margin:10px 0 6px">${I('info','sm')}<span>Kitabın arkasındaki barkodu çerçeveye getir. Arka arkaya okutabilirsin, her biri hemen eklenir.</span></p>
+  sheet('Barkod tara',`<div class="scan"><video id="scv" playsinline muted autoplay aria-hidden="true"></video><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><span class="ray"></span><p class="scmsg" id="scmsg">Kamera açılıyor…</p><button type="button" class="sctorch" id="sctorch" aria-pressed="false" aria-label="El feneri" hidden>${I('bolt')}</button></div>
+  <p class="note" style="margin:10px 0 6px">${I('info','sm')}<span>Kitabın arkasındaki barkodu çerçeveye getir, bir karış uzakta tut. Arka arkaya okutabilirsin, her biri hemen eklenir.</span></p>
   <div id="scanl" class="scanl" aria-live="polite"></div><button type="button" class="link" style="margin:10px auto 0" data-act="libFind">Barkod yok mu? Adıyla ara</button>`);scStart()},
  libFind:d=>{F={isbn:d&&okIsbn(d.n||'')?d.n:''};UI.lfRes=[];
-  sheet('Kitap ara',`<div class="field"><label for="lf-q" class="sr">Kitap adı ya da yazar</label><input class="inp" id="lf-q" type="search" placeholder="örn. Kürk Mantolu Madonna" autocomplete="off" enterkeyhint="search" autofocus></div>${F.isbn?`<p class="note" style="margin:0 0 8px">${I('info','sm')}<span>ISBN ${F.isbn} bulunamadı. Adını yaz, eklediğin kitaba bu barkod da yazılır.</span></p>`:''}<div id="lfres" aria-live="polite">${lfHint()}</div>`)},
+  sheet('Kitap ara',`<div class="field"><label for="lf-q" class="sr">Kitap adı ya da yazar</label><input class="inp" id="lf-q" type="search" placeholder="örn. Kürk Mantolu Madonna" autocomplete="off" enterkeyhint="search" autofocus></div>${F.isbn?`<p class="note" style="margin:0 0 8px">${I('info','sm')}<span>ISBN ${F.isbn} kitap kaynaklarında yok. Kapaktaki adı yaz, eklediğin kitaba bu barkod da yazılır. <a href="https://www.kitapyurdu.com/index.php?route=product/search&filter_name=${F.isbn}" target="_blank" rel="noopener" style="color:var(--accent-ink);font-weight:600">Kitapyurdu'nda bak</a></span></p>`:''}<div id="lfres" aria-live="polite">${lfHint()}</div>`)},
  libAdd:d=>{const x=(UI.lfRes||[])[+d.i];if(!x)return;if(libHas(x)){toast('Bu kitap zaten evde');return}const b=libNew(F.isbn?Object.assign({},x,{n:F.isbn}):x);F.isbn='';
   const el=document.querySelector(`#lfres [data-act="libAdd"][data-i="${d.i}"]`);if(el)el.outerHTML=`<span class="lbt in" aria-label="Eklendi">${I('check','sm')}</span>`;toast(`“${b.t}” eklendi`)},
  libAddT:()=>{const i=document.getElementById('lf-q'),t=i?i.value.trim().slice(0,160):'';if(!t)return;if(libHas({t})){toast('Bu kitap zaten evde');return}
