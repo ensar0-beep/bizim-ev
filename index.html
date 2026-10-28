@@ -1015,6 +1015,8 @@ const isPlaceType=t=>t==='mekan'||t==='yer';
 // Kitap kapakları yalnızca Google Books ve Open Library'den, https ile
 const okCover=u=>{try{const x=new URL(u);return x.protocol==='https:'&&/^(books\.google\.[a-z.]+|books\.googleusercontent\.com|covers\.openlibrary\.org)$/.test(x.hostname)}catch(e){return false}};
 const okMapsUrl=u=>{try{const x=new URL(u);return x.protocol==='https:'&&(/^(maps\.app\.goo\.gl|goo\.gl|maps\.google\.[a-z.]+)$/.test(x.hostname)||(/^(www\.)?google\.[a-z.]+$/.test(x.hostname)&&x.pathname.startsWith('/maps')))}catch(e){return false}};
+// Kitap istekleri: Hepsiburada arama sayfası (ad + yazar), anahtar ya da hesap gerekmez
+const hbUrl=w=>'https://www.hepsiburada.com/ara?q='+encodeURIComponent([w.book&&w.book.t||w.title,w.book&&w.book.a].filter(Boolean).join(' '));
 const mapsUrl=p=>p.u||'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((p.n+' '+p.a).trim());
 const dirUrl=p=>'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent((p.n+' '+p.a).trim());
 const area=p=>{const x=(p.a||'').split(',').pop().trim().replace(/^\d{5}\s*/,'');return x.split('/')[0].trim()||p.n};
@@ -2757,6 +2759,7 @@ const A={
   const bk=w.book;sheet(esc(w.title),`${bk?`<div class="bkhead">${bkCover(bk,'md')}<span class="bktx">${bk.a?`<b>${esc(bk.a)}</b>`:''}${bk.p||bk.y?`<span>${[bk.p?bk.p+' sayfa':'',bk.y].filter(Boolean).join(' · ')}</span>`:''}<span>${esc(M(w.by).name)} istedi · ${ago(w.at)}</span></span></div>`:`<div style="display:flex;gap:12px;align-items:center;margin-bottom:6px"><span class="wic">${I(WT[w.type][2])}</span><span><b>${WT[w.type][1]}</b><br><span style="color:var(--muted);font-size:.875rem">${esc(M(w.by).name)} istedi · ${ago(w.at)}</span></span></div>`}
   ${w.note?`<p style="margin:8px 0 4px">${esc(w.note)}</p>`:''}
   ${tripHTML(w)}
+  ${w.type==='kitap'?`<div class="actions" style="margin:12px 0 6px"><a class="btn soft" href="${esc(hbUrl(w))}" target="_blank" rel="noopener">${I('cart','sm')}Hepsiburada'da ara</a></div>`:''}
   ${w.place?`<div class="wpcard" style="margin:12px 0 4px">${I('pin')}<span class="tx"><b>${esc(w.place.n||w.title)}</b>${w.place.a?`<span>${esc(w.place.a)}</span>`:''}</span></div>
   <div class="actions" style="margin:8px 0 6px"><a class="btn soft" href="${esc(mapsUrl(w.place))}" target="_blank" rel="noopener">${I('pin','sm')}Haritada aç</a><a class="btn ghost" href="${esc(dirUrl({...w.place,n:w.place.n||w.title}))}" target="_blank" rel="noopener">Yol tarifi</a></div>`:''}
   <div class="dl">${w.done?`<div>${I('check')}<span><b>${w.mood} Yaptık</b> · ${dFull(iso(new Date(w.doneAt)))}<br><span style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">${allIn(w.doneWith)?`<span class="who">${famBadge()}<b>Bütün aile</b></span>`:w.doneWith.map(x=>`<span class="who">${av(x,'xs')}${esc(M(x).name)}</span>`).join('')}</span></span></div>`
