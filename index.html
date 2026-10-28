@@ -541,6 +541,18 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .kchips{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 2px}.kchips button{min-height:34px;padding:0 12px;border-radius:999px;border:1.5px solid var(--line);font-size:.8rem;font-weight:600;color:var(--muted)}
 .kchips button[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--surface));color:var(--fg)}
 .lcmw{margin-top:18px}
+/* hava durumu, acil hapı */
+.wxd{display:inline-flex;align-items:center;gap:4px;margin-left:10px;padding:2px 9px 2px 7px;border-radius:999px;background:var(--sunk);color:var(--fg);font-size:.78rem;font-weight:700;letter-spacing:0;text-transform:none;vertical-align:middle}.wxd svg{width:16px;height:16px}
+.wxbig{display:flex;align-items:center;gap:14px}.wxbig .wi svg{width:48px;height:48px}.wxbig .b{flex:1;display:grid}.wxbig b{font-family:var(--f-display);font-size:2.2rem;line-height:1}.wxbig small{color:var(--muted)}
+.wxfoot{display:flex;justify-content:flex-start;margin-top:14px}.wxcity{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 10px 0 12px;border-radius:999px;background:var(--sunk);font-weight:600;font-size:.88rem}
+.wxwait{color:var(--muted);padding:14px 0;text-align:center}
+.wxh{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:0 20px}
+.wh{flex:none;width:54px;display:grid;justify-items:center;gap:3px;padding:8px 0;border-radius:14px}.wh small{color:var(--muted);font-size:.72rem;font-weight:600}.wh b{font-size:.92rem}.wh em{font-style:normal;font-size:.7rem;color:var(--accent-ink);min-height:.9em;font-weight:700}.wh.wet{background:var(--sunk)}.wh svg{width:22px;height:22px}
+.wxdl{display:grid}.wd{display:grid;grid-template-columns:5.4rem 22px 2.6rem 2rem 1fr 2rem;align-items:center;gap:6px;min-height:40px;border-top:1px solid var(--line);font-size:.92rem}.wd:first-child{border-top:0}.wd .dn{font-weight:600}.wd svg{width:20px;height:20px}.wd em{font-style:normal;color:var(--accent-ink);font-size:.78rem;font-weight:700}.wd .lo{color:var(--muted);text-align:right}.wd .hi{font-weight:700}
+.wd .bar{position:relative;height:5px;border-radius:3px;background:var(--sunk)}.wd .bar i{position:absolute;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#6FA8DC,#F2B25C)}
+.wxloc{text-align:center;padding:8px 0 4px}.wxloc .big{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 10px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink)}.wxloc .big svg{width:30px;height:30px}.wxloc p{margin:0 0 6px}
+.wxrow{min-height:50px}.wxcl{margin-top:4px}
+.thn .panel .acp{background:var(--danger-soft);color:var(--danger)}.acp svg{width:14px;height:14px;flex:none}
 .lr .dd{flex:none;font-size:.8rem;color:var(--muted);white-space:nowrap}
 .dpg{margin-top:8px}
 .dph{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 14px;text-align:left;position:relative;background:var(--surface)}
@@ -1563,7 +1575,7 @@ function syncBack(){const st=history.state&&history.state.bz;
  if(store.mode&&S&&UI.tab!=='today'){if(!st)history.pushState({bz:1},'')}
  else if(st)history.back()}
 window.addEventListener('popstate',()=>{if(document.querySelector('.sheet'))close();if(UI.tab!=='today'){UI.tab='today';render()}});
-function afterRender(){document.getElementById('screen').classList.toggle('tsw',UI.tab==='lists'&&!UI.shop);rtInit();trackStrip();bindWheel();bindMore();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
+function afterRender(){if(UI.tab==='today')wxLoad();document.getElementById('screen').classList.toggle('tsw',UI.tab==='lists'&&!UI.shop);rtInit();trackStrip();bindWheel();bindMore();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
 const emptyBox=(title,text,btn)=>`<div class="empty"><b>${title}</b>${text}${btn||''}</div>`;
 
 /* ---------- Konuşur gibi ekleme ----------
@@ -1735,13 +1747,73 @@ function famFly(r){const sc=document.getElementById('screen'),ph=document.getEle
  requestAnimationFrame(()=>requestAnimationFrame(()=>{const t=sc.querySelector(`.wcard[data-c="1"][data-id="${meId()}"] .av`);if(!t){img.remove();return}
   t.style.visibility='hidden';const done=()=>{t.style.visibility='';img.remove()};
   img.animate([at(r),at(t.getBoundingClientRect())],{duration:560,easing:'cubic-bezier(.3,.7,.2,1)',fill:'forwards'}).finished.then(done,done)}))}
+// ---------- Hava durumu ----------
+// Yer: telefonun konumu ya da seçilen il (store.prefs.wx = {la, lo, n, gps}); yalnız bu telefonda durur, ailedekilere gitmez.
+// Veri Open-Meteo'dan (anahtarsız, ücretsiz); dışarı yalnızca iki ondalığa yuvarlanmış (yaklaşık 1 km) koordinat gider.
+// Son yanıt store.wxc'de 30 dakika tutulur; iPhone konumu her açılışta sormasın diye konum yalnızca "Konumumu kullan"a dokununca okunur.
+P.wsun='<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>';
+P.wmoon='<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"/>';
+P.wcloud='<path d="M7 18.5h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 9.6 4.5 4.5 0 0 0 7 18.5Z"/>';
+P.wcsun='<circle cx="8.5" cy="8" r="2.6"/><path d="M8.5 2.6v1.2M2.9 8h1.2M4.5 4 5.4 4.9M12.5 4l-.9.9"/><path d="M9.5 20h7.7a3.5 3.5 0 0 0 .4-6.97A4.8 4.8 0 0 0 8.4 13.6 3.2 3.2 0 0 0 9.5 20Z"/>';
+P.wrain='<path d="M7 15h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 6.1 4.5 4.5 0 0 0 7 15Z"/><path d="m8.5 18-1 2.2M12.5 18l-1 2.2M16.5 18l-1 2.2"/>';
+P.wstorm='<path d="M7 14h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 5.1 4.5 4.5 0 0 0 7 14Z"/><path d="m12.5 14-2.2 4h3.2l-1.3 4"/>';
+P.wsnow='<path d="M7 14h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 5.1 4.5 4.5 0 0 0 7 14Z"/><path d="M8.5 18v.01M12 19v.01M15.5 18v.01M10 21v.01M14 21v.01"/>';
+P.flag='<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>';
+const IL=[['Adana',37.00,35.32],['Adıyaman',37.76,38.28],['Afyonkarahisar',38.76,30.54],['Ağrı',39.72,43.05],['Aksaray',38.37,34.04],['Amasya',40.65,35.83],['Ankara',39.93,32.86],['Antalya',36.90,30.70],['Ardahan',41.11,42.70],['Artvin',41.18,41.82],['Aydın',37.85,27.85],['Balıkesir',39.65,27.89],['Bartın',41.64,32.34],['Batman',37.89,41.13],['Bayburt',40.26,40.23],['Bilecik',40.14,29.98],['Bingöl',38.88,40.50],['Bitlis',38.40,42.11],['Bolu',40.73,31.61],['Burdur',37.72,30.29],['Bursa',40.19,29.06],['Çanakkale',40.15,26.41],['Çankırı',40.60,33.62],['Çorum',40.55,34.95],['Denizli',37.78,29.09],['Diyarbakır',37.91,40.24],['Düzce',40.84,31.16],['Edirne',41.68,26.56],['Elazığ',38.67,39.22],['Erzincan',39.75,39.49],['Erzurum',39.90,41.27],['Eskişehir',39.78,30.52],['Gaziantep',37.07,37.38],['Giresun',40.91,38.39],['Gümüşhane',40.46,39.48],['Hakkâri',37.58,43.74],['Hatay',36.20,36.16],['Iğdır',39.92,44.04],['Isparta',37.76,30.55],['İstanbul',41.01,28.98],['İzmir',38.42,27.14],['Kahramanmaraş',37.58,36.94],['Karabük',41.20,32.63],['Karaman',37.18,33.22],['Kars',40.60,43.10],['Kastamonu',41.39,33.78],['Kayseri',38.73,35.49],['Kırıkkale',39.85,33.52],['Kırklareli',41.74,27.23],['Kırşehir',39.15,34.16],['Kilis',36.72,37.12],['Kocaeli',40.77,29.92],['Konya',37.87,32.48],['Kütahya',39.42,29.98],['Malatya',38.35,38.31],['Manisa',38.61,27.43],['Mardin',37.31,40.74],['Mersin',36.80,34.64],['Muğla',37.22,28.36],['Muş',38.74,41.51],['Nevşehir',38.62,34.71],['Niğde',37.97,34.68],['Ordu',40.98,37.88],['Osmaniye',37.07,36.25],['Rize',41.02,40.52],['Sakarya',40.76,30.40],['Samsun',41.29,36.33],['Siirt',37.93,41.94],['Sinop',42.03,35.15],['Sivas',39.75,37.02],['Şanlıurfa',37.16,38.79],['Şırnak',37.52,42.46],['Tekirdağ',40.98,27.51],['Tokat',40.31,36.55],['Trabzon',41.00,39.72],['Tunceli',39.11,39.55],['Uşak',38.68,29.41],['Van',38.50,43.37],['Yalova',40.65,29.27],['Yozgat',39.82,34.81],['Zonguldak',41.46,31.80]];
+function ilNear(la,lo){let b=IL[0],bd=1e9;for(const x of IL){const dy=la-x[1],dx=(lo-x[2])*Math.cos(la*Math.PI/180),d=dy*dy+dx*dx;if(d<bd){bd=d;b=x}}return b[0]}
+// WMO hava kodu → simge ve yazı (gece açık/az bulutlu için ay)
+function wxIc(c,night){c=+c;
+ if(c===0)return [night?'wmoon':'wsun','Açık'];if(c===1)return [night?'wmoon':'wsun','Çoğunlukla açık'];if(c===2)return [night?'wcloud':'wcsun','Parçalı bulutlu'];
+ if(c===45||c===48)return ['wcloud','Sisli'];if(c>=51&&c<=57)return ['wrain','Çiseleme'];if(c>=61&&c<=67)return ['wrain','Yağmurlu'];
+ if(c>=71&&c<=77||c===85||c===86)return ['wsnow','Karlı'];if(c>=80&&c<=82)return ['wrain','Sağanak'];if(c>=95)return ['wstorm','Gök gürültülü'];return ['wcloud','Bulutlu']}
+const wxOn=()=>!(store.prefs.wx&&store.prefs.wx.off);
+const wxPref=()=>{const w=store.prefs.wx;return w&&typeof w==='object'&&!w.off&&Math.abs(+w.la)<=90&&Math.abs(+w.lo)<=180&&w.la!==undefined&&w.lo!==undefined?w:null};
+const wxKey=w=>w.la+','+w.lo;
+const wxData=()=>{const w=wxPref(),c=store.wxc;return w&&c&&c.k===wxKey(w)&&c.d&&Date.now()-c.at<6*36e5?c.d:null};
+// Open-Meteo yanıtı dışarıdan gelir: yalnız sayılar alınır, yazılar kendi tablomuzdan çıkar
+function wxParse(j){const n=v=>v===null||v===undefined||v===''||!isFinite(+v)?null:Math.round(+v),cur=j&&j.current,h=j&&j.hourly,d=j&&j.daily;
+ if(!cur||!h||!d||!Array.isArray(h.time)||!Array.isArray(d.time))return null;const t=n(cur.temperature_2m);if(t===null)return null;
+ const ct=String(cur.time||'').slice(0,13),i0=Math.max(0,h.time.findIndex(x=>String(x).slice(0,13)>=ct)),out={t,c:n(cur.weather_code)||0,hr:+ct.slice(11,13)||0,h:[],d:[]};
+ for(let i=i0;i<Math.min(h.time.length,i0+12);i++){const T=n(h.temperature_2m&&h.temperature_2m[i]);if(T===null)continue;out.h.push({hr:+String(h.time[i]).slice(11,13)||0,t:T,r:Math.max(0,Math.min(100,n(h.precipitation_probability&&h.precipitation_probability[i])||0)),c:n(h.weather_code&&h.weather_code[i])||0})}
+ for(let i=0;i<Math.min(5,d.time.length);i++){const hi=n(d.temperature_2m_max&&d.temperature_2m_max[i]),lo=n(d.temperature_2m_min&&d.temperature_2m_min[i]);if(hi===null||lo===null||!okDate(d.time[i]))continue;
+  out.d.push({n:i?DAYS[parse(d.time[i]).getDay()]:'Bugün',hi,lo,r:Math.max(0,Math.min(100,n(d.precipitation_probability_max&&d.precipitation_probability_max[i])||0)),c:n(d.weather_code&&d.weather_code[i])||0})}
+ return out.d.length?out:null}
+let wxBusy=0,wxTry=0;
+async function wxLoad(force){const w=wxPref();if(!w||wxBusy)return;const c=store.wxc;if(!force&&c&&c.k===wxKey(w)&&Date.now()-c.at<30*60e3)return;if(!force&&Date.now()-wxTry<2*60e3)return;
+ wxBusy=1;wxTry=Date.now();const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),8000);
+ try{const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${w.la}&longitude=${w.lo}&current=temperature_2m,weather_code&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=5&timezone=auto`,{signal:ctl.signal});
+  if(!r.ok)throw 0;const d=wxParse(await r.json());if(d){store.wxc={k:wxKey(w),at:Date.now(),d};save()}}catch(e){}finally{clearTimeout(tm);wxBusy=0}
+ wxPaint()}
+const night=h=>h>=20||h<6;
+function wxChip(){if(!wxOn())return '';if(!wxPref())return `<button class="wxd" data-act="wxOpen" aria-label="Hava durumunu aç">${I('wcsun','sm')}Hava</button>`;
+ const d=wxData();if(!d)return '';const [ic,tx]=wxIc(d.c,night(new Date().getHours()));return `<button class="wxd" data-act="wxOpen" aria-label="Hava durumu: ${tx}, ${d.t} derece">${I(ic,'sm')}${d.t}°</button>`}
+function wxPaint(){const e=document.getElementById('wxs');if(e)e.innerHTML=wxChip();const b=document.getElementById('wxbody');if(b)b.innerHTML=wxBody()}
+function wxBody(){const w=wxPref(),d=wxData();
+ if(!w)return `<p class="note" style="margin:0">${I('info','sm')}<span>Hava durumu için bir yer seç.</span></p>`;
+ if(!d)return `<div class="wxwait">${wxBusy?'Hava durumu alınıyor…':'Hava durumuna şu an ulaşılamıyor.'}</div>${wxBusy?'':`<button class="btn soft block" data-act="wxRetry">Yeniden dene</button>`}`;
+ const [ic,tx]=wxIc(d.c,night(new Date().getHours())),T=d.d[0],mx=Math.max(...d.d.map(x=>x.hi)),mn=Math.min(...d.d.map(x=>x.lo));
+ return `<div class="wxbig"><span class="wi">${I(ic)}</span><span class="b"><b>${d.t}°</b><small>${tx} · ${T.lo}° / ${T.hi}°</small></span></div>
+ <div class="lbl" style="margin-top:14px"><span>Saat saat</span></div><div class="wxh">${d.h.map((x,i)=>`<span class="wh${x.r>=60?' wet':''}"><small>${i?String(x.hr).padStart(2,'0')+'.00':'Şimdi'}</small>${I(wxIc(x.c,night(x.hr))[0],'sm')}<b>${x.t}°</b><em>${x.r>=30?'%'+x.r:''}</em></span>`).join('')}</div>
+ <div class="lbl" style="margin-top:14px"><span>Önümüzdeki günler</span></div><div class="wxdl">${d.d.map(x=>`<div class="wd"><span class="dn">${x.n}</span>${I(wxIc(x.c,false)[0],'sm')}<em>${x.r>=30?'%'+x.r:''}</em><span class="lo">${x.lo}°</span><span class="bar"><i style="left:${mx>mn?(x.lo-mn)/(mx-mn)*100:0}%;right:${mx>mn?100-(x.hi-mn)/(mx-mn)*100:0}%"></i></span><span class="hi">${x.hi}°</span></div>`).join('')}</div>`}
+function wxSheet(){const w=wxPref();if(!wxOn()||!w)return wxCitySheet();
+ sheet('Hava durumu',`<div id="wxbody">${wxBody()}</div><div class="wxfoot"><button class="wxcity" data-act="wxCity">${I('pin','sm')}${esc(w.n||'Yer')}${I('chevR','sm')}</button></div>
+ <p class="note" style="margin:12px 0 0">${I('info','sm')}<span>Veri: Open-Meteo. Dışarı yalnızca yaklaşık bir koordinat gider, adres ya da aile bilgisi gitmez.</span></p>`);wxLoad()}
+function wxCitySheet(){const w=wxPref();
+ sheet('Hava durumu yeri',`<div class="wxloc"><span class="wi big">${I('pin')}</span><p><b>Telefonun bulunduğu yer</b></p><p class="note" style="margin:0 0 12px;text-align:left">${I('info','sm')}<span>Konum yalnızca hava durumu için kullanılır ve bu telefonda kalır, ailedekilere gönderilmez. Hava servisine yaklaşık bir koordinat (yaklaşık 1 km duyarlıkta) gider. Her telefon kendi yerinin havasını görür.</span></p></div>
+ <button class="btn primary block" id="wx-loc" data-act="wxLoc">${I('pin','sm')}${w&&w.gps?'Konumumu yenile':'Konumumu kullan'}</button><button class="btn ghost block" style="margin-top:8px" data-act="wxCityList">Bunun yerine şehir seç</button>
+ ${wxOn()?`<button class="link" style="margin:10px auto 0" data-act="wxOff">Hava durumunu gizle</button>`:`<button class="link" style="margin:10px auto 0" data-act="wxCityList">Hava durumunu aç</button>`}`)}
+function wxList(){const w=wxPref();sheet('Şehir seç',`<div class="field"><label for="wx-q" class="sr">Şehir ara</label><input class="inp" id="wx-q" type="search" placeholder="81 il içinde ara" autocomplete="off"></div><div class="cl wxcl" id="wx-cl">${IL.map((c,i)=>`<button class="hrow wxrow" data-act="wxPick" data-i="${i}" data-n="${esc(trl(c[0]))}"><span class="b"><b>${esc(c[0])}</b></span>${w&&!w.gps&&w.n===c[0]?I('check','sm'):''}</button>`).join('')}</div><p class="note" style="margin:10px 0 0">${I('info','sm')}<span>Konum izni istenmez. Şehir yalnızca bu telefonda görünür.</span></p>`)}
+document.addEventListener('input',e=>{if(e.target.id!=='wx-q')return;const q=trl(e.target.value).trim();document.querySelectorAll('#wx-cl .wxrow').forEach(b=>{b.style.display=!q||b.dataset.n.includes(q)?'':'none'})});
+// Acil alınacaklar: selamlama panelinde küçük kırmızı hap
+const acilN=()=>S.items.filter(i=>!i.done&&i.pri==='acil').length;
+const acilChip=()=>{const n=acilN();return n?`<button class="hchip acp" data-act="tab" data-tab="lists">${I('flag','sm')}<span>${n} acil alınacak</span></button>`:''};
 function todayHead(){const m=me(),d=new Date(),h=d.getHours(),hj=hnum(d),x=holy(d),sk=h>=5&&h<11?'m':h>=11&&h<17?'d':h>=17&&h<21?'e':'n';
  const n=x?null:nextHoly(),ch=x?`<span class="hchip on">✦ <span>Bugün ${x[0]}</span></span>`:n&&n.n?`<span class="hchip">✦ <span>${n.n} · ${n.i===1?'yarın':n.i+' gün kaldı'}</span></span>`:'';
  const stars=sk==='e'||sk==='n'?[[75,12],[95,20],[88,8],[78,86],[96,78]].map(([a,b])=>`<i class="st" style="left:${a}%;top:${b}%"></i>`).join(''):'';
  const hjt=hj?`<div class="hj">${hj.d} ${HAY[hj.m-1]} ${hj.y} · ${phaseN(hj.d).replace(' ','&nbsp;')}</div>`:'',mb=hj?`<button class="mbtn" data-act="moonInfo" data-d="${hj.d}" aria-label="Ay: ${phaseN(hj.d)}">${moonSVG(hj.d)}</button>`:'';
  const pa=msgStrip();
- return `<div class="th thx thn sky-${sk}"><div class="r1"><div class="ov">${long(T())}</div></div><div class="thbtn">${bellBtn()}<button class="icon-btn" data-act="myProfile" aria-label="Aile">${av(m.id)}</button></div>
- <div class="panel${pa?' wa':''}"${hj?'':' style="padding-right:16px"'}>${stars}<h1>${selam(h,x,hj,d.getDay()===5)}</h1>${hjt}${ch}${mb}</div>${pa}</div>`}
+ return `<div class="th thx thn sky-${sk}"><div class="r1"><div class="ov">${long(T())}<span id="wxs">${wxChip()}</span></div></div><div class="thbtn">${bellBtn()}<button class="icon-btn" data-act="myProfile" aria-label="Aile">${av(m.id)}</button></div>
+ <div class="panel${pa?' wa':''}"${hj?'':' style="padding-right:16px"'}>${stars}<h1>${selam(h,x,hj,d.getDay()===5)}</h1>${hjt}${acilChip()}${ch}${mb}</div>${pa}</div>`}
 function vToday(){
  const child=isChild();
  return `${todayHead()}${onHereHTML()}
@@ -2247,6 +2319,7 @@ function famSettingsHTML(){const {m,demo,np,standalone,ios,sync,sub}=famCtx();
   <div class="setrow"><span><b>Hatırlatmalar</b>${sub(np==='granted'?'Açık. Bildirim şimdilik uygulama açıkken gelir.':np==='denied'?'Bildirimler bu cihazda kapalı. Tarayıcı ayarlarından açabilirsin.':np==='unsupported'?(ios&&!standalone?'iPhone\'da bildirim için önce uygulamayı ana ekrana ekle.':'Bu tarayıcı bildirim desteklemiyor.'):'Etkinlik hatırlatmaları için izin ver.')}</span>${np==='default'?'<button class="btn ghost sm" data-act="askNotify">İzin ver</button>':''}</div></div>
  <div class="setsec">Bu cihaz</div><div class="group">
   <div class="setrow"><span><b>Bu cihazda</b>${sub(esc(m.name))}</span><button class="btn ghost sm" data-act="who">Değiştir</button></div>
+  <div class="setrow"><span><b>Hava durumu</b>${sub(!wxOn()?'Gizli':wxPref()?esc(wxPref().n||'Yer seçildi')+(wxPref().gps?' · konumun':''):'Yer seçilmedi')}</span><button class="btn ghost sm" data-act="wxCity">Değiştir</button></div>
   ${demo?'':`<div class="setrow"><span id="lbl-on"><b>Burada olduğumu göster</b>${sub('Uygulama açıkken ailen Bugün ve Listeler’de “şu an burada” görür')}</span><button class="switch" role="switch" aria-labelledby="lbl-on" aria-checked="${!store.prefs.hideOn}" data-act="onToggle"></button></div>`}
   ${standalone?'':`<div class="setrow"><span><b>Telefona yükle</b>${sub(installEvt?'Bizim Ev ana ekranında uygulama gibi açılır.':ios?'Safari\'de Paylaş düğmesine, sonra “Ana Ekrana Ekle”ye dokun.':'Tarayıcı menüsünden “Ana ekrana ekle”yi seç.')}</span>${installEvt?'<button class="btn ghost sm" data-act="install">Yükle</button>':''}</div>`}
   ${demo?'':`<div class="setrow"><span><b>Eşitleme</b>${sub(sync)}</span></div>`}</div>
@@ -2829,6 +2902,16 @@ const A={
   const el=document.querySelector(`#lfres [data-act="libAdd"][data-i="${d.i}"]`);if(el)el.outerHTML=`<span class="lbt in" aria-label="Eklendi">${I('check','sm')}</span>`;toast(`“${b.t}” eklendi`)},
  libAddT:()=>{const i=document.getElementById('lf-q'),t=i?i.value.trim().slice(0,160):'';if(!t)return;if(libHas({t})){toast('Bu kitap zaten evde');return}
   const b=libNew({t,k:'dg',n:F.isbn});A.libOpen({id:b.id});toast(`“${b.t}” eklendi. Kategorisini buradan seçebilirsin`)},
+ wxOpen:()=>wxSheet(),
+ wxCity:()=>wxCitySheet(),
+ wxCityList:()=>wxList(),
+ wxRetry:()=>{wxTry=0;wxLoad(true);wxPaint()},
+ wxLoc:()=>{const b=document.getElementById('wx-loc');if(!navigator.geolocation){toast('Bu telefonda konum okunamıyor. Şehir seçebilirsin.');return}
+  if(b){b.disabled=true;b.lastChild.textContent='Konum alınıyor…'}
+  navigator.geolocation.getCurrentPosition(p=>{const la=Math.round(p.coords.latitude*100)/100,lo=Math.round(p.coords.longitude*100)/100;store.prefs.wx={la,lo,n:ilNear(la,lo),gps:1};delete store.wxc;wxTry=0;save();closeNow();render(true);toast('Hava durumu bulunduğun yere göre')},
+   er=>{if(b){b.disabled=false;b.lastChild.textContent='Konumumu kullan'}toast(er&&er.code===1?'Konum izni verilmedi. İstersen şehir seçebilirsin.':'Konum alınamadı. İstersen şehir seçebilirsin.')},{timeout:12000,maximumAge:6e5})},
+ wxPick:d=>{const c=IL[+d.i];if(!c)return;store.prefs.wx={la:c[1],lo:c[2],n:c[0]};delete store.wxc;wxTry=0;save();closeNow();render(true);toast(`Hava durumu: ${c[0]}`)},
+ wxOff:()=>{store.prefs.wx={off:true};delete store.wxc;save();closeNow();render(true);const el=document.getElementById('setsheet');if(el)el.innerHTML=famSettingsHTML();toast('Hava durumu gizlendi')},
  doneWish:d=>wishDoneForm(S.wishes.find(x=>x.id===d.id)),
  cmDel:d=>{const u=snap();S.wcm=(S.wcm||[]).filter(c=>c.id!==d.id);render(true);toast('Yorum silindi',u)},
  undoneWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);if(!w)return;unlog(`“${w.title}” için “yaptık” dedi ${w.mood}`);w.done=false;w.doneAt=null;w.doneWith=[];w.mood='';close();render(true);toast('Geri alındı',u)},
@@ -3152,7 +3235,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-27c',items:[['book','Ev kütüphanesi','Aile sayfasında evdeki kitaplarınız: barkodu okut ya da adıyla ara, kapak ve yazar kendiliğinden gelir. Kitabı düzenleyebilir, kategori başlığına dokunup adını değiştirebilirsin. Kimin okuduğunu işaretler, kitaplara yorum yazarsınız'],['cal','Plana katılım','Bir isteği plana dökünce eklediğin yetişkinlere “Katılıyor musun?” diye sorulur. Başka gün de önerebilirler, sen de planı o güne alırsın'],['cart','Tahmini fiyat','Alınacak eklerken ⋯ içinde tahmini fiyat yazabilirsin. Listenin altında bekleyenlerin toplam tutarı görünür'],['cal','Birkaç günlük etkinlik','Etkinlik eklerken “Birkaç gün sürüyor”a dokun, bitiş gününü seç. Ay görünümünde o günler ve tatiller tek şerit olur']]};
+const NEWS={v:'2026-10-28',items:[['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır'],['book','Ev kütüphanesi','Aile sayfasında evdeki kitaplarınız: barkodu okut ya da adıyla ara, kapak ve yazar kendiliğinden gelir. Kitabı düzenleyebilir, kategori başlığına dokunup adını değiştirebilirsin. Kimin okuduğunu işaretler, kitaplara yorum yazarsınız'],['cal','Plana katılım','Bir isteği plana dökünce eklediğin yetişkinlere “Katılıyor musun?” diye sorulur. Başka gün de önerebilirler, sen de planı o güne alırsın'],['cart','Tahmini fiyat','Alınacak eklerken ⋯ içinde tahmini fiyat yazabilirsin. Listenin altında bekleyenlerin toplam tutarı görünür'],['cal','Birkaç günlük etkinlik','Etkinlik eklerken “Birkaç gün sürüyor”a dokun, bitiş gününü seç. Ay görünümünde o günler ve tatiller tek şerit olur']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
