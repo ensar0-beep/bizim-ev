@@ -139,7 +139,15 @@ h2.sec .qty{font-weight:700}
 .sugg{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 2px 2px}
 .sugg small{color:var(--muted);font-weight:600;font-size:.8rem;margin-right:2px}
 .row.shop{min-height:64px}.row.shop .t{font-size:1.08rem}
-.sugg button{min-height:40px;padding:0 12px;border-radius:999px;background:var(--sunk);font-weight:600;font-size:.9rem;display:inline-flex;align-items:center;gap:4px}
+.sugg .group{width:100%}
+.sugg .adh{display:block;margin:6px 4px 8px;width:100%}
+.sgl .row{min-height:48px;padding:6px 14px;font-weight:500;gap:12px;border-radius:0;background:var(--surface);font-size:1rem}
+.sgl .row .t{font-weight:500}
+.sgl .pki{width:30px;height:30px;border-radius:9px;background:var(--sunk);display:flex;align-items:center;justify-content:center;flex:none;color:var(--fg)}
+.sgl .pki .i{width:17px;height:17px}
+.sgs,.sugg .sgs{display:block;font-size:.8rem;color:var(--muted);font-weight:500;margin:1px 0 0}
+.sgdue{font-style:normal;font-size:.7rem;font-weight:700;color:var(--accent-ink);background:var(--accent-soft);border-radius:999px;padding:2px 8px;margin-left:8px;vertical-align:2px}
+.sugg button:not(.row){min-height:40px;padding:0 12px;border-radius:999px;background:var(--sunk);font-weight:600;font-size:.9rem;display:inline-flex;align-items:center;gap:4px}
 /* Görev kutlaması ve çocuklar için haftalık yıldız */
 .cf{position:absolute;width:8px;height:10px;border-radius:2px;pointer-events:none;z-index:40}
 .stars{display:inline-flex;align-items:center;gap:6px;background:var(--warn-soft);color:var(--warn);font-weight:700;padding:6px 12px;border-radius:999px;font-size:.9rem;margin:0 0 12px}
@@ -2471,8 +2479,17 @@ function remember(nm){S.freq=S.freq||[];const id=fid(nm),f=S.freq.find(x=>x.id==
  const gap=(now-f.last)/864e5;f.n++;if(gap>.5)f.every=f.every?Math.round((f.every*.7+gap*.3)*10)/10:Math.round(gap*10)/10;f.last=now;f.name=nm}
 function suggHTML(q){const L=F.list||UI.list,have=new Set(S.items.filter(i=>i.list===L&&!i.done).map(i=>low(i.name)));q=low(q.trim());
  const fr=(S.freq||[]).filter(f=>f.n>=2);
- const pool=(fr.length?[...fr].sort((a,b)=>b.n-a.n).map(f=>f.name):COMMON).filter(n=>!have.has(low(n))&&(!q||low(n).includes(q))&&low(n)!==q).slice(0,8);
- return pool.length?`<small>${q?'Öneriler':fr.length?'En çok eklediklerin':'Sık alınanlar'}</small>${pool.map(n=>`<button type="button" data-act="sugAdd" data-v="${esc(n)}">${I('plus','sm')}${esc(n)}</button>`).join('')}`:''}
+ const pool=(fr.length?[...fr].sort((a,b)=>b.n-a.n).map(f=>f.name):COMMON).filter(n=>!have.has(low(n))&&(!q||low(n).includes(q))&&low(n)!==q).map(n=>({n,i:sgInfo(n)}));
+ // Ortalamasını geçenler ("Vakti geldi") ortalamaya en çok aşanlardan başlayarak öne çıkar; gerisi en çok eklenenler sırasıyla kalır
+ pool.sort((a,b)=>(b.i.due-a.i.due)||(a.i.due?b.i.r-a.i.r:0));
+ const top=pool.slice(0,5),lb=q?'Öneriler':pool.some(x=>x.i.due)?'Sıradakiler':fr.length?'En çok eklediklerin':'Sık alınanlar';
+ return top.length?`<div class="adh">${lb}</div><div class="group sgl">${top.map(({n,i})=>{const sub=[i.ago!=null?gunOnce(i.ago)+' alındı':'',i.ev?`ortalama ${i.ev} günde bir`:''].filter(Boolean).join(' · ');
+  return `<button type="button" class="row" data-act="sugAdd" data-v="${esc(n)}"><span class="pki">${I('plus')}</span><span class="body"><span class="t">${esc(n)}${i.due?'<em class="sgdue">Vakti geldi</em>':''}</span>${sub?`<small class="sgs">${sub}</small>`:''}</span></button>`}).join('')}</div>`:''}
+const gunOnce=d=>d===0?'bugün':d===1?'dün':d+' gün önce';
+// Son alınış: o addaki alınmış ürünlerin en yenisi, yoksa listeye son eklenişi; ortalama: freq.every (iki ekleme arası gün)
+function sgInfo(n){const k=low(n),f=(S.freq||[]).find(x=>low(x.name)===k),ds=S.items.filter(i=>i.done&&i.doneAt&&low(i.name)===k).map(i=>i.doneAt);
+ const last=ds.length?Math.max(...ds):(f&&f.last)||0,ago=last?Math.max(0,Math.floor((Date.now()-last)/864e5)):null,ev=f&&f.every>=1?Math.round(f.every):null;
+ return {ago,ev,due:ago!=null&&!!ev&&ago>=ev,r:ago!=null&&ev?ago/ev:0}}
 // Alışveriş modu: seçilen mağaza türündeki (kategori) ürünler bütün listelerden tek ekranda; market için reyonlara göre
 const REYON=[['Temizlik & kağıt',['deterjan','tuvalet kağıdı','peçete','sabun','çamaşır suyu','bulaşık']],['Meyve & sebze',['domates','salatalık','patates','soğan','muz','elma','limon','meyve','sebze','biber','marul']],['Süt & kahvaltılık',['süt','peynir','yumurta','zeytin','yoğurt','tereyağ','bal','reçel']],['Et & tavuk',['et','tavuk','kıyma','balık','sucuk']],['Fırın & temel gıda',['ekmek','makarna','pirinç','bulgur','mercimek','şeker','salça','çay','kahve','kurabiye','un']]];
 function reyonOf(name){const n=low(name),w=n.split(/\s+/);for(const [r,ks] of REYON)if(ks.some(k=>k.includes(' ')?n.includes(k):w.some(x=>x.startsWith(k))))return r;return 'Diğer'}
@@ -2828,7 +2845,7 @@ const A={
  dpT:d=>{UI.dpo[d.k]=d.o!=='true';render(true)},
  toggleDone:()=>{UI.doneOpen=!UI.doneOpen;render(true)},
  clearDone:()=>{const u=snap(),n=S.items.filter(i=>i.list===UI.list&&i.done).length;S.items=S.items.filter(i=>!(i.list===UI.list&&i.done));render(true);toast(`${n} ürün temizlendi`,u)},
- newList:()=>sheet('Yeni liste',`<form data-form="newList" autocomplete="off"><div class="field"><label for="nl-name">Liste adı</label><input class="inp" id="nl-name" placeholder="örn. Kışlık giyim" autofocus></div><div class="chips" style="flex-wrap:wrap;margin-bottom:14px">${['Kışlık giyim','Bayram alışverişi','Taşınma','Doğum günü hediyeleri'].map(x=>`<button type="button" class="chip plain" data-act="nlFill" data-v="${x}">${x}</button>`).join('')}</div><button class="btn primary block">Listeyi ekle</button></form>`),
+ newList:()=>sheet('Yeni liste',`<form data-form="newList" autocomplete="off"><div class="field"><label for="nl-name">Liste adı</label><input class="inp" id="nl-name" placeholder="örn. Kışlık giyim" autofocus></div><div class="adh" style="margin:0 4px 8px">Hazır adlar</div><div class="group sgl" style="margin-bottom:14px">${['Kışlık giyim','Bayram alışverişi','Taşınma','Doğum günü hediyeleri'].map(x=>`<button type="button" class="row" data-act="nlFill" data-v="${x}"><span class="pki">${I('plus')}</span><span class="body t">${x}</span></button>`).join('')}</div><button class="btn primary block">Listeyi ekle</button></form>`),
  nlFill:d=>{document.getElementById('nl-name').value=d.v},
  // Listeleri düzenle: bütün liste adları tek sayfada yazılabilir; çöp kutusu silme onayını açar
  // Listeleri düzenle: adlar yazılabilir, simgeye dokununca seçici açılır, sağdaki çizgilerden tutup sıra değişir; çöp kutusu silme onayını açar
