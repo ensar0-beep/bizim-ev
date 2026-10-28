@@ -1055,10 +1055,12 @@ function parsePlace(title,text,url){text=str(text);let u=str(url).trim();const m
 const okHbUrl=u=>{try{const x=new URL(u);return x.protocol==='https:'&&/^([a-z0-9-]+\.)*(hepsiburada\.com|hb\.biz)$/.test(x.hostname)}catch(e){return false}};
 function parseHb(title,text,url){text=str(text);let u=str(url).trim();const m=text.match(/https?:\/\/\S+/);if(!u&&m)u=m[0];
  if(!u||!okHbUrl(u))return null;
+ // Paylaşım metni ürün adı dışında "Paylaş", "göz atın" gibi sözler de taşıyabilir: bunlar ad sayılmaz, ad boş kalırsa formda yazılır
+ const bad=x=>x.length<4||/payla[sş]|göz at|bak\s?ın|hepsiburada|kampanya|^https?:/i.test(x);
  const lines=text.replace(m?m[0]:'','').split('\n').map(x=>x.trim()).filter(Boolean);
- let n=lines[0]||str(title).trim();
- if(!n||/^hepsiburada/i.test(n)){try{const sl=new URL(u).pathname.split('/').filter(Boolean).pop()||'';n=decodeURIComponent(sl).replace(/-p-[A-Za-z0-9]+$/,'').replace(/[-_]+/g,' ').trim();n=n&&n[0].toLocaleUpperCase('tr')+n.slice(1)}catch(e){n=''}}
- return {n:(n||'Hepsiburada ürünü').slice(0,120),u}}
+ let n=[...lines,str(title).trim()].find(x=>x&&!bad(x))||'';
+ if(!n){try{const sl=decodeURIComponent(new URL(u).pathname.split('/').filter(Boolean).pop()||'');if(sl.includes('-')){n=sl.replace(/-p-[A-Za-z0-9]+$/,'').replace(/[-_]+/g,' ').trim();n=n&&n[0].toLocaleUpperCase('tr')+n.slice(1)}}catch(e){n=''}}
+ return {n:n.slice(0,120),u}}
 const WT={mekan:['Gidilecek mekanlar','Mekan','fork'],yer:['Gezilecek yerler','Gezi','compass'],kitap:['Okunacak kitaplar','Kitap','book'],film:['İzlenecek filmler','Film','film']};
 // Gezi planı (wish.trip, yalnızca gezilerde): g gün, b toplam bütçe, k kalemler (ulaşım, konaklama, yemek, gezi), r rota durakları, v ulaşım, m mevsim.
 // Kalemler girildiyse toplam onların toplamıdır. Bütçe dökümü TravelSpend gibi; kalemler dokununca açılır.
@@ -2285,6 +2287,15 @@ const forChips=()=>famGrid({box:'it-for',fam:'fFor',kind:'fFor',sel:[F.for],on:F
 const forRefresh=()=>{const e=document.getElementById('it-for');if(e)e.innerHTML=forChips()};
 // Bütün aileye geçince kişiler eve uçar, çıkınca geri gelir; kişiden kişiye geçişte yalnızca yeniden çizilir
 const forFly=(id,was,now)=>now==='ev'?flyIn(id):was==='ev'?flyOut(id):PAINT[id]();
+// Hepsiburada'dan paylaşılan ürün: eklemeden önce ad ve liste düzeltilebilir
+const hbGrid=()=>icGrid('hbList',S.lists.map(l=>[l.id,l.name,l.icon||'tag']),F.hb.list);
+const hbLists=()=>S.lists.length>1?`<div class="field"><span class="flabel">Hangi listeye?</span><div id="hb-list">${hbGrid()}</div></div>`:'';
+function hbForm(h,list){F={hb:{u:h.u,list}};
+ sheet('Ürünü ekle',`<form data-form="hbAdd" autocomplete="off">
+ <div class="field"><label for="hb-name">Ürün adı</label><input class="inp" id="hb-name" value="${esc(h.n)}" placeholder="örn. Philips Airfryer XL" autofocus>${h.n?'':'<span class="note" style="margin-top:6px">'+I('info','sm')+'<span>Ad paylaşımla gelmedi. Hepsiburada\'daki ürün adını yazın ya da yapıştırın.</span></span>'}<span class="err" id="hb-err" hidden>Ürüne bir ad ver.</span></div>
+ ${hbLists()}
+ <div class="field"><span class="flabel">Bağlantı</span><a href="${esc(h.u)}" target="_blank" rel="noopener" style="color:var(--accent-ink);font-weight:600;word-break:break-all;font-size:.9rem">${esc(h.u)}</a></div>
+ <button class="btn primary block">Alınacağı ekle</button></form>`)}
 function itemForm(i){F={for:i.for||'',pri:i.pri||'yakinda',edit:i.id,cat:i.cat||'Diğer'};
   sheet('Alınacağı düzenle',`<form data-form="item" autocomplete="off">
  <div class="field"><label for="it-name">Ne alınacak?</label><input class="inp" id="it-name" value="${esc(i.name)}"></div>
@@ -2960,6 +2971,7 @@ const A={
    <button class="btn primary block" data-act="toggleItem2" data-id="${i.id}">${I('check','sm')}${i.done?'Alınmadı':'Alındı'}</button>`,
    shTools(['editItem',i.id,'edit','Düzenle'],['delItem',i.id,'trash','Sil',undefined,'',1]))},
  editItem:d=>{const i=S.items.find(x=>x.id===d.id);i&&itemForm(i)},
+ hbList:d=>{F.hb.list=d.v;const e=document.getElementById('hb-list');if(e)e.innerHTML=hbGrid()},
  fCat:d=>{F.cat=d.v;F.catOpen=false;catPaint()},
  catTog:()=>{F.catOpen=!F.catOpen;catPaint()},
  fFor:d=>{const was=F.for;F.for=was===d.id?'':d.id;F.pick=false;forFly('it-for',was,F.for)},
@@ -3067,6 +3079,8 @@ const FORMS={
   const ord=[...F.lo.filter(id=>S.lists.some(l=>l.id===id)),...S.lists.map(l=>l.id).filter(id=>!F.lo.includes(id))];
   if(ord.join()!==S.lists.map(l=>l.id).join()){S.lists=ord.map((id,ix)=>Object.assign(S.lists.find(l=>l.id===id),{at:ix+1}));log('listelerin sırasını değiştirdi');ch=true}
   close();render(true);if(ch)toast('Listeler kaydedildi',u)},
+ hbAdd:()=>{const n=document.getElementById('hb-name').value.trim();if(!n){document.getElementById('hb-err').hidden=false;return}
+  const L=S.lists.find(l=>l.id===F.hb.list)||S.lists[0],it=addItemTo(L.id,n);if(!it)return;it.link=F.hb.u;UI.list=L.id;close();render(true);toast(`${it.name} ${L.name} listesine eklendi`)},
  newList:()=>{const v=document.getElementById('nl-name').value.trim();if(!v)return;const id=uid();S.lists.push({id,name:v,icon:'tag',at:Date.now()});UI.list=id;log(`“${v}” listesini oluşturdu`);close();render();toast('Liste oluşturuldu')},
  msg:()=>{const t=document.getElementById('ms-t').value.trim().slice(0,80);if(!t)return A.msgDel();const me=meId(),u=snap();
   S.msgs=S.msgs||[];const x=S.msgs.find(m=>m.id===me);if(x){x.t=t;x.at=Date.now()}else S.msgs.push({id:me,t,at:Date.now()});if(S.ann&&S.ann.by===me)S.ann=null;
@@ -3111,6 +3125,7 @@ document.addEventListener('input',e=>{if(e.target.id==='sa-in'){F.saKind=null;sa
 // Masaüstü tarayıcıda görünmez tarih kutusuna tıklayınca seçici açılsın (telefonda zaten açılır)
 document.addEventListener('click',e=>{const i=e.target.closest&&e.target.closest('.dtp input');if(i&&!i.disabled&&i.showPicker){try{i.showPicker()}catch(x){}}});
 document.addEventListener('input',e=>{if(e.target.id==='an-text')document.getElementById('an-count').textContent=e.target.value.length+'/140';
+ if(e.target.id==='hb-name'){const r=document.getElementById('hb-err');if(r)r.hidden=true}
  if(e.target.id==='item-input'){const g=document.getElementById('sugg');if(g)g.innerHTML=suggHTML(e.target.value)}
  if(e.target.id&&e.target.id.startsWith('tp-k-')){tpSync();const t=document.getElementById('tp-sum');if(t)t.textContent='Toplam '+tl(sumK(F.trip))}
  if(e.target.id==='ad-note'){F.note=e.target.value;const h=document.getElementById('add-hint'),m=document.querySelector('.adm');if(h)h.innerHTML=addHint();if(m)m.classList.toggle('on',addSet())}});
@@ -3301,8 +3316,8 @@ if(store.mode==='family'){ensureUid().then(()=>{connect();flush();loadAv()})}
 checkReminders();
 setTimeout(popCheck,2500);
 if(shared){if(S){UI.tab='lists';UI.lmode='wish';render(true);wishForm(null,{type:'mekan',title:shared.n,place:shared})}else toast('Önce aileye katıl, sonra mekanı yeniden paylaş.')}
-if(sharedHb){if(S&&S.lists.length){const L=S.lists.find(l=>l.id===UI.list)||S.lists[0];UI.tab='lists';UI.lmode='buy';UI.shop=null;UI.list=L.id;
- const had=S.items.find(i=>!i.done&&i.link===sharedHb.u);if(had)toast('Bu ürün zaten listede');else{const it=addItemTo(L.id,sharedHb.n);if(it){it.link=sharedHb.u;render(true);toast(`${it.name} ${L.name} listesine eklendi`)}}}
+if(sharedHb){if(S&&S.lists.length){const L=S.lists.find(l=>l.id===UI.list)||S.lists[0];UI.tab='lists';UI.lmode='buy';UI.shop=null;UI.list=L.id;render(true);
+ const had=S.items.find(i=>!i.done&&i.link===sharedHb.u);if(had)toast('Bu ürün zaten listede');else hbForm(sharedHb,L.id)}
  else toast('Önce aileye katıl, sonra ürünü yeniden paylaş.')}
 if(qcode&&!store.mode)A.joinSheet({code:qcode.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)});
 })();
