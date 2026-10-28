@@ -553,6 +553,7 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .wxloc{text-align:center;padding:8px 0 4px}.wxloc .big{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 10px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink)}.wxloc .big svg{width:30px;height:30px}.wxloc p{margin:0 0 6px}
 .wxrow{min-height:50px}.wxcl{margin-top:4px}
 .thn .panel .acp{background:var(--danger-soft);color:var(--danger)}.acp svg{width:14px;height:14px;flex:none}
+#acil-l .acil{display:none}
 .lr .dd{flex:none;font-size:.8rem;color:var(--muted);white-space:nowrap}
 .dpg{margin-top:8px}
 .dph{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 14px;text-align:left;position:relative;background:var(--surface)}
@@ -1806,7 +1807,10 @@ function wxList(){const w=wxPref();sheet('Şehir seç',`<div class="field"><labe
 document.addEventListener('input',e=>{if(e.target.id!=='wx-q')return;const q=trl(e.target.value).trim();document.querySelectorAll('#wx-cl .wxrow').forEach(b=>{b.style.display=!q||b.dataset.n.includes(q)?'':'none'})});
 // Acil alınacaklar: selamlama panelinde küçük kırmızı hap
 const acilN=()=>S.items.filter(i=>!i.done&&i.pri==='acil').length;
-const acilChip=()=>{const n=acilN();return n?`<button class="hchip acp" data-act="tab" data-tab="lists">${I('flag','sm')}<span>${n} acil alınacak</span></button>`:''};
+const acilL=()=>S.items.filter(i=>!i.done&&i.pri==='acil');
+const acilBody=()=>{const a=acilL();return a.length?`<div class="group">${a.map(lvRow).join('')}</div>`:'<p class="note" style="margin:6px 0 0">Acil alınacak kalmadı.</p>'};
+function acilRef(){const e=document.getElementById('acil-l');if(e)e.innerHTML=acilBody()}
+const acilChip=()=>{const n=acilN();return n?`<button class="hchip acp" data-act="acilOpen">${I('flag','sm')}<span>${n} acil alınacak</span></button>`:''};
 function todayHead(){const m=me(),d=new Date(),h=d.getHours(),hj=hnum(d),x=holy(d),sk=h>=5&&h<11?'m':h>=11&&h<17?'d':h>=17&&h<21?'e':'n';
  const n=x?null:nextHoly(),ch=x?`<span class="hchip on">✦ <span>Bugün ${x[0]}</span></span>`:n&&n.n?`<span class="hchip">✦ <span>${n.n} · ${n.i===1?'yarın':n.i+' gün kaldı'}</span></span>`:'';
  const stars=sk==='e'||sk==='n'?[[75,12],[95,20],[88,8],[78,86],[96,78]].map(([a,b])=>`<i class="st" style="left:${a}%;top:${b}%"></i>`).join(''):'';
@@ -2241,7 +2245,7 @@ function cmList(w){const me0=meId(),c=cmOf(w);
  return `<div class="cmh">${I('chat','sm')}Yorumlar${c.length?`<small>${c.length}</small>`:''}</div><div class="cmb">${c.map(x=>`<div class="b${x.by===me0?' me':''}">${x.by===me0?'':av(x.by,'xs')}<div class="tx">${x.by===me0?'':`<small>${esc(first(M(x.by).name))}</small>`}${esc(x.t)}<time>${ago(x.at)}</time></div>${x.by===me0?`<button class="del" data-act="cmDel" data-id="${x.id}" aria-label="Yorumunu sil">${I('trash','sm')}</button>`:''}</div>`).join('')||'<div class="t">Henüz kimse yazmadı. İlk sen yaz.</div>'}</div>`}
 const cmHTML=w=>`<div id="cmw" data-id="${w.id}">${cmList(w)}</div><form class="cmin" data-form="cmSave" data-id="${w.id}" autocomplete="off"><input id="cm-in" maxlength="500" placeholder="Bir şey yaz…" aria-label="Yorum" enterkeyhint="send"><button class="go" aria-label="Gönder">${I('arrUp')}</button></form>`;
 // Açık pencerede yorumlar başka telefondan gelince ya da yazınca yalnız liste yenilenir, yazı kutusu yerinde kalır
-function cmRefresh(){const el=document.getElementById('cmw'),w=el&&S&&(S.wishes.find(x=>x.id===el.dataset.id)||LIB().find(x=>x.id===el.dataset.id));if(w)el.innerHTML=cmList(w)}
+function cmRefresh(){acilRef();const el=document.getElementById('cmw'),w=el&&S&&(S.wishes.find(x=>x.id===el.dataset.id)||LIB().find(x=>x.id===el.dataset.id));if(w)el.innerHTML=cmList(w)}
 const withChips=()=>famGrid({box:'wd-with',fam:'fWithAll',kind:'fWith',sel:F.with,on:allOf(F.with)});
 const withRefresh=()=>{const e=document.getElementById('wd-with');if(e)e.innerHTML=withChips()};
 function wishDoneForm(w){F={wid:w.id,with:[...(w.want.length?w.want:[meId()])],mood:'😊'};
@@ -2903,6 +2907,7 @@ const A={
  libAddT:()=>{const i=document.getElementById('lf-q'),t=i?i.value.trim().slice(0,160):'';if(!t)return;if(libHas({t})){toast('Bu kitap zaten evde');return}
   const b=libNew({t,k:'dg',n:F.isbn});A.libOpen({id:b.id});toast(`“${b.t}” eklendi. Kategorisini buradan seçebilirsin`)},
  wxOpen:()=>wxSheet(),
+ acilOpen:()=>sheet('Acil alınacaklar',`<div id="acil-l">${acilBody()}</div>`),
  wxCity:()=>wxCitySheet(),
  wxCityList:()=>wxList(),
  wxRetry:()=>{wxTry=0;wxLoad(true);wxPaint()},
