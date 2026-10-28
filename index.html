@@ -888,6 +888,12 @@ a.btn{text-decoration:none}
 .rpick .ok{color:var(--accent);visibility:hidden;display:flex}
 .rpick .row[aria-pressed="true"] .ok{visibility:visible}
 .rpick .row[aria-pressed="true"] .rpi{background:var(--accent-soft);color:var(--accent-ink)}
+/* Marketteyim: mağaza türleri çizgili sekmeler (üst sekmeler gibi) */
+.stabs{display:flex;gap:20px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);margin:0 0 6px;padding:0 2px}
+.stabs::-webkit-scrollbar{display:none}
+.stabs button{flex:none;padding:10px 0 9px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;display:inline-flex;gap:6px;align-items:baseline}
+.stabs button small{font-size:.75rem;font-weight:600}
+.stabs button[aria-pressed="true"]{color:var(--fg);border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -1873,7 +1879,7 @@ function libBody(){const L=LIB(),me=meId(),f=UI.lf||'all';
  const ring=`<div class="rdc${f!=='all'?' on':''}"><span class="ring" role="img" aria-label="Okuduğun: yüzde ${pct}"><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" class="bg"/><circle cx="22" cy="22" r="18" class="fg" stroke-dasharray="${(pct*C/100).toFixed(1)} ${C}"/></svg><b>%${pct}</b></span>${[['rd','Okuduklarım',nr],['un','Okumadıklarım',L.length-nr]].map(([v,n,c])=>`<button class="rdb ${v}" data-act="libF" data-v="${v}" aria-pressed="${f===v}"><b>${c}</b><small>${n}</small>${f===v?`<span class="rx" aria-hidden="true">${I('x','sm')}</span>`:''}</button>`).join('')}</div>`;
  return `<div class="libtop">${btn}<div class="qrow"><label class="libq">${I('search','sm')}<input id="lib-q" type="search" placeholder="${L.length} kitapta ara" aria-label="Kitaplarda ara" value="${esc(UI.lq||'')}" autocomplete="off"></label><button class="dzs${k!=='ad'?' on':''}" data-act="dzSheet" aria-label="Sırala: ${DZ[k][0]}">${I('sliders')}</button></div>${ring}</div><div id="libres">${libList()}</div>`}
 const libPaint=()=>{const r=document.getElementById('libres');if(r)r.innerHTML=libList()};
-function vLib(){if(store.libTc!==2&&S.books&&S.books.length){S.books.forEach(b=>{const t=tcase(b.t),a=tcase(b.a);if(t!==b.t)b.t=t;if(a!==b.a)b.a=a});store.libTc=2;save()}return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="family">${I('chevL','sm')}Aile</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
+function vLib(){if(store.libTc!==2&&S.books&&S.books.length){S.books.forEach(b=>{const t=tcase(b.t),a=tcase(b.a);if(t!==b.t)b.t=t;if(a!==b.a)b.a=a});store.libTc=2;save()}return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}">${I('chevL','sm')}${UI.libFrom==='lists'?'İstekler':'Aile'}</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
 function libCard(){const L=LIB();return `<button class="libcard" data-act="libGo"><span class="st">${L.length?libSort(L).slice(0,4).map(b=>`<i style="--c:${bcol(b)}"></i>`).join(''):`<i style="--c:#8A3B2B"></i><i style="--c:#2E5A8A"></i><i style="--c:#B8662B"></i>`}</span><span class="tx"><b>Ev kütüphanesi</b><small>${L.length?L.length+' kitap':'Evdeki kitaplarınızı ekleyin'}</small></span>${I('chevR')}</button>`}
 // Kitap ayrıntısı: kapak, kategori, Kim okudu, yorumlar (isteklerdeki sohbet)
 function libSheet(b){const own=b.by===meId()||!isChild(),meta=[b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · ');
@@ -2062,7 +2068,7 @@ function vWishes(){
   <span class="tot" aria-label="Ailenin toplamı ${rSum(w)} puan"><b>${rSum(w)}</b>puan</span>${rbarHTML(w.id,rOf(w)[me0]||0)}</div>`;
  return lTop(true)+itabs(Object.entries(WTAB).map(([k,[i,n]])=>({act:'wt',data:`data-v="${k}"`,on:f===k,i,n,cnt:cnt(k)})),'Tür')
  +(pend.length?`<div class="group" style="margin-top:12px">${pend.map(row).join('')}</div>`:`<div class="group" style="margin-top:12px">${emptyBox(f==='all'?'Henüz istek yok':'Bu türde istek yok','Gezmek, okumak, izlemek ya da yemek istediğiniz bir şeyi ekleyin.',`<br><button class="btn soft sm" data-act="newWish">${I('plus','sm')}İstek ekle</button>`)}</div>`)
- +memCover(done,f)}
+ +(f==='kitap'?libCard():'')+memCover(done,f)}
 // Yaptıklarımız: listenin altında bir kapak kartı (Apple Fotoğraflar Anılar gibi); dokununca hatıra defteri ayrı pencerede
 // açılır: ay ay zaman çizgisi (Day One gibi), solda gün, ortada türün simgesiyle çizgi, sağda anı kartı.
 function memCover(done,f){if(!done.length)return '';const last=done[0];
@@ -2479,7 +2485,7 @@ function vShop(){const cat=UI.shop,all=S.items.filter(i=>i.cat===cat);const pend
  const order=cat==='Market'?[...REYON.map(r=>r[0]),'Diğer']:Object.keys(groups);
  const stores=catsOf(S.items.filter(i=>!i.done));
  return `<div class="hdr"><div class="h"><h1>${cat==='Market'?'Marketteyim':esc(cat)}</h1><div class="sub">Bütün listelerden ${pend.length} ürün bekliyor</div></div><button class="btn primary sm" data-act="shopEnd">Bitir</button></div>
- <div class="chips" role="group" aria-label="Neredesin?">${stores.map(([c,n])=>`<button class="chip plain" data-act="shopCat" data-v="${esc(c)}" aria-pressed="${c===cat}">${esc(c)} <span class="n">${n}</span></button>`).join('')}</div>
+ <div class="stabs" role="group" aria-label="Neredesin?">${stores.map(([c,n])=>`<button data-act="shopCat" data-v="${esc(c)}" aria-pressed="${c===cat}">${esc(c)}<small>${n}</small></button>`).join('')}</div>
  ${pend.length?order.filter(g=>groups[g]).map(g=>`<div class="catlbl">${esc(g)} · ${groups[g].length}</div><div class="group">${groups[g].map(row).join('')}</div>`).join(''):`<div class="group" style="margin-top:14px">${emptyBox('Hepsi sepette 🎉','Bu alışverişte alınacak başka bir şey kalmadı.')}</div>`}
  ${inCart.length?`<div class="catlbl">Sepette · ${inCart.length}</div><div class="group">${inCart.map(row).join('')}</div>`:''}`}
 // Bu hafta tamamlanan görev sayısı = yıldız (çocuk hesaplarında görünür)
@@ -2774,8 +2780,8 @@ const A={
  katEdit:d=>{if(!LKAT[d.v])return;F={kat:d.v};
   sheet('Kategori adı',`<form data-form="katEdit" autocomplete="off"><div class="field"><label for="ke-n">Ad</label><input class="inp" id="ke-n" maxlength="40" value="${esc(katN(d.v))}" placeholder="${esc(LKAT[d.v][0])}" autofocus></div>
   <p class="note" style="margin:0 0 14px">${I('info','sm')}<span>Ailede herkes bu adı görür. Boş bırakırsan “${esc(LKAT[d.v][0])}” olur.</span></p><button class="btn primary block">Kaydet</button></form>`)},
- libGo:()=>{UI.tab='lib';UI.lq='';UI.lf='all';toastOff();render()},
- openBook:d=>{if(UI.tab!=='lib'){UI.tab='lib';UI.lq='';UI.lf='all';render()}A.libOpen(d)},
+ libGo:()=>{UI.libFrom=UI.tab;UI.tab='lib';UI.lq='';UI.lf='all';toastOff();render()},
+ openBook:d=>{if(UI.tab!=='lib'){UI.libFrom=UI.tab;UI.tab='lib';UI.lq='';UI.lf='all';render()}A.libOpen(d)},
  libF:d=>{UI.lf=d.v===UI.lf?'all':d.v;render(true)},
  libOpen:d=>{const b=LIB().find(x=>x.id===d.id);if(!b){toast('Bu kitap başka bir cihazda silinmiş.');return}sheet(esc(b.t),libSheet(b),shTools(['libEdit',b.id,'edit','Düzenle',b.by===meId()||!isChild(),PARENT],['libDel',b.id,'trash','Sil',b.by===meId()||!isChild(),PARENT,1]))},
  libRead:d=>{const b=LIB().find(x=>x.id===d.id);if(!b)return;const on=!b.rd.includes(d.m);b.rd=on?[...b.rd,d.m]:b.rd.filter(x=>x!==d.m);
