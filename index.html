@@ -553,7 +553,18 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .wxloc{text-align:center;padding:8px 0 4px}.wxloc .big{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 10px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink)}.wxloc .big svg{width:30px;height:30px}.wxloc p{margin:0 0 6px}
 .wxrow{min-height:50px}.wxcl{margin-top:4px}
 .thn .panel .acp{background:var(--danger-soft);color:var(--danger)}.acp svg{width:14px;height:14px;flex:none}
+/* Acil balonu */
+.apo{position:fixed;inset:0;z-index:90;background:rgba(20,16,10,0);transition:background .22s}.apo.on{background:rgba(20,16,10,.14)}
+.apc{position:absolute;left:14px;right:14px;max-width:420px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px;box-shadow:0 20px 50px rgba(0,0,0,.28);opacity:0;transform:scale(.6);transition:transform .2s ease-in,opacity .16s ease-in}
+.apo.on .apc{opacity:1;transform:none;transition:transform .34s cubic-bezier(.2,.9,.3,1.25),opacity .18s ease-out}
+.apa{position:absolute;top:-8px;width:16px;height:16px;background:var(--surface);border-left:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg);border-radius:3px 0 0 0}
+.aph{display:flex;align-items:center;gap:12px;padding:0 2px 10px}
+.api{width:38px;height:38px;border-radius:999px;background:var(--danger-soft);color:var(--danger);display:flex;align-items:center;justify-content:center;flex:none}
+.apt{flex:1;min-width:0;display:flex;flex-direction:column}.apt b{font-family:var(--f-display);font-size:1.08rem;font-weight:700}.apt small{color:var(--muted);font-size:.82rem}
+.aps{width:34px;height:34px;border-radius:999px;border:0;background:var(--sunk);color:var(--fg);display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer}
+.apc .group{box-shadow:none;border:1px solid var(--line);max-height:var(--ah,46vh);overflow:auto}
 #acil-l .acil{display:none}
+@media (prefers-reduced-motion:reduce){.apo,.apc,.apo.on .apc{transition:none}}
 .lr .dd{flex:none;font-size:.8rem;color:var(--muted);white-space:nowrap}
 .dpg{margin-top:8px}
 .dph{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 14px;text-align:left;position:relative;background:var(--surface)}
@@ -1809,7 +1820,19 @@ document.addEventListener('input',e=>{if(e.target.id!=='wx-q')return;const q=trl
 const acilN=()=>S.items.filter(i=>!i.done&&i.pri==='acil').length;
 const acilL=()=>S.items.filter(i=>!i.done&&i.pri==='acil');
 const acilBody=()=>{const a=acilL();return a.length?`<div class="group">${a.map(lvRow).join('')}</div>`:'<p class="note" style="margin:6px 0 0">Acil alınacak kalmadı.</p>'};
-function acilRef(){const e=document.getElementById('acil-l');if(e)e.innerHTML=acilBody()}
+function acilRef(){const e=document.getElementById('acil-l');if(e)e.innerHTML=acilBody();const c=document.getElementById('acil-n');if(c)c.textContent=acilN()?acilN()+' ürün bekliyor':'Hepsi tamam';
+ if(e&&!acilN()&&!acilRef.t)acilRef.t=setTimeout(()=>{acilRef.t=0;if(!acilN())acilClose()},900)}
+function acilClose(){const e=document.getElementById('apo');if(!e||e.classList.contains('out'))return;e.classList.remove('on');e.classList.add('out');
+ if(matchMedia('(prefers-reduced-motion:reduce)').matches)e.remove();else setTimeout(()=>e.remove(),230)}
+// Hapa bağlı balon: hapın altından büyüyerek açılır, kapanırken hapa doğru küçülür
+function acilGo(el){const old=document.getElementById('apo');if(old)old.remove();
+ const o=document.createElement('div');o.id='apo';o.className='apo';
+ o.innerHTML=`<div class="apc" role="dialog" aria-modal="true" aria-label="Acil alınacaklar"><i class="apa"></i><div class="aph"><span class="api">${I('flag','sm')}</span><div class="apt"><b>Acil alınacaklar</b><small id="acil-n">${acilN()} ürün bekliyor</small></div><button class="aps" data-act="acilX" aria-label="Kapat">${I('x','sm')}</button></div><div id="acil-l">${acilBody()}</div></div>`;
+ o.addEventListener('click',e=>{if(e.target===o)acilClose()});document.body.appendChild(o);
+ const c=o.firstChild,r=el.getBoundingClientRect(),cx=r.left+r.width/2,top=r.bottom+12;
+ c.style.top=top+'px';c.style.setProperty('--ah',Math.max(160,innerHeight-top-130)+'px');c.style.transformOrigin=(cx-14)+'px 0';o.querySelector('.apa').style.left=(cx-14-8)+'px';
+ requestAnimationFrame(()=>requestAnimationFrame(()=>o.classList.add('on')))}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')acilClose()});
 const acilChip=()=>{const n=acilN();return n?`<button class="hchip acp" data-act="acilOpen">${I('flag','sm')}<span>${n} acil alınacak</span></button>`:''};
 function todayHead(){const m=me(),d=new Date(),h=d.getHours(),hj=hnum(d),x=holy(d),sk=h>=5&&h<11?'m':h>=11&&h<17?'d':h>=17&&h<21?'e':'n';
  const n=x?null:nextHoly(),ch=x?`<span class="hchip on">✦ <span>Bugün ${x[0]}</span></span>`:n&&n.n?`<span class="hchip">✦ <span>${n.n} · ${n.i===1?'yarın':n.i+' gün kaldı'}</span></span>`:'';
@@ -2907,7 +2930,8 @@ const A={
  libAddT:()=>{const i=document.getElementById('lf-q'),t=i?i.value.trim().slice(0,160):'';if(!t)return;if(libHas({t})){toast('Bu kitap zaten evde');return}
   const b=libNew({t,k:'dg',n:F.isbn});A.libOpen({id:b.id});toast(`“${b.t}” eklendi. Kategorisini buradan seçebilirsin`)},
  wxOpen:()=>wxSheet(),
- acilOpen:()=>sheet('Acil alınacaklar',`<div id="acil-l">${acilBody()}</div>`),
+ acilOpen:(d,el)=>acilGo(el),
+ acilX:()=>acilClose(),
  wxCity:()=>wxCitySheet(),
  wxCityList:()=>wxList(),
  wxRetry:()=>{wxTry=0;wxLoad(true);wxPaint()},
