@@ -2535,7 +2535,7 @@ function famSettingsHTML(){const {m,demo,np,standalone,ios,sync,sub}=famCtx();
   <div class="setrow"><span><b>Hava durumu</b>${sub(!wxOn()?'Gizli':wxPref()?esc(wxPref().n||'Yer seçildi')+(wxPref().gps?' · konumun':''):'Yer seçilmedi')}</span><button class="btn ghost sm" data-act="wxCity">Değiştir</button></div>
   ${demo?'':`<div class="setrow"><span id="lbl-on"><b>Burada olduğumu göster</b>${sub('Uygulama açıkken ailen Bugün ve Listeler’de “şu an burada” görür')}</span><button class="switch" role="switch" aria-labelledby="lbl-on" aria-checked="${!store.prefs.hideOn}" data-act="onToggle"></button></div>`}
   ${standalone?'':`<div class="setrow"><span><b>Telefona yükle</b>${sub(installEvt?'Bizim Ev ana ekranında uygulama gibi açılır.':ios?'Safari\'de Paylaş düğmesine, sonra “Ana Ekrana Ekle”ye dokun.':'Tarayıcı menüsünden “Ana ekrana ekle”yi seç.')}</span>${installEvt?'<button class="btn ghost sm" data-act="install">Yükle</button>':''}</div>`}
-  ${demo?'':`<div class="setrow"><span><b>Eşitleme</b>${sub(sync)}</span></div>`}</div>
+  ${demo?'':`<div class="setrow" data-act="syncTap"><span><b>Eşitleme</b>${sub(sync)}</span></div>`}</div>
  <div class="group" style="margin-top:16px">
   <div class="setrow"><span><b>${demo?'Örnek aileden çık':'Bu cihazdan çık'}</b>${sub(demo?'Kendi aileni kurmak ya da bir aileye katılmak için.':'Ailenin bilgileri silinmez, kodla tekrar girebilirsin.')}</span><button class="btn danger sm" data-act="leaveAsk">${demo?'Örnek aileden çık':'Çık'}</button></div></div>`}
 function famInviteHTML(){const {adm,demo}=famCtx();return `<div class="invite">${adm?`<div class="flabel">Aile kodu</div><div class="code" id="fam-code">${demo?'ÖRNE-KKOD':fmtCode(store.code)}</div>
@@ -3656,6 +3656,9 @@ async function lkUndoRun(){const code=store.code;lkProg(true);
  catch(e){lkFail(e)}}
 
 Object.assign(A,{
+ // Gizli açma: Eşitleme satırına art arda 5 kez dokunmak kilidi bu telefonda açar (ana ekrandaki uygulamaya ?kilit=1 verilemiyor)
+ syncTap:()=>{const t=Date.now();UI.stc=(UI.stc&&t-UI.stt<2500?UI.stc:0)+1;UI.stt=t;if(UI.stc<5||store.mode!=='family')return;UI.stc=0;
+  store.prefs.lkOn=!store.prefs.lkOn;save();toast(store.prefs.lkOn?'Uçtan uca kilit bu telefonda açıldı':'Uçtan uca kilit bu telefonda gizlendi');render(true)},
  lockLater:()=>{store.prefs.lkLater=Date.now()+14*864e5;render(true)},
  lockStart:()=>{if(!can('member.manage'))return;sheet('Aileni kilitle',`<p>Kilitledikten sonra takvimini, listelerini, görevlerini ve fotoğraflarını sadece bu ailenin telefonları görebilir. Google da, uygulamayı yapan kişi de göremez.</p>
   <ol class="lkol"><li><b>Yedek alınır.</b><span>Ailenin bütün verisi önce bu telefona kaydedilir.</span></li><li><b>Kurtarma kodunu yazarsın.</b><span>Bütün telefonlar kaybolursa veriyi bu kod açar.</span></li><li><b>Diğer telefonlar anahtarı alır.</b><span>Ailendeki diğer telefonlar anahtarı senden alır.</span></li></ol>
