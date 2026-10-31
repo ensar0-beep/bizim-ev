@@ -845,6 +845,37 @@ a.btn{text-decoration:none}
 :root[data-theme="dark"] .sk::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}
 @keyframes sh{to{transform:translateX(100%)}}
 .state-err{text-align:center;padding:60px 12px}
+.lkc{background:var(--accent-soft);border-radius:var(--r-lg);padding:16px;margin:0 0 16px;display:grid;gap:6px}
+.lkc .who{display:flex;gap:6px;align-items:center;font-size:.8rem;font-weight:600;color:var(--accent-ink)}
+.lkc h3{margin:0;font-size:1.05rem}.lkc p{margin:0;color:var(--muted);font-size:.92rem}.lkc .two{display:flex;gap:8px;margin-top:6px}
+.lkrow{display:flex;align-items:center;gap:12px;width:100%;background:var(--surface);border-radius:var(--r-lg);padding:12px 14px;margin:10px 0 4px;text-align:left;box-shadow:var(--shadow);color:var(--fg);min-height:60px}
+.lkrow.in{box-shadow:none;margin:0;border-radius:0}.lkrow.in+.lkrow.in{border-top:1px solid var(--line)}
+.lkrow .tx{flex:1;display:grid;min-width:0}.lkrow small{color:var(--muted);font-size:.85rem}.lkrow.on>.i:first-child{color:var(--accent)}
+.keyless{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:32px 4px}
+.keyless .bigic,.lkbig{width:72px;height:72px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;margin:0 auto}
+.keyless .bigic .i,.lkbig .i{width:34px;height:34px}
+.keyless h1{font-size:1.5rem;margin:6px 0 0}.keyless .lead{color:var(--muted);max-width:32ch;margin:0}
+.keyless .acts,.lkacts{display:grid;gap:10px;width:100%;max-width:320px;margin:10px auto 4px}
+.keyless .lkn{text-align:left;max-width:320px}
+.small{color:var(--muted);font-size:.85rem;margin:6px 0}
+.kgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.kgrid span,.kgrid .kin{font:700 1.3rem/1 var(--f-display);letter-spacing:.1em;text-align:center;padding:14px 2px;border-radius:12px;background:var(--sunk);font-variant-numeric:tabular-nums}
+.kgrid .mu{color:var(--muted)}.kgrid .kin{min-height:0;border:1.5px solid var(--accent);background:var(--bg);text-transform:uppercase;width:100%}
+.rcin{font:600 1.2rem/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;text-align:center}
+.qrbox{width:min(240px,70vw);aspect-ratio:1;margin:14px auto;background:#fff;border-radius:16px;padding:12px;display:flex;align-items:center;justify-content:center}
+.qrbox svg{width:100%;height:100%;display:block}.kb{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.lkol{padding-left:22px;display:grid;gap:10px;margin:12px 0}.lkol b{display:block}.lkol span{color:var(--muted);font-size:.9rem}
+.pg{padding:12px 14px;display:grid;gap:8px}.pg+.pg{border-top:1px solid var(--line)}
+.pgt{display:flex;align-items:center;gap:10px}.pgt b{flex:1;font-weight:600}.pgt small{color:var(--muted);font-variant-numeric:tabular-nums}
+.pbar{height:4px;border-radius:2px;background:var(--sunk);overflow:hidden}.pbar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.lkspn,.lkwt{width:18px;height:18px;border-radius:50%;border:2.5px solid var(--line);flex:none;display:inline-block}
+.lkspn{border-top-color:var(--accent);animation:lkspin .8s linear infinite}
+@keyframes lkspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.lkspn{animation-duration:2.4s}}
+.i.lkok{color:var(--accent)}.i.lkno{color:var(--danger)}
+.lkoff{color:var(--danger);margin:16px auto 0;display:flex;justify-content:center;width:100%}
+.lkn{margin:12px 0}.lkwait{display:flex;justify-content:center;padding:24px}.lkwait .lkspn{width:28px;height:28px}
+.lkwho .tx{display:grid}.lkwho small{color:var(--muted)}
 .state-err .ic{width:64px;height:64px;border-radius:999px;background:var(--danger-soft);color:var(--danger);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
 .child-hint{background:var(--accent-soft);color:var(--accent-ink);border-radius:var(--r-md);padding:10px 14px;font-weight:600;font-size:.9rem;display:flex;gap:8px;align-items:center;margin-bottom:6px}
 .welcome{min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:32px;padding-block:24px 40px}
@@ -1217,7 +1248,7 @@ const KEY='bizim-ev.v1';
 const COLS=['members','events','tasks','lists','items','wishes','activity','freq','msgs','wcm','rsv','books','bkat'];
 let store;
 try{store=JSON.parse(localStorage.getItem(KEY))}catch(e){}
-store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{},auth:null,av:{},avi:{}},store&&typeof store==='object'?store:{});
+store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{},auth:null,av:{},avi:{},D:{},fk:null,rc:null},store&&typeof store==='object'?store:{});
 let S=null,baseC={};
 const UI={shop:null,shopAt:0,joinFor:null,joinShown:false,tab:'today',cal:'month',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,dpo:{},lmode:'buy',wt:'all',net:'online',err:null};
 UI.dcKeep=new Set();
@@ -1292,13 +1323,94 @@ function flat(s){const o={};if(!s)return o;for(const c of COLS)for(const x of s[
 function unflat(o){const s={meta:o.meta||{},ann:o.ann&&typeof o.ann==='object'?Object.assign({},o.ann,{text:str(o.ann.text)}):null};for(const c of COLS)s[c]=[];
  for(const p in o){const i=p.indexOf('/');if(i<0)continue;const c=p.slice(0,i);if(s[c])s[c].push(norm(c,p.slice(i+1),o[p]))}
  s.members.sort((a,b)=>(a.at||0)-(b.at||0));s.lists.sort((a,b)=>(a.at||0)-(b.at||0));s.activity.sort((a,b)=>b.at-a.at);return s}
-function flatR(R){const o={};if(!R)return o;for(const c of COLS){const col=R[c];if(!col||typeof col!=='object')continue;for(const id in col)if(okId(id)&&col[id]!=null)o[c+'/'+id]=col[id]}if(R.ann)o.ann=R.ann;if(R.meta)o.meta=R.meta;return o}
+// Kilitli kayıtlar açılmış hâlleriyle (store.D) girer; açılamayanlar hiç girmez, böylece S'de ve baseC'de olmazlar ve silinmezler
+function flatR(R){const o={};if(!R)return o;for(const c of COLS){const col=R[c];if(!col||typeof col!=='object')continue;for(const id in col){if(!okId(id))continue;const v=rv(c+'/'+id,col[id]);if(v!=null)o[c+'/'+id]=v}}const a=rv('ann',R.ann),m=rv('meta',R.meta);if(a)o.ann=a;if(m)o.meta=m;return o}
 function rebase(){baseC={};const f=flat(S);for(const p in f)baseC[p]=canon(f[p])}
 function fromRemote(){const o=flatR(store.R);for(const p in store.pending){if(store.pending[p]===null)delete o[p];else o[p]=store.pending[p]}S=unflat(clone(o));rebase()}
 function setS(v){S=v;if(store.mode==='demo')store.demo=S}
 function setAt(root,path,val){const ks=path.split('/').filter(Boolean);if(!ks.length)return val&&typeof val==='object'?val:{};root=root&&typeof root==='object'?root:{};let o=root;
  for(let i=0;i<ks.length-1;i++){if(!o[ks[i]]||typeof o[ks[i]]!=='object'){if(val===null)return root;o[ks[i]]={}}o=o[ks[i]]}
  if(val===null)delete o[ks[ks.length-1]];else o[ks[ks.length-1]]=val;return root}
+/* ---------- Uçtan uca kilit: çekirdek ----------
+   Aile kilitlenince her kayıt (koleksiyon kayıtları, meta, ann) telefonda AES-256-GCM ile kilitlenip
+   öyle gönderilir: Firebase'de yalnızca "e1.<iv + şifreli metin>" dizisi durur. Ek doğrulama verisi
+   aile kodu + kaydın yoludur, bir kutu başka bir yere kopyalanırsa açılmaz.
+   Anahtar ailenin telefonlarında durur (store.fk). families/{kod}/k = {v, st, by, at, chk, w}:
+   st 'on' kilitli, 'migrating' kilitleniyor, 'undo' kilit kaldırılıyor; chk anahtarı doğrulamak için
+   kilitli {ok:1}; w kurtarma koduyla (PBKDF2) sarılmış anahtar.
+   Kurallar: anahtarı olmayan telefon kilitli kayıtları göremez ve onlara dokunmaz (S'ye ve baseC'ye
+   girmezler, commit() onları silmez). Kilit varken anahtar doğrulanmadıysa ya da st 'on' değilse
+   flush() hiçbir şey göndermez; kilitliyken her şeyi kilitleyip gönderir.
+   Açılan kayıtlar store.D[yol] = {i: iv, v: açık kayıt} olarak saklanır; iv değişince yeniden açılır. */
+const APPV=2,EV='e1.';
+const isEnc=v=>typeof v==='string'&&v.indexOf(EV)===0&&v.length>30;
+const encPath=p=>{if(p==='meta'||p==='ann')return true;const i=p.indexOf('/');return i>0&&p.indexOf('/',i+1)<0&&COLS.includes(p.slice(0,i))};
+const TE=new TextEncoder(),TD=new TextDecoder();
+const b64u=b=>{const u=b instanceof Uint8Array?b:new Uint8Array(b);let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const b64=b=>{let s=b64u(b).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return s};
+const ub64u=s=>{s=String(s).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+const okFk=s=>typeof s==='string'&&/^[A-Za-z0-9_-]{43}$/.test(s);
+const ivOf=v=>v.slice(EV.length,EV.length+16);
+const newFk=()=>b64u(crypto.getRandomValues(new Uint8Array(32)));
+const KC={s:'',k:null};
+async function fkey(s){s=s||store.fk;if(!okFk(s))throw new Error('anahtar yok');if(KC.s===s)return KC.k;
+ const k=await crypto.subtle.importKey('raw',ub64u(s),'AES-GCM',false,['encrypt','decrypt']);KC.s=s;KC.k=k;return k}
+async function encB(key,code,path,bytes){const iv=crypto.getRandomValues(new Uint8Array(12));
+ const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv,additionalData:TE.encode(code+'/'+path)},key,bytes));
+ const o=new Uint8Array(12+ct.length);o.set(iv);o.set(ct,12);return EV+b64u(o)}
+async function decB(key,code,path,s){const u=ub64u(s.slice(EV.length));
+ return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:u.subarray(0,12),additionalData:TE.encode(code+'/'+path)},key,u.subarray(12)))}
+const encJ=(key,code,path,v)=>encB(key,code,path,TE.encode(JSON.stringify(v)));
+const decJ=async(key,code,path,s)=>JSON.parse(TD.decode(await decB(key,code,path,s)));
+// Kurtarma kodu: 12 karakter (32 harflik alfabe, karışanlar yok) = 60 bit; PBKDF2 600 bin turla anahtarı sarar.
+const newRc=()=>{const a=new Uint32Array(12);crypto.getRandomValues(a);return Array.from(a,x=>CODE_ABC[x%32]).join('')};
+const fmtRc=c=>(c||'').match(/.{1,4}/g).join('-');
+const rcNorm=s=>String(s||'').toLocaleUpperCase('tr').replace(/İ/g,'I').split('').filter(c=>CODE_ABC.includes(c)).join('');
+async function rcKey(rc,salt,iter){const b=await crypto.subtle.importKey('raw',TE.encode(rc),'PBKDF2',false,['deriveKey']);
+ return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},b,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function rcWrap(code,fk,rc){const s=crypto.getRandomValues(new Uint8Array(16)),i=600000;return {s:b64u(s),i,x:await encB(await rcKey(rc,s,i),code,'k/w',ub64u(fk))}}
+async function rcOpen(code,w,rc){if(!w||typeof w.x!=='string')throw new Error('kurtarma yok');
+ return b64u(await decB(await rcKey(rc,ub64u(w.s),Math.max(1e5,Math.min(+w.i||600000,5e6))),code,'k/w',w.x))}
+// k kaydını oluştur: chk yalnızca doğru anahtarla açılır
+async function kMake(code,fk,rc,st,by){return {v:1,st,by:by||store.me||'',at:Date.now(),chk:await encJ(await fkey(fk),code,'k/chk',{ok:1}),w:await rcWrap(code,fk,rc)}}
+
+const KS={ok:null,src:'',p:null,fresh:false,lk:null};
+const kRec=()=>{const k=store.R&&store.R.k;return k&&typeof k==='object'&&typeof k.chk==='string'?k:null};
+const kOn=()=>{const k=kRec();return !!k&&k.st==='on'};
+async function keyCheck(fk,k,code){k=k||kRec();code=code||store.code;if(!k||!okFk(fk))return false;
+ try{const v=await decJ(await fkey(fk),code,'k/chk',k.chk);return !!v&&v.ok===1}catch(e){return false}}
+// Bu telefonun anahtarı ailenin kilidine uyuyor mu (true / false; kilit yoksa null)
+function keyState(){const k=kRec();if(!k){KS.ok=null;KS.src='';return Promise.resolve(null)}
+ const src=(store.fk||'')+'|'+k.chk;if(KS.src!==src){KS.src=src;KS.ok=null;KS.p=keyCheck(store.fk,k).then(v=>{if(KS.src===src)KS.ok=v;return v})}return KS.p}
+// Anahtarsız (ya da anahtarı uymayan) telefon: aile kilitli ekranı görür
+const needKey=()=>store.mode==='family'&&!!kRec()&&(!okFk(store.fk)||KS.ok===false);
+const rv=(p,v)=>{if(!isEnc(v))return v;const d=store.D&&store.D[p];return d&&d.i===ivOf(v)?d.v:null};
+const atPath=(o,p)=>{const i=p.indexOf('/');if(i<0)return o?o[p]:undefined;const c=o&&o[p.slice(0,i)];return c&&typeof c==='object'?c[p.slice(i+1)]:undefined};
+// Kilitli kayıtlardan açılmamış olanları aç (ekrana gelmeden önce)
+async function decAll(){const R=store.R,code=store.code;if(!R||KS.ok!==true)return;const key=await fkey(),D=store.D||(store.D={}),seen={},jobs=[];
+ const one=(p,v)=>{if(!isEnc(v))return;seen[p]=1;const i=ivOf(v);if(D[p]&&D[p].i===i)return;jobs.push(decJ(key,code,p,v).then(x=>{D[p]={i,v:x}},()=>{}))};
+ for(const c of COLS){const col=R[c];if(col&&typeof col==='object')for(const id in col)if(okId(id))one(c+'/'+id,col[id])}
+ one('meta',R.meta);one('ann',R.ann);
+ if(jobs.length)await Promise.all(jobs);
+ if(store.code===code&&store.R===R)for(const p in D)if(!seen[p])delete D[p]}
+// Kilitli ailede hâlâ açık duran kayıtlar (eski bir sürümün yazdığı ya da kilitleme sırasında kaçan) kilitlenmek üzere sıraya girer
+function sweep(){if(!kOn()||KS.ok!==true)return 0;const R=store.R;let n=0;
+ const one=(p,v)=>{if(n>=300||v==null||typeof v!=='object'||p in store.pending)return;store.pending[p]=clone(v);n++};
+ for(const c of COLS){const col=R[c];if(col&&typeof col==='object')for(const id in col)if(okId(id))one(c+'/'+id,col[id])}
+ one('meta',R.meta);one('ann',R.ann);return n}
+async function encBody(body,code){const key=await fkey(),o={},dd={};
+ for(const p in body){const v=body[p];if(v===null||!encPath(p)){o[p]=v;continue}const e=await encJ(key,code,p,v);o[p]=e;dd[p]={i:ivOf(e),v:clone(v)}}
+ return {o,dd}}
+// Aile fotoğrafları: başlık {n,t,m} + 0 + görüntü baytları tek kutuda kilitlenir (base64'ün base64'ü olmasın diye)
+async function avSeal(key,code,id,o){const m=/^data:(image\/[a-z0-9.+-]+);base64,/.exec(str(o.d));if(!m)throw new Error('görsel değil');
+ const h=TE.encode(JSON.stringify({n:str(o.n),t:str(o.t),m:m[1]})),b=ub64u(o.d.slice(m[0].length)),u=new Uint8Array(h.length+1+b.length);
+ u.set(h);u.set(b,h.length+1);return {d:await encB(key,code,'av/'+id,u),at:+o.at||Date.now()}}
+async function avOpen(key,code,id,s){const u=await decB(key,code,'av/'+id,s),z=u.indexOf(0);if(z<0)throw new Error('bozuk');const h=JSON.parse(TD.decode(u.subarray(0,z)));
+ return {n:str(h.n),t:str(h.t),d:`data:${/^image\/[a-z0-9.+-]+$/.test(h.m)?h.m:'image/webp'};base64,`+b64(u.subarray(z+1))}}
+// Anahtarı taşıyan bağlantı: ?aile=KOD#k=ANAHTAR (# sonrası sunucuya hiç gitmez)
+const keyUrl=()=>inviteUrl()+'#k='+store.fk;
+const parseKeyLink=s=>{s=String(s||'');const k=/[#&]k=([A-Za-z0-9_-]{43})(?![A-Za-z0-9_-])/.exec(s),c=/[?&]aile=([A-Za-z0-9-]{8,9})/.exec(s);
+ return k?{k:k[1],code:c?c[1].toUpperCase().replace(/[^A-Z0-9]/g,''):''}:null};
 /* ---------- Bu cihazın kimliği ----------
    Anonim giriş: cihaz bir kez kaydolur, yenileme anahtarını saklar ve her istekte 1 saatlik
    kimlik jetonu (?auth=) gönderir. Kimlik ailenin uids listesine yazılır; veritabanı kuralları
@@ -1337,12 +1449,15 @@ async function loadAv(){
   for(const id in store.av||{})if(!(id in ids)){delete store.av[id];delete store.avi[id];ch=true}
   for(const id in ids){if(!okOzId(id)||(store.av[id]&&store.avi[id]))continue;
    const q=await fetch(dbUrl('avatars/'+store.code+'/'+id,await authTok()));if(!q.ok)continue;
-   const o=await q.json();if(!o||typeof o.d!=='string'||o.d.indexOf('data:image/')!==0||o.d.length>200000)continue;
+   let o=await q.json();if(o&&isEnc(o.d)){try{o=await avOpen(await fkey(),store.code,id,o.d)}catch(e){continue}}
+   if(!o||typeof o.d!=='string'||o.d.indexOf('data:image/')!==0||o.d.length>200000)continue;
    store.av[id]=o.d;store.avi[id]={n:str(o.n).slice(0,40)||'Aile',t:str(o.t).slice(0,40)||'Avatar'};ch=true}
   if(ch){save();if(S)render(true)}}
  catch(e){}finally{avLoading=false;if(avAgain){avAgain=false;loadAv()}}}
 async function ensureUid(){if(!FB_KEY||store.mode!=='family'||!store.me||!store.code)return;
- try{await authTok();if(store.R&&store.R.uids&&store.R.uids[myUid()]===store.me)return;await claimUid(store.code,store.me)}catch(e){}}
+ try{await authTok();if(!(store.R&&store.R.uids&&store.R.uids[myUid()]===store.me))await claimUid(store.code,store.me);
+  // Bu telefonun sürümü: yönetici kilitlemeden önce bütün telefonların kilidi tanıyan sürümde olduğuna bakar
+  const v=store.R&&store.R.ver;if(!(v&&v[myUid()]===APPV))await fbSend(store.code,'PUT',APPV,'/ver/'+myUid())}catch(e){}}
 
 function commit(){
  if(store.mode==='demo'){if(S)store.demo=S;save();return}
@@ -1355,9 +1470,16 @@ let flushing=false,retryT=null,retryMs=3000;
 async function flush(){
  if(flushing||store.mode!=='family')return;const body=clone(store.pending);if(!Object.keys(body).length){renderNet();return}
  flushing=true;let ok=false;const code=store.code;
- try{await fbSend(code,'PATCH',body);ok=true;
+ try{
+  // Akış henüz taze veri getirmediyse önce kilit durumuna bak: çevrimdışıyken aile kilitlenmiş olabilir
+  if(!KS.fresh){const k=await fbGet(code,'/k');if(store.code!==code)return;if(k&&!store.R)return;
+   if(k&&typeof k==='object')store.R=setAt(store.R,'k',k);else if(store.R&&store.R.k)delete store.R.k;KS.fresh=true}
+  let out=body,dd=null;
+  if(kRec()){if(!kOn()||!(await keyState()))return;const e=await encBody(body,code);out=e.o;dd=e.dd}
+  await fbSend(code,'PATCH',out);ok=true;
   if(store.code!==code)return;
-  for(const p in body){store.R=setAt(store.R,p,body[p]);if(canon(store.pending[p])===canon(body[p]))delete store.pending[p]}
+  for(const p in out){store.R=setAt(store.R,p,out[p]);if(canon(store.pending[p])===canon(body[p]))delete store.pending[p]}
+  if(dd)Object.assign(store.D||(store.D={}),dd);
   retryMs=3000;save();setNet('online')}
  catch(e){setNet('offline');clearTimeout(retryT);retryT=setTimeout(flush,retryMs);retryMs=Math.min(retryMs*2,60000)}
  finally{flushing=false;if(ok&&Object.keys(store.pending).length)flush()}}
@@ -1365,7 +1487,7 @@ let es=null,rq=0,lastEvt=0,esRetry=null,esMs=5000;
 // Akış tamamen kapanırsa (ör. eski jetonla yeniden bağlanmaya çalışıp reddedilince) kendi kendine dönmez: artan aralıklarla yeniden kur
 function esLater(){clearTimeout(esRetry);esRetry=setTimeout(()=>ensureUid().then(connect),esMs);esMs=Math.min(esMs*2,60000)}
 function connect(){
- if(es){es.close();es=null}clearTimeout(esRetry);
+ if(es){es.close();es=null}clearTimeout(esRetry);KS.fresh=false;
  if(store.mode!=='family'||!FB_URL||typeof EventSource==='undefined')return;
  const code=store.code;
  authTok().then(t=>{if(store.mode!=='family'||store.code!==code)return;
@@ -1379,6 +1501,7 @@ function openEs(code,t){
  es.addEventListener('put',e=>{lastEvt=Date.now();let m;try{m=JSON.parse(e.data)}catch(x){return}
   // "Şu an burada" sinyalleri sık gelir: bütün ekranı değil yalnızca o satırı tazele
   if(/^\/on(\/|$)/.test(m.path)){store.R=setAt(store.R,m.path,m.data);onPaint();return}
+  if(m.path==='/')KS.fresh=true;
   store.R=m.path==='/'?(m.data&&typeof m.data==='object'?m.data:{}):setAt(store.R,m.path,m.data);remote()});
  es.addEventListener('patch',e=>{lastEvt=Date.now();let m;try{m=JSON.parse(e.data)}catch(x){return}for(const k in m.data||{})store.R=setAt(store.R,m.path+'/'+k,m.data[k]);remote()});
  es.addEventListener('cancel',()=>{if(es){es.close();es=null}UI.err='denied';render()});
@@ -1390,9 +1513,17 @@ function openEs(code,t){
 /* Telefon uygulamayı arka plana atınca akış sessizce ölebilir (açık görünür ama veri gelmez).
    Sunucu yarım dakikada bir "keep-alive" yollar; iki dakikadır hiçbir şey gelmediyse bağlantıyı yeniden kur. */
 setInterval(()=>{if(store.mode==='family'&&es&&es.readyState===1&&document.visibilityState==='visible'&&navigator.onLine&&Date.now()-lastEvt>120000)connect()},20000);
-function remote(){setNet('online');clearTimeout(rq);rq=setTimeout(()=>{
+let remG=0;
+function remote(){setNet('online');clearTimeout(rq);rq=setTimeout(async()=>{const g=++remG;
  if(!store.R||!store.R.meta){UI.err='missing';render();return}
+ if(kRec()){await keyState();
+  // Bağlantıyla gelen anahtar (#k=) bu ailenin kilidini açıyorsa al
+  if(KS.ok!==true&&KS.lk&&await keyCheck(KS.lk)){store.fk=KS.lk;KS.lk=null;await keyState();toast('Anahtar alındı, aile açıldı')}
+  if(KS.ok===true){try{await decAll()}catch(e){}sweep()}}
+ else if(KS.lk&&store.fk!==KS.lk)KS.lk=null;
+ if(g!==remG)return;
  UI.err=null;fromRemote();save();render(true);checkReminders();UI.synced=true;
+ if(Object.keys(store.pending).length)flush();
  // Aile verisi ilk kez gelince avatarlara bak (aile adı ve üyeler o zaman belli olur)
  if(!avChecked){avChecked=true;loadAv()}
  // Yeni katılan kişi: veriler gelince avatar ve renk seçimi bir kez açılır
@@ -1848,7 +1979,7 @@ function todayHead(){const m=me(),d=new Date(),h=d.getHours(),hj=hnum(d),x=holy(
 function vToday(){
  const child=isChild();
  return `${todayHead()}${onHereHTML()}
- ${rsvCards()}${demoBar()}${inviteCard()}
+ ${rsvCards()}${demoBar()}${inviteCard()}${lockCard()}
  ${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>${starsHTML()}`:''}
  <div class="lbl"><span>Sıradaki</span></div>${nextHTML({mine:child,filter:[]})}
  ${homeAgenda()}
@@ -2429,6 +2560,7 @@ function vFamily(){const {m,adm}=famCtx(),ord=ordMe();if(!ord.some(x=>x.id===UI.
  <div class="wdots" aria-hidden="true">${ord.map(x=>`<i style="--c:${x.color}"${x.id===UI.wsel?' class="on"':''}></i>`).join('')}</div>
  <div id="wsel">${wselHTML(UI.wsel)}</div>
  ${libCard()}
+ ${lockRow()}
  ${adm?`<button class="invlink" data-act="famInvite">${I('plus','sm')}Aileye birini ekle</button>`:''}
  <div class="sec-h"><h2 class="sec">Son değişiklikler</h2>${S.activity.length>3?`<button class="link" data-act="famFeed">Tümü ${I('chevR','sm')}</button>`:''}</div>
  ${feedHTML(3)}`}
@@ -2463,6 +2595,7 @@ function render(keepScroll){
  let html;
  if(!store.mode){html=vWelcome();nav.hidden=true}
  else if(UI.err){html=vError(UI.err);nav.hidden=true}
+ else if(needKey()){html=vKeyless();nav.hidden=true}
  else if(!S){html=vLoading();nav.hidden=false}
  else{html=({today:vToday,cal:vCal,lists:vLists,tasks:vTasks,family:vFamily,lib:vLib}[UI.tab]||vToday)();nav.hidden=false}
  sc.innerHTML=html;cmRefresh();document.body.classList.toggle('wishc',!!S&&UI.tab==='lists'&&!UI.shop&&UI.lmode==='wish');
@@ -2700,10 +2833,10 @@ const A={
   <p class="err" id="jn-err" hidden></p><button class="btn primary block" id="jn-btn">Katıl</button></form>`)},
  fRole:(d,el)=>{F.role=d.v;el.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
  leaveAsk:()=>{if(store.mode==='demo'){A.exitDemo();return}const n=Object.keys(store.pending).length;
-  sheet('Bu cihazdan çıkılsın mı?',`<p>Ailenin bilgileri silinmez, diğerleri kullanmaya devam eder. Tekrar girmek için aile kodunu not al: <b style="font-family:var(--f-display);letter-spacing:.08em">${fmtCode(store.code)}</b></p>${n?`<p class="err">${n} değişiklik henüz gönderilmedi. Çıkarsan bunlar kaybolur.</p>`:''}<div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" data-act="leave">Çık</button></div>`)},
+  sheet('Bu cihazdan çıkılsın mı?',`<p>Ailenin bilgileri silinmez, diğerleri kullanmaya devam eder. Tekrar girmek için aile kodunu not al: <b style="font-family:var(--f-display);letter-spacing:.08em">${fmtCode(store.code)}</b></p>${n?`<p class="err">${n} değişiklik henüz gönderilmedi. Çıkarsan bunlar kaybolur.</p>`:''}${kRec()&&okFk(store.fk)?`<p class="note">${I('key','sm')}<span>Aile kilitli: tekrar girince anahtarı yeniden alman gerekir.</span></p>`:''}<div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" data-act="leave">Çık</button></div>`)},
  leave:()=>{if(es){es.close();es=null}beatOff();
-  if(FB_KEY&&store.mode==='family'&&store.code)fbSend(store.code,'PUT',null,'/uids/'+myUid()).catch(()=>{});
-  Object.assign(store,{mode:null,code:null,me:null,R:null,pending:{}});S=null;UI.err=null;close();render()},
+  if(FB_KEY&&store.mode==='family'&&store.code){fbSend(store.code,'PUT',null,'/uids/'+myUid()).catch(()=>{});fbSend(store.code,'PUT',null,'/ver/'+myUid()).catch(()=>{})}
+  Object.assign(store,{mode:null,code:null,me:null,R:null,pending:{},fk:null,rc:null,D:{}});KS.ok=null;KS.src='';S=null;UI.err=null;close();render()},
  // Kişi, tema, ayarlar
  who:()=>sheet('Bu cihazda kim var?',`<p class="note" style="margin:0 0 12px">${I('info','sm')}<span>Ortak kullanılan bir tablet gibi cihazlarda kişiler arasında geçebilirsin.</span></p><div class="people">${ordMe().map(m=>`<button data-act="asUser" data-id="${m.id}" aria-pressed="${meId()===m.id}">${av(m.id)}<span><b>${esc(m.name)}</b><small>${ROLES[m.role]}${m.rel?' · '+esc(m.rel):''}</small></span></button>`).join('')}</div>`),
  asUser:d=>{if(store.mode==='demo'){store.demoMe=d.id;store.prefs.big=!!M(d.id).big}else{if(d.id!==store.me)beatOff();store.me=d.id;beat()}UI.tf=isChild()?'mine':'all';close();render();toast(`Artık ${M(d.id).name} olarak bakıyorsun`)},
@@ -2731,7 +2864,8 @@ const A={
  famFeed:()=>sheet('Son değişiklikler',feedHTML(40)),
  install:()=>{if(installEvt){installEvt.prompt();installEvt.userChoice.finally(()=>{installEvt=null;render(true)})}},
  share:()=>{if(store.mode!=='family'){toast('Örnek ailede davet gönderilemez.');return}
-  const url=inviteUrl(),text=`${S.meta.name||'Ailemiz'} Bizim Ev'de. Katılmak için bağlantıyı aç ya da aile kodunu yaz: ${fmtCode(store.code)}`;
+  // Kilitli ailede davet bağlantısı anahtarı da taşır (# sonrası sunucuya gitmez)
+  const url=kOn()&&KS.ok===true&&!isChild()?keyUrl():inviteUrl(),text=`${S.meta.name||'Ailemiz'} Bizim Ev'de. Katılmak için bağlantıyı aç ya da aile kodunu yaz: ${fmtCode(store.code)}`;
   if(navigator.share)navigator.share({title:'Bizim Ev',text,url}).catch(()=>{});else copyText(text+'\n'+url,'Davet metni kopyalandı')},
  copyCode:()=>{if(store.mode!=='family'){toast('Örnek ailede gerçek kod yok.');return}copyText(fmtCode(store.code),'Kod kopyalandı')},
  // Üyeler
@@ -3035,8 +3169,15 @@ const FORMS={
   try{let code=newCode();for(let i=0;i<3&&await fbGet(code,'/meta');i++)code=newCode();
    const now=Date.now(),mid=uid(),lid=uid(),aid=uid();
    const fam0={meta:{name:fam,createdAt:now,by:mid,v:1},uids:FB_KEY?{[myUid()]:mid}:{},members:{[mid]:{name,rel,role:'admin',color:COLORS[0],at:now}},lists:{[lid]:{name:'Alınacaklar',icon:'tag',at:now}},activity:{[aid]:{who:mid,text:'aileyi oluşturdu',at:now}}};
+   // Kilit açıksa yeni aile baştan kilitli kurulur: kayıtlar kilitli gider, kurtarma kodu hemen gösterilir
+   let lk=null;if(lkAvail()){lk={fk:newFk(),rc:newRc(),mode:'new'};const key=await fkey(lk.fk);
+    fam0.meta=await encJ(key,code,'meta',fam0.meta);for(const c of ['members','lists','activity'])for(const id in fam0[c])fam0[c][id]=await encJ(key,code,c+'/'+id,fam0[c][id]);
+    fam0.k=await kMake(code,lk.fk,lk.rc,'on',mid);if(FB_KEY)fam0.ver={[myUid()]:APPV}}
    await fbSend(code,'PUT',fam0);
-   Object.assign(store,{mode:'family',code,me:mid,R:fam0,pending:{},news:NEWS.v});UI.tab='today';UI.err=null;fromRemote();close();render();connect();toast('Aile oluşturuldu');UI.joinFor=mid;UI.joinShown=true;A.avPick({id:mid})}
+   Object.assign(store,{mode:'family',code,me:mid,R:fam0,pending:{},news:NEWS.v,fk:lk?lk.fk:null,rc:lk?lk.rc:null,D:{}});KS.src='';KS.fresh=true;
+   if(lk){await keyState();await decAll()}
+   UI.tab='today';UI.err=null;fromRemote();close();render();connect();toast('Aile oluşturuldu');UI.joinFor=mid;UI.joinShown=true;
+   if(lk){F.lk=Object.assign(lk,{then:()=>A.avPick({id:mid})});rcSheet()}else A.avPick({id:mid})}
   catch(e){busy(g('cf-btn'));err('Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.')}},
  join:async()=>{const g=id=>document.getElementById(id);const code=g('jf-code').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
   const err=t=>{g('jf-err').textContent=t;g('jf-err').hidden=false};
@@ -3044,13 +3185,17 @@ const FORMS={
   busy(g('jf-btn'),'Aranıyor…');
   try{const [meta,members]=await Promise.all([fbGet(code,'/meta'),fbGet(code,'/members')]);
    if(!meta){busy(g('jf-btn'));return err('Bu kodla bir aile bulunamadı. Kodu kontrol et.')}
+   if(isEnc(meta)){F={join:{code,enc:{meta,members:members||{}}}};busy(g('jf-btn'));
+    if(UI.lk&&await joinOpen(UI.lk)){UI.lk=null;return joinWho()}return joinLocked()}
    F={join:{code,meta,members:Object.entries(members||{}).filter(([id])=>okId(id)).map(([id,m])=>norm('members',id,m)).sort((a,b)=>(a.at||0)-(b.at||0))}};joinWho()}
   catch(e){busy(g('jf-btn'));err('Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.')}},
  joinNew:async()=>{const g=id=>document.getElementById(id);const name=g('jn-name').value.trim(),rel=g('jn-rel').value.trim();
   const err=t=>{g('jn-err').textContent=t;g('jn-err').hidden=false};
   if(!name)return err('Adını yaz.');
   busy(g('jn-btn'),'Katılıyor…');const j=F.join,id=uid(),now=Date.now();
-  try{await claimUid(j.code,id);await fbSend(j.code,'PATCH',{['members/'+id]:{name,rel,role:F.role||'adult',color:freeColor(j.members.map(m=>m.color)),at:now},['activity/'+uid()]:{who:id,text:'aileye katıldı',at:now}});enterFamily(j.code,id)}
+  try{await claimUid(j.code,id);let body={['members/'+id]:{name,rel,role:F.role||'adult',color:freeColor(j.members.map(m=>m.color)),at:now},['activity/'+uid()]:{who:id,text:'aileye katıldı',at:now}};
+   if(j.fk){const key=await fkey(j.fk),e={};for(const p in body)e[p]=await encJ(key,j.code,p,body[p]);body=e}
+   await fbSend(j.code,'PATCH',body);enterFamily(j.code,id)}
   catch(e){busy(g('jn-btn'));err('Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.')}},
  memberAdd:()=>{const name=document.getElementById('ma-name').value.trim();if(!name)return;const rel=document.getElementById('ma-rel').value.trim();
   const u=snap();S.members.push({id:uid(),name,rel,role:F.role||'adult',color:freeColor(S.members.map(m=>m.color)),at:Date.now()});log(`${name} adlı üyeyi ekledi`);close();render(true);toast(`${name} eklendi`,u)},
@@ -3120,7 +3265,8 @@ function joinWho(){const j=F.join;
  sheet(esc(j.meta.name||'Aile'),`<p style="margin:0 0 12px">Hoş geldin! Listede sen hangisisin?</p><div class="people">${j.members.map(m=>`<button data-act="joinAs" data-id="${m.id}"><span class="av" style="--c:${m.color}" aria-hidden="true">${esc(up(m.name[0]))}</span><span><b>${esc(m.name)}</b><small>${ROLES[m.role]}${m.rel?' · '+esc(m.rel):''}</small></span></button>`).join('')}</div>
  <button class="btn soft block" style="margin-top:12px" data-act="joinNewSheet">${I('plus','sm')}Listede yokum, beni ekle</button>`)}
 async function enterFamily(code,id){try{await claimUid(code,id)}catch(e){}
- Object.assign(store,{mode:'family',code,me:id,R:null,pending:{},news:NEWS.v});S=null;UI.err=null;UI.tab='today';close();UI.joinFor=id;UI.joinShown=false;save();render();connect();loadAv()}
+ const fk=F.join&&F.join.code===code&&F.join.fk||null;
+ Object.assign(store,{mode:'family',code,me:id,R:null,pending:{},news:NEWS.v,fk,rc:null,D:{}});KS.ok=null;KS.src='';S=null;UI.err=null;UI.tab='today';close();UI.joinFor=id;UI.joinShown=false;save();render();connect();loadAv()}
 function copyText(t,msg){const fallback=()=>{const el=document.getElementById('fam-code');if(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}toast('Kopyalanamadı, kodu elle seçebilirsin')};
  try{navigator.clipboard.writeText(t).then(()=>toast(msg),fallback)}catch(e){fallback()}}
 let swReg=null,installEvt=null;
@@ -3328,17 +3474,261 @@ function popCheck(n=0){if(UI.popped||store.mode!=='family'||document.hidden)retu
   popShow('bell','var(--accent)','Sen yokken',`<div class="popl">${n.slice(0,4).map(([w,t,m])=>popRow(av(w,'sm'),t,m)).join('')}</div>${more}`,`<button class="btn ghost" data-act="popX">Tamam</button><button class="btn primary" data-act="popTasks">Görevlere git</button>`);return}}
  if(store.news!==NEWS.v){UI.popped=true;store.news=NEWS.v;save();
   popShow('gift','#2F6DB5','Yenilikler',`<div class="popl">${NEWS.items.map(([i,t,m])=>popRow(`<span class="popdot">${I(i,'sm')}</span>`,t,m)).join('')}</div>`,`<button class="btn primary block" data-act="popX">Anladım</button>`)}}
+/* ---------- Uçtan uca kilit: ekranlar ----------
+   Yönetici kilitler (yedek → kurtarma kodu → kayıtlar tek tek kilitlenip geri okunarak doğrulanır →
+   fotoğraflar → st 'on'). Diğer telefonlar anahtarı QR, bağlantı ya da kurtarma koduyla alır.
+   LOCK_ON kapalıyken kilitleme yalnızca ?kilit=1 ile açılmış telefonda başlatılabilir; kilitli aileleri
+   okumak, anahtar almak ve vermek her zaman çalışır. */
+const LOCK_ON=false;
+const lkAvail=()=>LOCK_ON||!!store.prefs.lkOn;
+Object.assign(P,{
+ key:'<circle cx="8" cy="15" r="4.5"/><path d="M11.2 11.8 20 3M16.5 6.5l2.5 2.5M14.5 8.5l2 2"/>',
+ shield:'<path d="M12 3l7.5 3v5.5c0 4.6-3.1 8.3-7.5 9.5-4.4-1.2-7.5-4.9-7.5-9.5V6z"/><path d="M8.8 12.2l2.2 2.2 4.3-4.4"/>',
+ copy:'<rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/>',
+ paper:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+ qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20.5h.01M17.5 20.5H21V17"/>'});
+const lkNote=t=>`<p class="note lkn">${I('lock','sm')}<span>${t}</span></p>`;
+const rcGrid=c=>`<div class="kgrid">${c.match(/.{4}/g).map(g=>`<span>${g}</span>`).join('')}</div>`;
+const NETERR='Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.';
+
+// Bugün: yöneticiye bir kez çıkan kart (ya da yarım kalan iş)
+function lockCard(){if(store.mode!=='family'||!can('member.manage'))return '';const k=kRec();
+ if(k&&KS.ok===true&&k.st!=='on')return `<div class="lkc"><div class="who">${I('shield','sm')}<span>Sadece yöneticiye görünür</span></div><h3>${k.st==='undo'?'Kilidi kaldırma yarım kaldı':'Kilitleme yarım kaldı'}</h3><p>Hiçbir kayıt kaybolmadı. Kaldığı yerden devam et; o zamana kadar ailenin yaptığı değişiklikler telefonlarda bekliyor.</p><div class="two"><button class="btn primary sm" data-act="${k.st==='undo'?'lockUndo':'lockResume'}">Devam et</button></div></div>`;
+ if(k||!lkAvail()||(store.prefs.lkLater||0)>Date.now())return '';
+ return `<div class="lkc"><div class="who">${I('shield','sm')}<span>Sadece yöneticiye görünür</span></div><h3>Ailenin verisini kilitle</h3><p>Kilitlenince takvimini, listelerini ve fotoğraflarını ailenden başka kimse göremez.</p><div class="two"><button class="btn primary sm" data-act="lockStart">Nasıl olur?</button><button class="btn ghost sm" data-act="lockLater">Sonra</button></div></div>`}
+// Aile: kilit durumu satırı
+function lockRow(){if(store.mode!=='family')return '';const k=kRec();
+ if(k&&k.st==='on')return `<button class="lkrow on" data-act="lockInfo">${I('lock')}<span class="tx"><b>Uçtan uca kilitli</b><small>Sadece ailen görebilir</small></span>${I('chevR','sm')}</button>`;
+ if(!can('member.manage')||(!k&&!lkAvail()))return '';
+ return `<button class="lkrow" data-act="${k?(k.st==='undo'?'lockUndo':'lockResume'):'lockStart'}">${I('lock')}<span class="tx"><b>Uçtan uca kilit</b><small>${k?'Yarım kaldı · devam etmek için dokun':'Kapalı · açmak için dokun'}</small></span>${I('chevR','sm')}</button>`}
+// Anahtarı olmayan telefon: tek ekran
+function vKeyless(){const k=kRec()||{},mig=k.st!=='on';
+ return `<div class="keyless"><div class="bigic">${I('key')}</div>
+ <h1>${mig?'Ailen kilitleniyor':'Bu telefonun anahtarı yok'}</h1>
+ <p class="lead">${okFk(store.fk)?'Bu telefondaki anahtar ailenin kilidine uymuyor. ':''}${mig?'Yönetici ailenin verisini kilitliyor. Bitince anahtarı onun telefonundan al.':'Ailenin verisi artık kilitli. Açmak için anahtarı ailenden birinin telefonundan al.'}</p>
+ <div class="acts"><button class="btn primary block" data-act="keyScan">${I('qr','sm')}QR kodu tara</button><button class="btn soft block" data-act="keyPaste">${I('link','sm')}Bağlantı geldi, aç</button><button class="link" style="justify-content:center" data-act="keyRc">Kurtarma kodunu gir</button></div>
+ <p class="small">Onun telefonunda: Aile → Uçtan uca kilitli → Anahtarı ver</p>
+ ${lkNote('Bu sırada bu telefon hiçbir kaydı silmez ve değiştirmez.')}
+ <button class="link" data-act="leaveAsk">Bu cihazdan çık</button></div>`}
+
+/* Anahtar alma: aynı üç yol hem kilitli ekranda hem kilitli aileye katılırken kullanılır.
+   F.kq = {code, test(fk) → doğru mu, w() → kurtarma kutusu, ok(fk)} */
+const kqFam=()=>({code:store.code,test:fk=>keyCheck(fk),w:async()=>{const k=kRec();return k&&k.w},
+ ok:fk=>{store.fk=fk;KS.src='';KS.lk=null;store.D={};save();close();toast('Anahtar alındı, aile açıldı');keyState().then(()=>{remote();loadAv()})}});
+const kqSet=d=>{if(!(d&&d.j&&F.kq))F.kq=kqFam()};
+async function kqTry(txt,say){const q=F.kq;if(!q)return false;const p=parseKeyLink(txt);
+ if(!p){say('Bu, Bizim Ev anahtarı değil. Anahtarı ver ekranındaki kodu okut ya da bağlantıyı yapıştır.');return false}
+ if(p.code&&p.code!==q.code){say('Bu anahtar başka bir ailenin.');return false}
+ if(!(await q.test(p.k))){say('Bu anahtar bu ailenin kilidine uymuyor.');return false}
+ q.ok(p.k);return true}
+const zxLoad=()=>window.ZXing?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='vendor/zxing-0.21.3.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});
+let qrR=null;
+async function qrReader(){if(qrR)return qrR;
+ if('BarcodeDetector' in window){try{const f=await BarcodeDetector.getSupportedFormats();if(f.includes('qr_code')){const d=new BarcodeDetector({formats:['qr_code']});return qrR=async v=>{const r=await d.detect(v);return r[0]&&r[0].rawValue}}}catch(e){}}
+ await zxLoad();const Z=window.ZXing,rd=new Z.QRCodeReader(),cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});let f=0;
+ return qrR=async v=>{const w=v.videoWidth,h=v.videoHeight;if(!w||!h)return null;const k=Math.min(1,960/Math.max(w,h));
+  cv.width=Math.round(w*k);cv.height=Math.round(h*k);cx.drawImage(v,0,0,cv.width,cv.height);const B=f++%2?Z.GlobalHistogramBinarizer:Z.HybridBinarizer;
+  try{return rd.decode(new Z.BinaryBitmap(new B(new Z.HTMLCanvasElementLuminanceSource(cv)))).getText()}catch(e){return null}}}
+async function qrStart(){const v=document.getElementById('qrv');if(!v||v.srcObject)return;
+ const msg=t=>{const m=document.getElementById('scmsg');if(m){m.textContent=t;m.hidden=!t}};
+ if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){msg('Bu telefonda kamera açılamıyor. Bağlantıyı yapıştırabilirsin.');return}
+ let st;try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false})}
+ catch(e){msg(e&&e.name==='NotAllowedError'?'Kameraya izin verilmedi. Bağlantıyı yapıştırabilirsin.':'Kamera açılamadı. Bağlantıyı yapıştırabilirsin.');return}
+ const stop=()=>{st.getTracks().forEach(t=>t.stop());if(v.srcObject===st)v.srcObject=null};
+ if(!document.body.contains(v)||v.srcObject){stop();return}
+ v.srcObject=st;try{await v.play()}catch(e){}
+ let rd;try{rd=await qrReader()}catch(e){stop();msg('Kod okuyucu yüklenemedi. Bağlantıyı yapıştırabilirsin.');return}
+ msg('');let busyR=0,last='';
+ const tick=async()=>{if(!document.body.contains(v)||document.hidden||v.srcObject!==st){stop();return}
+  if(v.readyState>=2&&!busyR){busyR=1;try{const c=await rd(v);if(c&&c!==last){last=c;try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}if(await kqTry(String(c),msg)){stop();return}}}catch(e){}busyR=0}
+  setTimeout(tick,150)};tick()}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&document.getElementById('qrv'))qrStart()});
+async function qrSvg(t){await zxLoad();const Z=window.ZXing,h=new Map();h.set(Z.EncodeHintType.ERROR_CORRECTION,'M');h.set(Z.EncodeHintType.MARGIN,0);
+ const m=new Z.QRCodeWriter().encode(t,Z.BarcodeFormat.QR_CODE,0,0,h),w=m.getWidth(),ht=m.getHeight();let d='';
+ for(let y=0;y<ht;y++)for(let x=0;x<w;x++)if(m.get(x,y))d+=`M${x} ${y}h1v1h-1z`;
+ return `<svg viewBox="-3 -3 ${w+6} ${ht+6}" role="img" aria-label="Anahtar QR kodu" shape-rendering="crispEdges"><rect x="-3" y="-3" width="${w+6}" height="${ht+6}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`}
+
+/* Yedek: kilitlemeden önce ailenin bütün verisi (ve fotoğrafları) bu telefonda IndexedDB'ye yazılır */
+function ydDb(){return new Promise((ok,no)=>{const r=indexedDB.open('bizim-ev-yedek',1);r.onupgradeneeded=()=>r.result.createObjectStore('y');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}
+async function ydPut(k,v){const db=await ydDb();try{await new Promise((ok,no)=>{const t=db.transaction('y','readwrite');t.objectStore('y').put(v,k);t.oncomplete=ok;t.onerror=t.onabort=()=>no(t.error)})}finally{db.close()}}
+async function ydTake(code){const t=await authTok(),[fam,av]=await Promise.all([fbGet(code,''),fetch(dbUrl('avatars/'+code,t)).then(r=>r.ok?r.json():null)]);
+ if(!fam||!fam.meta)throw new Error('aile yok');const y={code,at:Date.now(),fam,av:av||{}};y.saved=await ydPut(code+'/'+y.at,y).then(()=>true,()=>false);UI.yd=y;return y}
+function ydDl(){const y=UI.yd;if(!y)return;const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify(y)],{type:'application/json'}));
+ a.href=u;a.download=`bizim-ev-yedek-${y.code}-${iso(new Date(y.at))}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+const ydBtn=()=>UI.yd?`<button class="link" style="justify-content:center;width:100%;margin-top:8px" data-act="ydDl">${I('paper','sm')}Yedeği dosya olarak indir</button>`:'';
+
+/* Kilitleme ilerlemesi */
+const LKG=[['Etkinlikler',['events','rsv']],['Görevler',['tasks']],['Listeler ve alınacaklar',['lists','items','freq']],['İstekler ve yorumlar',['wishes','wcm']],['Kütüphane',['books','bkat']],['Aile, mesajlar ve geçmiş',['members','msgs','activity','meta','ann']]];
+const LK={g:[]};
+function lkProg(undo){LK.g=[{n:undo?'Kilit kaldırma başladı':'Yedek kaydedildi',a:1,b:1,s:2},...LKG.map(([n])=>({n,a:0,b:0,s:0})),{n:'Fotoğraflar',a:0,b:0,s:0}];
+ sheet(undo?'Kilit kaldırılıyor':'Kilitleniyor',`<p>${undo?'Her kayıt açılıp yeniden yazılıyor.':'Her kayıt kilitlenip geri okunuyor ve aslıyla karşılaştırılıyor.'}</p><div class="group" id="lkpg">${lkPgHTML()}</div>${lkNote('Uygulama kapanırsa ya da internet giderse kaldığı yerden devam eder. Hiçbir kayıt kaybolmaz.')}`)}
+const lkPgHTML=()=>LK.g.map(g=>`<div class="pg"><span class="pgt">${g.s===2?I('check','sm lkok'):g.s===1?'<i class="lkspn"></i>':'<i class="lkwt"></i>'}<b>${g.n}</b>${g.b>1?`<small>${Math.min(g.a,g.b)} / ${g.b}</small>`:''}</span>${g.s===1&&g.b>1?`<span class="pbar"><i style="width:${Math.round(Math.min(g.a,g.b)/g.b*100)}%"></i></span>`:''}</div>`).join('');
+const lkSet=(i,o)=>{Object.assign(LK.g[i],o);const el=document.getElementById('lkpg');if(el)el.innerHTML=lkPgHTML()};
+// Firebase boş dizi ve nesneleri saklamaz; karşılaştırırken iki taraf da aynı biçime getirilir
+function fbNorm(v){if(Array.isArray(v)){const a=v.map(fbNorm).filter(x=>x!==undefined);return a.length?a:undefined}
+ if(v&&typeof v==='object'){const o={};for(const k in v){const x=fbNorm(v[k]);if(x!==undefined)o[k]=x}return Object.keys(o).length?o:undefined}return v===null?undefined:v}
+const same=(a,b)=>canon(fbNorm(a))===canon(fbNorm(b));
+/* Kayıtları kilitle (dir 'enc') ya da aç ('dec'). Her tur: aileyi baştan oku, geçen turda yazılanları
+   doğrula, kalanları 100'lük paketlerle yaz. Yazılan bir kayıt geri okunup aslıyla aynı çıkmazsa açık
+   hâli geri yazılır ve iş durur (kilit 'migrating'de kalır, kimse yazmaz, yönetici devam edebilir). */
+async function lkRecords(code,dir){const key=await fkey(),sent={},gi={};LKG.forEach(([,cs],i)=>cs.forEach(c=>gi[c]=i+1));
+ const grp=p=>gi[p.split('/')[0]];
+ for(let pass=0;pass<6;pass++){const fam=await fbGet(code,'')||{};if(!fam.meta)throw new Error('aile yok');
+  for(const p in sent){const s=atPath(fam,p),[w,v]=sent[p];delete sent[p];
+   if(dir==='enc'&&isEnc(s)){let ok=false;try{const x=await decJ(key,code,p,s);ok=s!==w||same(x,v)}catch(e){}
+    if(!ok){await fbSend(code,'PATCH',{[p]:v}).catch(()=>{});throw new Error('doğrulanamadı: '+p)}}}
+  const todo=[],cnt={};
+  const each=(p,v)=>{if(v==null)return;const g=grp(p),c=cnt[g]||(cnt[g]=[0,0]);c[1]++;const want=dir==='enc'?isEnc(v):!isEnc(v);if(want)c[0]++;else todo.push([p,v])};
+  for(const c of COLS){const col=fam[c];if(col&&typeof col==='object')for(const id in col)if(okId(id))each(c+'/'+id,col[id])}
+  each('meta',fam.meta);each('ann',fam.ann);
+  for(let i=1;i<=LKG.length;i++){const c=cnt[i]||[0,0];lkSet(i,{a:c[0],b:c[1],s:c[0]>=c[1]?2:1})}
+  if(!todo.length)return;
+  for(let i=0;i<todo.length;i+=100){const b=todo.slice(i,i+100),patch={};
+   for(const [p,v] of b){if(dir==='enc'){const e=await encJ(key,code,p,v);patch[p]=e;sent[p]=[e,v]}
+    else{let x;try{x=await decJ(key,code,p,v)}catch(e){throw new Error('açılamadı: '+p)}patch[p]=x;sent[p]=[x,v]}}
+   await fbSend(code,'PATCH',patch);
+   for(const [p] of b){const g=grp(p);lkSet(g,{a:LK.g[g].a+1})}}}
+ throw new Error('bitmedi')}
+async function lkAvatars(code,dir){const key=await fkey(),sent={},I7=LK.g.length-1;
+ for(let pass=0;pass<5;pass++){const r=await fetch(dbUrl('avatars/'+code,await authTok()));if(!r.ok)throw new Error('HTTP '+r.status);const all=await r.json()||{};
+  for(const id in sent){const o=all[id],x0=sent[id];delete sent[id];
+   if(dir==='enc'&&o&&isEnc(o.d)){let ok=false;try{const x=await avOpen(key,code,id,o.d);ok=o.d!==x0.w||x.d===x0.v.d}catch(e){}
+    if(!ok){await fetch(dbUrl('avatars/'+code+'/'+id,await authTok()),{method:'PUT',body:JSON.stringify(x0.v)}).catch(()=>{});throw new Error('fotoğraf doğrulanamadı')}}}
+  const ids=Object.keys(all).filter(id=>okOzId(id)&&all[id]&&typeof all[id].d==='string'&&(isEnc(all[id].d)||/^data:image\//.test(all[id].d)));
+  const todo=ids.filter(id=>dir==='enc'?!isEnc(all[id].d):isEnc(all[id].d)),left=todo.length;
+  lkSet(I7,{a:ids.length-left,b:ids.length,s:left?1:2});if(!left)return;
+  for(const id of todo){const o=all[id];let w;
+   if(dir==='enc'){w=await avSeal(key,code,id,o);sent[id]={w:w.d,v:o}}else{const x=await avOpen(key,code,id,o.d);w={n:x.n,t:x.t,d:x.d,at:+o.at||Date.now()};sent[id]={v:w}}
+   const q=await fetch(dbUrl('avatars/'+code+'/'+id,await authTok()),{method:'PUT',body:JSON.stringify(w)});if(!q.ok)throw new Error('HTTP '+q.status);
+   lkSet(I7,{a:LK.g[I7].a+1})}}
+ throw new Error('fotoğraflar bitmedi')}
+/* Aile fotoğraflarının adları (ör. "ali-1") kilitlenmez, kişinin adını ele verir: kilitlemeden önce rastgele adlara taşınır.
+   Sıra: yeni adla kopyala → üyeleri yeni adlara çevir → eskileri sil. Kilit kaydı (k) yazılmadan önce yapılır, çünkü kilitli ailede
+   kurallar üyelere açık yazıyı kabul etmez. Yarıda kalırsa en kötü ihtimalle fazladan bir kopya kalır. */
+const avRand=id=>/^a[0-9a-z]{12}$/.test(id);
+const newAvId=()=>'a'+Array.from(crypto.getRandomValues(new Uint8Array(12)),x=>'0123456789abcdefghijklmnopqrstuvwxyz'[x%36]).join('');
+async function lkReid(code){const r=await fetch(dbUrl('avatars/'+code,await authTok()));if(!r.ok)throw new Error('HTTP '+r.status);const all=await r.json()||{},map={};
+ for(const id in all)if(okOzId(id)&&!avRand(id)&&all[id]&&typeof all[id].d==='string'&&/^data:image\//.test(all[id].d))map[id]=newAvId();
+ if(!Object.keys(map).length)return;
+ const put=async(id,v)=>{const q=await fetch(dbUrl('avatars/'+code+'/'+id,await authTok()),{method:'PUT',body:JSON.stringify(v)});if(!q.ok)throw new Error('HTTP '+q.status)};
+ for(const id in map)await put(map[id],all[id]);
+ const ms=await fbGet(code,'/members')||{},patch={};
+ for(const mid in ms){const m=ms[mid];if(!m||typeof m!=='object')continue;const a=/^[a-z]+\/([A-Za-z0-9_-]+)$/.exec(str(m.avatar));if(a&&map[a[1]])patch['members/'+mid+'/avatar']=OZ+map[a[1]]}
+ if(Object.keys(patch).length)await fbSend(code,'PATCH',patch);
+ for(const id in map)await put(id,null);
+ for(const id in map)if(store.av&&store.av[id]){store.av[map[id]]=store.av[id];store.avi[map[id]]=store.avi[id];delete store.av[id];delete store.avi[id]}save()}
+async function lkMigrate(code){await lkRecords(code,'enc');await lkAvatars(code,'enc');
+ await fbSend(code,'PATCH',{st:'on',at:Date.now()},'/k');if(store.code===code&&store.R)store.R=setAt(store.R,'k/st','on');lkDone()}
+function lkDone(){render(true);sheet('Ailen kilitlendi',`<div class="lkbig">${I('lock')}</div><p>Ailenin verisi artık sadece ailenin telefonlarında açılıyor.</p><p>Şimdi diğer telefonlara anahtarı ver. Anahtarı almayan telefon aileyi açamaz.</p><button class="btn primary block" data-act="keyGive">${I('qr','sm')}Anahtarı başka telefona ver</button>${ydBtn()}`);flush()}
+function lkFail(e){try{console.warn('kilit',e)}catch(x){}render(true);const k=kRec(),off=!navigator.onLine;
+ if(!k){sheet('Kilitleme başlamadı',`<p>${off?'İnternet bağlantısı yok.':'Bir sorun çıktı.'} Hiçbir şey değişmedi.</p><button class="btn primary block" data-act="lockStart">Tekrar dene</button>`);return}
+ const undo=k.st==='undo';
+ sheet(undo?'Kilit kaldırma durdu':'Kilitleme durdu',`<p>${off?'İnternet bağlantısı gitti':'Bir sorun çıktı'}, iş yarıda kaldı. Hiçbir kayıt kaybolmadı; kaldığı yerden devam edebilirsin.</p><p class="note">${I('info','sm')}<span>Bu sırada ailenin yaptığı değişiklikler telefonlarda bekliyor.</span></p><button class="btn primary block" data-act="${undo?'lockUndo':'lockResume'}">Devam et</button>${undo?'':`<button class="btn ghost block" style="margin-top:8px" data-act="lockUndoAsk">Vazgeç, kilidi kaldır</button>`}${ydBtn()}`)}
+function rcSheet(){const c=F.lk.rc;sheet('Kurtarma kodun',`<p>Bu kodu kâğıda yaz ve evde güvenli bir yerde sakla. Bütün telefonlar kaybolursa ailenin verisini sadece bu kod açar.</p>${rcGrid(c)}${lkNote('Ekran görüntüsü alma, fotoğrafını çekme: telefon fotoğrafları buluta yedekler.')}<button class="btn primary block" data-act="rcWrote">Yazdım</button><p class="small" style="text-align:center">Kodu sonra Aile → Uçtan uca kilitli'den yeniden görebilirsin.</p>`)}
+async function lockPrep(){sheet('Yedek alınıyor',`<p>Ailenin bütün verisi önce bu telefona kaydediliyor.</p><div class="lkwait"><i class="lkspn"></i></div>`);
+ try{await ydTake(store.code);F.lk={fk:newFk(),rc:newRc(),mode:'lock'};rcSheet()}
+ catch(e){sheet('Yedek alınamadı',`<p>${NETERR} Hiçbir şey değişmedi.</p><button class="btn primary block" data-act="lockGo" data-f="1">Tekrar dene</button>`)}}
+async function lockRun(){const code=store.code,{fk,rc}=F.lk;
+ store.fk=fk;store.rc=rc;KS.src='';save();lkProg();
+ try{await lkReid(code);const k=await kMake(code,fk,rc,'migrating',store.me);await fbSend(code,'PUT',k,'/k');store.R=setAt(store.R,'k',k);KS.fresh=true;await keyState();await lkMigrate(code)}
+ catch(e){lkFail(e)}}
+async function lkUndoRun(){const code=store.code;lkProg(true);
+ try{if(kRec().st!=='undo'){await fbSend(code,'PATCH',{st:'undo',at:Date.now()},'/k');store.R=setAt(store.R,'k/st','undo')}
+  await lkRecords(code,'dec');await lkAvatars(code,'dec');await fbSend(code,'PUT',null,'/k');
+  if(store.code===code&&store.R)delete store.R.k;KS.ok=null;KS.src='';close();render(true);toast('Kilit kaldırıldı');flush()}
+ catch(e){lkFail(e)}}
+
+Object.assign(A,{
+ lockLater:()=>{store.prefs.lkLater=Date.now()+14*864e5;render(true)},
+ lockStart:()=>{if(!can('member.manage'))return;sheet('Aileni kilitle',`<p>Kilitledikten sonra takvimini, listelerini, görevlerini ve fotoğraflarını sadece bu ailenin telefonları görebilir. Google da, uygulamayı yapan kişi de göremez.</p>
+  <ol class="lkol"><li><b>Yedek alınır.</b><span>Ailenin bütün verisi önce bu telefona kaydedilir.</span></li><li><b>Kurtarma kodunu yazarsın.</b><span>Bütün telefonlar kaybolursa veriyi bu kod açar.</span></li><li><b>Diğer telefonlar anahtarı alır.</b><span>Ailendeki diğer telefonlar anahtarı senden alır.</span></li></ol>
+  ${lkNote('Hiçbir veri silinmez. Bir sorun çıkarsa her şey olduğu gibi kalır.')}
+  <button class="btn primary block" data-act="lockGo">${I('lock','sm')}Kilitlemeyi başlat</button>`)},
+ // Önce bütün telefonlar kilidi tanıyan sürümde mi bak: eski sürüm kilitli kayıtları okuyamaz
+ lockGo:async(d,el)=>{if(!can('member.manage')||kRec())return;busy(el,'Bakılıyor…');
+  try{if(!(d&&d.f)){const [u,v]=await Promise.all([fbGet(store.code,'/uids'),fbGet(store.code,'/ver')]),old={};
+    for(const [id,m] of Object.entries(u||{}))if(id!==myUid()&&!((v||{})[id]>=APPV)){const n=S.members.some(x=>x.id===m)?first(M(m).name):'Adı bilinmeyen';old[n]=(old[n]||0)+1}
+    if(Object.keys(old).length){sheet('Bazı telefonlar güncel değil',`<p>Şu telefonlar uygulamanın yeni sürümünü henüz açmadı:</p><div class="group">${Object.entries(old).map(([n,c])=>`<div class="setrow"><b>${esc(n)}${c>1?` <span class="qty">· ${c} telefon</span>`:''}</b></div>`).join('')}</div>
+     <p>Bu telefonlarda Bizim Ev'i bir kez açmaları yeter. Eski sürüm kilitli kayıtları okuyamaz.</p><p class="note">${I('info','sm')}<span>Artık kullanılmayan eski bir telefonsa devam edebilirsin.</span></p>
+     <div class="actions"><button class="btn ghost" data-act="close">Bekle</button><button class="btn primary" data-act="lockGo" data-f="1">Yine de devam et</button></div>`);return}}
+   await lockPrep()}
+  catch(e){busy(el);toast(NETERR)}},
+ rcWrote:()=>{const g=F.lk.rc.match(/.{4}/g);sheet('Kontrol edelim',`<form data-form="rcCheck" autocomplete="off"><p>Doğru yazdığını kontrol edelim. Kâğıda bakarak son grubu yaz.</p>
+  <div class="kgrid"><span class="mu">${g[0]}</span><span class="mu">${g[1]}</span><input class="inp kin" id="rc-in" maxlength="4" autocapitalize="characters" autocomplete="off" spellcheck="false" autofocus aria-label="Son grup"></div>
+  <p class="err" id="rc-err" hidden></p><button class="btn primary block" id="rc-btn">Kontrol et</button><button type="button" class="btn ghost block" style="margin-top:8px" data-act="rcBack">Koda geri dön</button></form>`)},
+ rcBack:()=>rcSheet(),
+ lockResume:()=>{if(!can('member.manage')||KS.ok!==true)return;lkProg();lkMigrate(store.code).catch(lkFail)},
+ lockUndoAsk:()=>{if(!can('member.manage')||KS.ok!==true)return;sheet('Kilit kaldırılsın mı?',`<p>Ailenin verisi yeniden kilitsiz saklanır; Firebase'e erişebilen biri okuyabilir. Hiçbir kayıt silinmez.</p><div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" data-act="lockUndo">Kilidi kaldır</button></div>`)},
+ lockUndo:()=>{if(!can('member.manage')||KS.ok!==true||!kRec())return;lkUndoRun()},
+ lockInfo:()=>{const n=Object.keys((store.R&&store.R.uids)||{}).length,adm=can('member.manage');
+  sheet('Uçtan uca kilitli',`<p>Ailenin verisi bu telefonlarda kilitlenip öyle gönderiliyor.</p><div class="group lkwho">
+   <div class="row">${I('check','lkok')}<span class="tx"><b>Bu ailenin ${n} telefonu</b><small>Görebilir</small></span></div>
+   <div class="row">${I('x','lkno')}<span class="tx"><b>Google</b><small>Göremez, sadece kilitli kutular saklar</small></span></div>
+   <div class="row">${I('x','lkno')}<span class="tx"><b>Uygulamayı yapan kişi</b><small>Göremez</small></span></div></div>
+   ${isChild()?'':`<div class="group" style="margin-top:12px"><button class="lkrow in" data-act="keyGive">${I('key')}<span class="tx"><b>Anahtarı başka telefona ver</b></span>${I('chevR','sm')}</button>${adm?`<button class="lkrow in" data-act="rcShow">${I('paper')}<span class="tx"><b>Kurtarma kodu</b><small>Sadece yönetici</small></span>${I('chevR','sm')}</button>`:''}</div>`}
+   ${adm?`<button class="link lkoff" data-act="lockUndoAsk">Kilidi kaldır</button>`:''}`)},
+ keyGive:async()=>{if(!kOn()||KS.ok!==true||isChild())return;
+  sheet('Anahtarı ver',`<p>Diğer telefonda Bizim Ev'i aç, “QR kodu tara”ya dokun ve bu kodu okut.</p><div class="qrbox" id="qrbox"><i class="lkspn"></i></div>
+   <div class="row2 kb"><button class="btn soft sm" data-act="keyShare">${I('link','sm')}Bağlantı gönder</button><button class="btn ghost sm" data-act="keyCopy">${I('copy','sm')}Kopyala</button></div>
+   ${lkNote('Bağlantıyı sadece aileden birine, WhatsApp gibi şifreli bir yoldan gönder. Bağlantıyı alan aileyi açabilir.')}`);
+  const b=()=>document.getElementById('qrbox');try{const svg=await qrSvg(keyUrl());if(b())b().innerHTML=svg}catch(e){if(b())b().innerHTML='<p class="small">QR kodu çizilemedi. Bağlantı gönderebilirsin.</p>'}},
+ keyShare:()=>{if(!kOn()||KS.ok!==true)return;const url=keyUrl(),text=`${S.meta.name||'Ailemiz'} için Bizim Ev anahtarı. Bağlantıyı aç ya da Bizim Ev'de “Bağlantı geldi, aç”a yapıştır.`;
+  if(navigator.share)navigator.share({title:'Bizim Ev anahtarı',text,url}).catch(()=>{});else copyText(url,'Bağlantı kopyalandı')},
+ keyCopy:()=>{if(kOn()&&KS.ok===true)copyText(keyUrl(),'Bağlantı kopyalandı')},
+ rcShow:()=>{if(!can('member.manage')||KS.ok!==true)return;
+  if(store.rc)sheet('Kurtarma kodu',`<p>Bütün telefonlar kaybolursa ailenin verisini bu kod açar. Kâğıda yazıp evde sakla.</p>${rcGrid(store.rc)}${lkNote('Ekran görüntüsü alma, fotoğrafını çekme.')}<button class="link" style="justify-content:center;width:100%" data-act="rcNew">Yeni kod oluştur</button>`);
+  else sheet('Kurtarma kodu',`<p>Kurtarma kodu bu telefonda kayıtlı değil. Kâğıdın kaybolduysa yeni bir kod oluşturabilirsin; eski kod o zaman işe yaramaz.</p><button class="btn primary block" data-act="rcNew">Yeni kod oluştur</button>`)},
+ rcNew:()=>{if(!can('member.manage')||KS.ok!==true)return;F.lk={fk:store.fk,rc:newRc(),mode:'re'};rcSheet()},
+ ydDl:()=>ydDl(),
+ keyScan:d=>{kqSet(d);sheet('QR kodu tara',`<div class="scan"><video id="qrv" playsinline muted autoplay aria-hidden="true"></video><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><p class="scmsg" id="scmsg">Kamera açılıyor…</p></div>
+  <p class="note" style="margin:10px 0 0">${I('info','sm')}<span>Ailenden birinin telefonunda Aile → Uçtan uca kilitli → Anahtarı ver'e dokunsun, ekrandaki kodu okut.</span></p>`);qrStart()},
+ keyPaste:d=>{kqSet(d);sheet('Bağlantıyı yapıştır',`<form data-form="keyPaste" autocomplete="off"><div class="field"><label for="kp-in">Gelen bağlantı</label><textarea class="inp" id="kp-in" rows="3" placeholder="Bağlantıyı buraya yapıştır" autofocus spellcheck="false" autocapitalize="off"></textarea></div>
+  <p class="err" id="kp-err" hidden></p><button class="btn primary block" id="kp-btn">Aç</button></form>`)},
+ keyRc:d=>{kqSet(d);sheet('Kurtarma kodu',`<form data-form="keyRc" autocomplete="off"><p>Yöneticinin kâğıda yazdığı 12 karakterlik kodu yaz.</p><div class="field"><label for="kr-in" class="sr">Kurtarma kodu</label><input class="inp rcin" id="kr-in" placeholder="XXXX-XXXX-XXXX" maxlength="16" autofocus autocapitalize="characters" autocomplete="off" spellcheck="false"></div>
+  <p class="err" id="kr-err" hidden></p><button class="btn primary block" id="kr-btn">Aç</button></form>`)}});
+Object.assign(FORMS,{
+ rcCheck:async()=>{const g=id=>document.getElementById(id),L=F.lk;if(!L)return;
+  if(rcNorm(g('rc-in').value)!==L.rc.slice(8)){g('rc-err').textContent='Uymadı. Kâğıttaki son grubu kontrol et.';g('rc-err').hidden=false;return}
+  if(L.mode==='lock')return lockRun();
+  if(L.mode==='new'){store.rc=L.rc;save();close();if(L.then)L.then();return}
+  busy(g('rc-btn'),'Kaydediliyor…');
+  try{const w=await rcWrap(store.code,store.fk,L.rc);await fbSend(store.code,'PUT',w,'/k/w');store.rc=L.rc;save();close();toast('Yeni kurtarma kodu kaydedildi')}
+  catch(e){busy(g('rc-btn'));g('rc-err').textContent=NETERR;g('rc-err').hidden=false}},
+ keyPaste:async()=>{const g=id=>document.getElementById(id),say=t=>{g('kp-err').textContent=t;g('kp-err').hidden=false};
+  busy(g('kp-btn'),'Açılıyor…');try{await kqTry(g('kp-in').value,say)}catch(e){say(NETERR)}finally{const b=g('kp-btn');if(b)busy(b)}},
+ keyRc:async()=>{const g=id=>document.getElementById(id),say=t=>{g('kr-err').textContent=t;g('kr-err').hidden=false},q=F.kq;
+  const rc=rcNorm(g('kr-in').value);if(rc.length!==12)return say('Kod 12 karakterden oluşur, örn. ABCD-EFGH-JKLM.');
+  busy(g('kr-btn'),'Açılıyor…');
+  try{const w=await q.w();if(!w){say('Bu ailenin kurtarma kodu yok.');return}
+   let fk;try{fk=await rcOpen(q.code,w,rc)}catch(e){say('Kod uymadı. Harfleri kontrol et.');return}
+   if(await q.test(fk))q.ok(fk);else say('Kod uymadı. Harfleri kontrol et.')}
+  catch(e){say(NETERR)}finally{const b=g('kr-btn');if(b)busy(b)}}});
+
+/* Kilitli aileye katılma: meta ve üyeler kilitli gelir, anahtar bağlantıdan (#k=) ya da sonradan alınır */
+async function joinOpen(fk){const j=F.join;if(!j||!j.enc)return false;
+ try{const key=await fkey(fk),meta=await decJ(key,j.code,'meta',j.enc.meta),ms=[];
+  for(const [id,v] of Object.entries(j.enc.members||{})){if(!okId(id))continue;let x=v;if(isEnc(v)){try{x=await decJ(key,j.code,'members/'+id,v)}catch(e){continue}}ms.push(norm('members',id,x))}
+  j.meta=meta&&typeof meta==='object'?meta:{};j.members=ms.sort((a,b)=>(a.at||0)-(b.at||0));j.fk=fk;return true}catch(e){return false}}
+function joinLocked(){const j=F.join;
+ F.kq={code:j.code,test:fk=>joinOpen(fk),w:async()=>{await claimUid(j.code,'-');const k=await fbGet(j.code,'/k');return k&&k.w},ok:()=>joinWho()};
+ sheet('Bu aile kilitli',`<p>Bu ailenin verisi kilitli. Katılmak için anahtarı ailenden birinin telefonundan al.</p>
+  <div class="acts lkacts"><button class="btn primary block" data-act="keyScan" data-j="1">${I('qr','sm')}QR kodu tara</button><button class="btn soft block" data-act="keyPaste" data-j="1">${I('link','sm')}Bağlantı geldi, aç</button><button class="link" style="justify-content:center" data-act="keyRc" data-j="1">Kurtarma kodunu gir</button></div>
+  <p class="small">Onun telefonunda: Aile → Uçtan uca kilitli → Anahtarı ver</p>`)}
 // Açılış
 if(store.mode==='demo'){S=store.demo||(store.demo=seedCm(seed()));if(!S.books)seedLib(S)}
 else if(store.mode==='family'){if(store.R)fromRemote()}
 const qs=new URLSearchParams(location.search),qcode=qs.get('aile');
+// Anahtar bağlantısı (#k=): adres çubuğundan hemen silinir, aile verisi gelince denenir
+{const hk=parseKeyLink(location.hash);if(hk){KS.lk=UI.lk=hk.k;history.replaceState(null,'',location.pathname+location.search)}}
+if(qs.get('kilit')==='1'){store.prefs.lkOn=true;save()}
 // Google Haritalar'dan "Paylaş → Bizim Ev" ile gelen mekan (manifest share_target)
 const sharedHb=(qs.has('text')||qs.has('url'))?parseHb(qs.get('title'),qs.get('text'),qs.get('url')):null;
 const shared=sharedHb?null:(qs.has('text')||qs.has('url'))?parsePlace(qs.get('title'),qs.get('text'),qs.get('url')):null;
-if(qcode||qs.has('text')||qs.has('url')||qs.has('title'))history.replaceState(null,'',location.pathname);
+if(qcode||qs.has('kilit')||qs.has('text')||qs.has('url')||qs.has('title'))history.replaceState(null,'',location.pathname);
 let rafS=0;document.getElementById('screen').addEventListener('scroll',()=>{if(rafS)return;rafS=requestAnimationFrame(()=>{rafS=0;trackStrip()})},{passive:true});
 UI.tf=S&&isChild()?'mine':'all';
 render();
+if(store.mode==='family'&&kRec())keyState().then(()=>{if(needKey())render()});
 if(store.mode==='family'){ensureUid().then(()=>{connect();flush();loadAv()})}
 checkReminders();
 setTimeout(popCheck,2500);

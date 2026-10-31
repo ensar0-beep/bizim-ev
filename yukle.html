@@ -94,13 +94,35 @@ function shrink(src){return new Promise((res,rej)=>{const im=new Image();im.cros
 const readFile=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(new Error('dosya okunamadı'));r.readAsDataURL(f)});
 const slug=t=>t.toLocaleLowerCase('tr').replace(/ş/g,'s').replace(/ı/g,'i').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o').replace(/ç/g,'c').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,20)||'av';
 
+/* Uçtan uca kilit: aile kilitliyse fotoğraflar telefonda kilitlenip öyle yüklenir (index.html'deki avSeal/avOpen ile aynı biçim).
+   Anahtar uygulamanın kaydettiği yerde (store.fk) durur; yoksa yükleme kapalıdır. */
+const EV='e1.',TE=new TextEncoder(),TD=new TextDecoder();
+const isEnc=v=>typeof v==='string'&&v.indexOf(EV)===0&&v.length>30;
+const b64u=u=>{let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const b64=u=>{let s=b64u(u).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return s};
+const ub64u=s=>{s=String(s).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+let key=null,locked=false;
+const aad=id=>TE.encode(code+'/av/'+id);
+async function seal(id,o){const m=/^data:(image\/[a-z0-9.+-]+);base64,/.exec(o.d),h=TE.encode(JSON.stringify({n:o.n,t:o.t,m:m[1]})),b=ub64u(o.d.slice(m[0].length)),u=new Uint8Array(h.length+1+b.length);
+ u.set(h);u.set(b,h.length+1);const iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv,additionalData:aad(id)},key,u)),x=new Uint8Array(12+ct.length);
+ x.set(iv);x.set(ct,12);return {d:EV+b64u(x),at:o.at}}
+async function open1(id,o){if(!isEnc(o.d))return o;if(!key)return null;const u=ub64u(o.d.slice(3)),p=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:u.subarray(0,12),additionalData:aad(id)},key,u.subarray(12))),z=p.indexOf(0),h=JSON.parse(TD.decode(p.subarray(0,z)));
+ return {n:h.n,t:h.t,d:`data:${h.m};base64,`+b64(p.subarray(z+1))}}
+async function kilit(){const k=await read('families/'+code+'/k').catch(()=>null);if(!k||typeof k!=='object')return '';
+ locked=true;if(k.st!=='on')return 'Aile şu an kilitleniyor. Bitince fotoğraf yükleyebilirsin.';
+ if(!/^[A-Za-z0-9_-]{43}$/.test(store.fk||''))return 'Aile kilitli ama bu telefonda anahtar yok. Önce uygulamada anahtarı al.';
+ try{key=await crypto.subtle.importKey('raw',ub64u(store.fk),'AES-GCM',false,['encrypt','decrypt']);const u=ub64u(k.chk.slice(3));
+  await crypto.subtle.decrypt({name:'AES-GCM',iv:u.subarray(0,12),additionalData:TE.encode(code+'/k/chk')},key,u.subarray(12));return ''}
+ catch(e){key=null;return 'Bu telefondaki anahtar ailenin kilidine uymuyor. Uygulamada anahtarı yeniden al.'}}
+const newId=()=>'a'+Array.from(crypto.getRandomValues(new Uint8Array(12)),x=>'0123456789abcdefghijklmnopqrstuvwxyz'[x%36]).join('');
+
 async function liste(){
  const ids=await read('avatars/'+code,'shallow=true')||{};
  const keys=Object.keys(ids);
  if(!keys.length){$('list').innerHTML='';$('ll').textContent='Henüz yüklü avatar yok.';return}
  $('ll').textContent='';
  const parts=[];
- for(const id of keys){const o=await read('avatars/'+code+'/'+id).catch(()=>null);if(!o||!o.d)continue;
+ for(const id of keys){let o=await read('avatars/'+code+'/'+id).catch(()=>null);if(!o||!o.d)continue;o=await open1(id,o).catch(()=>null);if(!o||!/^data:image\//.test(o.d))continue;
   parts.push(`<div class="it"><img src="${o.d}" alt=""><b>${esc(o.n||'')}</b>${esc(o.t||'')}<br><button data-del="${esc(id)}">Sil</button></div>`)}
  $('list').innerHTML=parts.join('');
  $('list').querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
@@ -113,11 +135,14 @@ async function baslat(){
  try{await token()}catch(e){$('who').innerHTML='<span class="err">Kimlik alınamadı: '+esc(e.message)+'</span>';return}
  $('who').innerHTML='Aile kodu <b>'+esc(code.slice(0,4)+'-'+code.slice(4))+'</b>'+(FB_KEY?'':'<br><span class="sub">Kimlik katmanı henüz kapalı (anahtar girilmedi).</span>');
  $('main').hidden=false;
+ const kl=await kilit();if(locked)$('who').innerHTML+='<br><span class="sub">🔒 Aile uçtan uca kilitli: fotoğraflar bu telefonda kilitlenip öyle yüklenir.</span>';
+ if(kl){$('who').innerHTML+='<br><span class="err">'+esc(kl)+'</span>';$('f').disabled=true;$('n').disabled=true}
  await liste().catch(e=>$('ll').textContent='Liste okunamadı: '+e.message)}
 
 $('f').onchange=()=>{$('up').disabled=!$('f').files.length||!$('n').value.trim()};
 $('n').oninput=()=>{$('up').disabled=!$('f').files.length||!$('n').value.trim()};
 $('up').onclick=async()=>{
+ if(locked&&!key)return;
  const name=$('n').value.trim(),files=[...$('f').files];
  if(!name||!files.length)return;
  $('up').disabled=true;$('ul').textContent='';
@@ -126,9 +151,10 @@ $('up').onclick=async()=>{
  let s=varolan.filter(k=>k.indexOf(base+'-')===0).length;
  for(const f of files){
   try{const d=await shrink(await readFile(f));
-   let id;do{id=base+'-'+(++s)}while(varolan.includes(id));
-   varolan.push(id);
-   await send('avatars/'+code+'/'+id,'PUT',{n:name,t:'Fotoğraf '+s,d,at:Date.now()});ok++;
+   // Fotoğraf adları rastgele: kişinin adı veritabanında görünmesin
+   let id;do{id=newId()}while(varolan.includes(id));
+   varolan.push(id);const o={n:name,t:'Fotoğraf '+(++s),d,at:Date.now()};
+   await send('avatars/'+code+'/'+id,'PUT',locked?await seal(id,o):o);ok++;
    $('ul').innerHTML+=`<span class="ok">${esc(f.name)} yüklendi</span><br>`}
   catch(e){$('ul').innerHTML+=`<span class="err">${esc(f.name)}: ${esc(e.message)}</span><br>`}}
  $('f').value='';$('up').disabled=true;

@@ -1,0 +1,105 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "families": {
+      "$code": {
+        ".read": "auth != null && data.child('uids').child(auth.uid).exists()",
+        ".write": "auth != null && $code.matches(/^[A-Z2-9]{8}$/) && (!data.exists() || data.child('uids').child(auth.uid).exists())",
+        "meta": {
+          ".read": "auth != null && $code.matches(/^[A-Z2-9]{8}$/)",
+          ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+        },
+        "members": {
+          ".read": "auth != null && $code.matches(/^[A-Z2-9]{8}$/)",
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "uids": {
+          "$uid": {
+            ".read": "auth != null && $uid === auth.uid",
+            ".write": "auth != null && $code.matches(/^[A-Z2-9]{8}$/) && $uid === auth.uid && (!newData.exists() || (newData.isString() && newData.val().length <= 40))"
+          }
+        },
+        "events": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "tasks": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "lists": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "items": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "wishes": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "activity": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "freq": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "msgs": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "wcm": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "rsv": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "books": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "bkat": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "ann": {
+          ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+        },
+        "ver": {
+          "$uid": {
+            ".validate": "newData.isNumber()"
+          }
+        }
+      }
+    },
+    "avatars": {
+      "$code": {
+        ".read": "auth != null && root.child('families').child($code).child('uids').child(auth.uid).exists()",
+        ".write": "auth != null && root.child('families').child($code).child('uids').child(auth.uid).exists()",
+        "$key": {
+          ".validate": "!newData.exists() || (newData.child('d').isString() && newData.child('d').val().length < 120000)"
+        }
+      }
+    }
+  }
+}
