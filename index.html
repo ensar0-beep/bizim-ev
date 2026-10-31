@@ -72,6 +72,11 @@ svg.i.sm{width:1.05rem;height:1.05rem}
 #tbar .in{background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:saturate(1.8) blur(18px);backdrop-filter:saturate(1.8) blur(18px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 10px) 18px 10px}
 .tbs{display:flex;align-items:center;gap:12px}.tbs b{font-family:var(--f-display);font-size:1.2rem;font-weight:700;flex:none}
 .tbs .seg{flex:1;padding:3px}.tbs .seg button{min-height:34px;font-size:.82rem;padding:0 4px}
+.tbd{flex:1;min-width:0;color:var(--muted);font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbx{display:flex;align-items:center;gap:4px;flex:none}.tbs .icon-btn{width:38px;height:38px;flex:none}.tbs .bellb em{top:2px;right:2px}
+.tbl{flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}.tbl::-webkit-scrollbar{display:none}
+.tbl button{flex:none;min-height:34px;padding:0 12px;border-radius:999px;font-size:.84rem;font-weight:600;color:var(--muted);white-space:nowrap}
+.tbl button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .tbt{text-align:center;font-weight:700;font-size:1.02rem;line-height:34px}
 .hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:6px 0 18px}
 .hdr .h{min-width:0}
@@ -888,7 +893,7 @@ a.btn{text-decoration:none}
 .dblock.flash>.group,.dblock.flash.dempty{animation:flash 1.4s ease-out}
 @keyframes flash{0%,55%{box-shadow:0 0 0 3px var(--accent)}}
 .strip{background:var(--bg);margin:0 -18px 12px;padding:4px 14px 8px}
-.strip.sticky{position:sticky;top:-20px;z-index:3;padding-top:24px;border-bottom:1px solid var(--line)}
+.strip.sticky{position:sticky;top:calc(var(--tbh,0px) - 20px);z-index:3;padding-top:24px;border-bottom:1px solid var(--line)}
 .strip .sh{display:flex;align-items:center;gap:4px;margin-bottom:4px;padding:0 4px}
 .strip .sh .ttl{flex:1;text-align:center;font-family:var(--f-display);font-weight:600;font-size:1.15rem}
 /* Takvim'de Akış ile Ay görünümünün ay satırı aynı yerde ve aynı boyutta durur (yapışkan şerit aynı kalır) */
@@ -1581,7 +1586,7 @@ function homeAgenda(){const t=T(),c={mine:isChild(),filter:[]};
  <button class="btn ghost block sm" data-act="tab" data-tab="cal" style="margin-top:14px">Takvimde devamını gör ${I('chevR','sm')}</button>`}
 function scrollToDay(day){const sc=document.getElementById('screen');
  const b=[...sc.querySelectorAll('.dblock')].find(x=>x.dataset.from<=day&&day<=x.dataset.to);if(!b)return false;
- const st=document.getElementById('strip');const off=st?st.getBoundingClientRect().height+(st.closest('.hs1')?6:-12):8;
+ const st=document.getElementById('strip');const tb=document.getElementById('tbar'),off=(st?st.getBoundingClientRect().height+(st.closest('.hs1')?6:-12):8)+(tb&&tb.innerHTML?tb.offsetHeight:0);
  sc.scrollTo({top:sc.scrollTop+b.getBoundingClientRect().top-sc.getBoundingClientRect().top-off,behavior:'smooth'});
  b.classList.remove('flash');void b.offsetWidth;b.classList.add('flash');return true}
 // Kaydırırken şeridin üstünde kalan günü işaretler; takvimde hafta değişince şeridi yeniler.
@@ -2377,13 +2382,28 @@ function vTasks(){
  return `<div class="hdr"><div class="h"><h1>Görevler</h1></div><button class="icon-btn" data-act="tkb" data-v="dn" aria-label="Yapılanlar">${I('dnic')}</button></div>${kid?starsHTML():''}
  <div class="seg" role="group" aria-label="Görünüm">${tkSeg(v)}</div>${body}`}
 const TKV=[['today','Bugün'],['up','Yaklaşan'],['rt','Rutinler']],tkSeg=v=>TKV.map(([k,n])=>`<button data-act="tkb" data-v="${k}" aria-pressed="${v===k}">${n}</button>`).join('');
-// Aşağı kayınca üstte kalan şerit (Microsoft To Do gibi): büyük başlık ekrandan çıkınca küçük başlık ve sekmeler buzlu bir şeritte görünür.
-// Şimdilik yalnız Görevler'de; #screen kaydıkça ve her çizimden sonra tbPaint() güncellenir.
+// Aşağı kayınca üstte kalan şerit (Microsoft To Do gibi): sayfanın büyük başlığı ekrandan çıkınca küçük başlık ve o sayfanın sekmeleri buzlu bir şeritte görünür.
+// tbIn() her sayfa için [izlenen öğe, şeridin içi] verir; #screen kaydıkça ve her çizimden sonra tbPaint() günceller.
+// Bugün ve Takvim'in yapışkan hafta şeridi bu şeridin altına oturur (--tbh).
+const tbBtn=(act,data,on,n)=>`<button data-act="${act}" ${data} aria-pressed="${on}">${esc(n)}</button>`;
+function tbIn(sc){const t=UI.tab,q=x=>sc.querySelector(x);if(!S||!store.mode)return [null,''];
+ if(t==='tasks'){const v=UI.tkb||'today';return [q('.hdr h1'),v==='dn'?`<div class="tbt">Yapılanlar</div>`:`<div class="tbs"><b>Görevler</b><div class="seg" role="group" aria-label="Görünüm">${tkSeg(v)}</div></div>`]}
+ if(t==='today')return [q('.th .panel'),`<div class="tbs"><b>Bugün</b><span class="tbd">${long(T())}</span><span class="tbx">${wxChip()}${bellBtn()}</span></div>`];
+ if(t==='cal'){const c=calTop().match(/<div class="cvw"[^]*?<\/div>/);return [q('.ctop h1'),`<div class="tbs"><b>Takvim</b><span class="tbd">${UI.cal==='month'&&UI.calDate?(d=>MON[d.getMonth()]+' '+d.getFullYear())(parse(UI.calDate)):''}</span>${c?c[0]:''}</div>`]}
+ if(t==='lists'&&!UI.shop){const w=UI.lmode==='wish',tb=w?Object.entries(WTAB).map(([k,[,n]])=>tbBtn('wt',`data-v="${k}"`,UI.wt===k,n)):S.lists.map(l=>tbBtn('pickList',`data-id="${l.id}"`,l.id===UI.list,l.name));
+  const mk=w?0:S.items.filter(i=>!i.done&&i.cat==='Market').length;
+  return [q('.wtabs')||q('.ltabs'),`<div class="tbs"><b style="color:var(${w?'--wish-ink':'--buy-ink'})">${w?'İstekler':'Alınacaklar'}</b><div class="tbl" role="group" aria-label="${w?'Tür':'Listeler'}">${tb.join('')}</div>${mk?`<button class="icon-btn" data-act="shopStart" data-v="Market" aria-label="Marketteyim">${I('cart')}</button>`:''}</div>`]}
+ if(t==='family')return [q('.hdr h1'),`<div class="tbs"><b>Aile</b><span class="tbd"></span><button class="icon-btn" data-act="famSettings" aria-label="Ayarlar">${I('gear')}</button></div>`];
+ if(t==='lib')return [q('.hdr h1'),`<div class="tbs"><button class="icon-btn" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}" aria-label="Geri">${I('chevL')}</button><b>Ev kütüphanesi</b><span class="tbd">${LIB().length} kitap</span></div>`];
+ return [null,'']}
 function tbPaint(){const bar=document.getElementById('tbar'),sc=document.getElementById('screen');if(!bar||!sc)return;
- const h=UI.tab==='tasks'&&!UI.shop&&sc.querySelector('.hdr h1');if(!h){bar.className='';bar.innerHTML='';bar._k='';return}
- const v=UI.tkb||'today',in_=v==='dn'?`<div class="tbt">Yapılanlar</div>`:`<div class="tbs"><b>Görevler</b><div class="seg" role="group" aria-label="Görünüm">${tkSeg(v)}</div></div>`;
- if(bar._k!==in_){bar.innerHTML=`<div class="in">${in_}</div>`;bar._k=in_}
- const on=h.getBoundingClientRect().bottom<sc.getBoundingClientRect().top+30;bar.style.top=sc.offsetTop+'px';bar.classList.toggle('on',on);bar.inert=!on}
+ const [h,in_]=tbIn(sc);if(!h){bar.className='';bar.innerHTML='';bar._k='';sc.style.removeProperty('--tbh');return}
+ if(bar._k!==in_){bar.innerHTML=`<div class="in">${in_}</div>`;bar._k=in_;const on=bar.querySelector('.tbl [aria-pressed="true"]');if(on)on.scrollIntoView({block:'nearest',inline:'center'})}
+ const on=h.getBoundingClientRect().bottom<sc.getBoundingClientRect().top+30;bar.style.top=sc.offsetTop+'px';bar.classList.toggle('on',on);bar.inert=!on;
+ sc.style.setProperty('--tbh',on?bar.offsetHeight+'px':'0px')}
+// şeritten sekme/liste değişince sayfa başa döner
+document.getElementById('tbar').addEventListener('click',e=>{if(!e.target.closest('[data-act="pickList"],[data-act="wt"],[data-act="calView"]'))return;
+ setTimeout(()=>{const sc=document.getElementById('screen');sc.style.scrollBehavior='auto';sc.scrollTop=0;sc.style.scrollBehavior='';tbPaint()},0)})
 
 // Aile sekmesi: kişiler, davet satırı ve son 3 değişiklik. Ayarlar sağ üstteki dişlide, gruplu bir sayfada.
 // Duyuru ayarlarda yok; Bugün ekranından değiştirilir.
