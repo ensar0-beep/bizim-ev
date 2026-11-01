@@ -2503,7 +2503,7 @@ async function phAdd(k,files){const v=evOfK(k);if(!v||!files.length)return;
  if(store.mode==='family'&&kRec()&&!(kOn()&&KS.ok===true)){toast('Kilit açılmadan fotoğraf eklenemez.');return}
  const room=30-phOf(k).length;if(room<=0){toast('Bir etkinliğe en çok 30 fotoğraf eklenebilir.');return}
  toast('Fotoğraf yükleniyor…');let n=0;
- for(const f of [...files].slice(0,room)){try{const id=uid(),m={e:k,by:meId(),at:Date.now()},t=await phShrink(f,320,.72,40000),d=await phShrink(f,1280,.8,270000);
+ for(const f of [...files].slice(0,room)){try{const id=newAvId(),m={e:k,by:meId(),at:Date.now()},t=await phShrink(f,320,.72,40000),d=await phShrink(f,1280,.8,270000);
    if(store.mode==='family'){const body={m:await phSeal(id,'m',m),t:await phSeal(id,'t',t),d:await phSeal(id,'d',d)};
     if(!kOn())body.m=JSON.stringify(m);
     const r=await fetch(dbUrl(`photos/${store.code}/${id}`,await authTok()),{method:'PUT',body:JSON.stringify(body)});if(!r.ok)throw new Error('HTTP '+r.status)}
