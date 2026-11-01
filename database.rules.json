@@ -6,8 +6,12 @@
       "$code": {
         ".read": "auth != null && data.child('uids').child(auth.uid).exists()",
         ".write": "auth != null && $code.matches(/^[A-Z2-9]{8}$/) && (!data.exists() || data.child('uids').child(auth.uid).exists())",
-        "meta": { ".read": "auth != null && $code.matches(/^[A-Z2-9]{8}$/)" },
-        "members": { ".read": "auth != null && $code.matches(/^[A-Z2-9]{8}$/)" },
+        "meta": {
+          ".read": "auth != null && $code.matches(/^[A-Z2-9]{8}$/)"
+        },
+        "members": {
+          ".read": "auth != null && $code.matches(/^[A-Z2-9]{8}$/)"
+        },
         "uids": {
           "$uid": {
             ".read": "auth != null && $uid === auth.uid",
@@ -22,6 +26,15 @@
         ".write": "auth != null && root.child('families').child($code).child('uids').child(auth.uid).exists()",
         "$key": {
           ".validate": "!newData.exists() || (newData.child('d').isString() && newData.child('d').val().length < 120000)"
+        }
+      }
+    },
+    "photos": {
+      "$code": {
+        ".read": "auth != null && root.child('families').child($code).child('uids').child(auth.uid).exists()",
+        ".write": "auth != null && root.child('families').child($code).child('uids').child(auth.uid).exists()",
+        "$id": {
+          ".validate": "!newData.exists() || (newData.child('m').isString() && newData.child('m').val().length < 2000 && newData.child('t').isString() && newData.child('t').val().length < 60000 && newData.child('d').isString() && newData.child('d').val().length < 400000)"
         }
       }
     }

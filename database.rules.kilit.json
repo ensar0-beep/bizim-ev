@@ -100,6 +100,15 @@
           ".validate": "!newData.exists() || (newData.child('d').isString() && newData.child('d').val().length < 120000)"
         }
       }
+    },
+    "photos": {
+      "$code": {
+        ".read": "auth != null && root.child('families').child($code).child('uids').child(auth.uid).exists()",
+        ".write": "auth != null && root.child('families').child($code).child('uids').child(auth.uid).exists()",
+        "$id": {
+          ".validate": "!newData.exists() || (newData.child('m').isString() && newData.child('m').val().length < 2000 && newData.child('t').isString() && newData.child('t').val().length < 60000 && newData.child('d').isString() && newData.child('d').val().length < 400000)"
+        }
+      }
     }
   }
 }

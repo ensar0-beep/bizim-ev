@@ -67,6 +67,23 @@ svg.i.sm{width:1.05rem;height:1.05rem}
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;padding:calc(20px + env(safe-area-inset-top,0px)) 18px 110px;scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
+.evmem{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.phcv{margin:0 0 16px}.phcv .big{display:block;width:100%;aspect-ratio:16/10;border-radius:16px;overflow:hidden;padding:0;position:relative;background:var(--sunk)}
+.phcv .big img,.phs img{width:100%;height:100%;object-fit:cover;display:block}
+.phcv .big em{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.55);color:#fff;font-style:normal;font-size:.8rem;font-weight:700;border-radius:999px;padding:4px 10px;display:flex;gap:5px;align-items:center}
+.phs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px}.phs button{aspect-ratio:1;border-radius:10px;overflow:hidden;padding:0;position:relative;background:var(--sunk)}
+.phs b{position:absolute;inset:0;background:rgba(0,0,0,.45);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.phadd{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--accent-ink);font-size:.7rem;font-weight:600;border:1.5px dashed var(--line)!important;background:none!important}
+.phempty{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border:1.5px dashed var(--line);border-radius:16px;margin:0 0 16px;text-align:left;color:var(--accent-ink)}
+.phempty b{display:block;color:var(--fg)}.phempty small{color:var(--muted)}
+.who .evth{position:relative;width:34px;height:34px;border-radius:9px;overflow:hidden;flex:none;margin-right:4px}.evth img{width:100%;height:100%;object-fit:cover;display:block}
+.evth em{position:absolute;right:0;bottom:0;background:rgba(0,0,0,.6);color:#fff;font-style:normal;font-size:.62rem;font-weight:700;padding:0 4px;border-radius:6px 0 0 0}
+.who .evc{display:inline-flex;align-items:center;gap:3px;font-size:.75rem;color:var(--muted);font-weight:600;margin-right:6px}
+.phv{position:fixed;inset:0;z-index:60;background:#000;display:flex;align-items:center;justify-content:center}
+.phv img{max-width:100%;max-height:100%}.phv .cap{position:absolute;left:0;right:0;bottom:0;padding:14px 16px calc(20px + env(safe-area-inset-bottom,0px));color:#fff;display:flex;gap:8px;align-items:center;background:linear-gradient(transparent,rgba(0,0,0,.7));font-size:.9rem}
+.phv .cap .n{margin-left:auto}
+.phv .x,.phv .del{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));width:42px;height:42px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;display:flex;align-items:center;justify-content:center}
+.phv .x{right:14px}.phv .del{left:14px}
 #tbar{position:absolute;left:0;right:0;top:0;z-index:6;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .18s,transform .22s}
 #tbar.on{opacity:1;transform:none;pointer-events:auto}
 #tbar .in{background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:saturate(1.8) blur(18px);backdrop-filter:saturate(1.8) blur(18px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 10px) 18px 10px}
@@ -989,7 +1006,7 @@ a.btn{text-decoration:none}
 (function(){
 'use strict';
 /* ---------- İkonlar ---------- */
-const P={dnic:'<path d="M4 7h9M4 12h7M4 17h6"/><path d="m14 16 2.5 2.5L21 12.5"/>',sprout:'<path d="M12 21v-9"/><path d="M12 12C12 8 9 5.5 5 5.5 5 9.5 8 12 12 12Z"/><path d="M12 14c0-3.5 2.5-6 6.5-6 0 3.8-2.6 6-6.5 6Z"/>',leaf:'<path d="M5 19C5 10 10 5 20 4c0 10-5 15-14 15"/><path d="M5 19 13 11"/>',snow:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="m9 4 3 2 3-2M9 20l3-2 3 2"/>',chat:'<path d="M20 12a8 8 0 0 1-11.5 7.2L4 20l1-4.3A8 8 0 1 1 20 12Z"/>',grip:'<path d="M5 8h14M5 12h14M5 16h14"/>',arrUp:'<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',grid:'<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',listb:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>',sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
+const P={camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',dnic:'<path d="M4 7h9M4 12h7M4 17h6"/><path d="m14 16 2.5 2.5L21 12.5"/>',sprout:'<path d="M12 21v-9"/><path d="M12 12C12 8 9 5.5 5 5.5 5 9.5 8 12 12 12Z"/><path d="M12 14c0-3.5 2.5-6 6.5-6 0 3.8-2.6 6-6.5 6Z"/>',leaf:'<path d="M5 19C5 10 10 5 20 4c0 10-5 15-14 15"/><path d="M5 19 13 11"/>',snow:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="m9 4 3 2 3-2M9 20l3-2 3 2"/>',chat:'<path d="M20 12a8 8 0 0 1-11.5 7.2L4 20l1-4.3A8 8 0 1 1 20 12Z"/>',grip:'<path d="M5 8h14M5 12h14M5 16h14"/>',arrUp:'<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',grid:'<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',listb:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>',sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
  today:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
  cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
  cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h9a1.5 1.5 0 0 0 1.5-1.1L21.5 7H6"/>',
@@ -1734,7 +1751,7 @@ function syncBack(){const st=history.state&&history.state.bz;
  if(store.mode&&S&&UI.tab!=='today'){if(!st)history.pushState({bz:1},'')}
  else if(st)history.back()}
 window.addEventListener('popstate',()=>{if(document.querySelector('.sheet'))close();if(UI.tab!=='today'){UI.tab='today';render()}});
-function afterRender(){tbPaint();if(UI.tab==='today')wxLoad();document.getElementById('screen').classList.toggle('tsw',UI.tab==='lists'&&!UI.shop);rtInit();trackStrip();bindWheel();bindMore();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
+function afterRender(){tbPaint();phLoad(3e5);if(UI.tab==='today')wxLoad();document.getElementById('screen').classList.toggle('tsw',UI.tab==='lists'&&!UI.shop);rtInit();trackStrip();bindWheel();bindMore();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
 const emptyBox=(title,text,btn)=>`<div class="empty"><b>${title}</b>${text}${btn||''}</div>`;
 
 /* ---------- Konuşur gibi ekleme ----------
@@ -1884,6 +1901,8 @@ function bellItems(){const me=meId(),nm=x=>esc(first(M(x).name)),out=[],o=x=>out
  (S.rsv||[]).forEach(r=>{const e=ok(r.m)&&S.events.find(x=>x.id===r.e&&x.by===me&&x.ask);if(e&&rsvOf(e)[r.m]===r)o({w:r.m,t:`${nm(r.m)} ${r.v==='y'?'katılıyor':r.v==='n'?'katılamıyor':'başka gün önerdi'}`,s:`${esc(e.title)} · ${r.v==='a'?rel(r.d)+(r.t?' '+hm(r.t):''):evWhen(e)}`,at:r.at,act:'openEvent',id:e.id,d:e.date})});
  S.events.forEach(e=>{if(!(e.ask&&e.ask.includes(me))&&e.members.includes(me)&&ok(e.by)&&e.date>=T())o({w:e.by,t:`${nm(e.by)} seni bir etkinliğe ekledi`,s:`${esc(e.title)} · ${rel(e.date)}${e.time?' '+hm(e.time):''}`,at:idAt(e.id),act:'openEvent',id:e.id,d:e.date})});
  (S.wcm||[]).forEach(c=>{const w=ok(c.by)&&S.wishes.find(x=>x.id===c.w);if(w)o({w:c.by,t:`${nm(c.by)} “${esc(w.title)}” isteğine yazdı`,s:`“${esc(c.t)}”`,at:c.at,act:'openWish',id:w.id,cm:1})});
+ (S.wcm||[]).forEach(c=>{const v=ok(c.by)&&evOfK(c.w);if(v&&evMine(v.e))o({w:c.by,t:`${nm(c.by)} “${esc(v.e.title)}” etkinliğine yazdı`,s:`“${esc(c.t)}”`,at:c.at,act:'openEvent',id:v.e.id,d:v.d,cm:1})});
+ phGroups().forEach(g=>{const v=ok(g.by)&&evOfK(g.e);if(v&&evMine(v.e))o({w:g.by,t:`${nm(g.by)} “${esc(v.e.title)}” etkinliğine ${g.n>1?g.n+' fotoğraf':'fotoğraf'} ekledi`,s:dFull(v.d),at:g.at,act:'openEvent',id:v.e.id,d:v.d})});
  (S.wcm||[]).forEach(c=>{const b=ok(c.by)&&LIB().find(x=>x.id===c.w);if(b)o({w:c.by,t:`${nm(c.by)} “${esc(b.t)}” kitabına yazdı`,s:`“${esc(c.t)}”`,at:c.at,act:'openBook',id:b.id,cm:1})});
  (S.msgs||[]).forEach(m=>{if(ok(m.id)&&m.t)o({w:m.id,t:`${nm(m.id)} panoya yazdı`,s:`“${esc(m.t)}”`,at:m.at,act:'bellMsg',id:m.id})});
  S.items.forEach(i=>{if(i.for===me&&ok(i.by)&&!i.done)o({w:i.by,t:`${nm(i.by)} senin için bir şey ekledi`,s:esc(i.name),at:idAt(i.id)||i.at||0,act:'openItem',id:i.id})});
@@ -2432,6 +2451,87 @@ function wpHTML(){const p=F.place;
   <div class="wprow"><input class="inp" id="wf-link" placeholder="ya da bağlantıyı yapıştır" inputmode="url" aria-label="Google Haritalar bağlantısı"><button type="button" class="btn soft sm" data-act="wpPaste">Ekle</button></div>
   <span class="err" id="wf-lerr" hidden>Bu bir Google Haritalar bağlantısı değil.</span></div>`}
 function wpRefresh(){const b=document.getElementById('wf-place');if(!b)return;b.hidden=!isPlaceType(F.wtype);b.innerHTML=wpHTML()}
+
+/* ---------- Etkinliklerde yorum ve hatıra fotoğrafı ----------
+   Yorumlar isteklerdeki wcm kayıtlarıdır; w = etkinliğin id'si, tekrarlayan etkinlikte id_YYYYMMDD (her hafta ayrı konuşulur).
+   Fotoğraflar aile kaydının dışında, avatarlar gibi ayrı bir kökte durur ki canlı akışla her telefona inmesin:
+   photos/{CODE}/{id} = {m, t, d}; m = {e: etkinlik anahtarı, by, at}, t = 320 px küçük resim, d = 1280 px fotoğraf.
+   Liste shallow okunur; yeni id'lerin yalnız m ve t'si iner, d fotoğraf açılınca. Önbellek IndexedDB'de (bizim-ev-foto), PH bellekte.
+   Kilitli ailede üçü ayrı ayrı kilitlenir (AAD ph/<id>/<alan>); kilit doğrulanmadan fotoğraf eklenmez. */
+const evKey=(e,day)=>e.repeat&&e.repeat!=='none'?e.id+'_'+String(day).replace(/-/g,''):e.id;
+const evOfK=k=>{k=String(k||'');const i=k.indexOf('_'),e=S.events.find(x=>x.id===(i<0?k:k.slice(0,i)));if(!e)return null;
+ return {e,d:i<0?e.date:k.slice(i+1).replace(/^(\d{4})(\d\d)(\d\d)$/,'$1-$2-$3')}};
+const evOwn=(k,id)=>k===id||String(k).startsWith(id+'_');
+const evCm=k=>evOfK(k)?{id:k,ev:1}:null;
+const evMine=e=>isAll(e)||e.members.includes(meId());
+const evDone=(e,day)=>{const t=T(),last=evLen(e)>1?add(evStart(e,day)||day,evLen(e)-1):day;return last<t||last===t&&(!e.time||toMin(e.time)+60<=nowMin())};
+const PH={};let phDb=null,phBusy=false,phAt=0;
+const phNs=()=>store.mode==='family'?store.code:'demo';
+const phIdb=()=>phDb||(phDb=new Promise((ok,no)=>{const r=indexedDB.open('bizim-ev-foto',1);r.onupgradeneeded=()=>r.result.createObjectStore('p');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}));
+const phTx=async(mode,f)=>{const db=await phIdb();return new Promise((ok,no)=>{const t=db.transaction('p',mode),r=f(t.objectStore('p'));t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>no(t.error)})};
+const phGetL=id=>phTx('readonly',s=>s.get(phNs()+'/'+id)).catch(()=>null);
+const phPutL=(id,v)=>phTx('readwrite',s=>s.put(v,phNs()+'/'+id)).catch(()=>{});
+const phDelL=id=>phTx('readwrite',s=>s.delete(phNs()+'/'+id)).catch(()=>{});
+const phOf=k=>Object.entries(PH).filter(([,v])=>v.e===k).map(([id,v])=>({id,...v})).sort((a,b)=>a.at-b.at);
+function phGroups(){const g={};for(const id in PH){const v=PH[id],k=v.e+'|'+v.by;if(!g[k])g[k]={e:v.e,by:v.by,n:0,at:0};g[k].n++;g[k].at=Math.max(g[k].at,v.at)}return Object.values(g)}
+// Görüntü kilitlenirken base64'ün base64'ü olmasın diye tür + 0 + baytlar tek kutuda (avSeal gibi)
+async function phSeal(id,f,v){if(!kOn())return v;const key=await fkey();
+ if(f==='m')return encJ(key,store.code,`ph/${id}/m`,v);const m=/^data:(image\/[a-z0-9.+-]+);base64,/.exec(v),h=TE.encode(m[1]),b=ub64u(v.slice(m[0].length)),u=new Uint8Array(h.length+1+b.length);
+ u.set(h);u.set(b,h.length+1);return encB(key,store.code,`ph/${id}/${f}`,u)}
+async function phOpen(id,f,v){if(!isEnc(v))return f==='m'&&typeof v==='string'?JSON.parse(v):v;const key=await fkey();
+ if(f==='m')return decJ(key,store.code,`ph/${id}/m`,v);const u=await decB(key,store.code,`ph/${id}/${f}`,v),z=u.indexOf(0),t=TD.decode(u.subarray(0,z));
+ return `data:${/^image\/[a-z0-9.+-]+$/.test(t)?t:'image/jpeg'};base64,`+b64(u.subarray(z+1))}
+const okImg=(v,n)=>typeof v==='string'&&v.indexOf('data:image/')===0&&v.length<n;
+async function phLoad(gap){if(phBusy||store.mode!=='family'||!FB_URL||!store.code||Date.now()-phAt<gap)return;phBusy=true;phAt=Date.now();
+ try{const r=await fetch(dbUrl('photos/'+store.code,await authTok(),'shallow=true'));if(!r.ok)return;const ids=await r.json()||{};if(typeof ids!=='object')return;let ch=0;
+  for(const id in PH)if(!(id in ids)){delete PH[id];phDelL(id);ch=1}
+  for(const id in ids){if(!okId(id)||PH[id])continue;let v=await phGetL(id);
+   if(!v){try{const g=async f=>{const q=await fetch(dbUrl(`photos/${store.code}/${id}/${f}`,await authTok()));return q.ok?q.json():null};
+     const m=await phOpen(id,'m',await g('m')),t=await phOpen(id,'t',await g('t'));
+     if(!m||!okId(str(m.e))||!okId(str(m.by))||!okImg(t,60000))continue;v={e:m.e,by:m.by,at:+m.at||0,t};phPutL(id,v)}catch(e){continue}}
+   PH[id]=v;ch=1}
+  if(ch)phPaint()}catch(e){}finally{phBusy=false}}
+async function phFull(id){const v=PH[id];if(!v)return '';if(v.d)return v.d;if(store.mode!=='family')return v.t;
+ try{const q=await fetch(dbUrl(`photos/${store.code}/${id}/d`,await authTok()));const d=q.ok?await phOpen(id,'d',await q.json()):'';if(okImg(d,600000)){v.d=d;phPutL(id,v);return d}}catch(e){}return v.t}
+function phPaint(){if(!S)return;render(true);const el=document.getElementById('evph');if(el)el.innerHTML=evPhotos(el.dataset.k)}
+// Telefonda küçültme: büyük kenar 1280 px; çok büyük çıkarsa kalite düşer
+async function phShrink(f,max,q0,lim){const b=await createImageBitmap(f);let w=b.width,h=b.height,k=Math.min(1,max/Math.max(w,h)),q=q0,out='';
+ for(let i=0;i<5;i++){const c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(b,0,0,c.width,c.height);
+  out=c.toDataURL('image/jpeg',q);if(out.length<lim)break;if(q>.55)q-=.1;else k*=.8}
+ b.close&&b.close();return out}
+async function phAdd(k,files){const v=evOfK(k);if(!v||!files.length)return;
+ if(store.mode==='family'&&kRec()&&!(kOn()&&KS.ok===true)){toast('Kilit açılmadan fotoğraf eklenemez.');return}
+ const room=30-phOf(k).length;if(room<=0){toast('Bir etkinliğe en çok 30 fotoğraf eklenebilir.');return}
+ toast('Fotoğraf yükleniyor…');let n=0;
+ for(const f of [...files].slice(0,room)){try{const id=uid(),m={e:k,by:meId(),at:Date.now()},t=await phShrink(f,320,.72,40000),d=await phShrink(f,1280,.8,270000);
+   if(store.mode==='family'){const body={m:await phSeal(id,'m',m),t:await phSeal(id,'t',t),d:await phSeal(id,'d',d)};
+    if(!kOn())body.m=JSON.stringify(m);
+    const r=await fetch(dbUrl(`photos/${store.code}/${id}`,await authTok()),{method:'PUT',body:JSON.stringify(body)});if(!r.ok)throw new Error('HTTP '+r.status)}
+   PH[id]={...m,t,d};phPutL(id,PH[id]);n++}catch(e){toast(navigator.onLine?'Fotoğraf eklenemedi.':'İnternet yokken fotoğraf eklenemez.');break}}
+ if(n){log(`“${v.e.title}” etkinliğine ${n>1?n+' fotoğraf':'fotoğraf'} ekledi`);phPaint();toast(n>1?n+' fotoğraf eklendi':'Fotoğraf eklendi')}}
+async function phDel(id){const v=PH[id];if(!v)return;
+ if(store.mode==='family'){try{const r=await fetch(dbUrl(`photos/${store.code}/${id}`,await authTok()),{method:'DELETE'});if(!r.ok)throw 0}catch(e){toast('Fotoğraf silinemedi.');return false}}
+ delete PH[id];phDelL(id);return true}
+const phDropEv=eid=>{for(const id in PH)if(evOwn(PH[id].e,eid))phDel(id)};
+function evTh(x,day){const k=evKey(x,day),p=phOf(k);
+ if(p.length)return `<span class="evth" aria-label="${p.length} fotoğraf"><img src="${p[0].t}" alt="">${p.length>1?`<em>${p.length}</em>`:''}</span>`;
+ const c=cmOf({id:k}).length;return c?`<span class="evc" aria-label="${c} yorum">${I('chat','sm')}${c}</span>`:''}
+const phAddB=k=>`<button class="phadd" data-act="phPick" data-k="${k}" aria-label="Fotoğraf ekle">${I('camera')}<span>Ekle</span></button>`;
+function evPhotos(k){const p=phOf(k);
+ if(!p.length)return `<button class="phempty" data-act="phPick" data-k="${k}">${I('camera')}<span><b>Hatıra fotoğrafı ekle</b><small>Ailedeki herkes görür</small></span></button>`;
+ return `<div class="phcv"><button class="big" data-act="phView" data-id="${p[0].id}" aria-label="Fotoğrafı aç"><img src="${p[0].d||p[0].t}" alt="" data-ph="${p[0].id}">${p.length>1?`<em>${I('camera','sm')}${p.length}</em>`:''}</button>
+  <div class="phs">${p.slice(1,5).map((x,i)=>`<button data-act="phView" data-id="${x.id}" aria-label="Fotoğrafı aç"><img src="${x.t}" alt="">${i===3&&p.length>5?`<b>+${p.length-5}</b>`:''}</button>`).join('')}${phAddB(k)}</div></div>`}
+function evMem(e,day){const k=evKey(e,day),done=evDone(e,day),w={id:k,ev:1};
+ if(done){const p=phOf(k)[0];if(p&&!p.d)phFull(p.id).then(d=>{const i=document.querySelector(`img[data-ph="${p.id}"]`);if(i&&d)i.src=d})}
+ return `<div class="evmem">${done?`<div id="evph" data-k="${k}">${evPhotos(k)}</div>`:''}<div id="cmw" data-id="${k}">${cmList(w)}</div>
+ <form class="cmin" data-form="cmSave" data-id="${k}" autocomplete="off"><input id="cm-in" maxlength="500" placeholder="${done?'Nasıldı? Bir şey yaz…':'Bir şey yaz…'}" aria-label="Yorum" enterkeyhint="send"><button class="go" aria-label="Gönder">${I('arrUp')}</button></form></div>`}
+async function phShow(id){const v=PH[id];if(!v)return;const list=phOf(v.e),i=list.findIndex(x=>x.id===id),me0=meId(),del=v.by===me0||can('member.manage')||M(me0).role!=='child';
+ document.querySelector('.phv')?.remove();const o=document.createElement('div');o.className='phv';o.setAttribute('role','dialog');o.setAttribute('aria-label','Fotoğraf');
+ o.innerHTML=`<img src="${v.d||v.t}" alt=""><div class="cap">${av(v.by,'xs')}<span><b>${esc(first(M(v.by).name))}</b> ekledi · ${ago(v.at)}</span><span class="n">${i+1}/${list.length}</span></div>
+  <button class="x" data-k="x" aria-label="Kapat">${I('x')}</button>${del?`<button class="del" data-k="del" aria-label="Fotoğrafı sil">${I('trash')}</button>`:''}`;
+ o.addEventListener('click',async ev=>{const b=ev.target.closest('button');if(b&&b.dataset.k==='del'){if(!confirm('Bu fotoğraf herkesten silinsin mi?'))return;if(await phDel(id)){o.remove();phPaint();toast('Fotoğraf silindi')}return}
+  if(b&&b.dataset.k==='x'){o.remove();return}const r=o.getBoundingClientRect(),nx=list[i+(ev.clientX>r.width/2?1:-1)];if(nx)phShow(nx.id);else o.remove()});
+ document.body.appendChild(o);const d=await phFull(id),im=o.querySelector('img');if(im&&d)im.src=d}
 // İsteklerde yorum: her isteğin altında (yapılmadan önce de) serbest sohbet. Her yorum ayrı kayıt (wcm/{id} = {w, by, t, at}),
 // böylece iki telefon aynı anda yazınca biri ötekini silmez.
 const cmOf=w=>(S.wcm||[]).filter(c=>c.w===w.id&&c.by&&c.t).sort((a,b)=>a.at-b.at);
@@ -2439,7 +2539,7 @@ function cmList(w){const me0=meId(),c=cmOf(w);
  return `<div class="cmh">${I('chat','sm')}Yorumlar${c.length?`<small>${c.length}</small>`:''}</div><div class="cmb">${c.map(x=>`<div class="b${x.by===me0?' me':''}">${x.by===me0?'':av(x.by,'xs')}<div class="tx">${x.by===me0?'':`<small>${esc(first(M(x.by).name))}</small>`}${esc(x.t)}<time>${ago(x.at)}</time></div>${x.by===me0?`<button class="del" data-act="cmDel" data-id="${x.id}" aria-label="Yorumunu sil">${I('trash','sm')}</button>`:''}</div>`).join('')||'<div class="t">Henüz kimse yazmadı. İlk sen yaz.</div>'}</div>`}
 const cmHTML=w=>`<div id="cmw" data-id="${w.id}">${cmList(w)}</div><form class="cmin" data-form="cmSave" data-id="${w.id}" autocomplete="off"><input id="cm-in" maxlength="500" placeholder="Bir şey yaz…" aria-label="Yorum" enterkeyhint="send"><button class="go" aria-label="Gönder">${I('arrUp')}</button></form>`;
 // Açık pencerede yorumlar başka telefondan gelince ya da yazınca yalnız liste yenilenir, yazı kutusu yerinde kalır
-function cmRefresh(){acilRef();const el=document.getElementById('cmw'),w=el&&S&&(S.wishes.find(x=>x.id===el.dataset.id)||LIB().find(x=>x.id===el.dataset.id));if(w)el.innerHTML=cmList(w)}
+function cmRefresh(){acilRef();const el=document.getElementById('cmw'),w=el&&S&&(S.wishes.find(x=>x.id===el.dataset.id)||LIB().find(x=>x.id===el.dataset.id)||evCm(el.dataset.id));if(w)el.innerHTML=cmList(w)}
 const withChips=()=>famGrid({box:'wd-with',fam:'fWithAll',kind:'fWith',sel:F.with,on:allOf(F.with)});
 const withRefresh=()=>{const e=document.getElementById('wd-with');if(e)e.innerHTML=withChips()};
 function wishDoneForm(w){F={wid:w.id,with:[...(w.want.length?w.want:[meId()])],mood:'😊'};
@@ -2573,7 +2673,7 @@ const ordMe=()=>{const o=famOrd(),m=o.find(x=>x.id===meId());return m?[m,...o.fi
 // Ay listesinde tek satırlık sade satır: saat · nokta ya da onay halkası · başlık · avatar
 function crow(k,x,day,past){const t=T();
  if(k==='e')return `<div class="cr${past?' past':''}${rsvMine(x)?' rsvw':''}" style="--c:${evColor(x)}">${evLen(x)>1&&evIdx(x,day)>1?`<span class="tm mu">${evIdx(x,day)}. gün</span>`:`<span class="tm${x.time?'':' mu'}">${x.time?hm(x.time):'Tüm gün'}</span>`}<span class="mk"><span class="dot"></span></span>
-  <button class="ti" data-act="openEvent" data-id="${x.id}" data-d="${day}"><b>${esc(x.title)}</b>${rsvTag(x)}${x.loc||evLen(x)>1?`<small>${[evLen(x)>1?evSpan(x,day):'',x.loc?esc(x.loc):''].filter(Boolean).join(' · ')}</small>`:''}</button><span class="who">${whoMini(x.members)}</span></div>`;
+  <button class="ti" data-act="openEvent" data-id="${x.id}" data-d="${day}"><b>${esc(x.title)}</b>${rsvTag(x)}${x.loc||evLen(x)>1?`<small>${[evLen(x)>1?evSpan(x,day):'',x.loc?esc(x.loc):''].filter(Boolean).join(' · ')}</small>`:''}</button><span class="who">${evTh(x,day)}${whoMini(x.members)}</span></div>`;
  const late=!x.done&&x.due<t,ok=can('task.complete',x);
  return `<div class="cr" style="--c:${ws(x).length>1?'var(--accent)':M(ws(x)[0]).color}"><span class="tm${late?' late':x.time?'':' mu'}">${late?rel(x.due):x.time?hm(x.time):''}</span><span class="mk"><button class="ck" data-act="toggleTask" data-id="${x.id}" aria-pressed="${myTick(x)}" aria-label="${esc(x.title)}: ${myTick(x)?'tamamlanmadı olarak işaretle':'tamamlandı olarak işaretle'}"${lock(ok,'Bu görev başkasına atanmış. Yalnızca kendi görevlerini işaretleyebilirsin.')}>${I('check','sm')}</button></span>
   <button class="ti" data-act="openTask" data-id="${x.id}"><b>${esc(x.title)}</b>${allRule(x)?`<small>${(x.dn||[]).length}/${ws(x).length} yaptı</small>`:''}</button><span class="who">${whoMini(ws(x))}</span></div>`}
@@ -2987,7 +3087,7 @@ const A={
  stripToday:()=>A.goDay({d:T()}),
  calFilter:d=>{if(!d.id)UI.filter=[];else UI.filter=UI.filter.includes(d.id)?UI.filter.filter(x=>x!==d.id):[...UI.filter,d.id];render(true)},
  newEvent:d=>eventForm(null,d&&d.d||undefined),
- openEvent:d=>{const e=S.events.find(x=>x.id===d.id);if(!e)return;const ok=can('event.edit',e);
+ openEvent:d=>{const e=S.events.find(x=>x.id===d.id);if(!e)return;const ok=can('event.edit',e);phLoad(15e3);
   sheet(esc(e.title),`<div class="dl">
    <div>${I('clock')}<span>${evLen(e)>1?(()=>{const s=evStart(e,d.d||e.date)||e.date,en=add(s,evLen(e)-1);return `<b>${shortD(s)} – ${shortD(en)}</b><br>${evLen(e)} gün${e.time?' · '+hm(e.time)+'’de başlıyor':''}${e.repeat!=='none'?` · ${REP[e.repeat]}`:''}`})():`<b>${dFull(d.d||e.date)}</b><br>${e.time?hm(e.time):'Tüm gün'}${e.repeat!=='none'?` · ${REP[e.repeat]}`:''}`}</span></div>
    ${e.loc?`<div>${I('pin')}<span>${esc(e.loc)}</span></div>`:''}
@@ -2995,10 +3095,10 @@ const A={
    :`<div>${I('users')}<span style="display:flex;flex-wrap:wrap;gap:8px">${isAll(e)?`<span class="who">${famBadge()}<b>Bütün aile</b></span>`:e.members.map(x=>`<span class="who">${av(x,'xs')}${esc(M(x).name)}</span>`).join('')}</span></div>`}
    <div>${I('bell')}<span>${e.rem==='none'?'Hatırlatma yok':REM[e.rem]+' hatırlatılacak'}</span></div>
    ${e.desc?`<div>${I('edit')}<span>${esc(e.desc)}</span></div>`:''}
-   <div style="color:var(--muted);font-size:.875rem">${av(e.by,'xs')}<span>${esc(M(e.by).name)} ekledi${e.at?' · '+ago(e.at):''}</span></div></div>`,
+   <div style="color:var(--muted);font-size:.875rem">${av(e.by,'xs')}<span>${esc(M(e.by).name)} ekledi${e.at?' · '+ago(e.at):''}</span></div></div>${evMem(e,d.d||e.date)}`,
    shTools(['editEvent',e.id,'edit','Düzenle',ok,PARENT],['delEvent',e.id,'trash','Sil',ok,PARENT,1]))},
  editEvent:d=>eventForm(S.events.find(x=>x.id===d.id)),
- delEvent:d=>{const u=snap(),e=S.events.find(x=>x.id===d.id);if(!e){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.events=S.events.filter(x=>x.id!==d.id);S.rsv=(S.rsv||[]).filter(r=>r.e!==d.id);log(`“${e.title}” etkinliğini sildi`);close();render(true);toast('Etkinlik silindi',u)},
+ delEvent:d=>{const u=snap(),e=S.events.find(x=>x.id===d.id);if(!e){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.events=S.events.filter(x=>x.id!==d.id);S.rsv=(S.rsv||[]).filter(r=>r.e!==d.id);S.wcm=(S.wcm||[]).filter(c=>!evOwn(c.w,d.id));phDropEv(d.id);log(`“${e.title}” etkinliğini sildi`);close();render(true);toast('Etkinlik silindi',u)},
  fMem:d=>{F.members=F.members.includes(d.id)?F.members.filter(x=>x!==d.id):[...F.members,d.id];memRefresh()},
  fAll:()=>{const all=allOf(F.members);F.members=all?[meId()]:S.members.map(m=>m.id);F.pick=false;all?flyOut('ev-mem'):flyIn('ev-mem')},
  fPick:(d,el)=>{F.pick=true;flyOut(el.dataset.box)},
@@ -3151,6 +3251,8 @@ const A={
  wxPick:d=>{const c=IL[+d.i];if(!c)return;store.prefs.wx={la:c[1],lo:c[2],n:c[0]};delete store.wxc;wxTry=0;save();closeNow();render(true);toast(`Hava durumu: ${c[0]}`)},
  wxOff:()=>{store.prefs.wx={off:true};delete store.wxc;save();closeNow();render(true);const el=document.getElementById('setsheet');if(el)el.innerHTML=famSettingsHTML();toast('Hava durumu gizlendi')},
  doneWish:d=>wishDoneForm(S.wishes.find(x=>x.id===d.id)),
+ phPick:d=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.multiple=true;i.onchange=()=>phAdd(d.k,i.files);i.click()},
+ phView:d=>phShow(d.id),
  cmDel:d=>{const u=snap();S.wcm=(S.wcm||[]).filter(c=>c.id!==d.id);render(true);toast('Yorum silindi',u)},
  undoneWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);if(!w)return;unlog(`“${w.title}” için “yaptık” dedi ${w.mood}`);w.done=false;w.doneAt=null;w.doneWith=[];w.mood='';close();render(true);toast('Geri alındı',u)},
  delWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);if(!w){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.wishes=S.wishes.filter(x=>x.id!==d.id);S.wcm=(S.wcm||[]).filter(c=>c.w!==d.id);log(`“${w.title}” isteğini sildi`);close();render(true);toast('İstek silindi',u)},
@@ -3276,7 +3378,7 @@ const FORMS={
   Object.assign(b,{t,a:g('le-a').value.trim().slice(0,120),p:Math.min(20000,p),y:/^\d{4}$/.test(y)?y:''});render(true);A.libOpen({id:b.id});toast('Kaydedildi',u)},
  katEdit:()=>{const k=F.kat,n=document.getElementById('ke-n').value.trim().slice(0,40);if(!LKAT[k])return;const u=snap();S.bkat=(S.bkat||[]).filter(x=>x.id!==k);
   if(n&&n!==LKAT[k][0])S.bkat.push({id:k,n,at:Date.now()});close();render(true);toast('Kategori adı kaydedildi',u)},
- cmSave:()=>{const f=document.querySelector('[data-form="cmSave"]'),i=document.getElementById('cm-in'),t=i.value.trim().slice(0,500),w=f&&(S.wishes.find(x=>x.id===f.dataset.id)||LIB().find(x=>x.id===f.dataset.id));if(!t||!w)return;
+ cmSave:()=>{const f=document.querySelector('[data-form="cmSave"]'),i=document.getElementById('cm-in'),t=i.value.trim().slice(0,500),w=f&&(S.wishes.find(x=>x.id===f.dataset.id)||LIB().find(x=>x.id===f.dataset.id)||evCm(f.dataset.id));if(!t||!w)return;
   S.wcm=S.wcm||[];S.wcm.push({id:uid(),w:w.id,by:meId(),t,at:Date.now()});i.value='';render(true);const b=document.querySelector('#cmw .cmb');b&&b.lastElementChild&&b.lastElementChild.scrollIntoView({block:'nearest'})},
  wishDone:()=>{const w=S.wishes.find(x=>x.id===F.wid);if(!w)return;const u=snap();const dt=document.getElementById('wd-date').value||T();
   Object.assign(w,{done:true,doneAt:parse(dt).getTime()+12*3600e3,doneWith:F.with.length?F.with:[meId()],mood:F.mood});{const t=document.getElementById('wd-cm').value.trim().slice(0,500);if(t){S.wcm=S.wcm||[];S.wcm.push({id:uid(),w:w.id,by:meId(),t,at:Date.now()})}}log(`“${w.title}” için “yaptık” dedi ${F.mood}`);close();render(true);toast(`${w.title} · Yaptıklarımız'a eklendi`,u)},
@@ -3489,12 +3591,13 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-10-28',items:[['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır'],['book','Ev kütüphanesi','Aile sayfasında evdeki kitaplarınız: barkodu okut ya da adıyla ara, kapak ve yazar kendiliğinden gelir. Kitabı düzenleyebilir, kategori başlığına dokunup adını değiştirebilirsin. Kimin okuduğunu işaretler, kitaplara yorum yazarsınız'],['cal','Plana katılım','Bir isteği plana dökünce eklediğin yetişkinlere “Katılıyor musun?” diye sorulur. Başka gün de önerebilirler, sen de planı o güne alırsın'],['cart','Tahmini fiyat','Alınacak eklerken ⋯ içinde tahmini fiyat yazabilirsin. Listenin altında bekleyenlerin toplam tutarı görünür'],['cal','Birkaç günlük etkinlik','Etkinlik eklerken “Birkaç gün sürüyor”a dokun, bitiş gününü seç. Ay görünümünde o günler ve tatiller tek şerit olur']]};
+const NEWS={v:'2026-11-01',items:[['camera','Etkinlik hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
  S.events.forEach(e=>{if(e.members.includes(me)&&e.by&&e.by!==me&&idAt(e.id)>since&&e.date>=T())out.push([e.by,`${nm(e.by)} seni bir etkinliğe ekledi`,`${esc(e.title)} · ${rel(e.date)}${e.time?' '+hm(e.time):''}`,idAt(e.id)])});
  (S.wcm||[]).forEach(c=>{const w=c.by!==me&&c.at>since&&S.wishes.find(x=>x.id===c.w);if(w)out.push([c.by,`${nm(c.by)} “${esc(w.title)}” için yorum yazdı`,`“${esc(c.t)}”`,c.at])});
+ (S.wcm||[]).forEach(c=>{const v=c.by!==me&&c.at>since&&evOfK(c.w);if(v&&evMine(v.e))out.push([c.by,`${nm(c.by)} “${esc(v.e.title)}” etkinliğine yazdı`,`“${esc(c.t)}”`,c.at])});
  (S.wcm||[]).forEach(c=>{const b=c.by!==me&&c.at>since&&LIB().find(x=>x.id===c.w);if(b)out.push([c.by,`${nm(c.by)} “${esc(b.t)}” kitabına yazdı`,`“${esc(c.t)}”`,c.at])});
  (S.msgs||[]).forEach(m=>{if(m.id!==me&&m.t&&m.at>since&&S.members.some(x=>x.id===m.id))out.push([m.id,`${nm(m.id)} panoya yazdı`,`“${esc(m.t)}”`,m.at])});
  return out.sort((a,b)=>b[3]-a[3])}
@@ -3769,7 +3872,7 @@ let rafS=0;document.getElementById('screen').addEventListener('scroll',()=>{if(r
 UI.tf=S&&isChild()?'mine':'all';
 render();
 if(store.mode==='family'&&kRec())keyState().then(()=>{if(needKey())render()});
-if(store.mode==='family'){ensureUid().then(()=>{connect();flush();loadAv()})}
+if(store.mode==='family'){ensureUid().then(()=>{connect();flush();loadAv();phLoad(0)})}
 checkReminders();
 setTimeout(popCheck,2500);
 if(shared){if(S){UI.tab='lists';UI.lmode='wish';render(true);wishForm(null,{type:'mekan',title:shared.n,place:shared})}else toast('Önce aileye katıl, sonra mekanı yeniden paylaş.')}
