@@ -1410,7 +1410,7 @@ async function keyCheck(fk,k,code){k=k||kRec();code=code||store.code;if(!k||!okF
  try{const v=await decJ(await fkey(fk),code,'k/chk',k.chk);return !!v&&v.ok===1}catch(e){return false}}
 // Bu telefonun anahtarı ailenin kilidine uyuyor mu (true / false; kilit yoksa null)
 function keyState(){const k=kRec();if(!k){KS.ok=null;KS.src='';return Promise.resolve(null)}
- const src=(store.fk||'')+'|'+k.chk;if(KS.src!==src){KS.src=src;KS.ok=null;KS.p=keyCheck(store.fk,k).then(v=>{if(KS.src===src)KS.ok=v;return v})}return KS.p}
+ const src=(store.fk||'')+'|'+k.chk;if(KS.src!==src){KS.src=src;KS.ok=null;KS.p=keyCheck(store.fk,k).then(v=>{if(KS.src===src){KS.ok=v;if(v)phAt=0}return v})}return KS.p}
 // Anahtarsız (ya da anahtarı uymayan) telefon: aile kilitli ekranı görür
 const needKey=()=>store.mode==='family'&&!!kRec()&&(!okFk(store.fk)||KS.ok===false);
 const rv=(p,v)=>{if(!isEnc(v))return v;const d=store.D&&store.D[p];return d&&d.i===ivOf(v)?d.v:null};
@@ -2482,7 +2482,7 @@ async function phOpen(id,f,v){if(!isEnc(v))return f==='m'&&typeof v==='string'?J
  if(f==='m')return decJ(key,store.code,`ph/${id}/m`,v);const u=await decB(key,store.code,`ph/${id}/${f}`,v),z=u.indexOf(0),t=TD.decode(u.subarray(0,z));
  return `data:${/^image\/[a-z0-9.+-]+$/.test(t)?t:'image/jpeg'};base64,`+b64(u.subarray(z+1))}
 const okImg=(v,n)=>typeof v==='string'&&v.indexOf('data:image/')===0&&v.length<n;
-async function phLoad(gap){if(phBusy||store.mode!=='family'||!FB_URL||!store.code||Date.now()-phAt<gap)return;phBusy=true;phAt=Date.now();
+async function phLoad(gap){if(phBusy||store.mode!=='family'||!FB_URL||!store.code||Date.now()-phAt<gap||kRec()&&KS.ok!==true)return;phBusy=true;phAt=Date.now();
  try{const r=await fetch(dbUrl('photos/'+store.code,await authTok(),'shallow=true'));if(!r.ok)return;const ids=await r.json()||{};if(typeof ids!=='object')return;let ch=0;
   for(const id in PH)if(!(id in ids)){delete PH[id];phDelL(id);ch=1}
   for(const id in ids){if(!okId(id)||PH[id])continue;let v=await phGetL(id);
@@ -3700,7 +3700,7 @@ const ydBtn=()=>UI.yd?`<button class="link" style="justify-content:center;width:
 /* Kilitleme ilerlemesi */
 const LKG=[['Etkinlikler',['events','rsv']],['Görevler',['tasks']],['Listeler ve alınacaklar',['lists','items','freq']],['İstekler ve yorumlar',['wishes','wcm']],['Kütüphane',['books','bkat']],['Aile, mesajlar ve geçmiş',['members','msgs','activity','meta','ann']]];
 const LK={g:[]};
-function lkProg(undo){LK.g=[{n:undo?'Kilit kaldırma başladı':'Yedek kaydedildi',a:1,b:1,s:2},...LKG.map(([n])=>({n,a:0,b:0,s:0})),{n:'Fotoğraflar',a:0,b:0,s:0}];
+function lkProg(undo){LK.g=[{n:undo?'Kilit kaldırma başladı':'Yedek kaydedildi',a:1,b:1,s:2},...LKG.map(([n])=>({n,a:0,b:0,s:0})),{n:'Aile fotoğrafları',a:0,b:0,s:0},{n:'Etkinlik fotoğrafları',a:0,b:0,s:0}];
  sheet(undo?'Kilit kaldırılıyor':'Kilitleniyor',`<p>${undo?'Her kayıt açılıp yeniden yazılıyor.':'Her kayıt kilitlenip geri okunuyor ve aslıyla karşılaştırılıyor.'}</p><div class="group" id="lkpg">${lkPgHTML()}</div>${lkNote('Uygulama kapanırsa ya da internet giderse kaldığı yerden devam eder. Hiçbir kayıt kaybolmaz.')}`)}
 const lkPgHTML=()=>LK.g.map(g=>`<div class="pg"><span class="pgt">${g.s===2?I('check','sm lkok'):g.s===1?'<i class="lkspn"></i>':'<i class="lkwt"></i>'}<b>${g.n}</b>${g.b>1?`<small>${Math.min(g.a,g.b)} / ${g.b}</small>`:''}</span>${g.s===1&&g.b>1?`<span class="pbar"><i style="width:${Math.round(Math.min(g.a,g.b)/g.b*100)}%"></i></span>`:''}</div>`).join('');
 const lkSet=(i,o)=>{Object.assign(LK.g[i],o);const el=document.getElementById('lkpg');if(el)el.innerHTML=lkPgHTML()};
@@ -3729,7 +3729,7 @@ async function lkRecords(code,dir){const key=await fkey(),sent={},gi={};LKG.forE
    await fbSend(code,'PATCH',patch);
    for(const [p] of b){const g=grp(p);lkSet(g,{a:LK.g[g].a+1})}}}
  throw new Error('bitmedi')}
-async function lkAvatars(code,dir){const key=await fkey(),sent={},I7=LK.g.length-1;
+async function lkAvatars(code,dir){const key=await fkey(),sent={},I7=LK.g.length-2;
  for(let pass=0;pass<5;pass++){const r=await fetch(dbUrl('avatars/'+code,await authTok()));if(!r.ok)throw new Error('HTTP '+r.status);const all=await r.json()||{};
   for(const id in sent){const o=all[id],x0=sent[id];delete sent[id];
    if(dir==='enc'&&o&&isEnc(o.d)){let ok=false;try{const x=await avOpen(key,code,id,o.d);ok=o.d!==x0.w||x.d===x0.v.d}catch(e){}
@@ -3742,6 +3742,29 @@ async function lkAvatars(code,dir){const key=await fkey(),sent={},I7=LK.g.length
    const q=await fetch(dbUrl('avatars/'+code+'/'+id,await authTok()),{method:'PUT',body:JSON.stringify(w)});if(!q.ok)throw new Error('HTTP '+q.status);
    lkSet(I7,{a:LK.g[I7].a+1})}}
  throw new Error('fotoğraflar bitmedi')}
+/* Etkinlik fotoğrafları (photos/{kod}/{id} = {m,t,d}): her biri tek tek okunur, kilitlenir/açılır, yazılır ve geri okunup
+   aslıyla karşılaştırılır (hepsini birden indirmek telefonu yorar). Kilitlerken zamana dayalı eski adlar rastgele adlara taşınır
+   (ad kilitlenmez, ne zaman eklendiğini ele verir): yeni adla yaz, doğrula, eskiyi sil. Uyuşmazsa asıl hâli geri yazılır ve iş durur. */
+async function lkPhotos(code,dir){const key=await fkey(),I8=LK.g.length-1,u=async id=>dbUrl('photos/'+code+'/'+id,await authTok());
+ const get=async id=>{const q=await fetch(await u(id));if(!q.ok)throw new Error('HTTP '+q.status);return q.json()};
+ const put=async(id,v)=>{const q=await fetch(await u(id),{method:'PUT',body:JSON.stringify(v)});if(!q.ok)throw new Error('HTTP '+q.status)};
+ const sealI=async(id,f,v)=>{const m=/^data:(image\/[a-z0-9.+-]+);base64,/.exec(str(v));if(!m)throw new Error('görsel değil');
+  const h=TE.encode(m[1]),b=ub64u(v.slice(m[0].length)),x=new Uint8Array(h.length+1+b.length);x.set(h);x.set(b,h.length+1);return encB(key,code,`ph/${id}/${f}`,x)};
+ const openI=async(id,f,v)=>{const x=await decB(key,code,`ph/${id}/${f}`,v),z=x.indexOf(0);if(z<0)throw new Error('bozuk');const t=TD.decode(x.subarray(0,z));
+  return `data:${/^image\/[a-z0-9.+-]+$/.test(t)?t:'image/jpeg'};base64,`+b64(x.subarray(z+1))};
+ const plain=async(id,o)=>({m:isEnc(o.m)?JSON.stringify(await decJ(key,code,`ph/${id}/m`,o.m)):o.m,t:isEnc(o.t)?await openI(id,'t',o.t):o.t,d:isEnc(o.d)?await openI(id,'d',o.d):o.d});
+ const r=await fetch(dbUrl('photos/'+code,await authTok(),'shallow=true'));if(!r.ok)throw new Error('HTTP '+r.status);
+ const ids=Object.keys(await r.json()||{}).filter(okId);let done=0;lkSet(I8,{a:0,b:ids.length,s:ids.length?1:2});
+ for(const id of ids){const o=await get(id);
+  if(o&&typeof o==='object'&&typeof o.m==='string'&&typeof o.t==='string'&&typeof o.d==='string'){const enc=isEnc(o.m)&&isEnc(o.t)&&isEnc(o.d),clear=!isEnc(o.m)&&!isEnc(o.t)&&!isEnc(o.d);
+   if(dir==='enc'&&!(enc&&avRand(id))){const p=await plain(id,o),nid=avRand(id)?id:newAvId();
+    const w={m:await encJ(key,code,`ph/${nid}/m`,JSON.parse(p.m)),t:await sealI(nid,'t',p.t),d:await sealI(nid,'d',p.d)};await put(nid,w);
+    const b=await get(nid);let ok=false;try{const x=await plain(nid,b);ok=same(JSON.parse(x.m),JSON.parse(p.m))&&x.t===p.t&&x.d===p.d}catch(e){}
+    if(!ok){if(nid===id)await put(id,o).catch(()=>{});else await put(nid,null).catch(()=>{});throw new Error('fotoğraf doğrulanamadı')}
+    if(nid!==id){await put(id,null);if(PH[id]){PH[nid]=PH[id];delete PH[id];phDelL(id);phPutL(nid,PH[nid])}}}
+   else if(dir==='dec'&&!clear){const p=await plain(id,o);await put(id,p)}}
+  lkSet(I8,{a:++done})}
+ lkSet(I8,{s:2})}
 /* Aile fotoğraflarının adları (ör. "ali-1") kilitlenmez, kişinin adını ele verir: kilitlemeden önce rastgele adlara taşınır.
    Sıra: yeni adla kopyala → üyeleri yeni adlara çevir → eskileri sil. Kilit kaydı (k) yazılmadan önce yapılır, çünkü kilitli ailede
    kurallar üyelere açık yazıyı kabul etmez. Yarıda kalırsa en kötü ihtimalle fazladan bir kopya kalır. */
@@ -3757,7 +3780,7 @@ async function lkReid(code){const r=await fetch(dbUrl('avatars/'+code,await auth
  if(Object.keys(patch).length)await fbSend(code,'PATCH',patch);
  for(const id in map)await put(id,null);
  for(const id in map)if(store.av&&store.av[id]){store.av[map[id]]=store.av[id];store.avi[map[id]]=store.avi[id];delete store.av[id];delete store.avi[id]}save()}
-async function lkMigrate(code){await lkRecords(code,'enc');await lkAvatars(code,'enc');
+async function lkMigrate(code){await lkRecords(code,'enc');await lkAvatars(code,'enc');await lkPhotos(code,'enc');
  await fbSend(code,'PATCH',{st:'on',at:Date.now()},'/k');if(store.code===code&&store.R)store.R=setAt(store.R,'k/st','on');lkDone()}
 function lkDone(){render(true);sheet('Ailen kilitlendi',`<div class="lkbig">${I('lock')}</div><p>Ailenin verisi artık sadece ailenin telefonlarında açılıyor.</p><p>Şimdi diğer telefonlara anahtarı ver. Anahtarı almayan telefon aileyi açamaz.</p><button class="btn primary block" data-act="keyGive">${I('qr','sm')}Anahtarı başka telefona ver</button>${ydBtn()}`);flush()}
 function lkFail(e){try{console.warn('kilit',e)}catch(x){}render(true);const k=kRec(),off=!navigator.onLine;
@@ -3774,7 +3797,7 @@ async function lockRun(){const code=store.code,{fk,rc}=F.lk;
  catch(e){lkFail(e)}}
 async function lkUndoRun(){const code=store.code;lkProg(true);
  try{if(kRec().st!=='undo'){await fbSend(code,'PATCH',{st:'undo',at:Date.now()},'/k');store.R=setAt(store.R,'k/st','undo')}
-  await lkRecords(code,'dec');await lkAvatars(code,'dec');await fbSend(code,'PUT',null,'/k');
+  await lkRecords(code,'dec');await lkAvatars(code,'dec');await lkPhotos(code,'dec');await fbSend(code,'PUT',null,'/k');
   if(store.code===code&&store.R)delete store.R.k;KS.ok=null;KS.src='';close();render(true);toast('Kilit kaldırıldı');flush()}
  catch(e){lkFail(e)}}
 
