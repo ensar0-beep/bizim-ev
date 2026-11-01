@@ -595,6 +595,14 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .apc .group{box-shadow:none;border:1px solid var(--line);max-height:var(--ah,46vh);overflow:auto}
 #acil-l .acil{display:none}
 @media (prefers-reduced-motion:reduce){.apo,.apc,.apo.on .apc{transition:none}}
+/* Avatar fotoğrafı */
+.afw{display:flex;flex-direction:column;align-items:stretch}
+.afv{position:relative;margin:6px auto 16px;overflow:hidden;border-radius:22px;background:var(--sunk);touch-action:none;cursor:grab}
+.afc{position:absolute;left:50%;top:50%;max-width:none;transform-origin:center;pointer-events:none;user-select:none;-webkit-user-drag:none}
+.afm{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 999px rgba(20,16,10,.55);outline:2px solid rgba(255,255,255,.85);outline-offset:-2px;pointer-events:none;z-index:2}
+.afbig{display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 auto 14px;background:none;border:0;color:var(--fg);font-weight:600;font-size:.86rem}
+.afba{position:relative;display:block}.afba .av{width:5.4rem;height:5.4rem;font-size:2rem}.afba i{position:absolute;right:-2px;bottom:-2px;width:30px;height:30px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;border:2px solid var(--surface)}
+.afr{width:100%;margin:0 0 6px;accent-color:var(--accent)}
 .lr .dd{flex:none;font-size:.8rem;color:var(--muted);white-space:nowrap}
 .dpg{margin-top:8px}
 .dph{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 14px;text-align:left;position:relative;background:var(--surface)}
@@ -1483,6 +1491,55 @@ async function loadAv(){
    store.av[id]=o.d;store.avi[id]={n:str(o.n).slice(0,40)||'Aile',t:str(o.t).slice(0,40)||'Avatar'};ch=true}
   if(ch){save();if(S)render(true)}}
  catch(e){}finally{avLoading=false;if(avAgain){avAgain=false;loadAv()}}}
+// ---------- Avatar fotoğrafı: telefondan çek ya da seç, daire içinde kırp, aileye kaydet ----------
+let AF=null;
+const afClamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function afCanvas(im){const W=im.naturalWidth||im.width,H=im.naturalHeight||im.height,k=Math.min(1,1024/Math.max(W,H)),c=document.createElement('canvas');
+ c.width=Math.max(1,Math.round(W*k));c.height=Math.max(1,Math.round(H*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);return c}
+function afFile(f){return new Promise((res,rej)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('okunamadı'))};im.src=u})}
+function afPick(mid){const m=M(mid);if(!m||!(can('member.manage')||m.id===meId()))return;
+ let i=document.getElementById('afin');
+ if(!i){i=document.createElement('input');i.type='file';i.accept='image/*';i.id='afin';i.hidden=true;document.body.appendChild(i)}
+ i.value='';i.onchange=async()=>{const f=i.files&&i.files[0];if(!f)return;
+  if(f.size>30e6){toast('Fotoğraf çok büyük. Daha küçük bir tane seç.');return}
+  try{afStart(mid,afCanvas(await afFile(f)))}catch(e){toast('Fotoğraf açılamadı. Başka bir tane dene.')}};
+ i.click()}
+// Yüz bulunursa ona ortalar (tarayıcı destekliyorsa), yoksa dikey fotoğrafta üst kısma
+async function afAuto(){const p=AF,c=p.cv,N=p.N;let cx=c.width/2,cy=c.height/2,side=Math.min(c.width,c.height);
+ try{if('FaceDetector' in window){const f=(await new FaceDetector({fastMode:true,maxDetectedFaces:1}).detect(c))[0];
+   if(f){const b=f.boundingBox;cx=b.x+b.width/2;cy=b.y+b.height/2;side=afClamp(b.width*2.6,Math.min(c.width,c.height)*.3,Math.min(c.width,c.height))}}}catch(e){}
+ if(AF!==p||p.moved)return;if(side===Math.min(c.width,c.height)&&c.height>c.width)cy=c.height*.4;
+ p.z=N/side;p.x=(c.width/2-cx)*p.z;p.y=(c.height/2-cy)*p.z;afView()}
+function afView(){const p=AF,c=p.cv,mx=Math.max(0,(c.width*p.z-p.N)/2),my=Math.max(0,(c.height*p.z-p.N)/2);
+ p.x=afClamp(p.x,-mx,mx);p.y=afClamp(p.y,-my,my);c.style.transform=`translate(-50%,-50%) translate(${p.x}px,${p.y}px) scale(${p.z})`;
+ const r=document.getElementById('afz');if(r)r.value=p.z}
+function afStart(mid,cv){const N=Math.min(280,innerWidth-80),min=N/Math.min(cv.width,cv.height);
+ AF={mid,cv,N,min,max:min*5,z:min,x:0,y:0,pt:new Map()};cv.className='afc';cv.style.width=cv.width+'px';cv.style.height=cv.height+'px';
+ const m=M(mid);
+ sheet('Fotoğrafı ayarla',`<div class="afw"><div class="afv" id="afv" style="width:${N}px;height:${N}px"><span class="afm"></span></div>
+  <input class="afr" id="afz" type="range" min="${min}" max="${AF.max}" step="any" value="${min}" aria-label="Yakınlaştır">
+  <p class="note" style="justify-content:center;margin:0 0 14px">Sürükleyerek kaydır, iki parmakla yakınlaştır.</p>
+  <button class="btn primary block" data-act="afSave">${m.id===meId()?'Avatarım yap':esc(first(m.name))+' için kullan'}</button>
+  <button class="btn ghost block" style="margin-top:8px" data-act="afAgain" data-id="${mid}">Başka fotoğraf seç</button></div>`);
+ const v=document.getElementById('afv');v.insertBefore(cv,v.firstChild);
+ afView();afAuto();
+ const sl=document.getElementById('afz');sl.oninput=()=>{AF.moved=1;AF.z=+sl.value;afView()};
+ // Tek parmak kaydırır, iki parmak yakınlaştırır; bilgisayarda tekerlek de yakınlaştırır
+ const dist=()=>{const a=[...AF.pt.values()];return Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)};
+ v.onpointerdown=e=>{AF.moved=1;v.setPointerCapture(e.pointerId);AF.pt.set(e.pointerId,{x:e.clientX,y:e.clientY});AF.d0=AF.pt.size===2?dist():0;AF.z0=AF.z};
+ v.onpointermove=e=>{const q=AF.pt.get(e.pointerId);if(!q)return;const dx=e.clientX-q.x,dy=e.clientY-q.y;q.x=e.clientX;q.y=e.clientY;
+  if(AF.pt.size===2&&AF.d0){AF.z=afClamp(AF.z0*dist()/AF.d0,AF.min,AF.max);AF.x+=dx/2;AF.y+=dy/2}else{AF.x+=dx;AF.y+=dy}afView()};
+ const up=e=>{AF.pt.delete(e.pointerId);AF.d0=0;AF.z0=AF.z};v.onpointerup=up;v.onpointercancel=up;
+ v.onwheel=e=>{e.preventDefault();AF.moved=1;AF.z=afClamp(AF.z*(e.deltaY<0?1.08:.92),AF.min,AF.max);afView()}}
+function afOut(){const p=AF,c=p.cv,o=document.createElement('canvas');o.width=o.height=256;const x=o.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,256,256);
+ const sw=p.N/p.z;x.drawImage(c,c.width/2+(-p.N/2-p.x)/p.z,c.height/2+(-p.N/2-p.y)/p.z,sw,sw,0,0,256,256);
+ let d=o.toDataURL('image/webp',.82);if(d.indexOf('data:image/webp')!==0)d=o.toDataURL('image/jpeg',.85);return d}
+async function afStore(mid,d){const m=M(mid),id=newAvId(),n=Object.values(store.avi||{}).filter(x=>x.n===m.name).length,o={n:m.name,t:'Fotoğraf '+(n+1),d,at:Date.now()};
+ if(d.length>190000)throw new Error('büyük');
+ if(store.mode==='family'){const t=await authTok(),code=store.code;let body=o;
+  if(kOn()){if(!await keyCheck(store.fk))throw new Error('anahtar');body=await avSeal(await fkey(),code,id,o)}
+  const r=await fetch(dbUrl('avatars/'+code+'/'+id,t),{method:'PUT',body:JSON.stringify(body)});if(!r.ok)throw new Error('HTTP '+r.status)}
+ store.av=store.av||{};store.avi=store.avi||{};store.av[id]=d;store.avi[id]={n:o.n,t:o.t};save();return id}
 async function ensureUid(){if(!FB_KEY||store.mode!=='family'||!store.me||!store.code)return;
  try{await authTok();if(!(store.R&&store.R.uids&&store.R.uids[myUid()]===store.me))await claimUid(store.code,store.me);
   // Bu telefonun sürümü: yönetici kilitlemeden önce bütün telefonların kilidi tanıyan sürümde olduğuna bakar
@@ -3043,7 +3100,7 @@ const A={
  avPick:d=>{const m=M(d.id);if(!(can('member.manage')||m.id===meId()))return;const self=m.id===meId();
   const b=(k,n)=>`<button type="button" data-act="setAv" data-id="${m.id}" data-v="${k}" aria-pressed="${(m.avatar||'')===k}" aria-label="${n}">${avFace(k,m.name,m.color)}<span>${n}</span></button>`;
   const open=document.getElementById('avp');
-  const body=`<div id="avp" data-id="${m.id}"><p class="note" style="margin:0 0 14px">Seçtiğin avatar ve renk ailedeki herkesin ekranında ${self?'adının':'onun adının'} yanında görünür.</p>
+  const body=`<div id="avp" data-id="${m.id}"><button type="button" class="afbig" data-act="afPick" data-id="${m.id}" aria-label="Fotoğraf ekle"><span class="afba">${av(m.id,'lg')}<i>${I('camera','sm')}</i></span><span>Fotoğraf ekle</span></button><p class="note" style="margin:0 0 14px">Seçtiğin avatar ve renk ailedeki herkesin ekranında ${self?'adının':'onun adının'} yanında görünür.</p>
   <div class="flabel" style="margin:0 0 8px">${self?'Rengin':'Rengi'}</div>
   <div class="swg" role="group" aria-label="Renk">${COLORS.map((c,i)=>`<button type="button" data-act="setColor" data-id="${m.id}" data-v="${c}" style="--c:${c}" aria-pressed="${m.color===c}" aria-label="Renk ${i+1}">${m.color===c?I('check','sm'):''}</button>`).join('')}</div>
   <div class="flabel" style="margin:18px 0 8px">Avatar</div>
@@ -3051,6 +3108,11 @@ const A={
   <div class="avg" role="group" aria-label="Avatar">${AVATARS.map(([k,n])=>b(k,n)).join('')}${b('','Baş harf')}</div>${UI.joinFor===m.id?`<button class="btn primary block" data-act="joinDone" style="margin-top:18px">Devam</button>`:''}</div>`;
   // Seçim yaparken sayfa yeniden açılıp kaymasın: açıksa yalnızca içi yenilenir.
   if(open&&open.dataset.id===m.id)open.outerHTML=body;else sheet(UI.joinFor===m.id?'Avatarını ve rengini seç':self?'Avatarın ve rengin':esc(m.name)+' için avatar',body)},
+ afPick:d=>afPick(d.id),
+ afAgain:d=>{AF=null;afPick(d.id)},
+ afSave:async()=>{if(!AF||AF.busy)return;AF.busy=1;const b=document.querySelector('[data-act="afSave"]');if(b){b.disabled=true;b.textContent='Kaydediliyor…'}
+  try{const id=await afStore(AF.mid,afOut()),mid=AF.mid;AF=null;A.setAv({id:mid,v:OZ+id})}
+  catch(e){if(AF)AF.busy=0;if(b){b.disabled=false;b.textContent='Tekrar dene'}toast(e.message==='anahtar'?'Bu telefonda aile anahtarı yok. Önce anahtarı al.':'Fotoğraf kaydedilemedi. Bağlantını kontrol edip tekrar dene.')}},
  joinDone:()=>{const m=me();close();toast(`Hoş geldin ${first(m.name)}!`)},
  setAv:d=>{const m=S.members.find(x=>x.id===d.id);if(!m||d.v&&!(isOz(d.v)?avSrc(d.v):AVN(d.v)))return;const u=snap();m.avatar=d.v||'';
   log(m.id===meId()?'avatarını değiştirdi':`${m.name} için avatarı değiştirdi`);render(true);A.avPick({id:m.id});refocus('setAv',d.v);toast(d.v?`Avatar: ${AVN(d.v)}`:'Baş harf kullanılıyor',u)},
@@ -3591,7 +3653,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-11-01',items:[['camera','Etkinlik hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
+const NEWS={v:'2026-11-01b',items:[['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
