@@ -1535,8 +1535,10 @@ function afOut(){const p=AF,c=p.cv,o=document.createElement('canvas');o.width=o.
  const sw=p.N/p.z;x.drawImage(c,c.width/2+(-p.N/2-p.x)/p.z,c.height/2+(-p.N/2-p.y)/p.z,sw,sw,0,0,256,256);
  let d=o.toDataURL('image/webp',.82);if(d.indexOf('data:image/webp')!==0)d=o.toDataURL('image/jpeg',.85);return d}
 async function afStore(mid,d){const m=M(mid),id=newAvId(),n=Object.values(store.avi||{}).filter(x=>x.n===m.name).length,o={n:m.name,t:'Fotoğraf '+(n+1),d,at:Date.now()};
- if(d.length>190000)throw new Error('büyük');
+ if(d.length>115000)throw new Error('büyük');
  if(store.mode==='family'){const t=await authTok(),code=store.code;let body=o;
+  // Kilit varken anahtar doğrulanmadıysa ya da kilitleniyor/kaldırılıyorsa yazma (açık fotoğraf kilitli aileye kaçmasın)
+  if(kRec()&&!(kOn()&&KS.ok===true))throw new Error('anahtar');
   if(kOn()){if(!await keyCheck(store.fk))throw new Error('anahtar');body=await avSeal(await fkey(),code,id,o)}
   const r=await fetch(dbUrl('avatars/'+code+'/'+id,t),{method:'PUT',body:JSON.stringify(body)});if(!r.ok)throw new Error('HTTP '+r.status)}
  store.av=store.av||{};store.avi=store.avi||{};store.av[id]=d;store.avi[id]={n:o.n,t:o.t};save();return id}
