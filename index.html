@@ -84,6 +84,16 @@ svg.i.sm{width:1.05rem;height:1.05rem}
 .phv .cap .n{margin-left:auto}
 .phv .x,.phv .del{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));width:42px;height:42px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;display:flex;align-items:center;justify-content:center}
 .phv .x{right:14px}.phv .del{left:14px}
+.albcard .alst{display:flex;flex:none;padding-left:4px}.albcard .alst img{width:36px;height:46px;object-fit:cover;border-radius:8px;border:2px solid var(--surface);margin-left:-14px;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.albcard .alst img:first-child{margin-left:0;transform:rotate(-6deg)}.albcard .alst img:last-child:not(:first-child){transform:rotate(6deg)}
+.albcard .alst i{width:46px;height:46px;border-radius:12px;background:var(--sunk);color:var(--muted);display:flex;align-items:center;justify-content:center;font-style:normal}
+.alm{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:4px -18px 6px;padding:0 18px 4px;scroll-snap-type:x mandatory;scroll-padding:0 18px}.alm::-webkit-scrollbar{display:none}
+.amc{flex:none;width:132px;aspect-ratio:3/4;border-radius:18px;overflow:hidden;position:relative;padding:0;text-align:left;scroll-snap-align:start;background:var(--sunk)}
+.amc .cl{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;width:100%;height:100%;gap:2px}.amc .cl img{width:100%;height:100%;object-fit:cover;display:block;min-height:0}
+.amc .cl.n1 img{grid-area:1/1/3/3}.amc .cl.n2 img{grid-row:1/3}.amc .cl.n3 img:first-child{grid-row:1/3}
+.amc .ov{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 10px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff}.amc .ov b{display:block;font-size:.95rem}.amc .ov small{opacity:.9;font-size:.75rem}
+.amc[aria-pressed="true"]{outline:3px solid var(--accent);outline-offset:-3px}
+.alr img{width:48px;height:48px;border-radius:10px;object-fit:cover;flex:none}
 #tbar{position:absolute;left:0;right:0;top:0;z-index:6;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .18s,transform .22s}
 #tbar.on{opacity:1;transform:none;pointer-events:auto}
 #tbar .in{background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:saturate(1.8) blur(18px);backdrop-filter:saturate(1.8) blur(18px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 10px) 18px 10px}
@@ -2591,6 +2601,16 @@ async function phShow(id){const v=PH[id];if(!v)return;const list=phOf(v.e),i=lis
  o.addEventListener('click',async ev=>{const b=ev.target.closest('button');if(b&&b.dataset.k==='del'){if(!confirm('Bu fotoğraf herkesten silinsin mi?'))return;if(await phDel(id)){o.remove();phPaint();toast('Fotoğraf silindi')}return}
   if(b&&b.dataset.k==='x'){o.remove();return}const r=o.getBoundingClientRect(),nx=list[i+(ev.clientX>r.width/2?1:-1)];if(nx)phShow(nx.id);else o.remove()});
  document.body.appendChild(o);const d=await phFull(id),im=o.querySelector('img');if(im&&d)im.src=d}
+// Hatıralarımız: fotoğraflı geçmiş etkinlikler bir arada (Aile'de kart, UI.tab 'album'). Üstte ay kolajları (dokununca o ay süzülür), altta etkinlik satırları; satır etkinliği açar.
+function albEvs(){const out=[],seen={};for(const id in PH){const v=PH[id];if(!v||!v.t||seen[v.e])continue;seen[v.e]=1;const x=evOfK(v.e);if(!x)continue;out.push({e:x.e,d:x.d,p:phOf(v.e).filter(p=>p.t)})}
+ return out.sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:0)}
+const albMon=m=>MON[+m.slice(5,7)-1]+' '+m.slice(0,4);
+function albCard(){const E=albEvs(),P=E.flatMap(x=>x.p);return `<button class="libcard albcard" data-act="albGo"><span class="alst">${P.length?P.slice(-3).map(p=>`<img src="${p.t}" alt="">`).join(''):`<i>${I('camera')}</i>`}</span><span class="tx"><b>Hatıralarımız</b><small>${E.length?`${E.length} etkinlik · ${P.length} fotoğraf`:'Etkinlik fotoğrafları burada toplanır'}</small></span>${I('chevR')}</button>`}
+function vAlb(){const E=albEvs(),P=E.flatMap(x=>x.p),months=[...new Set(E.map(x=>x.d.slice(0,7)))],sel=months.includes(UI.albM)?UI.albM:null,list=sel?E.filter(x=>x.d.slice(0,7)===sel):E;
+ const head=`<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="family">${I('chevL','sm')}Aile</button><h1>Hatıralarımız</h1><div class="sub">${E.length} etkinlik · ${P.length} fotoğraf</div></div></div>`;
+ if(!E.length)return head+`<div class="group">${emptyBox('Henüz hatıra fotoğrafı yok','Bir etkinlik bitince ayrıntısından fotoğraf ekleyin, burada ay ay toplanır.')}</div>`;
+ return head+`<div class="alm">${months.map(m=>{const ev=E.filter(x=>x.d.slice(0,7)===m),ps=ev.flatMap(x=>x.p);return `<button class="amc" data-act="albM" data-v="${m}" aria-pressed="${sel===m}"><span class="cl n${Math.min(4,ps.length)}">${ps.slice(0,4).map(p=>`<img src="${p.t}" alt="">`).join('')}</span><span class="ov"><b>${albMon(m)}</b><small>${ev.length} etkinlik</small></span></button>`}).join('')}</div>`
+  +`<div class="sec-h"><h2 class="sec">${sel?albMon(sel):'Hepsi'}</h2>${sel?`<button class="link" data-act="albM" data-v="">Hepsini göster</button>`:''}</div><div class="group">${list.map(x=>{const c=cmOf({id:evKey(x.e,x.d)}).length;return `<button class="row alr" data-act="openEvent" data-id="${x.e.id}" data-d="${x.d}"><img src="${x.p[0].t}" alt=""><span class="body"><span class="t">${esc(x.e.title)}</span><span class="m">${dFull(x.d)} · ${x.p.length} fotoğraf${c?` · ${c} yorum`:''}</span></span>${I('chevR','sm')}</button>`}).join('')}</div>`}
 // İsteklerde yorum: her isteğin altında (yapılmadan önce de) serbest sohbet. Her yorum ayrı kayıt (wcm/{id} = {w, by, t, at}),
 // böylece iki telefon aynı anda yazınca biri ötekini silmez.
 const cmOf=w=>(S.wcm||[]).filter(c=>c.w===w.id&&c.by&&c.t).sort((a,b)=>a.at-b.at);
@@ -2684,6 +2704,7 @@ function tbIn(sc){const t=UI.tab,q=x=>sc.querySelector(x);if(!S||!store.mode)ret
   const mk=w?0:S.items.filter(i=>!i.done&&i.cat==='Market').length;
   return [q('.wtabs')||q('.ltabs'),`<div class="tbs"><b style="color:var(${w?'--wish-ink':'--buy-ink'})">${w?'İstekler':'Alınacaklar'}</b><div class="tbl" role="group" aria-label="${w?'Tür':'Listeler'}">${tb.join('')}</div>${mk?`<button class="icon-btn" data-act="shopStart" data-v="Market" aria-label="Marketteyim">${I('cart')}</button>`:''}</div>`]}
  if(t==='family')return [q('.hdr h1'),`<div class="tbs"><b>Aile</b><span class="tbd"></span><button class="icon-btn" data-act="famSettings" aria-label="Ayarlar">${I('gear')}</button></div>`];
+ if(t==='album')return [q('.hdr h1'),`<div class="tbs"><button class="icon-btn" data-act="tab" data-tab="family" aria-label="Geri">${I('chevL')}</button><b>Hatıralarımız</b><span class="tbd">${albEvs().length} etkinlik</span></div>`];
  if(t==='lib')return [q('.hdr h1'),`<div class="tbs"><button class="icon-btn" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}" aria-label="Geri">${I('chevL')}</button><b>Ev kütüphanesi</b><span class="tbd">${LIB().length} kitap</span></div>`];
  return [null,'']}
 function tbPaint(){const bar=document.getElementById('tbar'),sc=document.getElementById('screen');if(!bar||!sc)return;
@@ -2755,7 +2776,7 @@ function vFamily(){const {m,adm}=famCtx(),ord=ordMe();if(!ord.some(x=>x.id===UI.
  <div class="wheel" id="wheel" aria-label="Aile üyeleri, sağa sola kaydır">${[0,1,2].map(c=>ord.map(x=>card(x,c)).join('')).join('')}</div>
  <div class="wdots" aria-hidden="true">${ord.map(x=>`<i style="--c:${x.color}"${x.id===UI.wsel?' class="on"':''}></i>`).join('')}</div>
  <div id="wsel">${wselHTML(UI.wsel)}</div>
- ${libCard()}
+ ${libCard()}${albCard()}
  ${lockRow()}
  ${adm?`<button class="invlink" data-act="famInvite">${I('plus','sm')}Aileye birini ekle</button>`:''}
  <div class="sec-h"><h2 class="sec">Son değişiklikler</h2>${S.activity.length>3?`<button class="link" data-act="famFeed">Tümü ${I('chevR','sm')}</button>`:''}</div>
@@ -2793,7 +2814,7 @@ function render(keepScroll){
  else if(UI.err){html=vError(UI.err);nav.hidden=true}
  else if(needKey()){html=vKeyless();nav.hidden=true}
  else if(!S){html=vLoading();nav.hidden=false}
- else{html=({today:vToday,cal:vCal,lists:vLists,tasks:vTasks,family:vFamily,lib:vLib}[UI.tab]||vToday)();nav.hidden=false}
+ else{html=({today:vToday,cal:vCal,lists:vLists,tasks:vTasks,family:vFamily,lib:vLib,album:vAlb}[UI.tab]||vToday)();nav.hidden=false}
  sc.innerHTML=html;cmRefresh();document.body.classList.toggle('wishc',!!S&&UI.tab==='lists'&&!UI.shop&&UI.lmode==='wish');
  const ss=document.getElementById('setsheet');if(ss&&S)ss.innerHTML=famSettingsHTML();
  sc.scrollTop=keepScroll?y:0;
@@ -3281,6 +3302,8 @@ const A={
  katEdit:d=>{if(!LKAT[d.v])return;F={kat:d.v};
   sheet('Kategori adı',`<form data-form="katEdit" autocomplete="off"><div class="field"><label for="ke-n">Ad</label><input class="inp" id="ke-n" maxlength="40" value="${esc(katN(d.v))}" placeholder="${esc(LKAT[d.v][0])}" autofocus></div>
   <p class="note" style="margin:0 0 14px">${I('info','sm')}<span>Ailede herkes bu adı görür. Boş bırakırsan “${esc(LKAT[d.v][0])}” olur.</span></p><button class="btn primary block">Kaydet</button></form>`)},
+ albGo:()=>{UI.tab='album';UI.albM=null;toastOff();phLoad(15e3);render()},
+ albM:d=>{UI.albM=d.v||null;render(true)},
  libGo:()=>{UI.libFrom=UI.tab;UI.tab='lib';UI.lq='';UI.lf='all';toastOff();render()},
  openBook:d=>{if(UI.tab!=='lib'){UI.libFrom=UI.tab;UI.tab='lib';UI.lq='';UI.lf='all';render()}A.libOpen(d)},
  libF:d=>{UI.lf=d.v===UI.lf?'all':d.v;render(true)},
@@ -3655,7 +3678,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-11-01b',items:[['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
+const NEWS={v:'2026-11-01c',items:[['camera','Hatıralarımız','Aile sayfasında, Ev kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
