@@ -3114,7 +3114,7 @@ const A={
  afAgain:d=>{AF=null;afPick(d.id)},
  afSave:async()=>{if(!AF||AF.busy)return;AF.busy=1;const b=document.querySelector('[data-act="afSave"]');if(b){b.disabled=true;b.textContent='Kaydediliyor…'}
   try{const id=await afStore(AF.mid,afOut()),mid=AF.mid;AF=null;A.setAv({id:mid,v:OZ+id})}
-  catch(e){if(AF)AF.busy=0;if(b){b.disabled=false;b.textContent='Tekrar dene'}toast(e.message==='anahtar'?'Bu telefonda aile anahtarı yok. Önce anahtarı al.':'Fotoğraf kaydedilemedi. Bağlantını kontrol edip tekrar dene.')}},
+  catch(e){if(AF)AF.busy=0;if(b){b.disabled=false;b.textContent='Tekrar dene'}toast(e.message==='anahtar'?'Kilit açılmadan fotoğraf eklenemez.':'Fotoğraf kaydedilemedi. Bağlantını kontrol edip tekrar dene.')}},
  joinDone:()=>{const m=me();close();toast(`Hoş geldin ${first(m.name)}!`)},
  setAv:d=>{const m=S.members.find(x=>x.id===d.id);if(!m||d.v&&!(isOz(d.v)?avSrc(d.v):AVN(d.v)))return;const u=snap();m.avatar=d.v||'';
   log(m.id===meId()?'avatarını değiştirdi':`${m.name} için avatarı değiştirdi`);render(true);A.avPick({id:m.id});refocus('setAv',d.v);toast(d.v?`Avatar: ${AVN(d.v)}`:'Baş harf kullanılıyor',u)},
