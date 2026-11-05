@@ -2958,7 +2958,17 @@ function render(keepScroll){
   nav.innerHTML=tb.slice(0,2).map(btn).join('')+`<button class="navadd" data-act="navAdd" aria-label="Ekle"><span>${I('plus')}</span></button>`+tb.slice(2).map(btn).join('')}
  applyPrefs();commit();renderNet();afterRender();syncBack();
 }
-function applyPrefs(){const r=document.documentElement;const t=store.prefs.theme;if(t==='light'||t==='dark')r.dataset.theme=t;else delete r.dataset.theme;r.classList.toggle('big',!!store.prefs.big)}
+function applyPrefs(){const r=document.documentElement;const t=store.prefs.theme;if(t==='light'||t==='dark')r.dataset.theme=t;else delete r.dataset.theme;r.classList.toggle('big',!!store.prefs.big);stbar()}
+// iPhone'da üstteki saat/ahize şeridi theme-color'dan boyanır: uygulama içi tema, açılan pencerenin karartması ve tam ekran fotoğrafla birlikte değişsin. Android'e dokunmaz (alt sistem çubuğu ayarı bozulmasın).
+let stC='',stP=null;
+const rgbOf=c=>{stP=stP||document.body.appendChild(Object.assign(document.createElement('i'),{hidden:true}));stP.style.color='';stP.style.color=c;const m=getComputedStyle(stP).color.match(/[\d.]+/g)||[0,0,0];return m.map(Number)};
+function stbar(){if(!IOS||!document.body)return;const L=document.getElementById('layer');let [r,g,b]=rgbOf(getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#FAF8F5');
+ if(document.querySelector('.phv'))r=g=b=0;
+ else{const o=L&&L.querySelector('.scrim')||document.querySelector('.popov.on,.apo.on');if(o){const [sr,sg,sb,sa=1]=getComputedStyle(o).backgroundColor.match(/[\d.]+/g).map(Number);r=r+(sr-r)*sa;g=g+(sg-g)*sa;b=b+(sb-b)*sa}}
+ const c='#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');if(c===stC)return;stC=c;
+ document.querySelectorAll('meta[name="theme-color"]').forEach((x,i)=>{if(i)x.remove();else{x.removeAttribute('media');x.content=c}})}
+if(IOS){addEventListener('DOMContentLoaded',()=>{const o=new MutationObserver(stbar);o.observe(document.body,{childList:true});const L=document.getElementById('layer');L&&o.observe(L,{childList:true});document.body.addEventListener('transitionend',stbar);stbar()});
+ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',stbar)}
 
 /* ---------- Sheet & toast ---------- */
 let lastFocus=null;
