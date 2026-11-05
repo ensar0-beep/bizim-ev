@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Bizim Ev">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Bizim Ev</title>
 <meta name="description" content="Ailenin takvimi, görevleri ve listeleri tek yerde.">
 <link rel="manifest" href="./manifest.json">
@@ -1060,6 +1060,10 @@ a.btn{text-decoration:none}
 .okst .i{width:13px;height:13px;fill:currentColor;stroke:none}
 .wcard .okst{position:absolute;top:12px;left:12px;margin:0}
 @media (max-width:360px){.okgo{padding:0 10px;font-size:.82rem}.okt{gap:10px}.okx b{font-size:.95rem}.okbt{display:none}}
+.sheet{max-height:min(92%,calc(100% - env(safe-area-inset-top,0px) - 16px))}
+/* iPhone: şeffaf durum çubuğunda saat beyaz yazılır; açık temada okunsun diye en üstte hafif koyu geçiş */
+.stsh{display:none}html.iosa .stsh{display:block;position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top,0px) + 14px);background:linear-gradient(rgba(20,16,10,.30),rgba(20,16,10,.12) 60%,rgba(20,16,10,0));pointer-events:none;z-index:200}
+:root[data-theme="dark"] .stsh{display:none!important}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .stsh{display:none!important}}
 </style>
 </head>
 <body>
@@ -1070,7 +1074,7 @@ a.btn{text-decoration:none}
     <main class="screen" id="screen" tabindex="-1"></main>
     <div id="tbar"></div>
     <nav class="nav" id="nav" aria-label="Ana menü"></nav>
-    <div id="layer"></div>
+    <div id="layer"></div><div class="stsh" aria-hidden="true"></div>
     <div id="toastwrap" aria-live="polite"></div>
   </div>
 </div>
@@ -2960,7 +2964,7 @@ function render(keepScroll){
 }
 function applyPrefs(){const r=document.documentElement;const t=store.prefs.theme;if(t==='light'||t==='dark')r.dataset.theme=t;else delete r.dataset.theme;r.classList.toggle('big',!!store.prefs.big);stbar()}
 // iPhone'da üstteki saat/ahize şeridi theme-color'dan boyanır: uygulama içi tema, açılan pencerenin karartması ve tam ekran fotoğrafla birlikte değişsin. Android'e dokunmaz (alt sistem çubuğu ayarı bozulmasın).
-let stC='',stP=null;
+let stC='',stP=null;if(IOS&&navigator.standalone)document.documentElement.classList.add('iosa');
 const rgbOf=c=>{stP=stP||document.body.appendChild(Object.assign(document.createElement('i'),{hidden:true}));stP.style.color='';stP.style.color=c;const m=getComputedStyle(stP).color.match(/[\d.]+/g)||[0,0,0];return m.map(Number)};
 function stbar(){if(!IOS||!document.body)return;const L=document.getElementById('layer');let [r,g,b]=rgbOf(getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#FAF8F5');
  if(document.querySelector('.phv'))r=g=b=0;
