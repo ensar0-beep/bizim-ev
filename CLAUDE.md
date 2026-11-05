@@ -12,6 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Data sync goes to the Firebase Realtime Database in `FB_URL` (top of the "Durum" section). With `FB_URL` empty the app only offers the local "örnek aile" demo.
 - For local testing without touching the real database, point `FB_URL` at a small REST+SSE mock (GET/PUT/PATCH on `/families/{code}.json`, and `text/event-stream` GET that sends `put`/`patch` events like Firebase).
 - When shipping a change that the service worker must pick up, bump `CACHE` in `sw.js`.
+- GitHub Pages' "pages build and deployment" run can hang in its Deploy step (2026-11-05: v121 stuck, failed after 10 min, rerun stayed queued). The live site then keeps the previous version; a new push to `main` starts a fresh deploy.
 
 ## Architecture
 
