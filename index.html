@@ -94,6 +94,11 @@ svg.i.sm{width:1.05rem;height:1.05rem}
 .amc .ov{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 10px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff}.amc .ov b{display:block;font-size:.95rem}.amc .ov small{opacity:.9;font-size:.75rem}
 .amc[aria-pressed="true"]{outline:3px solid var(--accent);outline-offset:-3px}
 .alr img{width:48px;height:48px;border-radius:10px;object-fit:cover;flex:none}
+.hmc{position:relative;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:14px;margin:0 0 16px;display:grid;gap:10px}
+.hmc .x{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:999px;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.hmc .hd{display:flex;gap:12px;align-items:center;padding-right:28px}.hmc .hd>span:last-child{display:grid;gap:2px;min-width:0}.hmc .hd small{color:var(--muted);font-size:.82rem}
+.hmc .ic{width:44px;height:44px;border-radius:14px;background:var(--accent-soft);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;flex:none}
+.hmc p{margin:0;color:var(--muted);font-size:.9rem}.hmc .bt{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 #tbar{position:absolute;left:0;right:0;top:0;z-index:6;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .18s,transform .22s}
 #tbar.on{opacity:1;transform:none;pointer-events:auto}
 #tbar .in{background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:saturate(1.8) blur(18px);backdrop-filter:saturate(1.8) blur(18px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 10px) 18px 10px}
@@ -2131,7 +2136,7 @@ function todayHead(){const m=me(),d=new Date(),h=d.getHours(),hj=hnum(d),x=holy(
 function vToday(){
  const child=isChild();
  return `${todayHead()}${onHereHTML()}
- ${rsvCards()}${demoBar()}${inviteCard()}${lockCard()}
+ ${hmCard()}${rsvCards()}${demoBar()}${inviteCard()}${lockCard()}
  ${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>${starsHTML()}`:''}
  <div class="lbl"><span>Sıradaki</span></div>${nextHTML({mine:child,filter:[]})}
  ${homeAgenda()}
@@ -2729,6 +2734,18 @@ function vAlb(){const E=albEvs(),P=E.flatMap(x=>x.p),months=[...new Set(E.map(x=
  if(!E.length)return head+`<div class="group">${emptyBox('Henüz hatıra fotoğrafı yok','Bir etkinlik bitince ayrıntısından fotoğraf ekleyin, burada ay ay toplanır.')}</div>`;
  return head+`<div class="alm">${months.map(m=>{const ev=E.filter(x=>x.d.slice(0,7)===m),ps=ev.flatMap(x=>x.p);return `<button class="amc" data-act="albM" data-v="${m}" aria-pressed="${sel===m}"><span class="cl n${Math.min(4,ps.length)}">${ps.slice(0,4).map(p=>`<img src="${p.t}" alt="">`).join('')}</span><span class="ov"><b>${albMon(m)}</b><small>${ev.length} etkinlik</small></span></button>`}).join('')}</div>`
   +`<div class="sec-h"><h2 class="sec">${sel?albMon(sel):'Hepsi'}</h2>${sel?`<button class="link" data-act="albM" data-v="">Hepsini göster</button>`:''}</div><div class="group">${list.map(x=>{const c=cmOf({id:evKey(x.e,x.d)}).length;return `<button class="row alr" data-act="openEvent" data-id="${x.e.id}" data-d="${x.d}"><img src="${x.p[0].t}" alt=""><span class="body"><span class="t">${esc(x.e.title)}</span><span class="m">${dFull(x.d)} · ${x.p.length} fotoğraf${c?` · ${c} yorum`:''}</span></span>${I('chevR','sm')}</button>`}).join('')}</div>`}
+// Etkinlik bitince hatıra hatırlatması: bittikten ~1 saat sonra (evDone), son 3 günde katıldığım, benim fotoğrafım ya da yorumum olmayan en yeni etkinlik için Bugün'ün üstünde tek kart. Kapatılanlar yalnız bu telefonda (store.hmx).
+function hmDue(e,day){const k=evKey(e,day);if((store.hmx||{})[k]||!evMine(e)||!evDone(e,day))return false;
+ return !phOf(k).some(p=>p.by===meId())&&!cmOf({id:k}).some(c=>c.by===meId())}
+function hmNext(){const t=T();let best=null;const seen={};
+ for(let i=0;i<=3;i++){const d=add(t,-i);for(const e of S.events){if(!occurs(e,d))continue;const k=evKey(e,d);if(seen[k])continue;seen[k]=1;
+  if(hmDue(e,d)&&(!best||d>best.d||d===best.d&&(e.time||'')>(best.e.time||'')))best={e,d}}}
+ return best}
+function hmCard(){if(store.mode!=='family'&&store.mode!=='demo')return '';const x=hmNext();if(!x)return '';const {e,d}=x,k=evKey(e,d),d0=evStart(e,d)||d;
+ return `<div class="hmc"><button class="x" data-act="hmX" data-k="${k}" aria-label="Kapat, sonra eklerim">${I('x','sm')}</button>
+ <div class="hd"><span class="ic">${I('camera')}</span><span><b>${esc(e.title)} nasıldı?</b><small>${rel(d0)}${e.time?' '+hm(e.time):''}${e.loc?' · '+esc(e.loc):''}</small></span></div>
+ <p>Ailene bir hatıra bırak: fotoğraf ekle ya da birkaç söz yaz.</p>
+ <div class="bt"><button class="btn primary sm" data-act="phPick" data-k="${k}">${I('camera','sm')}Fotoğraf ekle</button><button class="btn soft sm" data-act="hmCm" data-id="${e.id}" data-d="${d}">${I('chat','sm')}Yorum yaz</button></div></div>`}
 // İsteklerde yorum: her isteğin altında (yapılmadan önce de) serbest sohbet. Her yorum ayrı kayıt (wcm/{id} = {w, by, t, at}),
 // böylece iki telefon aynı anda yazınca biri ötekini silmez.
 const cmOf=w=>(S.wcm||[]).filter(c=>c.w===w.id&&c.by&&c.t).sort((a,b)=>a.at-b.at);
@@ -3468,6 +3485,8 @@ const A={
  doneWish:d=>wishDoneForm(S.wishes.find(x=>x.id===d.id)),
  phPick:d=>{const i=document.createElement('input');i.type='file';i.accept='image/*';i.multiple=true;i.onchange=()=>phAdd(d.k,i.files);i.click()},
  phView:d=>phShow(d.id),
+ hmX:d=>{const h=store.hmx=store.hmx||{},now=Date.now();for(const k in h)if(now-h[k]>8*864e5)delete h[k];h[d.k]=now;save();render(true);toast('Tamam. İstediğinde etkinliğin içinden ekleyebilirsin.')},
+ hmCm:d=>{A.openEvent({id:d.id,d:d.d});setTimeout(()=>{const i=document.getElementById('cm-in');i&&i.focus()},350)},
  cmDel:d=>{const u=snap();S.wcm=(S.wcm||[]).filter(c=>c.id!==d.id);render(true);toast('Yorum silindi',u)},
  undoneWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);if(!w)return;unlog(`“${w.title}” için “yaptık” dedi ${w.mood}`);w.done=false;w.doneAt=null;w.doneWith=[];w.mood='';close();render(true);toast('Geri alındı',u)},
  delWish:d=>{const u=snap(),w=S.wishes.find(x=>x.id===d.id);if(!w){close();toast('Bu kayıt başka bir cihazda silinmiş.');return}S.wishes=S.wishes.filter(x=>x.id!==d.id);S.wcm=(S.wcm||[]).filter(c=>c.w!==d.id);log(`“${w.title}” isteğini sildi`);close();render(true);toast('İstek silindi',u)},
@@ -3806,7 +3825,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-11-04',items:[['book','Okuma alışkanlığı','Ev kütüphanesinin tepesinde okuma kartı var. Okuduğun gün “Okudum”a dokun, kaç dakika okuduğunu seç. Günlük hedefini tuttukça seri büyür; son 7 günün 5’inde tutturunca Filiz’den Fidan’a, Ağaç’a, Çınar’a geçersin. Çocukların hedefini anne ya da baba seçer'],['camera','Hatıralarımız','Aile sayfasında, Ev kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
+const NEWS={v:'2026-11-05',items:[['camera','Hatıra hatırlatması','Katıldığın bir etkinlik bitince Bugün’ün üstünde “Nasıldı?” kartı çıkar: oradan fotoğraf ekleyebilir ya da yorum yazabilirsin. Ekleyince ya da kapatınca kaybolur'],['book','Okuma alışkanlığı','Ev kütüphanesinin tepesinde okuma kartı var. Okuduğun gün “Okudum”a dokun, kaç dakika okuduğunu seç. Günlük hedefini tuttukça seri büyür; son 7 günün 5’inde tutturunca Filiz’den Fidan’a, Ağaç’a, Çınar’a geçersin. Çocukların hedefini anne ya da baba seçer'],['camera','Hatıralarımız','Aile sayfasında, Ev kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
