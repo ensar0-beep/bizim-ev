@@ -1061,9 +1061,8 @@ a.btn{text-decoration:none}
 .wcard .okst{position:absolute;top:12px;left:12px;margin:0}
 @media (max-width:360px){.okgo{padding:0 10px;font-size:.82rem}.okt{gap:10px}.okx b{font-size:.95rem}.okbt{display:none}}
 .sheet{max-height:min(92%,calc(100% - env(safe-area-inset-top,0px) - 16px))}
-/* iPhone: şeffaf durum çubuğunda saat beyaz yazılır; açık temada okunsun diye en üstte hafif koyu geçiş */
-.stsh{display:none}html.iosa .stsh{display:block;position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top,0px) + 14px);background:linear-gradient(rgba(20,16,10,.30),rgba(20,16,10,.12) 60%,rgba(20,16,10,0));pointer-events:none;z-index:200}
-:root[data-theme="dark"] .stsh{display:none!important}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .stsh{display:none!important}}
+/* iPhone: şeffaf durum çubuğu; saatin altı üst şerit (#tbar) gibi buzlu cam */
+.stsh{display:none}html.iosa .stsh{display:block;position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:saturate(1.8) blur(18px);backdrop-filter:saturate(1.8) blur(18px);pointer-events:none;z-index:7}
 </style>
 </head>
 <body>
