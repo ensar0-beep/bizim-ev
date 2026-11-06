@@ -2858,6 +2858,9 @@ function ilParse(raw){const t=String(raw).replace(/^\](d2|C1|Q3|e0)/,'').replace
  if(!o.e){const m=t.match(/\x1d17(\d{6})/)||t.slice(16).match(/17(\d\d(?:0[1-9]|1[0-2])\d\d)10/);if(m)o.e=m[1]}
  let s='';if(o.e&&/^\d{6}$/.test(o.e)){const v='20'+o.e.slice(0,2)+'-'+o.e.slice(2,4);if(okSkt(v))s=v}
  return {g:o.g,s}}
+// TİTCK "Ruhsatlı Beşeri Tıbbi Ürünler Listesi"nden barkod → ad ve tür (vendor/ilac-adlari.tsv, ATC'den). İlaç penceresi ilk açılınca bir kez iner, sonra önbellekte.
+let ILDB=null;
+const ilDb=()=>ILDB||(ILDB=fetch('vendor/ilac-adlari.tsv').then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>{const m=new Map();t.split('\n').forEach(l=>{const [b,n,k]=l.split('\t');if(n&&/^\d{13}$/.test(b))m.set(b,[n.slice(0,80),IKAT[k]?k:''])});return m}).catch(()=>{ILDB=null;return null}));
 // Bu telefonun hatırladığı adlar (GTIN → ad); dolaptan çıkan ilaç bir daha okutulunca da ad gelsin. Firebase'e gitmez.
 const ilName=g=>g?(ILC().find(x=>x.g===g)||{}).n||(store.ilg||{})[g]||'':'';
 function ilMem(g,n){const m=store.ilg=store.ilg||{};delete m[g];m[g]=n;const k=Object.keys(m);if(k.length>300)delete m[k[0]];save()}
@@ -2867,7 +2870,7 @@ function ilChip(){const b=ilBad();if(!b.length)return '';const g=b.filter(x=>ilS
 const ilRow=x=>`<button class="row ilr" data-act="ilOpen" data-id="${x.id}">${ilIc(x)}<span class="body"><span class="t">${esc(x.n)}</span><span class="m">${IKAT[x.c][0]} · ${ilFor(x)}${x.a>1?' · '+x.a+' kutu':''}</span></span>${ilTag(x)}</button>`;
 function vIlac(){const L=ILC(),g=L.filter(x=>ilSt(x)==='gec'),y=L.filter(x=>ilSt(x)==='yak'),ok=L.filter(x=>ilSt(x)==='iyi');
  const head=`<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="family">${I('chevL','sm')}Aile</button><h1>İlaç dolabı</h1><div class="sub">${L.length} ilaç${g.length?` · ${g.length} tarihi geçmiş`:''}</div></div><button class="icon-btn" data-act="ilAdd" aria-label="İlaç ekle">${I('plus')}</button></div>`;
- if(!L.length)return head+`<div class="ilempty">${I('pill')}<b>Dolap henüz boş</b><p>Kutunun üstündeki karekodu okutun; son kullanma tarihi kendiliğinden gelir. Tarihi yaklaşınca Bugün’de haber verilir.</p><button class="btn primary" data-act="ilAdd">${I('plus','sm')}İlk ilacı ekle</button></div>`;
+ if(!L.length)return head+`<div class="ilempty">${I('pill')}<b>Dolap henüz boş</b><p>Kutunun üstündeki karekodu okutun; adı ve son kullanma tarihi kendiliğinden gelir. Tarihi yaklaşınca Bugün’de haber verilir.</p><button class="btn primary" data-act="ilAdd">${I('plus','sm')}İlk ilacı ekle</button></div>`;
  return head+[['Tarihi geçmiş',g,'gec'],['Yakında bitiyor',y,'yak'],['Dolapta',ok,'iyi']].filter(z=>z[1].length).map(([t,a,c])=>`<div class="sec-h"><h2 class="sec ${c}">${t}</h2><span class="n">${a.length}</span></div><div class="group">${ilSort(a).map(ilRow).join('')}</div>`).join('')}
 function ilSheet(x){const st=ilSt(x),by=x.by&&S.members.some(m=>m.id===x.by)?esc(first(M(x.by).name))+' ekledi · ':'';
  return `<div class="ilsh"><div class="ilhd">${ilIc(x,'lg')}<div><b>${esc(x.n)}</b><small>${IKAT[x.c][0]}</small></div></div>
@@ -2878,7 +2881,7 @@ function ilSheet(x){const st=ilSt(x),by=x.by&&S.members.some(m=>m.id===x.by)?esc
 function ilKat(){const c=F.ilc,cur=c?IKAT[c]:null;
  return `<div class="group rpick"><button type="button" class="row rph" data-act="ilKatTog" aria-expanded="${!!F.ilkOpen}"><span class="body t">Türü</span><span class="rpv">${cur?`<i class="ildot" style="--c:${cur[1]}"></i>${cur[0]}`:'Adından tahmin edilir'}</span>${I('chevD','sm')}</button>${F.ilkOpen?Object.entries(IKAT).map(([k,[n,col]])=>`<button type="button" class="row" data-act="ilKatSet" data-v="${k}" aria-pressed="${k===c}"><span class="rpi"><i class="ildot" style="--c:${col}"></i></span><span class="body t">${n}</span><span class="ok">${I('check')}</span></button>`).join(''):''}</div>`}
 const ilKatPaint=()=>{const e=document.getElementById('il-kat');if(e)e.innerHTML=ilKat()};
-const ilScanBox=()=>`<div class="scan dm"><video id="scv" playsinline muted autoplay aria-hidden="true"></video><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><span class="ray"></span><p class="scmsg" id="scmsg">Kamera açılıyor…</p><button type="button" class="sctorch" id="sctorch" aria-pressed="false" aria-label="El feneri" hidden>${I('bolt')}</button></div><p class="note" style="margin:10px 0 4px">${I('info','sm')}<span>Kutunun üstündeki küçük kare kodu (karekod) çerçeveye getir. Son kullanma tarihi kendiliğinden gelir.</span></p>`;
+const ilScanBox=()=>`<div class="scan dm"><video id="scv" playsinline muted autoplay aria-hidden="true"></video><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><span class="ray"></span><p class="scmsg" id="scmsg">Kamera açılıyor…</p><button type="button" class="sctorch" id="sctorch" aria-pressed="false" aria-label="El feneri" hidden>${I('bolt')}</button></div><p class="note" style="margin:10px 0 4px">${I('info','sm')}<span>Kutunun üstündeki küçük kare kodu (karekod) çerçeveye getir. Adı ve son kullanma tarihi kendiliğinden gelir.</span></p>`;
 function ilForm(x){const ed=!!x;x=x||{a:1};F={il:x.id||'',for:x.k||'ev',ilc:x.c||'',g:x.g||'',seen:{}};
  sheet(ed?'İlacı düzenle':'Yeni ilaç',`${ed?'':`<div id="ilsc">${ilScanBox()}</div>`}<form data-form="ilac" autocomplete="off">
  <div class="field"><label for="il-n">İlacın adı</label><input class="inp" id="il-n" value="${esc(x.n||'')}" placeholder="örn. Parol 500 mg tablet" maxlength="80"><span class="err" id="il-err" hidden>İlacın adını yaz.</span></div>
@@ -2888,17 +2891,21 @@ function ilForm(x){const ed=!!x;x=x||{a:1};F={il:x.id||'',for:x.k||'ev',ilc:x.c|
  <details class="more"${x.no||x.a>1?' open':''}><summary>Kutu sayısı ve not ${I('chevD','sm')}</summary>
  <div class="field"><label for="il-a">Kaç kutu</label><input class="inp" id="il-a" inputmode="numeric" value="${x.a||1}"></div>
  <div class="field"><label for="il-no">Not</label><input class="inp" id="il-no" value="${esc(x.no||'')}" placeholder="örn. ölçeği kutunun içinde" maxlength="200"></div></details>
- <button class="btn primary block">${ed?'Kaydet':'İlacı ekle'}</button></form>`);if(!ed)scStart('il')}
+ <button class="btn primary block">${ed?'Kaydet':'İlacı ekle'}</button></form>`);if(!ed){scStart('il');ilDb()}}
 // Karekod okununca: tarih ve (biliniyorsa) ad forma yazılır, kamera kapanır
 function ilGot(raw){const r=ilParse(raw),m=document.getElementById('scmsg');
  if(!r){if(m&&!F.seen[raw]){F.seen[raw]=1;m.textContent='Bu, ilacın karekodu değil. Karekod kutunun üstünde, küçük bir kare.';m.hidden=false;setTimeout(()=>{if(m.textContent.startsWith('Bu, ilacın'))m.hidden=true},3500)}return}
- if(!document.getElementById('il-n'))return;
- try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
- F.g=r.g;const n=document.getElementById('il-n'),s=document.getElementById('il-s'),nm=ilName(r.g);
- if(nm)n.value=nm;if(r.s)s.value=r.s;
- const ex=ILC().find(y=>y.g===r.g&&y.s===(r.s||s.value));
- const b=document.getElementById('ilsc');if(b)b.innerHTML=`<div class="ilok">${I('check','sm')}<span>${r.s?`Karekod okundu · son kullanma ${ilSkt({s:r.s},1)}`:'Barkod okundu. Son kullanma tarihi için kutudaki karekodu okut ya da aşağıya yaz.'}${ex?'. Bu ilaç dolapta var; eklersen kutu sayısı artar.':nm?'':'. İlacın adını bir kez yaz, bir dahaki sefere kendiliğinden gelir.'}</span><button type="button" class="link" data-act="ilRescan">Yeniden okut</button></div>`;
- if(!nm)setTimeout(()=>n.focus(),60)}
+ const n=document.getElementById('il-n'),s=document.getElementById('il-s'),b=document.getElementById('ilsc');if(!n||!b||F.ilBusy)return;
+ F.ilBusy=1;try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
+ F.g=r.g;if(r.s)s.value=r.s;b.innerHTML=`<div class="ilok">${I('check','sm')}<span>Okundu, ilaç aranıyor…</span></div>`;
+ let nm=ilName(r.g);
+ (nm?Promise.resolve(null):ilDb()).then(db=>{F.ilBusy=0;const h=db&&db.get(r.g.slice(1));
+  if(h){nm=h[0];if(!F.ilc&&h[1]){F.ilc=h[1];ilKatPaint()}}
+  if(!document.body.contains(n))return;if(nm)n.value=nm;
+  const ex=ILC().find(y=>y.g===r.g&&y.s===(r.s||s.value));
+  const t=r.s?`son kullanma ${ilSkt({s:r.s},1)}`:'son kullanma tarihi bu barkodda yok, kutudaki karekodu okut ya da aşağıya yaz';
+  b.innerHTML=`<div class="ilok">${I('check','sm')}<span>${nm?`<b>${esc(nm)}</b> · `:''}${t}${ex?'. Bu ilaç dolapta var; eklersen kutu sayısı artar.':nm?'':'. Bu ilaç listede yok: adını bir kez yaz, bir dahaki sefere kendiliğinden gelir.'}</span><button type="button" class="link" data-act="ilRescan">Yeniden okut</button></div>`;
+  if(!nm)setTimeout(()=>n.focus(),60)})}
 // Örnek ailede ilaçlar: bazılarının tarihi geçmiş, bazıları iki ay içinde bitiyor
 function seedIl(o){const now=Date.now(),ym=k=>{const d=parse(T());d.setDate(1);d.setMonth(d.getMonth()+k);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')},by=['ayse','mehmet'];
  o.ilac=[['Parol 500 mg tablet','ag',14,'',2],['Calpol şurup','ag',-1,'can',1,'Ölçeği kutunun içinde'],['Nurofen Çocuk şurup','ag',1,'zeynep',1],['Otrivine burun spreyi','sg',-3,'',1],['Tylol Hot','sg',9,'',1],['Rennie çiğneme tableti','mi',30,'',1],['Buscopan','mi',1,'mehmet',1],['Zyrtec damla','al',18,'can',1],['Bepanthol krem','ci',2,'',1],['Supradyn','vi',11,'ayse',1],['D vitamini damla','vi',5,'zeynep',1]]
@@ -3640,7 +3647,7 @@ const A={
   close();render(true);toast(it?`${it.name} ${L.name} listesine eklendi`:`“${x.n}” dolaptan çıkarıldı`,u)},
  ilKatTog:()=>{F.ilkOpen=!F.ilkOpen;ilKatPaint()},
  ilKatSet:d=>{F.ilc=d.v;F.ilkOpen=false;ilKatPaint()},
- ilRescan:()=>{const b=document.getElementById('ilsc');if(!b)return;F.seen={};b.innerHTML=ilScanBox();scStart('il')},
+ ilRescan:()=>{const b=document.getElementById('ilsc');if(!b)return;F.seen={};F.ilBusy=0;b.innerHTML=ilScanBox();scStart('il')},
  libScan:()=>{if(!S)return;F={scan:0,seen:{}};
   sheet('Barkod tara',`<div class="scan"><video id="scv" playsinline muted autoplay aria-hidden="true"></video><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><span class="ray"></span><p class="scmsg" id="scmsg">Kamera açılıyor…</p><button type="button" class="sctorch" id="sctorch" aria-pressed="false" aria-label="El feneri" hidden>${I('bolt')}</button></div>
   <p class="note" style="margin:10px 0 6px">${I('info','sm')}<span>Kitabın arkasındaki barkodu çerçeveye getir, bir karış uzakta tut. Arka arkaya okutabilirsin, her biri hemen eklenir.</span></p>
@@ -4013,7 +4020,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-11-06',items:[['pill','İlaç dolabı','Aile sayfasında yeni bir kart var: evdeki ilaçlar ve son kullanma tarihleri. Kutunun üstündeki karekodu okutunca tarih kendiliğinden gelir. Tarihi geçen ya da iki ay içinde biten ilaç olunca Bugün’ün üstünde küçük bir uyarı çıkar; “Bitti” deyince ilaç alınacaklara eklenir'],['camera','Hatıra hatırlatması','Katıldığın bir etkinlik bitince Bugün’ün üstünde “Nasıldı?” kartı çıkar: oradan fotoğraf ekleyebilir ya da yorum yazabilirsin. Ekleyince ya da kapatınca kaybolur'],['book','Okuma alışkanlığı','Ev kütüphanesinin tepesinde okuma kartı var. Okuduğun gün “Okudum”a dokun, kaç dakika okuduğunu seç. Günlük hedefini tuttukça seri büyür; son 7 günün 5’inde tutturunca Filiz’den Fidan’a, Ağaç’a, Çınar’a geçersin. Çocukların hedefini anne ya da baba seçer'],['camera','Hatıralarımız','Aile sayfasında, Ev kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
+const NEWS={v:'2026-11-06',items:[['pill','İlaç dolabı','Aile sayfasında yeni bir kart var: evdeki ilaçlar ve son kullanma tarihleri. Kutunun üstündeki karekodu okutunca ilacın adı ve son kullanma tarihi kendiliğinden gelir. Tarihi geçen ya da iki ay içinde biten ilaç olunca Bugün’ün üstünde küçük bir uyarı çıkar; “Bitti” deyince ilaç alınacaklara eklenir'],['camera','Hatıra hatırlatması','Katıldığın bir etkinlik bitince Bugün’ün üstünde “Nasıldı?” kartı çıkar: oradan fotoğraf ekleyebilir ya da yorum yazabilirsin. Ekleyince ya da kapatınca kaybolur'],['book','Okuma alışkanlığı','Ev kütüphanesinin tepesinde okuma kartı var. Okuduğun gün “Okudum”a dokun, kaç dakika okuduğunu seç. Günlük hedefini tuttukça seri büyür; son 7 günün 5’inde tutturunca Filiz’den Fidan’a, Ağaç’a, Çınar’a geçersin. Çocukların hedefini anne ya da baba seçer'],['camera','Hatıralarımız','Aile sayfasında, Ev kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
