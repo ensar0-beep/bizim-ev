@@ -107,7 +107,7 @@ svg.i.sm{width:1.05rem;height:1.05rem}
 .ilt{flex:none;font-size:.74rem;font-weight:700;border-radius:999px;padding:3px 9px;background:var(--sunk);color:var(--muted)}.ilt.gec{background:var(--danger-soft);color:var(--danger)}.ilt.yak{background:var(--warn-soft);color:var(--warn)}
 h2.sec.gec{color:var(--danger)}h2.sec.yak{color:var(--warn)}
 .ilempty{display:grid;justify-items:center;text-align:center;gap:8px;padding:32px 20px;margin-top:12px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow)}.ilempty>.i{width:32px;height:32px;color:#A2412B}.ilempty p{margin:0 0 8px;color:var(--muted);font-size:.92rem;line-height:1.45}
-.ilq{margin:2px 0 4px}.ilsh{display:grid;gap:14px}.ilhd{display:flex;gap:14px;align-items:center}.ilhd b{font-size:1.2rem;display:block}.ilhd small{color:var(--muted)}.ilrest{display:block;font-size:.92rem;margin:2px 0}
+.ilq{margin:2px 0 4px}#il-for{grid-template-columns:repeat(auto-fill,minmax(4.2rem,1fr))}#il-for .kbr{display:block;grid-column:1/-1}.ilsh{display:grid;gap:14px}.ilhd{display:flex;gap:14px;align-items:center}.ilhd b{font-size:1.2rem;display:block}.ilhd small{color:var(--muted)}.ilrest{display:block;font-size:.92rem;margin:2px 0}
 .ilskt{border-radius:16px;padding:14px;background:var(--sunk);display:grid;gap:2px}.ilskt span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}.ilskt b{font-size:1.4rem;font-family:var(--f-display)}.ilskt small{color:var(--muted)}
 .ilskt.gec{background:var(--danger-soft)}.ilskt.gec b,.ilskt.gec small{color:var(--danger)}.ilskt.yak{background:var(--warn-soft)}.ilskt.yak b{color:var(--warn)}
 .ilsh .row .v{color:var(--muted);text-align:right;max-width:60%}.ilby{margin:-4px 4px 0;font-size:.8rem;color:var(--muted)}
@@ -2851,7 +2851,13 @@ const ILC=()=>S.ilac||(S.ilac=[]);
 const okSkt=v=>/^20\d\d-(0[1-9]|1[0-2])$/.test(String(v));
 const ilSt=x=>{if(!x.s)return 'iyi';const [a,b]=x.s.split('-').map(Number),d=(new Date(a,b,0)-parse(T()))/864e5;return d<0?'gec':d<62?'yak':'iyi'};
 const ilSkt=(x,long)=>x.s?(long?MON[+x.s.slice(5,7)-1]:MON[+x.s.slice(5,7)-1].slice(0,3))+' '+x.s.slice(0,4):'';
-const ilFor=x=>x.k&&S.members.some(m=>m.id===x.k)?first(M(x.k).name)+' için':'Herkes';
+const ilFor=x=>x.k==='cocuk'?'Çocuklar için':x.k==='yetiskin'?'Yetişkinler için':x.k&&S.members.some(m=>m.id===x.k)?first(M(x.k).name)+' için':'Herkes';
+// Kimin için: Bütün aile, (çocuk varsa) Yetişkinler ve Çocuklar, ya da bir kişi. k = '' | 'yetiskin' | 'cocuk' | üye id
+const ilKids=()=>S.members.some(m=>m.role==='child');
+function ilForChips(){const v=F.for||'ev',grp=['ev','yetiskin','cocuk'].includes(v),G=[['ev','Bütün aile'],...(ilKids()?[['yetiskin','Yetişkinler','users'],['cocuk','Çocuklar','sprout']]:[])];
+ const g=G.map(([k,n,ic])=>`<button type="button" class="pp${k==='ev'?' famchip':''}" data-act="ilFor" data-id="${k}" aria-pressed="${v===k}">${k==='ev'?famBadge():`<span class="lic">${I(ic)}</span>`}<span class="ck">${I('check','sm')}</span>${n}</button>`).join('');
+ return grp&&!F.pick?g+`<button type="button" class="link" data-act="ilPick">Bir kişi seç</button>`:g+'<span class="kbr" aria-hidden="true"></span>'+faceGrid('ilFor',[v])}
+const ilForPaint=()=>{const e=document.getElementById('il-for');if(e)e.innerHTML=ilForChips()};
 const ilIc=(x,sz)=>`<span class="ilic${sz?' '+sz:''}" style="--c:${IKAT[x.c][1]}">${I(/sprey|spray/i.test(x.n)?'spray':'pill')}</span>`;
 const ilTag=x=>{const st=ilSt(x);return `<span class="ilt ${st}">${st==='gec'?'Tarihi geçti':!x.s?'Tarihsiz':st==='yak'?ilSkt(x)+' bitiyor':ilSkt(x)}</span>`};
 // Başlıkta yalnız adı: "Parol 500 mg tablet, 20 adet" → "Parol"; mg, ml, biçim ve adet ayrıntıda (ilRest)
@@ -2909,7 +2915,7 @@ function ilForm(x){const ed=!!x;x=x||{a:1};F={il:x.id||'',for:x.k||'ev',ilc:x.c|
  <div class="field"><label for="il-n">İlacın adı</label><input class="inp" id="il-n" value="${esc(x.n||'')}" placeholder="örn. Parol 500 mg tablet" maxlength="80"><span class="err" id="il-err" hidden>İlacın adını yaz.</span></div>
  <div class="field"><label for="il-s">Son kullanma tarihi</label><label class="dtp">${I('cal','sm')}<span class="v${x.s?'':' ph'}">${x.s?ilSkt(x,1):'Ay ve yıl seç'}</span><input id="il-s" type="month" value="${x.s||''}" min="2020-01" max="2060-12"></label></div>
  <div class="field"><div id="il-kat">${ilKat()}</div></div>
- <div class="field"><span class="flabel">Kimin için?</span><div class="pgrid" id="it-for">${forChips()}</div></div>
+ <div class="field"><span class="flabel">Kimin için?</span><div class="pgrid lgrid" id="il-for">${ilForChips()}</div></div>
  <details class="more"${x.no||x.a>1?' open':''}><summary>Kutu sayısı ve not ${I('chevD','sm')}</summary>
  <div class="field"><label for="il-a">Kaç kutu</label><input class="inp" id="il-a" inputmode="numeric" value="${x.a||1}"></div>
  <div class="field"><label for="il-no">Not</label><input class="inp" id="il-no" value="${esc(x.no||'')}" placeholder="örn. ölçeği kutunun içinde" maxlength="200"></div></details>
@@ -2923,6 +2929,7 @@ function ilGot(raw){const r=ilParse(raw),m=document.getElementById('scmsg');
  let nm=ilName(r.g);
  (nm?Promise.resolve(null):ilDb()).then(db=>{F.ilBusy=0;const h=db&&db.get(r.g.slice(1));
   if(h){nm=h[0];if(!F.ilc&&h[1]){F.ilc=h[1];ilKatPaint()}}
+  if(nm&&(F.for||'ev')==='ev'&&ilKids()&&/pediatri|çocuk|cocuk|bebek/i.test(nm)){F.for='cocuk';ilForPaint()}
   if(!document.body.contains(n))return;if(nm)n.value=nm;
   const ex=ILC().find(y=>y.g===r.g&&y.s===(r.s||s.value));
   const t=r.s?`son kullanma ${ilSkt({s:r.s},1)}`:'son kullanma tarihi bu barkodda yok, kutudaki karekodu okut ya da aşağıya yaz';
@@ -3668,6 +3675,8 @@ const A={
  ilDone:d=>{const x=ILC().find(y=>y.id===d.id);if(!x){close();return}const u=snap(),L=S.lists.find(l=>/eczane|ilaç/i.test(l.name))||S.lists[0];
   if(x.g)ilMem(x.g,x.n);S.ilac=ILC().filter(y=>y.id!==x.id);let it=null;if(L){it=addItemTo(L.id,x.n);if(it&&x.k&&S.members.some(m=>m.id===x.k))it.for=x.k}
   close();render(true);toast(it?`${it.name} ${L.name} listesine eklendi`:`“${x.n}” dolaptan çıkarıldı`,u)},
+ ilFor:d=>{F.for=F.for===d.id&&!['ev','yetiskin','cocuk'].includes(d.id)?'ev':d.id;F.pick=false;ilForPaint()},
+ ilPick:()=>{F.pick=true;ilForPaint()},
  ilKatTog:()=>{F.ilkOpen=!F.ilkOpen;ilKatPaint()},
  ilKatSet:d=>{F.ilc=d.v;F.ilkOpen=false;ilKatPaint()},
  ilRescan:()=>{const b=document.getElementById('ilsc');if(!b)return;F.seen={};F.ilBusy=0;b.innerHTML=ilScanBox();scStart('il')},
