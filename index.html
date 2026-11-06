@@ -2280,6 +2280,47 @@ const tcase=(t,lang)=>{t=String(t).normalize('NFC');const L=lang==='tr'||lang===
  return t.split(/(\s+|-)/).map(w=>/^[IVXLC]{2,}[.,:;]?$/.test(w)?w:hm?w.replace(/^([^\p{L}\p{N}]*)(.*)$/u,(m,a,c)=>{const x=trI(c);return a+x.charAt(0).toLocaleUpperCase('tr')+x.slice(1)}):w.replace(/^([^\p{L}\p{N}]*)([\p{L}\p{N}])(.*)$/u,(m,a,b,c)=>a+b.toLocaleUpperCase(L)+(mix?c:c.toLocaleLowerCase(L)))).join('')};
 // Eski dönüşümün İngilizce/ASCII adlarda kelime başına koyduğu İ'yi I yapar (Türkçe harf yoksa)
 const tcFix=t=>TRC.test(t)?t:String(t).replace(/(^|[\s\-("“'])İ/g,'$1I');
+// Türkçe harfleri kaybolmuş ad (yanki ustasi, Ihsan Oktay Anar): ç ğ ı ö ş ü geri konur. Karar listesi vendor/tr-harf.json (Deniz Yuret, turkish-mode),
+// gerektiğinde bir kez iner. Harf harf bağlama bakar; yabancı adları bozmasın diye bilinen kelimeler olduğu gibi kalır (DSK).
+const DSC={c:'ç',C:'Ç',g:'ğ',G:'Ğ',i:'ı',I:'İ',o:'ö',O:'Ö',s:'ş',S:'Ş',u:'ü',U:'Ü'};
+const DSK=new Set('ali dune tolkien harari king charles don musa alchemist mockingbird one exupery agatha christie george orwell stephen hugo victor kafka camus tolstoy dostoyevski dostoyevsky coelho paulo harry potter rowling dickens austen jane wilde oscar zweig stefan london jack martin eden verne jules sherlock holmes doyle conan isaac asimov dan brown game thrones lord rings hobbit sapiens noah yuval atomic habits clean code'.split(' '));
+let DST=null,DSP=null;
+function dscT(){if(DST)return DST;const asc={},dn={},up={},tg={};
+ for(let c=97;c<=122;c++){const a=String.fromCharCode(c);dn[a]=dn[a.toUpperCase()]=up[a]=up[a.toUpperCase()]=a}
+ for(const k in DSC){const t=DSC[k];asc[t]=k;tg[k]=t;tg[t]=k;dn[t]=k.toLowerCase();up[t]=k.toUpperCase()}
+ up.i='i';up.I='I';up['İ']='i';up['ı']='I';return DST={asc,dn,up,tg}}
+const dscLoad=()=>DSP||(DSP=fetch('vendor/tr-harf.json').then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>{const P={};'cgiosu'.split('').forEach(k=>{if(j[k]&&typeof j[k]==='object')P[k]=j[k]});return P}).catch(()=>{DSP=null;return null}));
+function deasc(t,P){t=String(t);const L=t.replace(/[^\p{L}]/gu,'');if(L&&L===L.toUpperCase())t=t.toLowerCase();
+ const T=dscT(),x=[...t],o=x.slice(),n=x.length,Z=10;
+ const ctx=p=>{const s=Array(2*Z+1).fill(' ');s[Z]='X';let i=Z+1,j=p+1,sp=false;
+  while(i<s.length&&!sp&&j<n){const c=T.dn[x[j]];if(!c){if(sp)i++;else sp=true}else{s[i]=c;sp=false}i++;j++}
+  s.length=Math.min(s.length,i);i=Z-1;j=p-1;sp=false;
+  while(i>=0&&j>=0){const c=T.up[x[j]];if(!c){if(sp)i--;else sp=true}else{s[i]=c;sp=false}i--;j--}
+  return s.join('')};
+ const hit=(p,dl)=>{const s=ctx(p);let r=Infinity;for(let a=0;a<=Z;a++)for(let b=Z+1;b<=s.length;b++){const v=dl[s.slice(a,b)];if(v&&Math.abs(v)<Math.abs(r))r=v}return r!==Infinity&&r>0};
+ for(let p=0;p<n;p++){const ch=x[p],tr=T.asc[ch]||ch,dl=P[tr.toLowerCase()];if(!dl)continue;const m=hit(p,dl);
+  if(tr==='I'?(ch===tr?!m:m):(ch===tr?m:!m)){const a=T.tg[ch];if(a)x[p]=a}}
+ // bilinen yabancı/özel kelimeyi geri al
+ const r=x.join('');return r.replace(/\p{L}+/gu,(w,i)=>DSK.has(o.slice(i,i+w.length).join('').toLowerCase())?o.slice(i,i+w.length).join(''):w)}
+const TRISBN=/^97(8975|8605|89944)/,ENW=/\b(the|of|and|to|in|for|with|is|a|an|my|your|how|what)\b/i;
+// Türkçe kitap mı: Türkiye ISBN'i, kaynağın dili, Türk edebiyatı rafı; bunlar yoksa İngilizce kelime içermeyen ve harf düzeltmesi bir şey bulan ad
+const trBook=(b,lang)=>TRISBN.test(b.isbn||'')||lang==='tr'||b.k==='tr';
+const TRX=/[çğıöşüÇĞŞÖÜİ]/;
+async function trFix(b,lang,net){const t0=b.t,a0=b.a||'';let t=t0,a=a0;const need=v=>v&&!TRX.test(v),sig=trBook(b,lang);
+ if((need(t)||need(a))&&(sig||!ENW.test(t))){const fd=v=>String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('tr').replace(/ı/g,'i');
+  // önce başka kaynakta aynı adın Türkçe harfli yazılışı
+  if(net&&sig){try{const r=await bkSearch(`${t} ${a}`)||[];if(need(t)){const z=r.find(z=>TRX.test(z.t)&&fd(z.t)===fd(t));if(z)t=z.t}
+   if(need(a)){const z=r.find(z=>z.a&&TRX.test(z.a)&&fd(z.a)===fd(a));if(z)a=z.a}}catch(e){}}
+  const P=(need(t)||need(a))&&await dscLoad();
+  if(P){if(need(t)){const d=deasc(t,P);if(TRX.test(d)&&(sig||!ENW.test(d)))t=d}if(need(a)&&(sig||TRX.test(t))){const d=deasc(a,P);if(TRX.test(d))a=d}}}
+ // hepsi küçük, hepsi büyük ya da yalnız ilk harfi büyük yazılmış ad: kelime başları büyük
+ const cs=v=>{const l=v.replace(/[^\p{L}]/gu,''),r=l.slice(1);return l&&(r===r.toLocaleLowerCase('tr')||l===l.toLocaleUpperCase('tr'))?tcase(v,TRX.test(v)?'tr':''):v};
+ t=cs(t);if(a)a=cs(a);if(t===t0&&a===a0)return false;
+ const z=LIB().find(y=>y.id===b.id);if(!z||z.t!==t0||(z.a||'')!==a0)return false;z.t=t.slice(0,160);z.a=a.slice(0,120);return true}
+// Kütüphanedeki eski kayıtlar için bir kez (her telefonda): ağa çıkmadan, yalnız harf düzeltmesi ve büyük/küçük harf
+let trRun=0;async function trRepair(){if(trRun||store.libTc===4)return;trRun=1;let ch=0;
+ if(LIB().some(b=>!TRX.test(b.t)||b.a&&!TRX.test(b.a))&&!await dscLoad()){trRun=0;return}
+ for(const b of LIB().slice())if(await trFix(b,'',false))ch++;store.libTc=4;save();trRun=0;if(ch)render(true)}
 // Kategori adları aile aile değiştirilebilir: bkat/{anahtar} = {n, at}; boşsa varsayılan ad
 const katN=k=>{const x=(S.bkat||[]).find(z=>z.id===k&&z.n);return x?x.n:LKAT[k][0]};
 const trl=x=>String(x||'').toLocaleLowerCase('tr');
@@ -2332,7 +2373,7 @@ const sur=a=>trl(String(a).split(',')[0].trim().split(' ').pop());
 // Rafta sırta basılı tutunca (iPhone'daki dokun-tut gibi) arka plan buğulanır, kitap sırtın yerinden büyüyerek ortaya gelir ve kapağı görünür;
 // altında ad, yazar ve Ayrıntılar. Boş yere dokununca rafa geri küçülür. Kısa dokunuş eskisi gibi ayrıntıyı açar.
 const LP={t:0,x:0,y:0,b:null,eat:0,on:null,sp:null,from:''};
-function lpCover(b){return b.i&&okCover(b.i)?`<span class="bkc lg" aria-hidden="true">${cvImg(b.i,600)}<span class="css mkc" style="--a:${bcol(b)}"><em></em><i>${esc(b.t)}</i><u>${esc(b.a||'')}</u></span></span>`
+function lpCover(b){const L=cvL(b,600);return L.length?`<span class="bkc lg" aria-hidden="true">${cvImg(L)}<span class="css mkc" style="--a:${bcol(b)}"><em></em><i>${esc(b.t)}</i><u>${esc(b.a||'')}</u></span></span>`
  :`<span class="bkc lg mkc" style="--a:${bcol(b)}" aria-hidden="true"><em></em><i>${esc(b.t)}</i><u>${esc(b.a||'')}</u></span>`}
 function lpShow(sp){const bk=LIB().find(x=>x.id===sp.dataset.id);if(!bk)return;const r=sp.getBoundingClientRect(),ph=document.getElementById('phone')||document.body,pr=ph.getBoundingClientRect();
  const W=170,H=250,cx=pr.left+pr.width/2,cy=pr.top+pr.height*.42,rm=calm();
@@ -2350,7 +2391,7 @@ function lpCancel(){clearTimeout(LP.t);if(LP.b)LP.b.classList.remove('lpd');LP.b
 document.addEventListener('pointerdown',e=>{
  if(LP.on){if(!e.target.closest('[data-lpopen]')){e.preventDefault();lpHide();LP.eat=1}return}
  const b=e.target.closest('.bsp');if(!b)return;LP.x=e.clientX;LP.y=e.clientY;LP.b=b;clearTimeout(LP.t);b.classList.add('lpd');
- {const bk=LIB().find(x=>x.id===b.dataset.id);bk&&cvPre(bk.i,600)}
+ {const bk=LIB().find(x=>x.id===b.dataset.id);bk&&cvPre(bk,600)}
  LP.t=setTimeout(()=>{LP.eat=1;b.classList.remove('lpd');LP.b=null;try{navigator.vibrate&&navigator.vibrate(12)}catch(x){}lpShow(b)},420)},true);
 document.addEventListener('pointermove',e=>{if(LP.b&&Math.hypot(e.clientX-LP.x,e.clientY-LP.y)>8)lpCancel()},true);
 document.addEventListener('pointerup',lpCancel,true);document.addEventListener('pointercancel',lpCancel,true);
@@ -2383,8 +2424,8 @@ function libBody(){const L=LIB(),me=meId(),f=UI.lf||'all';
  return `<div class="libtop">${okuCard()}${btn}<div class="qrow"><label class="libq">${I('search','sm')}<input id="lib-q" type="search" placeholder="${L.length} kitapta ara" aria-label="Kitaplarda ara" value="${esc(UI.lq||'')}" autocomplete="off"></label><button class="dzs${k!=='ad'?' on':''}" data-act="dzSheet" aria-label="Sırala: ${DZ[k][0]}">${I('sliders')}</button><button class="dzs" data-act="lbTog" aria-label="${store.prefs.lv==='liste'?'Raf görünümü':'Liste görünümü'}">${I(store.prefs.lv==='liste'?'book':'listb')}</button></div>${ring}</div><div id="libres">${libList()}</div>`}
 const libPaint=()=>{const r=document.getElementById('libres');if(r)r.innerHTML=libList()};
 // Kütüphane açılınca küçük kapakları arka planda bir kez çek: liste ve ayrıntı beklemeden açılır (SW saklar)
-let cvWarm=0;function cvWarmUp(){if(cvWarm)return;cvWarm=1;let i=0;const L=LIB().filter(b=>b.i),go=()=>{L.slice(i,i+6).forEach(b=>cvPre(b.i));i+=6;if(i<L.length)setTimeout(go,400)};setTimeout(go,800)}
-function vLib(){cvWarmUp();if(store.libTc!==3&&S.books&&S.books.length){S.books.forEach(b=>{if(TRC.test(b.t+' '+b.a))return;const t=tcFix(b.t),a=tcFix(b.a);if(t!==b.t)b.t=t;if(a!==b.a)b.a=a});store.libTc=3;save()}return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}">${I('chevL','sm')}${UI.libFrom==='lists'?'İstekler':'Aile'}</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
+let cvWarm=0;function cvWarmUp(){if(cvWarm)return;cvWarm=1;let i=0;const L=LIB().filter(b=>b.i),go=()=>{L.slice(i,i+6).forEach(b=>cvPre(b));i+=6;if(i<L.length)setTimeout(go,400)};setTimeout(go,800)}
+function vLib(){cvWarmUp();if((store.libTc||0)<3&&S.books&&S.books.length){S.books.forEach(b=>{if(TRC.test(b.t+' '+b.a))return;const t=tcFix(b.t),a=tcFix(b.a);if(t!==b.t)b.t=t;if(a!==b.a)b.a=a});store.libTc=3;save()}if(store.libTc===3)setTimeout(trRepair,300);return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}">${I('chevL','sm')}${UI.libFrom==='lists'?'İstekler':'Aile'}</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
 function libCard(){const L=LIB();return `<button class="libcard" data-act="libGo"><span class="st">${L.length?libSort(L).slice(0,4).map(b=>`<i style="--c:${bcol(b)}"></i>`).join(''):`<i style="--c:#8A3B2B"></i><i style="--c:#2E5A8A"></i><i style="--c:#B8662B"></i>`}</span><span class="tx"><b>Ev kütüphanesi</b><small>${L.length?L.length+' kitap':'Evdeki kitaplarınızı ekleyin'}${(o=>` · bugün ${o.v}/${o.g} dk`)(okuNow(meId()))}</small></span>${I('chevR')}</button>`}
 // Kitap ayrıntısı: kapak, kategori, Kim okudu, yorumlar (isteklerdeki sohbet)
 function libSheet(b){const own=b.by===meId()||!isChild(),meta=[b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · ');
@@ -2395,6 +2436,7 @@ function libSheet(b){const own=b.by===meId()||!isChild(),meta=[b.p?b.p+' sayfa':
 const libHas=x=>LIB().find(b=>x.n&&b.isbn===x.n||trl(b.t)===trl(x.t)&&(!x.a||!b.a||trl(b.a)===trl(x.a)));
 function libNew(x){const b={id:uid(),t:tcase(String(x.t||'?').trim(),x.lang).slice(0,160),a:tcase(String(x.a||'').trim()).slice(0,120),p:Math.max(0,Math.min(20000,Math.round(+x.p)||0)),y:/^\d{4}$/.test(x.y||'')?x.y:'',k:LKAT[x.k]?x.k:'dg',i:okCover(x.i||'')?x.i:'',rd:[],by:meId(),at:Date.now()};
  if(okIsbn(x.n||''))b.isbn=x.n;LIB().push(b);libLog(b.t);render(true);
+ trFix(b,x.lang,true).then(c=>{if(c)render(true)});
  if(b.i)coverTint(b.i).then(c=>{const z=c&&LIB().find(y=>y.id===b.id);if(z&&!z.c){z.c=c;render(true)}});return b}
 // Arka arkaya eklenen kitaplar "Son değişiklikler"i doldurmasın: 10 dakika içinde tek satırda sayılır
 function libLog(t){const a=S.activity[0];
@@ -2706,17 +2748,20 @@ const IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||navigator.platform==='Ma
 P.search='<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>';
 // Kitap arama: adını yazdıkça Google Books'tan (olmazsa Open Library) kapak, yazar ve sayfa sayısıyla sonuçlar (Goodreads gibi)
 const BKC=['#6E2B2B','#2E5A8A','#3E7C6B','#6B4C9A','#B8662B','#2F4F4F','#8A1E1E','#4B5B2E'];
-// Kapak adresini büyüklüğe göre seç: Google'ın küçük resmi ~128 px, büyük görünümde bulanık durur (fife=w… daha büyüğünü verir); Open Library'de -M → -L
-const cvU=(u,w)=>{if(!w)return u;try{const x=new URL(u);if(x.pathname==='/books/content'&&/^books\.google(usercontent)?\./.test(x.hostname)){x.searchParams.delete('edge');x.searchParams.set('fife','w'+w);return x.href}
- if(x.hostname==='covers.openlibrary.org'&&w>=400)return u.replace(/-[SM]\.jpg$/,'-L.jpg')}catch(e){}return u};
-// Önce küçük kapak (çoğu zaman önbellekte, hemen görünür), üstüne büyüğü gelince keskinleşir; büyüğü gelmezse küçüğü kalır
-const cvImg=(u,w,lazy)=>{const b=cvU(u,w),a=`alt="" referrerpolicy="no-referrer" decoding="async" onerror="this.remove()"`;
- return `<img src="${esc(u)}" ${a}${lazy?' loading="lazy"':''}>${b!==u?`<img src="${esc(b)}" ${a}${lazy?' loading="lazy"':''}>`:''}`};
+// Kapak adayları, küçükten iyiye: kayıttaki küçük resim (Google zoom=1 ≈128 px, Open Library -M), Open Library'de ISBN'le büyük kapak,
+// Google'da yayıncının verdiği kapak (frontcover, fife=w…). Hepsi üst üste: önce küçüğü görünür, iyisi gelince üstüne oturur; gelmeyen kendini siler.
+const cvGid=u=>{try{const x=new URL(u);const g=/^books\.google/.test(x.hostname)&&x.searchParams.get('id')||'';return /^[\w-]{6,24}$/.test(g)?g:''}catch(e){return ''}};
+const cvL=(b,w)=>{const u=b.i&&okCover(b.i)?b.i:'',L=u?[u]:[];if(!w)return L;
+ if(okIsbn(b.isbn||''))L.push(`https://covers.openlibrary.org/b/isbn/${b.isbn}-L.jpg?default=false`);
+ if(/^https:\/\/covers\.openlibrary\.org\/b\/id\/\d+-[SM]\.jpg$/.test(u))L.push(u.replace(/-[SM]\.jpg$/,'-L.jpg'));
+ const g=cvGid(u);if(g)L.push(`https://books.google.com/books/publisher/content/images/frontcover/${g}?fife=w${w}-h${Math.round(w*1.5)}&source=gbs_api`);
+ return [...new Set(L)]};
+const cvImg=(L,lazy)=>L.map(u=>`<img src="${esc(u)}" alt="" referrerpolicy="no-referrer" decoding="async"${lazy?' loading="lazy"':''} onload="if(this.naturalWidth<40)this.remove()" onerror="this.remove()">`).join('');
 const CVW={md:320,lg:600};
-const bkCover=(b,sz)=>{const h=[...(b.t||'')].reduce((a,c)=>a+c.charCodeAt(0),0),ph=`<span class="bkc ${sz} css" style="--a:${BKC[h%BKC.length]}" aria-hidden="true"><i>${esc(b.t||'')}</i></span>`;
- return b.i&&okCover(b.i)?`<span class="bkc ${sz}" aria-hidden="true">${cvImg(b.i,CVW[sz],!CVW[sz])}${ph}</span>`:ph};
+const bkCover=(b,sz)=>{const h=[...(b.t||'')].reduce((a,c)=>a+c.charCodeAt(0),0),ph=`<span class="bkc ${sz} css" style="--a:${BKC[h%BKC.length]}" aria-hidden="true"><i>${esc(b.t||'')}</i></span>`,L=cvL(b,CVW[sz]);
+ return L.length?`<span class="bkc ${sz}" aria-hidden="true">${cvImg(L,!CVW[sz])}${ph}</span>`:ph};
 // Basılı tutma başlarken büyük kapağı yüklemeye başla: kitap öne geldiğinde hazır olsun
-function cvPre(u,w){if(!u||!okCover(u))return;const im=new Image();im.referrerPolicy='no-referrer';im.decoding='async';im.src=cvU(u,w)}
+function cvPre(b,w){cvL(b,w).slice(w?1:0).forEach(u=>{const im=new Image();im.referrerPolicy='no-referrer';im.decoding='async';im.src=u})}
 const gbMap=v=>{const im=v.imageLinks||{},n=(v.industryIdentifiers||[]).find(x=>x.type==='ISBN_13');return {t:String(v.title+(v.subtitle?': '+v.subtitle:'')).slice(0,160),a:(v.authors||[]).join(', ').slice(0,120),p:+v.pageCount||0,y:(String(v.publishedDate||'').match(/^\d{4}/)||[''])[0],i:String(im.thumbnail||im.smallThumbnail||'').replace(/^http:/,'https:').replace('&edge=curl',''),k:katGuess(v.categories,(v.authors||[]).join(' ')),n:n?String(n.identifier):'',lang:v.language==='tr'?'tr':v.language?'en':''}};
 let bkSeq=0;
 async function bkSearch(q){q=q.trim();if(q.length<2)return [];const get=async u=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),6000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)throw 0;return await r.json()}finally{clearTimeout(t)}};
