@@ -4,12 +4,12 @@
   2) Firebase isteklerine dokunmaz; eşitleme her zaman doğrudan sunucuyla yapılır.
   Yeni sürüm yayınlarken CACHE adını artır.
 */
-const CACHE = "bizim-ev-v125";
+const CACHE = "bizim-ev-v126";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icons/icon-192.png",
   "./icons/icon-512.png", "./icons/favicon.svg", "./icons/apple-touch-icon.png"];
 const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 // Kitap kapakları ayrı bir önbellekte durur (sürüm değişince silinmez): liste ikinci açılışta beklemeden gelir.
-const COVERS = "bizim-ev-kapak";
+const COVERS = "bizim-ev-kapak2"; // 2: CORS'lu kopyalar (opaque kopya telefonda kapak başına ~7 MB yer sayılıyordu)
 const COVER_HOSTS = /^(books\.google\.[a-z.]+|books\.googleusercontent\.com|covers\.openlibrary\.org)$/;
 
 self.addEventListener("install", (e) => {
@@ -35,13 +35,15 @@ self.addEventListener("fetch", (e) => {
   if (COVER_HOSTS.test(url.hostname) && req.destination === "image") {
     e.respondWith(
       caches.open(COVERS).then((c) =>
-        c.match(req).then((hit) => hit || fetch(req).then((res) => {
-          if (res.ok || res.type === "opaque") {
-            c.put(req, res.clone());
-            c.keys().then((ks) => ks.slice(0, Math.max(0, ks.length - 80)).forEach((k) => c.delete(k)));
-          }
-          return res;
-        }))
+        c.match(req).then((hit) => hit || fetch(req.url, { mode: "cors", credentials: "omit", referrerPolicy: "no-referrer" })
+          .catch(() => fetch(req))
+          .then((res) => {
+            if (res.ok || res.type === "opaque") {
+              c.put(req, res.clone());
+              c.keys().then((ks) => ks.slice(0, Math.max(0, ks.length - 600)).forEach((k) => c.delete(k)));
+            }
+            return res;
+          }))
       )
     );
     return;

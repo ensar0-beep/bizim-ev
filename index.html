@@ -2332,7 +2332,7 @@ const sur=a=>trl(String(a).split(',')[0].trim().split(' ').pop());
 // Rafta sırta basılı tutunca (iPhone'daki dokun-tut gibi) arka plan buğulanır, kitap sırtın yerinden büyüyerek ortaya gelir ve kapağı görünür;
 // altında ad, yazar ve Ayrıntılar. Boş yere dokununca rafa geri küçülür. Kısa dokunuş eskisi gibi ayrıntıyı açar.
 const LP={t:0,x:0,y:0,b:null,eat:0,on:null,sp:null,from:''};
-function lpCover(b){return b.i&&okCover(b.i)?`<span class="bkc lg" aria-hidden="true"><img src="${esc(b.i)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()"><span class="css mkc" style="--a:${bcol(b)}"><em></em><i>${esc(b.t)}</i><u>${esc(b.a||'')}</u></span></span>`
+function lpCover(b){return b.i&&okCover(b.i)?`<span class="bkc lg" aria-hidden="true">${cvImg(b.i,600)}<span class="css mkc" style="--a:${bcol(b)}"><em></em><i>${esc(b.t)}</i><u>${esc(b.a||'')}</u></span></span>`
  :`<span class="bkc lg mkc" style="--a:${bcol(b)}" aria-hidden="true"><em></em><i>${esc(b.t)}</i><u>${esc(b.a||'')}</u></span>`}
 function lpShow(sp){const bk=LIB().find(x=>x.id===sp.dataset.id);if(!bk)return;const r=sp.getBoundingClientRect(),ph=document.getElementById('phone')||document.body,pr=ph.getBoundingClientRect();
  const W=170,H=250,cx=pr.left+pr.width/2,cy=pr.top+pr.height*.42,rm=calm();
@@ -2350,6 +2350,7 @@ function lpCancel(){clearTimeout(LP.t);if(LP.b)LP.b.classList.remove('lpd');LP.b
 document.addEventListener('pointerdown',e=>{
  if(LP.on){if(!e.target.closest('[data-lpopen]')){e.preventDefault();lpHide();LP.eat=1}return}
  const b=e.target.closest('.bsp');if(!b)return;LP.x=e.clientX;LP.y=e.clientY;LP.b=b;clearTimeout(LP.t);b.classList.add('lpd');
+ {const bk=LIB().find(x=>x.id===b.dataset.id);bk&&cvPre(bk.i,600)}
  LP.t=setTimeout(()=>{LP.eat=1;b.classList.remove('lpd');LP.b=null;try{navigator.vibrate&&navigator.vibrate(12)}catch(x){}lpShow(b)},420)},true);
 document.addEventListener('pointermove',e=>{if(LP.b&&Math.hypot(e.clientX-LP.x,e.clientY-LP.y)>8)lpCancel()},true);
 document.addEventListener('pointerup',lpCancel,true);document.addEventListener('pointercancel',lpCancel,true);
@@ -2381,7 +2382,9 @@ function libBody(){const L=LIB(),me=meId(),f=UI.lf||'all';
  const ring=`<div class="rdc${f!=='all'?' on':''}"><span class="ring" role="img" aria-label="Okuduğun: yüzde ${pct}"><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" class="bg"/><circle cx="22" cy="22" r="18" class="fg" stroke-dasharray="${(pct*C/100).toFixed(1)} ${C}"/></svg><b>%${pct}</b></span>${[['rd','Okuduklarım',nr],['un','Okumadıklarım',L.length-nr]].map(([v,n,c])=>`<button class="rdb ${v}" data-act="libF" data-v="${v}" aria-pressed="${f===v}"><b>${c}</b><small>${n}</small>${f===v?`<span class="rx" aria-hidden="true">${I('x','sm')}</span>`:''}</button>`).join('')}</div>`;
  return `<div class="libtop">${okuCard()}${btn}<div class="qrow"><label class="libq">${I('search','sm')}<input id="lib-q" type="search" placeholder="${L.length} kitapta ara" aria-label="Kitaplarda ara" value="${esc(UI.lq||'')}" autocomplete="off"></label><button class="dzs${k!=='ad'?' on':''}" data-act="dzSheet" aria-label="Sırala: ${DZ[k][0]}">${I('sliders')}</button><button class="dzs" data-act="lbTog" aria-label="${store.prefs.lv==='liste'?'Raf görünümü':'Liste görünümü'}">${I(store.prefs.lv==='liste'?'book':'listb')}</button></div>${ring}</div><div id="libres">${libList()}</div>`}
 const libPaint=()=>{const r=document.getElementById('libres');if(r)r.innerHTML=libList()};
-function vLib(){if(store.libTc!==3&&S.books&&S.books.length){S.books.forEach(b=>{if(TRC.test(b.t+' '+b.a))return;const t=tcFix(b.t),a=tcFix(b.a);if(t!==b.t)b.t=t;if(a!==b.a)b.a=a});store.libTc=3;save()}return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}">${I('chevL','sm')}${UI.libFrom==='lists'?'İstekler':'Aile'}</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
+// Kütüphane açılınca küçük kapakları arka planda bir kez çek: liste ve ayrıntı beklemeden açılır (SW saklar)
+let cvWarm=0;function cvWarmUp(){if(cvWarm)return;cvWarm=1;let i=0;const L=LIB().filter(b=>b.i),go=()=>{L.slice(i,i+6).forEach(b=>cvPre(b.i));i+=6;if(i<L.length)setTimeout(go,400)};setTimeout(go,800)}
+function vLib(){cvWarmUp();if(store.libTc!==3&&S.books&&S.books.length){S.books.forEach(b=>{if(TRC.test(b.t+' '+b.a))return;const t=tcFix(b.t),a=tcFix(b.a);if(t!==b.t)b.t=t;if(a!==b.a)b.a=a});store.libTc=3;save()}return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}">${I('chevL','sm')}${UI.libFrom==='lists'?'İstekler':'Aile'}</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
 function libCard(){const L=LIB();return `<button class="libcard" data-act="libGo"><span class="st">${L.length?libSort(L).slice(0,4).map(b=>`<i style="--c:${bcol(b)}"></i>`).join(''):`<i style="--c:#8A3B2B"></i><i style="--c:#2E5A8A"></i><i style="--c:#B8662B"></i>`}</span><span class="tx"><b>Ev kütüphanesi</b><small>${L.length?L.length+' kitap':'Evdeki kitaplarınızı ekleyin'}${(o=>` · bugün ${o.v}/${o.g} dk`)(okuNow(meId()))}</small></span>${I('chevR')}</button>`}
 // Kitap ayrıntısı: kapak, kategori, Kim okudu, yorumlar (isteklerdeki sohbet)
 function libSheet(b){const own=b.by===meId()||!isChild(),meta=[b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · ');
@@ -2702,8 +2705,17 @@ const IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||navigator.platform==='Ma
 P.search='<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>';
 // Kitap arama: adını yazdıkça Google Books'tan (olmazsa Open Library) kapak, yazar ve sayfa sayısıyla sonuçlar (Goodreads gibi)
 const BKC=['#6E2B2B','#2E5A8A','#3E7C6B','#6B4C9A','#B8662B','#2F4F4F','#8A1E1E','#4B5B2E'];
+// Kapak adresini büyüklüğe göre seç: Google'ın küçük resmi ~128 px, büyük görünümde bulanık durur (fife=w… daha büyüğünü verir); Open Library'de -M → -L
+const cvU=(u,w)=>{if(!w)return u;try{const x=new URL(u);if(x.pathname==='/books/content'&&/^books\.google(usercontent)?\./.test(x.hostname)){x.searchParams.delete('edge');x.searchParams.set('fife','w'+w);return x.href}
+ if(x.hostname==='covers.openlibrary.org'&&w>=400)return u.replace(/-[SM]\.jpg$/,'-L.jpg')}catch(e){}return u};
+// Önce küçük kapak (çoğu zaman önbellekte, hemen görünür), üstüne büyüğü gelince keskinleşir; büyüğü gelmezse küçüğü kalır
+const cvImg=(u,w,lazy)=>{const b=cvU(u,w),a=`alt="" referrerpolicy="no-referrer" decoding="async" onerror="this.remove()"`;
+ return `<img src="${esc(u)}" ${a}${lazy?' loading="lazy"':''}>${b!==u?`<img src="${esc(b)}" ${a}${lazy?' loading="lazy"':''}>`:''}`};
+const CVW={md:320,lg:600};
 const bkCover=(b,sz)=>{const h=[...(b.t||'')].reduce((a,c)=>a+c.charCodeAt(0),0),ph=`<span class="bkc ${sz} css" style="--a:${BKC[h%BKC.length]}" aria-hidden="true"><i>${esc(b.t||'')}</i></span>`;
- return b.i&&okCover(b.i)?`<span class="bkc ${sz}" aria-hidden="true"><img src="${esc(b.i)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">${ph}</span>`:ph};
+ return b.i&&okCover(b.i)?`<span class="bkc ${sz}" aria-hidden="true">${cvImg(b.i,CVW[sz],!CVW[sz])}${ph}</span>`:ph};
+// Basılı tutma başlarken büyük kapağı yüklemeye başla: kitap öne geldiğinde hazır olsun
+function cvPre(u,w){if(!u||!okCover(u))return;const im=new Image();im.referrerPolicy='no-referrer';im.decoding='async';im.src=cvU(u,w)}
 const gbMap=v=>{const im=v.imageLinks||{},n=(v.industryIdentifiers||[]).find(x=>x.type==='ISBN_13');return {t:String(v.title+(v.subtitle?': '+v.subtitle:'')).slice(0,160),a:(v.authors||[]).join(', ').slice(0,120),p:+v.pageCount||0,y:(String(v.publishedDate||'').match(/^\d{4}/)||[''])[0],i:String(im.thumbnail||im.smallThumbnail||'').replace(/^http:/,'https:').replace('&edge=curl',''),k:katGuess(v.categories,(v.authors||[]).join(' ')),n:n?String(n.identifier):'',lang:v.language==='tr'?'tr':v.language?'en':''}};
 let bkSeq=0;
 async function bkSearch(q){q=q.trim();if(q.length<2)return [];const get=async u=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),6000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)throw 0;return await r.json()}finally{clearTimeout(t)}};
