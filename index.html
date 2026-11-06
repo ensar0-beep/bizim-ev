@@ -608,8 +608,8 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 @media (prefers-reduced-motion:reduce){.scan .ray{animation:none}}
 .scmsg{position:absolute;left:16px;right:16px;bottom:12px;margin:0;color:#fff;font-size:.85rem;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.8)}
 .scanl{margin-top:8px}
-.kchips{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 2px}.kchips button{min-height:34px;padding:0 12px;border-radius:999px;border:1.5px solid var(--line);font-size:.8rem;font-weight:600;color:var(--muted)}
-.kchips button[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--surface));color:var(--fg)}
+.lkp{margin-top:14px}.lkp .rpv{display:flex;align-items:center;gap:8px}
+.kdot{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:color-mix(in srgb,var(--c) 16%,var(--surface));color:var(--c)}.kdot svg{width:15px;height:15px}.rpi.kdot{width:32px;height:32px}
 .lcmw{margin-top:18px}
 /* hava durumu, acil hapı */
 .wxd{display:inline-flex;align-items:center;gap:4px;margin-left:10px;padding:2px 9px 2px 7px;border-radius:999px;background:var(--sunk);color:var(--fg);font-size:.78rem;font-weight:700;letter-spacing:0;text-transform:none;vertical-align:middle}.wxd svg{width:16px;height:16px}
@@ -1130,7 +1130,7 @@ a.btn{text-decoration:none}
 (function(){
 'use strict';
 /* ---------- İkonlar ---------- */
-const P={flame:'<path d="M12 22c4 0 7-2.7 7-6.8 0-3.6-2.4-6-4.2-8.2-.5 2-1.6 3.2-2.8 3.6.4-3-1-6.2-3.5-8.6C8.4 5.4 5 8.6 5 14.6 5 19 8 22 12 22Z"/>',tree:'<path d="M12 22v-6"/><path d="M12 16c-4.4 0-7-2.4-7-5.6 0-2.4 1.6-4 3.4-4.6C9 3.6 10.4 2 12 2s3 1.6 3.6 3.8c1.8.6 3.4 2.2 3.4 4.6 0 3.2-2.6 5.6-7 5.6Z"/>',oak:'<path d="M12 22v-7M9 22h6"/><path d="M12 15c-5.5 0-9-2.6-9-6 0-2.6 2.2-4.3 4.6-4.3C8.6 3 10.2 2 12 2s3.4 1 4.4 2.7C18.8 4.7 21 6.4 21 9c0 3.4-3.5 6-9 6Z"/>',camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',dnic:'<path d="M4 7h9M4 12h7M4 17h6"/><path d="m14 16 2.5 2.5L21 12.5"/>',sprout:'<path d="M12 21v-9"/><path d="M12 12C12 8 9 5.5 5 5.5 5 9.5 8 12 12 12Z"/><path d="M12 14c0-3.5 2.5-6 6.5-6 0 3.8-2.6 6-6.5 6Z"/>',leaf:'<path d="M5 19C5 10 10 5 20 4c0 10-5 15-14 15"/><path d="M5 19 13 11"/>',snow:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="m9 4 3 2 3-2M9 20l3-2 3 2"/>',chat:'<path d="M20 12a8 8 0 0 1-11.5 7.2L4 20l1-4.3A8 8 0 1 1 20 12Z"/>',grip:'<path d="M5 8h14M5 12h14M5 16h14"/>',arrUp:'<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',grid:'<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',listb:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>',sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
+const P={moon:'<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/>',flame:'<path d="M12 22c4 0 7-2.7 7-6.8 0-3.6-2.4-6-4.2-8.2-.5 2-1.6 3.2-2.8 3.6.4-3-1-6.2-3.5-8.6C8.4 5.4 5 8.6 5 14.6 5 19 8 22 12 22Z"/>',tree:'<path d="M12 22v-6"/><path d="M12 16c-4.4 0-7-2.4-7-5.6 0-2.4 1.6-4 3.4-4.6C9 3.6 10.4 2 12 2s3 1.6 3.6 3.8c1.8.6 3.4 2.2 3.4 4.6 0 3.2-2.6 5.6-7 5.6Z"/>',oak:'<path d="M12 22v-7M9 22h6"/><path d="M12 15c-5.5 0-9-2.6-9-6 0-2.6 2.2-4.3 4.6-4.3C8.6 3 10.2 2 12 2s3.4 1 4.4 2.7C18.8 4.7 21 6.4 21 9c0 3.4-3.5 6-9 6Z"/>',camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',dnic:'<path d="M4 7h9M4 12h7M4 17h6"/><path d="m14 16 2.5 2.5L21 12.5"/>',sprout:'<path d="M12 21v-9"/><path d="M12 12C12 8 9 5.5 5 5.5 5 9.5 8 12 12 12Z"/><path d="M12 14c0-3.5 2.5-6 6.5-6 0 3.8-2.6 6-6.5 6Z"/>',leaf:'<path d="M5 19C5 10 10 5 20 4c0 10-5 15-14 15"/><path d="M5 19 13 11"/>',snow:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="m9 4 3 2 3-2M9 20l3-2 3 2"/>',chat:'<path d="M20 12a8 8 0 0 1-11.5 7.2L4 20l1-4.3A8 8 0 1 1 20 12Z"/>',grip:'<path d="M5 8h14M5 12h14M5 16h14"/>',arrUp:'<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',grid:'<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',listb:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>',sparkle:'<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7-4.7-1.8 4.7-1.8z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/>',
  today:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
  cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
  cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.6l2.4 12.2a1.5 1.5 0 0 0 1.5 1.2h9a1.5 1.5 0 0 0 1.5-1.1L21.5 7H6"/>',
@@ -2277,7 +2277,11 @@ function itabs(arr,label){return `<div class="wtabs${arr.length>5?' scr':''}" ro
 // books/{id} = {t, a, p, y, k, i, c, isbn, rd[], by, at}: ad, yazar, sayfa, yıl, kategori (LKAT), kapak, sırt rengi, ISBN, okuyanlar.
 // Aile sayfasında kart, ayrı sayfa (UI.tab 'lib'). Raf sırtlarla, kategori kategori bölümlerde; yorumlar isteklerdeki gibi wcm kayıtları (w = kitap id).
 P.scan='<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M17 8v8"/>';
-const LKAT={tr:['Türk edebiyatı','#8A3B2B'],dk:['Dünya edebiyatı','#2E5A8A'],cg:['Çocuk ve genç','#B8662B'],dt:['Düşünce ve tarih','#3E6B4C'],dg:['Diğer','#6B6359']};
+// 18 tür (Kitapyurdu / D&R ana başlıkları gibi): [ad, renk, simge]. dt eski "Düşünce ve tarih": seçim listesinde yok, o kategorideki kitaplar değiştirilene kadar kalır.
+const LKAT={tr:['Türk edebiyatı','#8A3B2B','book'],dk:['Dünya edebiyatı','#2E5A8A','compass'],si:['Şiir','#9A3F6B','heart'],oy:['Öykü ve deneme','#7A5C2E','chat'],po:['Polisiye ve gerilim','#2F4F4F','lock'],bk:['Bilim kurgu ve fantastik','#4B3E8A','sparkle'],
+ cg:['Çocuk','#B8662B','sprout'],gn:['Gençlik','#C0582E','bolt'],ta:['Tarih','#6E4B2B','oak'],bi:['Biyografi ve anı','#5C3B5E','user'],fe:['Felsefe','#3E6B4C','tree'],di:['Din ve tasavvuf','#2B6A73','moon'],
+ ps:['Psikoloji ve kişisel gelişim','#3E7C6B','arrUp'],bl:['Bilim ve doğa','#4B5B2E','leaf'],sa:['Sanat ve müzik','#8A1E1E','film'],ev:['Yemek, ev ve hobi','#B8862B','fork'],ds:['Ders, sözlük ve sınav','#1F3A5F','board'],
+ dt:['Düşünce ve tarih','#3E6B4C','tree'],dg:['Diğer','#6B6359','tag']};
 const LIB=()=>S.books||(S.books=[]);
 // Kitap ve yazar adı: her kelimenin ilk harfi büyük, gerisi küçük ("Beş Şehir", "Saint-Exupéry"). Roma rakamları (II, IV) olduğu gibi kalır. Elle düzenlenen ad dokunulmadan kalır.
 // Küçültmede Türkçe kural (I→ı) yalnız adda Türkçe harf varsa: "İLBER ORTAYLI" → Ortaylı, "SABAHATTIN ALI" → Ali. Büyütmede yabancı harf yoksa Türkçe (ince → İnce).
@@ -2338,9 +2342,22 @@ const okIsbn=v=>{if(!/^97[89]\d{10}$/.test(v))return false;let s=0;for(let i=0;i
 // Kategori tahmini: Google Books / Open Library konularından. Romanda yazar adı Türkçeyse Türk edebiyatı; kitaba dokunup değiştirilebilir.
 const TRN=/[çğıöşüÇĞİÖŞÜ]|\b(orhan|ahmet|mehmet|ali|sabahattin|halit|oguz|elif|peyami|cemal|sait|kemal|hakan|murat|mustafa|hasan|ilber|halil|necip|sezai|refik|yusuf|selim|aziz|haldun|adalet|sevgi|tezer|leyla|nazan|buket|ece|zeynep|hatice|pamuk|atay|safak|tanpinar)\b/i;
 function katGuess(cs,a){const s=(Array.isArray(cs)?cs:[]).join(' ').toLowerCase(),tr=TRN.test(a||'');
- if(/juvenile|young adult|children|çocuk|masal/.test(s))return 'cg';
- if(/histor|philosoph|religio|biograph|politic|social|psycholog|science|self-help|business|econom|tarih|felsefe|din/.test(s))return 'dt';
- if(!s||/fiction|literar|poetry|drama|novel|roman|şiir|hikâye|hikaye|literature|edebiyat/.test(s))return tr?'tr':s?'dk':'dg';
+ if(/young adult|gençlik/.test(s))return 'gn';
+ if(/juvenile|children|çocuk|masal|picture book/.test(s))return 'cg';
+ if(/poetry|şiir/.test(s))return 'si';
+ if(/detective|mystery|crime|thriller|suspense|polisiye/.test(s))return 'po';
+ if(/science fiction|fantasy|dystop|fantastik|bilim kurgu/.test(s))return 'bk';
+ if(/short stor|essay|öykü|deneme|hikâye|hikaye/.test(s))return 'oy';
+ if(/biograph|autobiograph|memoir|anı|biyografi/.test(s))return 'bi';
+ if(/histor|tarih/.test(s))return 'ta';
+ if(/philosoph|felsefe/.test(s))return 'fe';
+ if(/religio|islam|koran|qur|sufi|\bdin\b|tasavvuf/.test(s))return 'di';
+ if(/psycholog|self-help|personal development|psikoloji|kişisel/.test(s))return 'ps';
+ if(/science|nature|mathemat|physics|biolog|bilim/.test(s))return 'bl';
+ if(/\bart\b|music|architect|photograph|sanat|müzik/.test(s))return 'sa';
+ if(/cook|recipe|craft|hobb|garden|house|yemek/.test(s))return 'ev';
+ if(/dictionar|encyclop|study aid|textbook|education|sözlük|\bders\b/.test(s))return 'ds';
+ if(!s||/fiction|literar|drama|novel|roman|literature|edebiyat/.test(s))return tr?'tr':s?'dk':'dg';
  return 'dg'}
 const bkGet=async u=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),7000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)throw 0;return await r.json()}finally{clearTimeout(t)}};
 // Barkoddan (ISBN) kitap. Türkçe kitapların çoğu tek bir kaynakta bulunmadığı için hepsi aynı anda sorulur, öncelik sırasıyla ilk bulunan alınır:
@@ -2438,8 +2455,11 @@ let cvWarm=0;function cvWarmUp(){if(cvWarm)return;cvWarm=1;let i=0;const L=LIB()
 function vLib(){cvWarmUp();if((store.libTc||0)<3&&S.books&&S.books.length){S.books.forEach(b=>{if(TRC.test(b.t+' '+b.a))return;const t=tcFix(b.t),a=tcFix(b.a);if(t!==b.t)b.t=t;if(a!==b.a)b.a=a});store.libTc=3;save()}if(store.libTc===3)setTimeout(trRepair,300);return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}">${I('chevL','sm')}${UI.libFrom==='lists'?'İstekler':'Aile'}</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
 function libCard(){const L=LIB();return `<button class="libcard" data-act="libGo"><span class="st">${L.length?libSort(L).slice(0,4).map(b=>`<i style="--c:${bcol(b)}"></i>`).join(''):`<i style="--c:#8A3B2B"></i><i style="--c:#2E5A8A"></i><i style="--c:#B8662B"></i>`}</span><span class="tx"><b>Ev kütüphanesi</b><small>${L.length?L.length+' kitap':'Evdeki kitaplarınızı ekleyin'}${(o=>` · bugün ${o.v}/${o.g} dk`)(okuNow(meId()))}</small></span>${I('chevR')}</button>`}
 // Kitap ayrıntısı: kapak, kategori, Kim okudu, yorumlar (isteklerdeki sohbet)
+// Kategori: tek satır, dokununca 18 tür açılır (catPick gibi)
+function lkPick(b,own){const c=LKAT[b.k]||LKAT.dg,lk=lock(own,PARENT);
+ return `<div class="group rpick lkp"><button type="button" class="row rph" data-act="libKatTog" data-id="${b.id}" aria-expanded="${!!F.lkOpen}"${lk}><span class="body t">Kategori</span><span class="rpv"><span class="kdot" style="--c:${c[1]}">${I(c[2]||'tag','sm')}</span>${esc(katN(b.k))}</span>${I('chevD','sm')}</button>${F.lkOpen?Object.entries(LKAT).filter(([k])=>k!=='dt'||b.k==='dt').map(([k,[n,cl,ic]])=>`<button type="button" class="row" data-act="libKat" data-id="${b.id}" data-v="${k}" aria-pressed="${k===b.k}"><span class="rpi kdot" style="--c:${cl}">${I(ic||'tag')}</span><span class="body t">${esc(katN(k))}</span><span class="ok">${I('check')}</span></button>`).join(''):''}</div>`}
 function libSheet(b){const own=b.by===meId()||!isChild(),meta=[b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · ');
- const kat=`<div class="kchips" role="group" aria-label="Kategori">${Object.entries(LKAT).map(([k,[n,c]])=>`<button data-act="libKat" data-id="${b.id}" data-v="${k}" aria-pressed="${b.k===k}" style="--c:${c}"${lock(own,PARENT)}>${esc(katN(k))}</button>`).join('')}</div>`;
+ const kat=`<div id="lkat">${lkPick(b,own)}</div>`;
  const rd=`<div class="lbl" style="margin-top:16px"><span>Kim okudu</span></div><div class="pgrid">${ordMe().map(m=>`<button class="pp${m.role==='child'?' kid':''}" data-act="libRead" data-id="${b.id}" data-m="${m.id}" aria-pressed="${b.rd.includes(m.id)}"${lock(m.id===meId(),'Herkes yalnızca kendini işaretler.')}>${av(m.id)}<span class="ck">${I('check','sm')}</span>${esc(first(m.name))}</button>`).join('')}</div>`;
  return `<div class="bkhead">${bkCover(b,'md')}<span class="bktx">${b.a?`<b>${esc(b.a)}</b>`:''}${meta?`<span>${meta}</span>`:''}${b.isbn?`<span>ISBN ${b.isbn}</span>`:''}<span>${b.by?esc(first(M(b.by).name))+' ekledi · ':''}${ago(b.at)}</span></span></div>${kat}${rd}<div class="lcmw">${cmHTML(b)}</div>`}
 // Aynı kitap evde var mı: ISBN ya da ad (ve yazar)
@@ -2582,9 +2602,9 @@ function seedOku(o){const t=T(),now=Date.now(),D=864e5,H=36e5,r=s=>{const x=Math
 function seedLib(o){const now=Date.now(),D=864e5,H=36e5,by=['ayse','mehmet','fatma','zeynep'];
  const L=[['Simyacı','Paulo Coelho',188,1988,'dk',['ayse','zeynep']],['Suç ve Ceza','Fyodor Dostoyevski',687,1866,'dk',['mehmet']],['Tutunamayanlar','Oğuz Atay',724,1972,'tr',['mehmet']],['İnce Memed','Yaşar Kemal',436,1955,'tr',['fatma','mehmet']],
   ['Çalıkuşu','Reşat Nuri Güntekin',544,1922,'tr',['fatma','ayse']],['Saatleri Ayarlama Enstitüsü','Ahmet Hamdi Tanpınar',382,1961,'tr',['mehmet']],['Beyaz Diş','Jack London',264,1906,'cg',['can','zeynep']],['Define Adası','Robert Louis Stevenson',240,1883,'cg',['can']],
-  ['Pal Sokağı Çocukları','Ferenc Molnár',224,1906,'cg',['zeynep','can','ayse']],['Momo','Michael Ende',304,1973,'cg',['can']],['Harry Potter ve Felsefe Taşı','J. K. Rowling',276,1997,'cg',['zeynep','can']],['Sofie’nin Dünyası','Jostein Gaarder',560,1991,'dt',['zeynep']],
+  ['Pal Sokağı Çocukları','Ferenc Molnár',224,1906,'cg',['zeynep','can','ayse']],['Momo','Michael Ende',304,1973,'gn',['can']],['Harry Potter ve Felsefe Taşı','J. K. Rowling',276,1997,'bk',['zeynep','can']],['Sofie’nin Dünyası','Jostein Gaarder',560,1991,'fe',['zeynep']],
   ['Kuyucaklı Yusuf','Sabahattin Ali',248,1937,'tr',['ayse','mehmet']],['Benim Adım Kırmızı','Orhan Pamuk',472,1998,'tr',['ayse']],['Yaban','Yakup Kadri Karaosmanoğlu',224,1932,'tr',[]],['1984','George Orwell',352,1949,'dk',['mehmet','zeynep']],
-  ['Satranç','Stefan Zweig',84,1942,'dk',['mehmet','ayse']],['Küçük Kadınlar','Louisa May Alcott',592,1868,'dk',['zeynep']],['Nutuk','Mustafa Kemal Atatürk',598,1927,'dt',['mehmet']],['Dede Korkut Hikâyeleri','Anonim',248,0,'tr',['fatma']]];
+  ['Satranç','Stefan Zweig',84,1942,'oy',['mehmet','ayse']],['Küçük Kadınlar','Louisa May Alcott',592,1868,'dk',['zeynep']],['Nutuk','Mustafa Kemal Atatürk',598,1927,'ta',['mehmet']],['Dede Korkut Hikâyeleri','Anonim',248,0,'tr',['fatma']]];
  o.books=L.map(([t,a,p,y,k,rd],i)=>({id:'b'+(now-i*D).toString(36)+i,t,a,p,y:y?String(y):'',k,i:'',rd:[...rd],by:by[i%4],at:now-(i*2+1)*D}));
  const B=t=>o.books.find(b=>b.t===t).id;o.wcm=o.wcm||[];
  [['Simyacı','zeynep','Sonu çok güzel bağlanıyor.',8],['Simyacı','ayse','Her okuyuşta başka bir şey buluyorum.',30],['Harry Potter ve Felsefe Taşı','can','Devamını da alalım!',5],['Pal Sokağı Çocukları','can','Nemeçek’e çok üzüldüm.',26],['Kuyucaklı Yusuf','mehmet','Sabahattin Ali’nin en sevdiğim kitabı.',300]]
@@ -3733,11 +3753,12 @@ const A={
  okuFin:()=>{F.okf=!F.okf;okuRe(okuLogBody())},
  okuSave:()=>{if(F.okv)okuSave()},
  libF:d=>{UI.lf=d.v===UI.lf?'all':d.v;render(true)},
- libOpen:d=>{const b=LIB().find(x=>x.id===d.id);if(!b){toast('Bu kitap başka bir cihazda silinmiş.');return}sheet(esc(b.t),libSheet(b),shTools(['libEdit',b.id,'edit','Düzenle',b.by===meId()||!isChild(),PARENT],['libDel',b.id,'trash','Sil',b.by===meId()||!isChild(),PARENT,1]))},
+ libOpen:d=>{const b=LIB().find(x=>x.id===d.id);if(!b){toast('Bu kitap başka bir cihazda silinmiş.');return}F.lkOpen=false;sheet(esc(b.t),libSheet(b),shTools(['libEdit',b.id,'edit','Düzenle',b.by===meId()||!isChild(),PARENT],['libDel',b.id,'trash','Sil',b.by===meId()||!isChild(),PARENT,1]))},
  libRead:d=>{const b=LIB().find(x=>x.id===d.id);if(!b||d.m!==meId())return;const on=!b.rd.includes(d.m);b.rd=on?[...b.rd,d.m]:b.rd.filter(x=>x!==d.m);
   if(d.m===meId()){const t=`“${b.t}” kitabını okudu`;if(on)log(t);else unlog(t)}
   const el=document.querySelector(`.sheet [data-act="libRead"][data-m="${d.m}"]`);el&&el.setAttribute('aria-pressed',on);render(true)},
- libKat:d=>{const b=LIB().find(x=>x.id===d.id);if(!b||!LKAT[d.v])return;b.k=d.v;document.querySelectorAll('.sheet [data-act="libKat"]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===d.v));render(true)},
+ libKat:d=>{const b=LIB().find(x=>x.id===d.id);if(!b||!LKAT[d.v])return;b.k=d.v;F.lkOpen=false;const e=document.getElementById('lkat');if(e)e.innerHTML=lkPick(b,true);render(true)},
+ libKatTog:d=>{const b=LIB().find(x=>x.id===d.id);if(!b)return;F.lkOpen=!F.lkOpen;const e=document.getElementById('lkat');if(e)e.innerHTML=lkPick(b,true)},
  libDel:d=>{const b=LIB().find(x=>x.id===d.id);if(!b){close();return}const u=snap();S.books=LIB().filter(x=>x.id!==b.id);S.wcm=(S.wcm||[]).filter(c=>c.w!==b.id);close();render(true);toast(`“${b.t}” silindi`,u)},
  dzSheet:()=>{const k=lsrt();sheet('Sırala',`<div class="dzl" role="radiogroup" aria-label="Dizilim">${Object.entries(DZ).map(([x,[n,s]])=>`<button role="radio" aria-checked="${x===k}" data-act="dzSet" data-v="${x}"><span>${n}<small>${s}</small></span><i class="rb" aria-hidden="true"></i></button>`).join('')}</div>`)},
  dzSet:d=>{if(!DZ[d.v])return;store.prefs.lsrt=d.v;save();close();render(true)},
