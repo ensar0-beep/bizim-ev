@@ -99,6 +99,21 @@ svg.i.sm{width:1.05rem;height:1.05rem}
 .hmc .hd{display:flex;gap:12px;align-items:center;padding-right:28px}.hmc .hd>span:last-child{display:grid;gap:2px;min-width:0}.hmc .hd small{color:var(--muted);font-size:.82rem}
 .hmc .ic{width:44px;height:44px;border-radius:14px;background:var(--accent-soft);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;flex:none}
 .hmc p{margin:0;color:var(--muted);font-size:.9rem}.hmc .bt{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ilcard .ilbx{width:46px;height:46px;border-radius:14px;background:linear-gradient(160deg,#F4D9D2,#E9B7AA);color:#A2412B;display:flex;align-items:center;justify-content:center;flex:none}
+.ilcard small em{font-style:normal;font-weight:700}.ilcard small em.r{color:var(--danger)}.ilcard small em.o{color:var(--warn)}
+.ilch{background:var(--danger-soft);color:var(--danger)}
+.ilic{width:40px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c);display:flex;align-items:center;justify-content:center;flex:none}.ilic.lg{width:56px;height:56px;border-radius:16px}
+.ilr{gap:12px}.ilr .body{min-width:0;flex:1}.ilr .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.ilt{flex:none;font-size:.74rem;font-weight:700;border-radius:999px;padding:3px 9px;background:var(--sunk);color:var(--muted)}.ilt.gec{background:var(--danger-soft);color:var(--danger)}.ilt.yak{background:var(--warn-soft);color:var(--warn)}
+h2.sec.gec{color:var(--danger)}h2.sec.yak{color:var(--warn)}
+.ilempty{display:grid;justify-items:center;text-align:center;gap:8px;padding:32px 20px;margin-top:12px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow)}.ilempty>.i{width:32px;height:32px;color:#A2412B}.ilempty p{margin:0 0 8px;color:var(--muted);font-size:.92rem;line-height:1.45}
+.ilsh{display:grid;gap:14px}.ilhd{display:flex;gap:14px;align-items:center}.ilhd b{font-size:1.2rem;display:block}.ilhd small{color:var(--muted)}
+.ilskt{border-radius:16px;padding:14px;background:var(--sunk);display:grid;gap:2px}.ilskt span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}.ilskt b{font-size:1.4rem;font-family:var(--f-display)}.ilskt small{color:var(--muted)}
+.ilskt.gec{background:var(--danger-soft)}.ilskt.gec b,.ilskt.gec small{color:var(--danger)}.ilskt.yak{background:var(--warn-soft)}.ilskt.yak b{color:var(--warn)}
+.ilsh .row .v{color:var(--muted);text-align:right;max-width:60%}.ilby{margin:-4px 4px 0;font-size:.8rem;color:var(--muted)}
+.ildot{display:inline-block;width:12px;height:12px;border-radius:999px;background:var(--c);margin-right:6px;vertical-align:-1px}.rpi .ildot{margin:0}
+.scan.dm .c1{left:calc(50% - 70px);top:calc(50% - 70px)}.scan.dm .c2{right:calc(50% - 70px);top:calc(50% - 70px)}.scan.dm .c3{left:calc(50% - 70px);bottom:calc(50% - 70px)}.scan.dm .c4{right:calc(50% - 70px);bottom:calc(50% - 70px)}.scan.dm .ray{left:calc(50% - 80px);right:calc(50% - 80px)}
+.ilok{display:flex;align-items:flex-start;gap:8px;padding:12px 14px;border-radius:14px;background:var(--accent-soft);color:var(--accent-ink);font-size:.9rem;line-height:1.4;margin-bottom:10px}.ilok>.i{flex:none;margin-top:2px}.ilok span{flex:1}.ilok .link{flex:none;padding:0;margin:0;font-size:.85rem}
 #tbar{position:absolute;left:0;right:0;top:0;z-index:6;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .18s,transform .22s}
 #tbar.on{opacity:1;transform:none;pointer-events:auto}
 #tbar .in{background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:saturate(1.8) blur(18px);backdrop-filter:saturate(1.8) blur(18px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 10px) 18px 10px}
@@ -1350,7 +1365,7 @@ const FB_KEY='AIzaSyB6cyMIu_2Q5T1cAXTzDFPmXlPs0CWzQpg';
 const IDP_URL='https://identitytoolkit.googleapis.com/v1/accounts:signUp';
 const TOK_URL='https://securetoken.googleapis.com/v1/token';
 const KEY='bizim-ev.v1';
-const COLS=['members','events','tasks','lists','items','wishes','activity','freq','msgs','wcm','rsv','books','bkat','okl','okh'];
+const COLS=['members','events','tasks','lists','items','wishes','activity','freq','msgs','wcm','rsv','books','bkat','okl','okh','ilac'];
 let store;
 try{store=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,demoMe:'ayse',prefs:{theme:'system',big:false},fired:{},auth:null,av:{},avi:{},D:{},fk:null,rc:null},store&&typeof store==='object'?store:{});
@@ -1424,7 +1439,8 @@ function norm(c,id,x){x=Object.assign({},x&&typeof x==='object'?x:{},{id});
   case 'books':x.t=str(x.t).slice(0,160)||'?';x.a=str(x.a).slice(0,120);x.p=Math.max(0,Math.min(20000,Math.round(+x.p)||0));x.y=/^\d{4}$/.test(str(x.y))?x.y:'';if(!LKAT[x.k])x.k='dg';x.i=okCover(str(x.i))?x.i:'';if(!/^#[0-9a-fA-F]{6}$/.test(str(x.c)))delete x.c;if(!okIsbn(str(x.isbn)))delete x.isbn;x.rd=idList(x.rd);x.by=okId(str(x.by))?x.by:'';x.at=+x.at||0;break;
   case 'bkat':x.n=str(x.n).trim().slice(0,40);x.at=+x.at||0;break;
   case 'okl':x.m=okId(str(x.m))?x.m:'';if(!okDate(x.d))x.d='';x.dk=Math.max(0,Math.min(600,Math.round(+x.dk)||0));x.g=Math.max(0,Math.min(600,Math.round(+x.g)||0));if(!okId(str(x.b)))delete x.b;x.at=+x.at||0;break;
-  case 'okh':x.lv=Math.max(0,Math.min(3,Math.round(+x.lv)||0));if(!okId(str(x.b)))delete x.b;x.at=+x.at||0;break}
+  case 'okh':x.lv=Math.max(0,Math.min(3,Math.round(+x.lv)||0));if(!okId(str(x.b)))delete x.b;x.at=+x.at||0;break;
+  case 'ilac':x.n=str(x.n).trim().slice(0,80)||'?';if(!IKAT[x.c])x.c='dg';x.s=okSkt(x.s)?x.s:'';x.k=okId(str(x.k))?x.k:'';x.a=Math.max(1,Math.min(99,Math.round(+x.a)||1));x.no=str(x.no).slice(0,200);if(!okGtin(str(x.g)))delete x.g;x.by=okId(str(x.by))?x.by:'';x.at=+x.at||0;break}
  return x}
 function flat(s){const o={};if(!s)return o;for(const c of COLS)for(const x of s[c]||[])o[c+'/'+x.id]=x;if(s.ann)o.ann=s.ann;if(s.meta)o.meta=s.meta;return o}
 function unflat(o){const s={meta:o.meta||{},ann:o.ann&&typeof o.ann==='object'?Object.assign({},o.ann,{text:str(o.ann.text)}):null};for(const c of COLS)s[c]=[];
@@ -2135,7 +2151,7 @@ function todayHead(){const m=me(),d=new Date(),h=d.getHours(),hj=hnum(d),x=holy(
  const hjt=hj?`<div class="hj">${hj.d} ${HAY[hj.m-1]} ${hj.y} · ${phaseN(hj.d).replace(' ','&nbsp;')}</div>`:'',mb=hj?`<button class="mbtn" data-act="moonInfo" data-d="${hj.d}" aria-label="Ay: ${phaseN(hj.d)}">${moonSVG(hj.d)}</button>`:'';
  const pa=msgStrip();
  return `<div class="th thx thn sky-${sk}"><div class="r1"><div class="ov">${long(T())}<span id="wxs">${wxChip()}</span></div></div><div class="thbtn">${bellBtn()}<button class="icon-btn" data-act="myProfile" aria-label="Aile">${av(m.id)}</button></div>
- <div class="panel${pa?' wa':''}"${hj?'':' style="padding-right:16px"'}>${stars}<h1>${selam(h,x,hj,d.getDay()===5)}</h1>${hjt}${acilChip()}${ch}${mb}</div>${pa}</div>`}
+ <div class="panel${pa?' wa':''}"${hj?'':' style="padding-right:16px"'}>${stars}<h1>${selam(h,x,hj,d.getDay()===5)}</h1>${hjt}${acilChip()}${ilChip()}${ch}${mb}</div>${pa}</div>`}
 function vToday(){
  const child=isChild();
  return `${todayHead()}${onHereHTML()}
@@ -2329,31 +2345,32 @@ function libLog(t){const a=S.activity[0];
  else log(`kütüphaneye “${t}” kitabını ekledi`)}
 const libRow=(b,sub,end)=>`${bkCover(b,'xs')}<span class="tx"><b>${esc(b.t)}</b><small>${sub}</small></span>${end||''}`;
 // Barkod okuma: kamera görüntüsünde EAN-13 (978/979). Android'de tarayıcının BarcodeDetector'ı, iPhone'da ilk taramada yüklenen ZXing.
-let scR=null,scBusy=0;
-async function scReader(){if(scR)return scR;
- if('BarcodeDetector' in window){try{const f=await BarcodeDetector.getSupportedFormats();if(f.includes('ean_13')){const d=new BarcodeDetector({formats:['ean_13']});return scR=async v=>{const r=await d.detect(v);return r[0]&&r[0].rawValue}}}catch(e){}}
+// scMode 'il': ilaç kutusundaki karekod (GS1 DataMatrix) ya da kutunun çizgili barkodu; sonuç ilGot'a gider.
+let scRs={},scBusy=0,scMode='isbn';
+async function scReader(){const md=scMode;if(scRs[md])return scRs[md];const il=md==='il',fm=il?['data_matrix','ean_13']:['ean_13'];
+ if('BarcodeDetector' in window){try{const f=await BarcodeDetector.getSupportedFormats();if(fm.every(x=>f.includes(x))){const d=new BarcodeDetector({formats:fm});return scRs[md]=async v=>{const r=await d.detect(v);const q=il&&r.find(x=>x.format==='data_matrix')||r[0];return q&&q.rawValue}}}catch(e){}}
  if(!window.ZXing)await new Promise((ok,no)=>{const s=document.createElement('script');s.src='vendor/zxing-0.21.3.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});
  const Z=window.ZXing,h=new Map(),rd=new Z.MultiFormatReader(),cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});
- h.set(Z.DecodeHintType.POSSIBLE_FORMATS,[Z.BarcodeFormat.EAN_13]);h.set(Z.DecodeHintType.TRY_HARDER,true);rd.setHints(h);
+ h.set(Z.DecodeHintType.POSSIBLE_FORMATS,il?[Z.BarcodeFormat.DATA_MATRIX,Z.BarcodeFormat.EAN_13]:[Z.BarcodeFormat.EAN_13]);h.set(Z.DecodeHintType.TRY_HARDER,true);rd.setHints(h);
  // Her karede başka bir kesit: ortadaki dar şerit, geniş şerit, bütün kare; ikili yöntem de sırayla değişir (parlak ya da gölgeli kapakta biri tutar)
- const CR=[[.62,.34,900],[.9,.5,1100],[1,1,960]];let f=0;
- return scR=async v=>{const w=v.videoWidth,ht=v.videoHeight;if(!w||!ht)return null;const [fw,fh,mx]=CR[f%3],B=f%2?Z.GlobalHistogramBinarizer:Z.HybridBinarizer;f++;
+ const CR=il?[[.45,.6,700],[.7,.9,900],[1,1,960]]:[[.62,.34,900],[.9,.5,1100],[1,1,960]];let f=0;
+ return scRs[md]=async v=>{const w=v.videoWidth,ht=v.videoHeight;if(!w||!ht)return null;const [fw,fh,mx]=CR[f%3],B=f%2?Z.GlobalHistogramBinarizer:Z.HybridBinarizer;f++;
   const sw=Math.round(w*fw),sh=Math.round(ht*fh),sx=(w-sw)/2,sy=(ht-sh)/2,k=Math.min(1,mx/sw);
   cv.width=Math.round(sw*k);cv.height=Math.round(sh*k);cx.drawImage(v,sx,sy,sw,sh,0,0,cv.width,cv.height);
   try{return rd.decode(new Z.BinaryBitmap(new B(new Z.HTMLCanvasElementLuminanceSource(cv)))).getText()}catch(e){return null}}}
-async function scStart(){const v=document.getElementById('scv');if(!v||v.srcObject)return;
+async function scStart(md){const v=document.getElementById('scv');if(!v||v.srcObject)return;if(md)scMode=md;const alt=scMode==='il'?'İlacın adını aşağıya yazabilirsin.':'Kitabı adıyla arayabilirsin.';
  const msg=t=>{const m=document.getElementById('scmsg');if(m){m.textContent=t;m.hidden=!t}};
- if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){msg('Bu telefonda kamera açılamıyor. Kitabı adıyla arayabilirsin.');return}
+ if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){msg('Bu telefonda kamera açılamıyor. '+alt);return}
  let st;try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false})}
- catch(e){msg(e&&e.name==='NotAllowedError'?'Kameraya izin verilmedi. Telefonun ayarlarından izin verebilir ya da kitabı adıyla arayabilirsin.':'Kamera açılamadı. Kitabı adıyla arayabilirsin.');return}
+ catch(e){msg(e&&e.name==='NotAllowedError'?'Kameraya izin verilmedi. Telefonun ayarlarından izin verebilir ya da '+alt.charAt(0).toLocaleLowerCase('tr')+alt.slice(1):'Kamera açılamadı. '+alt);return}
  const stop=()=>{st.getTracks().forEach(t=>t.stop());if(v.srcObject===st)v.srcObject=null};
  if(!document.body.contains(v)||v.srcObject){stop();return}
  v.srcObject=st;try{await v.play()}catch(e){}
  scTune(st.getVideoTracks()[0]);
- let rd;try{rd=await scReader()}catch(e){stop();msg('Barkod okuyucu yüklenemedi. Kitabı adıyla arayabilirsin.');return}
+ let rd;try{rd=await scReader()}catch(e){stop();msg('Barkod okuyucu yüklenemedi. '+alt);return}
  msg('');
  const tick=async()=>{if(!document.body.contains(v)||document.hidden||v.srcObject!==st){stop();return}
-  if(v.readyState>=2&&!scBusy){scBusy=1;try{const c=await rd(v);if(c)scGot(String(c))}catch(e){}scBusy=0}
+  if(v.readyState>=2&&!scBusy){scBusy=1;try{const c=await rd(v);if(c)(scMode==='il'?ilGot:scGot)(String(c))}catch(e){}scBusy=0}
   setTimeout(tick,120)};tick()}
 // Telefon destekliyorsa (çoğu Android): sürekli odak; kitabı uzak tutunca da okunsun diye hafif yakınlaştırma; el feneri düğmesi.
 // iPhone tarayıcısı bunları vermez, orada düğme görünmez.
@@ -2462,7 +2479,7 @@ function seedLib(o){const now=Date.now(),D=864e5,H=36e5,by=['ayse','mehmet','fat
  const B=t=>o.books.find(b=>b.t===t).id;o.wcm=o.wcm||[];
  [['Simyacı','zeynep','Sonu çok güzel bağlanıyor.',8],['Simyacı','ayse','Her okuyuşta başka bir şey buluyorum.',30],['Harry Potter ve Felsefe Taşı','can','Devamını da alalım!',5],['Pal Sokağı Çocukları','can','Nemeçek’e çok üzüldüm.',26],['Kuyucaklı Yusuf','mehmet','Sabahattin Ali’nin en sevdiğim kitabı.',300]]
   .forEach(([t,m,x,h],i)=>o.wcm.push({id:'c'+(now-h*H).toString(36)+i,w:B(t),by:m,t:x,at:now-h*H}));
- return seedOku(o)}
+ return seedIl(seedOku(o))}
 function lTop(wish){const mk=S.items.filter(i=>!i.done&&i.cat==='Market').length,sel=wish?1:0,cn=[S.items.filter(i=>!i.done).length,(S.wishes||[]).filter(w=>!w.done).length],
   opt=[['buy','Alınacaklar','--buy-ink'],['wish','İstekler','--wish-ink']];
  // Kamera şeridi (iPhone Kamera gibi): seçilen ortada ve renkli, öbürü iki yanda soluk. Daireseldir: iki yana da öbürü görünür, kaydırınca döner.
@@ -2759,6 +2776,79 @@ function hmCard(){if(store.mode!=='family'&&store.mode!=='demo')return '';const 
  <div class="hd"><span class="ic">${I('camera')}</span><span><b>${esc(e.title)} nasıldı?</b><small>${rel(d0)}${e.time?' '+hm(e.time):''}${e.loc?' · '+esc(e.loc):''}</small></span></div>
  <p>Ailene bir hatıra bırak: fotoğraf ekle ya da birkaç söz yaz.</p>
  <div class="bt"><button class="btn primary sm" data-act="phPick" data-k="${k}">${I('camera','sm')}Fotoğraf ekle</button><button class="btn soft sm" data-act="hmCm" data-id="${e.id}" data-d="${d}">${I('chat','sm')}Yorum yaz</button></div></div>`}
+// İlaç dolabı (Aile'de kart, UI.tab 'ilac'). ilac/{id} = {n, c, s, k, a, no, g, by, at}: ad, tür (IKAT), son kullanma 'YYYY-MM' (boş olabilir),
+// kimin için (üye id, boş = herkes), kutu sayısı, not, GTIN (karekoddan; aynı ilaç bir daha okutulunca ad kendiliğinden gelir).
+// Sayfa tarih sırasıyla: tarihi geçmiş, yakında bitiyor (2 ay), dolapta (Apple Sağlık'ın ilaç listesi gibi). Uyarı selamlama panelinde hap (ilChip).
+const IKAT={ag:['Ağrı ve ateş','#E07A5F'],sg:['Soğuk algınlığı','#3D8EB9'],mi:['Mide','#5E9C80'],al:['Alerji','#A66DB8'],ci:['Cilt ve yara','#D08A1E'],vi:['Vitamin','#4F944F'],dg:['Diğer','#8A8A8A']};
+const ILC=()=>S.ilac||(S.ilac=[]);
+const okSkt=v=>/^20\d\d-(0[1-9]|1[0-2])$/.test(String(v));
+const ilSt=x=>{if(!x.s)return 'iyi';const [a,b]=x.s.split('-').map(Number),d=(new Date(a,b,0)-parse(T()))/864e5;return d<0?'gec':d<62?'yak':'iyi'};
+const ilSkt=(x,long)=>x.s?(long?MON[+x.s.slice(5,7)-1]:MON[+x.s.slice(5,7)-1].slice(0,3))+' '+x.s.slice(0,4):'';
+const ilFor=x=>x.k&&S.members.some(m=>m.id===x.k)?first(M(x.k).name)+' için':'Herkes';
+const ilIc=(x,sz)=>`<span class="ilic${sz?' '+sz:''}" style="--c:${IKAT[x.c][1]}">${I(/sprey|spray/i.test(x.n)?'spray':'pill')}</span>`;
+const ilTag=x=>{const st=ilSt(x);return `<span class="ilt ${st}">${st==='gec'?'Tarihi geçti':!x.s?'Tarihsiz':st==='yak'?ilSkt(x)+' bitiyor':ilSkt(x)}</span>`};
+const ilSort=a=>a.slice().sort((p,q)=>(p.s||'9999')<(q.s||'9999')?-1:(p.s||'9999')>(q.s||'9999')?1:p.n.localeCompare(q.n,'tr'));
+const ilBad=()=>ILC().filter(x=>ilSt(x)!=='iyi');
+function ilGuess(n){const R=[['ag',/parol|minoset|calpol|nurofen|majezik|apranax|arveles|dolorex|vermidon|termalgin|aspirin|ibuprofen|parasetamol|novalgin|voltaren|dikloron|ağrı|ateş/i],['sg',/aferin|tylol|gripin|theraflu|otrivin|iliadin|sinecod|burun|öksürük|pastil|strepsils|tantum|boğaz|grip/i],['mi',/rennie|gaviscon|talcid|buscopan|nexium|lansor|metpamid|mide|ishal|smecta|enterogermina|prazol/i],['al',/zyrtec|aerius|claritin|xyzal|allerset|telfast|alerji|setirizin|cetirizin|desloratadin/i],['vi',/vitamin|supradyn|pharmaton|magnezyum|omega|demir|devit|d3|b12|çinko|probiyotik/i],['ci',/bepanthol|fucidin|madecassol|krem|pomad|merhem|batikon|yara|jel/i]];
+ const r=R.find(([,re])=>re.test(n));return r?r[0]:'dg'}
+// GTIN-14 kontrol hanesi
+const okGtin=g=>/^\d{14}$/.test(g)&&(10-[...g.slice(0,13)].reduce((t,d,i)=>t+(+d)*(i%2?1:3),0)%10)%10===+g[13];
+// Karekod (İTS, GS1 DataMatrix): 01 GTIN, 21 seri, 17 son kullanma YYAAGG, 10 parti; değişken alanlar GS (29) ile biter. Çizgili barkod (EAN-13) yalnız GTIN verir.
+function ilParse(raw){const t=String(raw).replace(/^\](d2|C1|Q3|e0)/,'').replace(/^\x1d+/,'');
+ if(/^\d{13}$/.test(t))return okGtin('0'+t)&&!/^97[89]/.test(t)?{g:'0'+t,s:''}:null;
+ const o={};let i=0;
+ while(i<t.length){const ai=t.slice(i,i+2);
+  if(ai==='01'){o.g=t.slice(i+2,i+16);i+=16}else if(ai==='17'){o.e=t.slice(i+2,i+8);i+=8}
+  else if(ai==='10'||ai==='21'){const j=t.indexOf('\x1d',i+2);i=j<0?t.length:j+1}else if(t[i]==='\x1d')i++;else break}
+ if(!o.g||!okGtin(o.g))return null;
+ if(!o.e){const m=t.match(/\x1d17(\d{6})/)||t.slice(16).match(/17(\d\d(?:0[1-9]|1[0-2])\d\d)10/);if(m)o.e=m[1]}
+ let s='';if(o.e&&/^\d{6}$/.test(o.e)){const v='20'+o.e.slice(0,2)+'-'+o.e.slice(2,4);if(okSkt(v))s=v}
+ return {g:o.g,s}}
+// Bu telefonun hatırladığı adlar (GTIN → ad); dolaptan çıkan ilaç bir daha okutulunca da ad gelsin. Firebase'e gitmez.
+const ilName=g=>g?(ILC().find(x=>x.g===g)||{}).n||(store.ilg||{})[g]||'':'';
+function ilMem(g,n){const m=store.ilg=store.ilg||{};delete m[g];m[g]=n;const k=Object.keys(m);if(k.length>300)delete m[k[0]];save()}
+function ilCard(){const L=ILC(),g=L.filter(x=>ilSt(x)==='gec').length,y=L.filter(x=>ilSt(x)==='yak').length;
+ return `<button class="libcard ilcard" data-act="ilGo"><span class="ilbx">${I('pill')}</span><span class="tx"><b>İlaç dolabı</b><small>${L.length?L.length+' ilaç':'Evdeki ilaçları ve son kullanma tarihlerini ekleyin'}${g?` · <em class="r">${g} tarihi geçmiş</em>`:y?` · <em class="o">${y} yakında bitiyor</em>`:''}</small></span>${I('chevR')}</button>`}
+function ilChip(){const b=ilBad();if(!b.length)return '';const g=b.filter(x=>ilSt(x)==='gec').length;return `<button class="hchip ilch" data-act="ilGo">${I('pill','sm')}<span>${g?g+' ilacın tarihi geçmiş':b.length+' ilacın tarihi yaklaşıyor'}</span></button>`}
+const ilRow=x=>`<button class="row ilr" data-act="ilOpen" data-id="${x.id}">${ilIc(x)}<span class="body"><span class="t">${esc(x.n)}</span><span class="m">${IKAT[x.c][0]} · ${ilFor(x)}${x.a>1?' · '+x.a+' kutu':''}</span></span>${ilTag(x)}</button>`;
+function vIlac(){const L=ILC(),g=L.filter(x=>ilSt(x)==='gec'),y=L.filter(x=>ilSt(x)==='yak'),ok=L.filter(x=>ilSt(x)==='iyi');
+ const head=`<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="family">${I('chevL','sm')}Aile</button><h1>İlaç dolabı</h1><div class="sub">${L.length} ilaç${g.length?` · ${g.length} tarihi geçmiş`:''}</div></div><button class="icon-btn" data-act="ilAdd" aria-label="İlaç ekle">${I('plus')}</button></div>`;
+ if(!L.length)return head+`<div class="ilempty">${I('pill')}<b>Dolap henüz boş</b><p>Kutunun üstündeki karekodu okutun; son kullanma tarihi kendiliğinden gelir. Tarihi yaklaşınca Bugün’de haber verilir.</p><button class="btn primary" data-act="ilAdd">${I('plus','sm')}İlk ilacı ekle</button></div>`;
+ return head+[['Tarihi geçmiş',g,'gec'],['Yakında bitiyor',y,'yak'],['Dolapta',ok,'iyi']].filter(z=>z[1].length).map(([t,a,c])=>`<div class="sec-h"><h2 class="sec ${c}">${t}</h2><span class="n">${a.length}</span></div><div class="group">${ilSort(a).map(ilRow).join('')}</div>`).join('')}
+function ilSheet(x){const st=ilSt(x),by=x.by&&S.members.some(m=>m.id===x.by)?esc(first(M(x.by).name))+' ekledi · ':'';
+ return `<div class="ilsh"><div class="ilhd">${ilIc(x,'lg')}<div><b>${esc(x.n)}</b><small>${IKAT[x.c][0]}</small></div></div>
+ <div class="ilskt ${x.s?st:''}"><span>Son kullanma</span><b>${x.s?ilSkt(x,1):'Girilmedi'}</b><small>${!x.s?'Düzenle’ye dokunup ekleyebilirsin':st==='gec'?'Tarihi geçmiş, kullanmayın':st==='yak'?'Bu ayın sonundan sonra kullanmayın':'Kullanılabilir'}</small></div>
+ <div class="group"><div class="row"><span class="body"><span class="t">Kimin için</span></span><span class="v">${ilFor(x)}</span></div><div class="row"><span class="body"><span class="t">Kaç kutu</span></span><span class="v">${x.a}</span></div>${x.no?`<div class="row"><span class="body"><span class="t">Not</span></span><span class="v">${esc(x.no)}</span></div>`:''}</div>
+ <p class="ilby">${by}${ago(x.at)}</p>
+ <button class="btn ${st==='gec'?'danger':'soft'} block" data-act="ilDone" data-id="${x.id}">${I('cart','sm')}${st==='gec'?'Attım, yenisini alınacaklara ekle':'Bitti, alınacaklara ekle'}</button></div>`}
+function ilKat(){const c=F.ilc,cur=c?IKAT[c]:null;
+ return `<div class="group rpick"><button type="button" class="row rph" data-act="ilKatTog" aria-expanded="${!!F.ilkOpen}"><span class="body t">Türü</span><span class="rpv">${cur?`<i class="ildot" style="--c:${cur[1]}"></i>${cur[0]}`:'Adından tahmin edilir'}</span>${I('chevD','sm')}</button>${F.ilkOpen?Object.entries(IKAT).map(([k,[n,col]])=>`<button type="button" class="row" data-act="ilKatSet" data-v="${k}" aria-pressed="${k===c}"><span class="rpi"><i class="ildot" style="--c:${col}"></i></span><span class="body t">${n}</span><span class="ok">${I('check')}</span></button>`).join(''):''}</div>`}
+const ilKatPaint=()=>{const e=document.getElementById('il-kat');if(e)e.innerHTML=ilKat()};
+const ilScanBox=()=>`<div class="scan dm"><video id="scv" playsinline muted autoplay aria-hidden="true"></video><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><span class="ray"></span><p class="scmsg" id="scmsg">Kamera açılıyor…</p><button type="button" class="sctorch" id="sctorch" aria-pressed="false" aria-label="El feneri" hidden>${I('bolt')}</button></div><p class="note" style="margin:10px 0 4px">${I('info','sm')}<span>Kutunun üstündeki küçük kare kodu (karekod) çerçeveye getir. Son kullanma tarihi kendiliğinden gelir.</span></p>`;
+function ilForm(x){const ed=!!x;x=x||{a:1};F={il:x.id||'',for:x.k||'ev',ilc:x.c||'',g:x.g||'',seen:{}};
+ sheet(ed?'İlacı düzenle':'Yeni ilaç',`${ed?'':`<div id="ilsc">${ilScanBox()}</div>`}<form data-form="ilac" autocomplete="off">
+ <div class="field"><label for="il-n">İlacın adı</label><input class="inp" id="il-n" value="${esc(x.n||'')}" placeholder="örn. Parol 500 mg tablet" maxlength="80"><span class="err" id="il-err" hidden>İlacın adını yaz.</span></div>
+ <div class="field"><label for="il-s">Son kullanma tarihi</label><input class="inp" id="il-s" type="month" value="${x.s||''}" min="2020-01" max="2060-12"></div>
+ <div class="field"><div id="il-kat">${ilKat()}</div></div>
+ <div class="field"><span class="flabel">Kimin için?</span><div class="pgrid" id="it-for">${forChips()}</div></div>
+ <details class="more"${x.no||x.a>1?' open':''}><summary>Kutu sayısı ve not ${I('chevD','sm')}</summary>
+ <div class="field"><label for="il-a">Kaç kutu</label><input class="inp" id="il-a" inputmode="numeric" value="${x.a||1}"></div>
+ <div class="field"><label for="il-no">Not</label><input class="inp" id="il-no" value="${esc(x.no||'')}" placeholder="örn. ölçeği kutunun içinde" maxlength="200"></div></details>
+ <button class="btn primary block">${ed?'Kaydet':'İlacı ekle'}</button></form>`);if(!ed)scStart('il')}
+// Karekod okununca: tarih ve (biliniyorsa) ad forma yazılır, kamera kapanır
+function ilGot(raw){const r=ilParse(raw),m=document.getElementById('scmsg');
+ if(!r){if(m&&!F.seen[raw]){F.seen[raw]=1;m.textContent='Bu, ilacın karekodu değil. Karekod kutunun üstünde, küçük bir kare.';m.hidden=false;setTimeout(()=>{if(m.textContent.startsWith('Bu, ilacın'))m.hidden=true},3500)}return}
+ if(!document.getElementById('il-n'))return;
+ try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
+ F.g=r.g;const n=document.getElementById('il-n'),s=document.getElementById('il-s'),nm=ilName(r.g);
+ if(nm)n.value=nm;if(r.s)s.value=r.s;
+ const ex=ILC().find(y=>y.g===r.g&&y.s===(r.s||s.value));
+ const b=document.getElementById('ilsc');if(b)b.innerHTML=`<div class="ilok">${I('check','sm')}<span>${r.s?`Karekod okundu · son kullanma ${ilSkt({s:r.s},1)}`:'Barkod okundu. Son kullanma tarihi için kutudaki karekodu okut ya da aşağıya yaz.'}${ex?'. Bu ilaç dolapta var; eklersen kutu sayısı artar.':nm?'':'. İlacın adını bir kez yaz, bir dahaki sefere kendiliğinden gelir.'}</span><button type="button" class="link" data-act="ilRescan">Yeniden okut</button></div>`;
+ if(!nm)setTimeout(()=>n.focus(),60)}
+// Örnek ailede ilaçlar: bazılarının tarihi geçmiş, bazıları iki ay içinde bitiyor
+function seedIl(o){const now=Date.now(),ym=k=>{const d=parse(T());d.setDate(1);d.setMonth(d.getMonth()+k);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')},by=['ayse','mehmet'];
+ o.ilac=[['Parol 500 mg tablet','ag',14,'',2],['Calpol şurup','ag',-1,'can',1,'Ölçeği kutunun içinde'],['Nurofen Çocuk şurup','ag',1,'zeynep',1],['Otrivine burun spreyi','sg',-3,'',1],['Tylol Hot','sg',9,'',1],['Rennie çiğneme tableti','mi',30,'',1],['Buscopan','mi',1,'mehmet',1],['Zyrtec damla','al',18,'can',1],['Bepanthol krem','ci',2,'',1],['Supradyn','vi',11,'ayse',1],['D vitamini damla','vi',5,'zeynep',1]]
+  .map(([n,c,k,f,a,no],i)=>({id:'il'+(now-i*864e5).toString(36)+i,n,c,s:ym(k),k:(o.members||[]).some(m=>m.id===f)?f:'',a,no:no||'',by:by[i%2],at:now-(i*3+2)*864e5}));return o}
 // İsteklerde yorum: her isteğin altında (yapılmadan önce de) serbest sohbet. Her yorum ayrı kayıt (wcm/{id} = {w, by, t, at}),
 // böylece iki telefon aynı anda yazınca biri ötekini silmez.
 const cmOf=w=>(S.wcm||[]).filter(c=>c.w===w.id&&c.by&&c.t).sort((a,b)=>a.at-b.at);
@@ -2853,6 +2943,7 @@ function tbIn(sc){const t=UI.tab,q=x=>sc.querySelector(x);if(!S||!store.mode)ret
   return [q('.wtabs')||q('.ltabs'),`<div class="tbs"><b style="color:var(${w?'--wish-ink':'--buy-ink'})">${w?'İstekler':'Alınacaklar'}</b><div class="tbl" role="group" aria-label="${w?'Tür':'Listeler'}">${tb.join('')}</div>${mk?`<button class="icon-btn" data-act="shopStart" data-v="Market" aria-label="Marketteyim">${I('cart')}</button>`:''}</div>`]}
  if(t==='family')return [q('.hdr h1'),`<div class="tbs"><b>Aile</b><span class="tbd"></span><button class="icon-btn" data-act="famSettings" aria-label="Ayarlar">${I('gear')}</button></div>`];
  if(t==='album')return [q('.hdr h1'),`<div class="tbs"><button class="icon-btn" data-act="tab" data-tab="family" aria-label="Geri">${I('chevL')}</button><b>Hatıralarımız</b><span class="tbd">${albEvs().length} etkinlik</span></div>`];
+ if(t==='ilac')return [q('.hdr h1'),`<div class="tbs"><button class="icon-btn" data-act="tab" data-tab="family" aria-label="Geri">${I('chevL')}</button><b>İlaç dolabı</b><span class="tbd">${ILC().length} ilaç</span></div>`];
  if(t==='lib')return [q('.hdr h1'),`<div class="tbs"><button class="icon-btn" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}" aria-label="Geri">${I('chevL')}</button><b>Ev kütüphanesi</b><span class="tbd">${LIB().length} kitap</span></div>`];
  return [null,'']}
 function tbPaint(){const bar=document.getElementById('tbar'),sc=document.getElementById('screen');if(!bar||!sc)return;
@@ -2924,7 +3015,7 @@ function vFamily(){const {m,adm}=famCtx(),ord=ordMe();if(!ord.some(x=>x.id===UI.
  <div class="wheel" id="wheel" aria-label="Aile üyeleri, sağa sola kaydır">${[0,1,2].map(c=>ord.map(x=>card(x,c)).join('')).join('')}</div>
  <div class="wdots" aria-hidden="true">${ord.map(x=>`<i style="--c:${x.color}"${x.id===UI.wsel?' class="on"':''}></i>`).join('')}</div>
  <div id="wsel">${wselHTML(UI.wsel)}</div>
- ${libCard()}${albCard()}
+ ${libCard()}${albCard()}${ilCard()}
  ${lockRow()}
  ${adm?`<button class="invlink" data-act="famInvite">${I('plus','sm')}Aileye birini ekle</button>`:''}
  <div class="sec-h"><h2 class="sec">Son değişiklikler</h2>${S.activity.length>3?`<button class="link" data-act="famFeed">Tümü ${I('chevR','sm')}</button>`:''}</div>
@@ -2962,7 +3053,7 @@ function render(keepScroll){
  else if(UI.err){html=vError(UI.err);nav.hidden=true}
  else if(needKey()){html=vKeyless();nav.hidden=true}
  else if(!S){html=vLoading();nav.hidden=false}
- else{html=({today:vToday,cal:vCal,lists:vLists,tasks:vTasks,family:vFamily,lib:vLib,album:vAlb}[UI.tab]||vToday)();nav.hidden=false}
+ else{html=({today:vToday,cal:vCal,lists:vLists,tasks:vTasks,family:vFamily,lib:vLib,album:vAlb,ilac:vIlac}[UI.tab]||vToday)();nav.hidden=false}
  sc.innerHTML=html;cmRefresh();document.body.classList.toggle('wishc',!!S&&UI.tab==='lists'&&!UI.shop&&UI.lmode==='wish');
  const ss=document.getElementById('setsheet');if(ss&&S)ss.innerHTML=famSettingsHTML();
  sc.scrollTop=keepScroll?y:0;
@@ -3357,7 +3448,7 @@ const A={
  tkb:d=>{UI.tkb=d.v;UI.tkUp=false;UI.dcKeep.clear();const sc=document.getElementById('screen');if(sc){sc.style.scrollBehavior='auto';sc.scrollTop=0;sc.style.scrollBehavior=''}render(true)},
  tkUp:()=>{UI.tkUp=!UI.tkUp;render(true)},
  newTask:d=>taskForm(null,d&&d.d||undefined),
- navAdd:()=>{(()=>{if(UI.tab==='lib')return A.libScan();if(UI.tab==='lists'&&!UI.shop){if(UI.lmode==='wish')return A.newWish();if(S.lists.length)return lAddSheet()}if(UI.tab==='tasks')return A.newTask();A.tdAdd()})();plusGrow()},
+ navAdd:()=>{(()=>{if(UI.tab==='lib')return A.libScan();if(UI.tab==='ilac')return A.ilAdd();if(UI.tab==='lists'&&!UI.shop){if(UI.lmode==='wish')return A.newWish();if(S.lists.length)return lAddSheet()}if(UI.tab==='tasks')return A.newTask();A.tdAdd()})();plusGrow()},
  sugAdd:d=>{const it=addItemTo(F.list,d.v);if(!it)return;addApply([it]);render(true);const g=document.getElementById('sugg'),q=document.getElementById('item-input');if(g)g.innerHTML=suggHTML(q?q.value:'');toast(`${it.name} ${addL().name} listesine eklendi`)},
  addMore:()=>{addSync();F.more=!F.more;addPaint()},
  adList:d=>{addSync();F.list=d.id;addPaint()},
@@ -3483,10 +3574,21 @@ const A={
  libDel:d=>{const b=LIB().find(x=>x.id===d.id);if(!b){close();return}const u=snap();S.books=LIB().filter(x=>x.id!==b.id);S.wcm=(S.wcm||[]).filter(c=>c.w!==b.id);close();render(true);toast(`“${b.t}” silindi`,u)},
  dzSheet:()=>{const k=lsrt();sheet('Sırala',`<div class="dzl" role="radiogroup" aria-label="Dizilim">${Object.entries(DZ).map(([x,[n,s]])=>`<button role="radio" aria-checked="${x===k}" data-act="dzSet" data-v="${x}"><span>${n}<small>${s}</small></span><i class="rb" aria-hidden="true"></i></button>`).join('')}</div>`)},
  dzSet:d=>{if(!DZ[d.v])return;store.prefs.lsrt=d.v;save();close();render(true)},
+ ilGo:()=>{close();UI.tab='ilac';toastOff();render();document.getElementById('screen').scrollTop=0},
+ ilAdd:()=>{if(S)ilForm()},
+ ilOpen:d=>{const x=ILC().find(y=>y.id===d.id);if(!x){toast('Bu ilaç başka bir cihazda silinmiş.');return}const ok=x.by===meId()||!isChild();sheet('',ilSheet(x),shTools(['ilEdit',x.id,'edit','Düzenle',ok,PARENT],['ilDel',x.id,'trash','Sil',ok,PARENT,1]))},
+ ilEdit:d=>{const x=ILC().find(y=>y.id===d.id);if(x)ilForm(x)},
+ ilDel:d=>{const x=ILC().find(y=>y.id===d.id);if(!x){close();return}const u=snap();S.ilac=ILC().filter(y=>y.id!==x.id);close();render(true);toast(`“${x.n}” dolaptan çıkarıldı`,u)},
+ ilDone:d=>{const x=ILC().find(y=>y.id===d.id);if(!x){close();return}const u=snap(),L=S.lists.find(l=>/eczane|ilaç/i.test(l.name))||S.lists[0];
+  if(x.g)ilMem(x.g,x.n);S.ilac=ILC().filter(y=>y.id!==x.id);let it=null;if(L){it=addItemTo(L.id,x.n);if(it&&x.k&&S.members.some(m=>m.id===x.k))it.for=x.k}
+  close();render(true);toast(it?`${it.name} ${L.name} listesine eklendi`:`“${x.n}” dolaptan çıkarıldı`,u)},
+ ilKatTog:()=>{F.ilkOpen=!F.ilkOpen;ilKatPaint()},
+ ilKatSet:d=>{F.ilc=d.v;F.ilkOpen=false;ilKatPaint()},
+ ilRescan:()=>{const b=document.getElementById('ilsc');if(!b)return;F.seen={};b.innerHTML=ilScanBox();scStart('il')},
  libScan:()=>{if(!S)return;F={scan:0,seen:{}};
   sheet('Barkod tara',`<div class="scan"><video id="scv" playsinline muted autoplay aria-hidden="true"></video><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><span class="ray"></span><p class="scmsg" id="scmsg">Kamera açılıyor…</p><button type="button" class="sctorch" id="sctorch" aria-pressed="false" aria-label="El feneri" hidden>${I('bolt')}</button></div>
   <p class="note" style="margin:10px 0 6px">${I('info','sm')}<span>Kitabın arkasındaki barkodu çerçeveye getir, bir karış uzakta tut. Arka arkaya okutabilirsin, her biri hemen eklenir.</span></p>
-  <div id="scanl" class="scanl" aria-live="polite"></div><button type="button" class="link" style="margin:10px auto 0" data-act="libFind">Barkod yok mu? Adıyla ara</button>`);scStart()},
+  <div id="scanl" class="scanl" aria-live="polite"></div><button type="button" class="link" style="margin:10px auto 0" data-act="libFind">Barkod yok mu? Adıyla ara</button>`);scStart('isbn')},
  libFind:d=>{F={isbn:d&&okIsbn(d.n||'')?d.n:''};UI.lfRes=[];
   sheet('Kitap ara',`<div class="field"><label for="lf-q" class="sr">Kitap adı ya da yazar</label><input class="inp" id="lf-q" type="search" placeholder="örn. Kürk Mantolu Madonna" autocomplete="off" enterkeyhint="search" autofocus></div>${F.isbn?`<p class="note" style="margin:0 0 8px">${I('info','sm')}<span>ISBN ${F.isbn} kitap kaynaklarında yok. Kapaktaki adı yaz, eklediğin kitaba bu barkod da yazılır. <a href="https://www.kitapyurdu.com/index.php?route=product/search&filter_name=${F.isbn}" target="_blank" rel="noopener" style="color:var(--accent-ink);font-weight:600">Kitapyurdu'nda bak</a></span></p>`:''}<div id="lfres" aria-live="polite">${lfHint()}</div>`)},
  libAdd:d=>{const x=(UI.lfRes||[])[+d.i];if(!x)return;if(libHas(x)){toast('Bu kitap zaten evde');return}const b=libNew(F.isbn?Object.assign({},x,{n:F.isbn}):x);F.isbn='';
@@ -3558,6 +3660,13 @@ const A={
 };
 
 const FORMS={
+ ilac:()=>{const g=id=>document.getElementById(id),n=g('il-n').value.trim().replace(/\s+/g,' ').slice(0,80);if(!n){g('il-err').hidden=false;g('il-n').focus();return}
+  const sv=g('il-s').value,s=okSkt(sv)?sv:'',a=Math.max(1,Math.min(99,parseInt(g('il-a').value,10)||1)),no=g('il-no').value.trim().slice(0,200),k=F.for&&F.for!=='ev'?F.for:'',c=IKAT[F.ilc]?F.ilc:ilGuess(n),u=snap();let msg;
+  if(F.il){const x=ILC().find(y=>y.id===F.il);if(!x){close();return}Object.assign(x,{n,s,a,no,k,c});msg='Kaydedildi'}
+  else{const ex=F.g&&ILC().find(y=>y.g===F.g&&y.s===s&&y.k===k);
+   if(ex){ex.a=Math.min(99,ex.a+a);msg=`Dolapta vardı, artık ${ex.a} kutu`}
+   else{ILC().push(Object.assign({id:uid(),n,c,s,k,a,no,by:meId(),at:Date.now()},F.g?{g:F.g}:{}));log(`ilaç dolabına “${n}” ekledi`);msg=`${n} dolaba eklendi`}}
+  if(F.g)ilMem(F.g,n);F={};close();render(true);toast(msg,u)},
  create:async()=>{const g=id=>document.getElementById(id);const fam=g('cf-fam').value.trim(),name=g('cf-name').value.trim(),rel=g('cf-rel').value.trim();
   const err=t=>{g('cf-err').textContent=t;g('cf-err').hidden=false};
   if(!fam||!name)return err('Ailenin adını ve kendi adını yaz.');
@@ -3848,7 +3957,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-11-05',items:[['camera','Hatıra hatırlatması','Katıldığın bir etkinlik bitince Bugün’ün üstünde “Nasıldı?” kartı çıkar: oradan fotoğraf ekleyebilir ya da yorum yazabilirsin. Ekleyince ya da kapatınca kaybolur'],['book','Okuma alışkanlığı','Ev kütüphanesinin tepesinde okuma kartı var. Okuduğun gün “Okudum”a dokun, kaç dakika okuduğunu seç. Günlük hedefini tuttukça seri büyür; son 7 günün 5’inde tutturunca Filiz’den Fidan’a, Ağaç’a, Çınar’a geçersin. Çocukların hedefini anne ya da baba seçer'],['camera','Hatıralarımız','Aile sayfasında, Ev kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
+const NEWS={v:'2026-11-06',items:[['pill','İlaç dolabı','Aile sayfasında yeni bir kart var: evdeki ilaçlar ve son kullanma tarihleri. Kutunun üstündeki karekodu okutunca tarih kendiliğinden gelir. Tarihi geçen ya da iki ay içinde biten ilaç olunca Bugün’ün üstünde küçük bir uyarı çıkar; “Bitti” deyince ilaç alınacaklara eklenir'],['camera','Hatıra hatırlatması','Katıldığın bir etkinlik bitince Bugün’ün üstünde “Nasıldı?” kartı çıkar: oradan fotoğraf ekleyebilir ya da yorum yazabilirsin. Ekleyince ya da kapatınca kaybolur'],['book','Okuma alışkanlığı','Ev kütüphanesinin tepesinde okuma kartı var. Okuduğun gün “Okudum”a dokun, kaç dakika okuduğunu seç. Günlük hedefini tuttukça seri büyür; son 7 günün 5’inde tutturunca Filiz’den Fidan’a, Ağaç’a, Çınar’a geçersin. Çocukların hedefini anne ya da baba seçer'],['camera','Hatıralarımız','Aile sayfasında, Ev kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
@@ -3955,7 +4064,7 @@ function ydDl(){const y=UI.yd;if(!y)return;const a=document.createElement('a'),u
 const ydBtn=()=>UI.yd?`<button class="link" style="justify-content:center;width:100%;margin-top:8px" data-act="ydDl">${I('paper','sm')}Yedeği dosya olarak indir</button>`:'';
 
 /* Kilitleme ilerlemesi */
-const LKG=[['Etkinlikler',['events','rsv']],['Görevler',['tasks']],['Listeler ve alınacaklar',['lists','items','freq']],['İstekler ve yorumlar',['wishes','wcm']],['Kütüphane',['books','bkat','okl','okh']],['Aile, mesajlar ve geçmiş',['members','msgs','activity','meta','ann']]];
+const LKG=[['Etkinlikler',['events','rsv']],['Görevler',['tasks']],['Listeler ve alınacaklar',['lists','items','freq']],['İstekler ve yorumlar',['wishes','wcm']],['Kütüphane',['books','bkat','okl','okh']],['İlaç dolabı',['ilac']],['Aile, mesajlar ve geçmiş',['members','msgs','activity','meta','ann']]];
 const LK={g:[]};
 function lkProg(undo){LK.g=[{n:undo?'Kilit kaldırma başladı':'Yedek kaydedildi',a:1,b:1,s:2},...LKG.map(([n])=>({n,a:0,b:0,s:0})),{n:'Aile fotoğrafları',a:0,b:0,s:0},{n:'Etkinlik fotoğrafları',a:0,b:0,s:0}];
  sheet(undo?'Kilit kaldırılıyor':'Kilitleniyor',`<p>${undo?'Her kayıt açılıp yeniden yazılıyor.':'Her kayıt kilitlenip geri okunuyor ve aslıyla karşılaştırılıyor.'}</p><div class="group" id="lkpg">${lkPgHTML()}</div>${lkNote('Uygulama kapanırsa ya da internet giderse kaldığı yerden devam eder. Hiçbir kayıt kaybolmaz.')}`)}
