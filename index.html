@@ -2430,7 +2430,7 @@ function libCard(){const L=LIB();return `<button class="libcard" data-act="libGo
 // Kitap ayrıntısı: kapak, kategori, Kim okudu, yorumlar (isteklerdeki sohbet)
 function libSheet(b){const own=b.by===meId()||!isChild(),meta=[b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · ');
  const kat=`<div class="kchips" role="group" aria-label="Kategori">${Object.entries(LKAT).map(([k,[n,c]])=>`<button data-act="libKat" data-id="${b.id}" data-v="${k}" aria-pressed="${b.k===k}" style="--c:${c}"${lock(own,PARENT)}>${esc(katN(k))}</button>`).join('')}</div>`;
- const rd=`<div class="lbl" style="margin-top:16px"><span>Kim okudu</span></div><div class="pgrid">${ordMe().map(m=>`<button class="pp${m.role==='child'?' kid':''}" data-act="libRead" data-id="${b.id}" data-m="${m.id}" aria-pressed="${b.rd.includes(m.id)}"${lock(!isChild()||m.id===meId(),'Yalnızca kendini işaretleyebilirsin.')}>${av(m.id)}<span class="ck">${I('check','sm')}</span>${esc(first(m.name))}</button>`).join('')}</div>`;
+ const rd=`<div class="lbl" style="margin-top:16px"><span>Kim okudu</span></div><div class="pgrid">${ordMe().map(m=>`<button class="pp${m.role==='child'?' kid':''}" data-act="libRead" data-id="${b.id}" data-m="${m.id}" aria-pressed="${b.rd.includes(m.id)}"${lock(m.id===meId(),'Herkes yalnızca kendini işaretler.')}>${av(m.id)}<span class="ck">${I('check','sm')}</span>${esc(first(m.name))}</button>`).join('')}</div>`;
  return `<div class="bkhead">${bkCover(b,'md')}<span class="bktx">${b.a?`<b>${esc(b.a)}</b>`:''}${meta?`<span>${meta}</span>`:''}${b.isbn?`<span>ISBN ${b.isbn}</span>`:''}<span>${b.by?esc(first(M(b.by).name))+' ekledi · ':''}${ago(b.at)}</span></span></div>${kat}${rd}<div class="lcmw">${cmHTML(b)}</div>`}
 // Aynı kitap evde var mı: ISBN ya da ad (ve yazar)
 const libHas=x=>LIB().find(b=>x.n&&b.isbn===x.n||trl(b.t)===trl(x.t)&&(!x.a||!b.a||trl(b.a)===trl(x.a)));
@@ -3705,7 +3705,7 @@ const A={
  okuSave:()=>{if(F.okv)okuSave()},
  libF:d=>{UI.lf=d.v===UI.lf?'all':d.v;render(true)},
  libOpen:d=>{const b=LIB().find(x=>x.id===d.id);if(!b){toast('Bu kitap başka bir cihazda silinmiş.');return}sheet(esc(b.t),libSheet(b),shTools(['libEdit',b.id,'edit','Düzenle',b.by===meId()||!isChild(),PARENT],['libDel',b.id,'trash','Sil',b.by===meId()||!isChild(),PARENT,1]))},
- libRead:d=>{const b=LIB().find(x=>x.id===d.id);if(!b)return;const on=!b.rd.includes(d.m);b.rd=on?[...b.rd,d.m]:b.rd.filter(x=>x!==d.m);
+ libRead:d=>{const b=LIB().find(x=>x.id===d.id);if(!b||d.m!==meId())return;const on=!b.rd.includes(d.m);b.rd=on?[...b.rd,d.m]:b.rd.filter(x=>x!==d.m);
   if(d.m===meId()){const t=`“${b.t}” kitabını okudu`;if(on)log(t);else unlog(t)}
   const el=document.querySelector(`.sheet [data-act="libRead"][data-m="${d.m}"]`);el&&el.setAttribute('aria-pressed',on);render(true)},
  libKat:d=>{const b=LIB().find(x=>x.id===d.id);if(!b||!LKAT[d.v])return;b.k=d.v;document.querySelectorAll('.sheet [data-act="libKat"]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===d.v));render(true)},
