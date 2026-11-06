@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bizim Ev · Aile düzenleyici</title>
+<meta name="description" content="Ailenin takvimi, alınacakları, görevleri ve hatıraları tek yerde. Herkesin telefonunda aynı anda, uçtan uca kilitli. Yakında Google Play ve App Store'da.">
+<meta property="og:title" content="Bizim Ev · Aile düzenleyici">
+<meta property="og:description" content="Ailenin takvimi, alınacakları, görevleri ve hatıraları tek yerde. Uçtan uca kilitli.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="img/bugun.webp">
+<meta name="theme-color" content="#FAF8F5">
+<link rel="icon" href="img/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Tek sayfa: ortada açılış + telefon, kaydırınca değişen ekranlar, koyu gizlilik bandı. Düzen container query ile; renk ve yazı uygulamanın kendi sisteminden. */
+:root{
+  --bg:#FAF8F5; --surface:#FFFFFF; --sunk:#F2EEE8; --line:#E4DED4; --fg:#22201D; --muted:#625B52;
+  --accent:#2E6A51; --on-accent:#FFFFFF; --accent-soft:#E1EDE6; --accent-ink:#22533F;
+  --wish:#7A4FB5; --wish-soft:#EFE6F8; --coral:#B9502F; --coral-soft:#FBE9E2; --sun:#E9A23B;
+  --deep:#173A2C; --on-deep:#EAF3EE; --deep-muted:#A9C7B7;
+  --stage:#ECE7DF; --bezel:#1C1B19;
+  --shadow:0 1px 2px rgba(60,40,20,.06),0 18px 50px rgba(60,40,20,.14);
+  --f-display:'Bricolage Grotesque','Figtree',system-ui,sans-serif;
+  --f-body:'Figtree',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#16140F; --surface:#211E19; --sunk:#2B2721; --line:#3B362E; --fg:#F2EDE5; --muted:#ADA497;
+  --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD;
+  --wish:#C7A8EE; --wish-soft:#2E2438; --coral:#F29A80; --coral-soft:#3A251E; --sun:#F2C46E;
+  --deep:#0F241B; --on-deep:#EAF3EE; --deep-muted:#9FC2B0;
+  --stage:#0D0C0A; --bezel:#000;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 18px 50px rgba(0,0,0,.5); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#16140F; --surface:#211E19; --sunk:#2B2721; --line:#3B362E; --fg:#F2EDE5; --muted:#ADA497;
+  --accent:#8BCBA9; --on-accent:#0D2419; --accent-soft:#1F342A; --accent-ink:#A5DABD;
+  --wish:#C7A8EE; --wish-soft:#2E2438; --coral:#F29A80; --coral-soft:#3A251E; --sun:#F2C46E;
+  --deep:#0F241B; --on-deep:#EAF3EE; --deep-muted:#9FC2B0;
+  --stage:#0D0C0A; --bezel:#000;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 18px 50px rgba(0,0,0,.5); color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+#site{container:site/inline-size;overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+
+/* ---------- Site ---------- */
+.w{max-width:1120px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.disp{font-family:var(--f-display);letter-spacing:-.025em;text-wrap:balance;margin:0}
+.eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.lead{color:var(--muted);font-size:1.15rem;max-width:36em;text-wrap:pretty}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:13px 22px;font-weight:700;text-decoration:none;border:0}
+.btn.pri{background:var(--accent);color:var(--on-accent)}
+.btn.sec{background:var(--accent-soft);color:var(--accent-ink)}
+.btn svg{width:18px;height:18px}
+
+.nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+.nav .w{display:flex;align-items:center;gap:20px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:800;font-size:1.2rem;text-decoration:none}
+.brand img{width:34px;height:34px;border-radius:9px}
+.nav nav{display:flex;gap:22px;margin-left:auto;font-weight:600;font-size:.95rem}
+.nav nav a{text-decoration:none;color:var(--muted)}
+.nav nav a:hover{color:var(--fg)}
+.nav .btn{padding:9px 16px;font-size:.92rem}
+@container site (max-width:760px){.nav nav{display:none}.nav .btn{margin-left:auto}}
+
+/* telefon çerçevesi */
+.ph{--w:280px;width:var(--w);max-width:100%;aspect-ratio:390/844;border-radius:calc(var(--w)*.16);padding:calc(var(--w)*.03);background:var(--bezel);box-shadow:var(--shadow);position:relative;flex:none}
+.ph::before{content:"";position:absolute;top:calc(var(--w)*.055);left:50%;transform:translateX(-50%);width:28%;height:calc(var(--w)*.075);border-radius:99px;background:#000;z-index:2}
+.ph img{display:block;width:100%;height:100%;object-fit:cover;object-position:top;border-radius:calc(var(--w)*.13)}
+
+/* mağaza rozetleri */
+.stores{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.badge{display:inline-flex;align-items:center;gap:10px;background:#111;color:#fff;border-radius:12px;padding:11px 18px 11px 14px;border:1px solid #444;position:relative;min-width:168px}
+.badge svg{width:26px;height:26px;flex:none}
+.badge span{display:flex;flex-direction:column;line-height:1.1}
+.badge small{font-size:.68rem;opacity:.85}
+.badge b{font-size:1.08rem;font-weight:600;letter-spacing:-.01em}
+.soon{position:absolute;top:-9px;right:-8px;background:var(--sun);color:#2a1a00;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:99px}
+.storenote{font-size:.88rem;color:var(--muted)}
+
+/* ---------- HERO A: Things 3 tarzı, ortada ---------- */
+.hero{padding-block:72px 0;overflow:hidden}
+.hA{text-align:center}
+.hA .disp{font-size:clamp(2.6rem,6.5cqi,4.6rem);line-height:1.02;max-width:13em;margin:18px auto 18px}
+.hA .lead{margin:0 auto 28px}
+.hA .ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:22px}
+.hA .stores{justify-content:center}
+.hA .stage{position:relative;margin-top:56px;height:520px;display:flex;justify-content:center}
+.hA .stage::before{content:"";position:absolute;left:50%;top:90px;transform:translateX(-50%);width:min(760px,92%);height:600px;border-radius:50%;background:radial-gradient(closest-side,var(--accent-soft),transparent)}
+.hA .ph{--w:330px;position:relative}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:6px 14px 6px 8px;font-weight:600;font-size:.88rem;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.pill i{width:22px;height:22px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:var(--on-accent);font-style:normal}
+.pill i svg{width:13px;height:13px}
+.float{position:absolute;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 14px;box-shadow:var(--shadow);font-size:.88rem;text-align:left;z-index:3;max-width:220px}
+.float b{display:block;font-size:.95rem}
+.float small{color:var(--muted)}
+.hA .f1{left:calc(50% - 360px);top:120px}
+.hA .f2{right:calc(50% - 370px);top:250px}
+@container site (max-width:760px){.hA .float{display:none}.hA .stage{height:420px}.hA .ph{--w:270px}}
+
+/* özellik şeridi */
+.strip{border-block:1px solid var(--line);background:var(--surface)}
+.strip .w{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 28px;padding-block:22px;font-weight:600;color:var(--muted)}
+.strip span{display:inline-flex;align-items:center;gap:8px}
+.strip svg{width:20px;height:20px;color:var(--accent)}
+
+section.sec{padding-block:96px}
+.sh{max-width:40em;margin-bottom:48px}
+.sh .disp{font-size:clamp(2rem,4.2cqi,3rem);line-height:1.08;margin:10px 0 14px}
+@container site (max-width:760px){section.sec{padding-block:64px}}
+
+/* ---------- ÖZELLİK C: Kaydırınca değişen telefon (Apple) ---------- */
+.sticky{display:grid;grid-template-columns:1fr 360px;gap:64px}
+.sticky .steps{display:flex;flex-direction:column}
+.st{min-height:62vh;display:flex;flex-direction:column;justify-content:center;opacity:.35;transition:opacity .35s}
+.st.on{opacity:1}
+.st h3{font-family:var(--f-display);font-size:clamp(1.7rem,3.4cqi,2.4rem);letter-spacing:-.02em;line-height:1.1;margin:10px 0 12px}
+.st p{color:var(--muted);font-size:1.08rem;margin:0;max-width:30em}
+.st .ph{display:none}
+.stk{position:sticky;top:90px;height:calc(100vh - 140px);max-height:740px;display:flex;align-items:center;justify-content:center}
+.stk .ph{--w:320px}
+.stk .ph img{position:absolute;inset:calc(var(--w)*.03);width:calc(100% - var(--w)*.06);height:calc(100% - var(--w)*.06);opacity:0;transition:opacity .45s}
+.stk .ph img.on{opacity:1}
+.dots{position:absolute;right:-22px;top:50%;transform:translateY(-50%);display:grid;gap:8px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--accent);height:20px;border-radius:9px}
+@container site (max-width:760px){.sticky{grid-template-columns:1fr}.stk{display:none}.st{min-height:0;opacity:1;padding-block:28px;gap:0}.st .ph{display:block;--w:240px;margin:20px auto 0}}
+
+/* ---------- Bize göre ---------- */
+.tr{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.tc{padding:22px;border-radius:22px;background:var(--surface);border:1px solid var(--line)}
+.tc .ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);margin-bottom:14px}
+.tc .ic svg{width:22px;height:22px}
+.tc h4{margin:0 0 6px;font-size:1.05rem}
+.tc p{margin:0;color:var(--muted);font-size:.95rem}
+.hijri{font-family:var(--f-display);font-weight:700;color:var(--wish)}
+@container site (max-width:860px){.tr{grid-template-columns:1fr 1fr}}
+@container site (max-width:480px){.tr{grid-template-columns:1fr}}
+
+/* ---------- GİZLİLİK A: Signal tarzı büyük söz ---------- */
+.pA{background:var(--deep);color:var(--on-deep);padding-block:110px}
+.pA .w{display:grid;grid-template-columns:auto 1fr;gap:56px;align-items:center}
+.lockbig{width:180px;height:180px;border-radius:48px;background:color-mix(in srgb,var(--on-deep) 8%,transparent);display:grid;place-items:center}
+.lockbig svg{width:92px;height:92px;color:var(--deep-muted)}
+.pA .eyebrow{color:var(--deep-muted)}
+.pA .disp{font-size:clamp(2.2rem,5cqi,3.6rem);line-height:1.04;margin:12px 0 18px;max-width:14em}
+.pA p{color:var(--deep-muted);font-size:1.12rem;max-width:34em;margin:0 0 26px}
+.pA ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.pA li{border-top:1px solid color-mix(in srgb,var(--on-deep) 18%,transparent);padding-top:14px;font-size:.95rem;color:var(--deep-muted)}
+.pA li b{display:block;color:var(--on-deep);font-size:1rem;margin-bottom:4px}
+@container site (max-width:760px){.pA .w{grid-template-columns:1fr;gap:28px}.lockbig{width:110px;height:110px;border-radius:30px}.lockbig svg{width:56px;height:56px}.pA ul{grid-template-columns:1fr}}
+
+/* SSS */
+.faq{max-width:780px}
+.faq details{border-bottom:1px solid var(--line);padding-block:18px}
+.faq summary{cursor:pointer;font-weight:700;font-size:1.08rem;list-style:none;display:flex;justify-content:space-between;gap:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-family:var(--f-display);font-size:1.5rem;line-height:1;color:var(--accent);transition:transform .2s}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq details p{color:var(--muted);margin:10px 0 0;max-width:40em}
+
+/* son çağrı */
+.final{padding-block:0 96px}
+.final .card{border-radius:36px;background:var(--accent-soft);padding:64px 48px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;overflow:hidden;position:relative}
+.final .disp{font-size:clamp(2rem,4.4cqi,3.2rem);line-height:1.05;margin:0 0 14px}
+.final p{color:var(--muted);margin:0 0 24px;font-size:1.08rem}
+.final .ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.final img.app{width:150px;height:150px;border-radius:34px;box-shadow:var(--shadow)}
+@container site (max-width:760px){.final .card{grid-template-columns:1fr;padding:40px 24px}.final img.app{width:96px;height:96px;border-radius:22px;order:-1}}
+
+footer{border-top:1px solid var(--line);padding-block:32px 40px;color:var(--muted);font-size:.9rem}
+footer .w{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center}
+footer .brand{font-size:1rem;color:var(--fg)}
+footer .brand img{width:26px;height:26px;border-radius:7px}
+footer nav{display:flex;gap:20px;margin-left:auto}
+footer a{text-decoration:none}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <defs>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.6" r="1.3"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="m8.5 12.2 2.4 2.4 4.8-5"/></symbol>
+  <symbol id="i-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17.5" rx="2.5"/><path d="M9 3.5h6v3H9zM9 11h6M9 15h4"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></symbol>
+  <symbol id="i-cam" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.4-2h4.6l1.4 2h1.8A2.5 2.5 0 0 1 20 8.5v9A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6.5 6.5 0 0 1 3.5 6"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5-2.7M14.5 10.4A10 10 0 0 1 19 13M2 9.5a15 15 0 0 1 4.3-2.7M10.5 5.6A15 15 0 0 1 22 9.5"/><circle cx="12" cy="20" r=".8"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4.5"/><path d="m11.2 11.8 8.3-8.3M16.5 6.5l2.5 2.5M14 9l2 2"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.2"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.2"/><path d="M14 14h3v3h-3zM20.5 14v.01M17 20.5h3.5V17"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="7" rx="2"/><rect x="4" y="13" width="16" height="7" rx="2"/><path d="M8 7.5h.01M8 16.5h.01"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M14 6.5l5.5 5.5-5.5 5.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M4.2 2.6 13.6 12l-9.4 9.4c-.4-.2-.7-.7-.7-1.3V3.9c0-.6.3-1.1.7-1.3z" fill="#34C2F2"/><path d="m16.9 8.7-3.3 3.3-9.4-9.4c.3-.1.8-.1 1.2.1z" fill="#3BD16F"/><path d="m16.9 15.3-11.5 6c-.4.2-.9.2-1.2.1l9.4-9.4z" fill="#F23C4F"/><path d="m20.4 10.6c.9.5.9 2.3 0 2.8l-3.5 1.9-3.3-3.3 3.3-3.3z" fill="#FFC928"/></symbol>
+  <symbol id="i-apple" viewBox="0 0 24 24"><path fill="#fff" d="M16.4 12.7c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.3 1.2 9.7.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.5-1-2.5-3.8zM14 5.6c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></symbol>
+ </defs>
+</svg>
+
+<div id="site">
+  <header class="nav"><div class="w">
+   <a class="brand" href="#ust"><img src="img/icon-192.png" alt="">Bizim Ev</a>
+   <nav><a href="#ozellikler">Özellikler</a><a href="#gizlilik">Gizlilik</a><a href="#sss">Sorular</a></nav>
+   <a class="btn pri" href="https://ensar0-beep.github.io/bizim-ev/" target="_blank" rel="noopener">Hemen dene</a>
+  </div></header>
+  
+
+  <!-- HERO A -->
+  <section class="hero hA"><div class="w">
+   <span class="pill"><i><svg><use href="#i-lock"/></svg></i>Uçtan uca kilitli aile uygulaması</span>
+   <h1 class="disp">Evin bütün işi, herkesin cebinde.</h1>
+   <p class="lead">Takvim, alınacaklar, görevler ve hatıralar tek yerde. Biri bir şey eklediğinde bütün aile aynı anda görür.</p>
+   <div class="ctas"><a class="btn pri" href="https://ensar0-beep.github.io/bizim-ev/" target="_blank" rel="noopener">Tarayıcıda hemen dene <svg><use href="#i-arrow"/></svg></a></div>
+   <div class="stores" data-stores></div>
+   <div class="stage">
+    <div class="float f1"><b>Can · Çöpü çıkar</b><small>Bugün 20.00 · Sırada: Zeynep</small></div>
+    <div class="float f2"><b>Mehmet ekmek aldı</b><small>Alınacaklar · az önce</small></div>
+    <div class="ph"><img src="img/bugun.webp" alt="Bizim Ev Bugün ekranı: selamlama, acil alınacaklar ve aile mesajı"></div>
+   </div>
+  </div></section>
+
+  <div class="strip"><div class="w">
+   <span><svg><use href="#i-cal"/></svg>Ortak takvim</span>
+   <span><svg><use href="#i-list"/></svg>Alınacaklar</span>
+   <span><svg><use href="#i-check"/></svg>Görevler</span>
+   <span><svg><use href="#i-star"/></svg>İstekler</span>
+   <span><svg><use href="#i-book"/></svg>Ev kütüphanesi</span>
+   <span><svg><use href="#i-cam"/></svg>Hatıralar</span>
+  </div></div>
+
+  <!-- ÖZELLİKLER -->
+  <section class="sec" id="ozellikler"><div class="w">
+   <div class="sh"><span class="eyebrow">Neler yapar?</span><h2 class="disp">Herkesin aklındakini bir yerde toplar.</h2><p class="lead">Evin günlük işi birkaç uygulamaya, mesaj grubuna ve buzdolabındaki kâğıda dağılmasın.</p></div>
+
+   <!-- C: kaydırınca değişen -->
+   <div class="sticky">
+    <div class="steps">
+     <div class="st" data-i="0"><span class="eyebrow">Bugün</span><h3>Sabah açınca günü bilirsin.</h3><p>Günün planı, acil alınacaklar ve ailenin kısa mesajları en üstte.</p><div class="ph"><img src="img/bugun.webp" alt="Bugün ekranı"></div></div>
+     <div class="st" data-i="1"><span class="eyebrow">Takvim</span><h3>Herkesin günü, aynı ayda.</h3><p>Birinin eklediği etkinlik herkesin takviminde hemen belirir. Plan yapınca aileye "katılıyor musun?" diye sorar.</p><div class="ph"><img src="img/cal.webp" alt="Takvim ekranı"></div></div>
+     <div class="st" data-i="2"><span class="eyebrow">Alınacaklar</span><h3>Markete kim giderse liste cebinde.</h3><p>Kim aldı, ne zaman aldı görünür. Fiyat yazarsan toplamı çıkar.</p><div class="ph"><img src="img/lists.webp" alt="Listeler ekranı"></div></div>
+     <div class="st" data-i="3"><span class="eyebrow">Görevler</span><h3>Ev işi sırayla döner.</h3><p>Çöp bu hafta Can'da, sonra Zeynep'te. Kimse unutmaz.</p><div class="ph"><img src="img/tasks.webp" alt="Görevler ekranı"></div></div>
+     <div class="st" data-i="4"><span class="eyebrow">Ev kütüphanesi</span><h3>Kitaplar rafta, okuma serisi elde.</h3><p>Barkodu okut, kitap rafa dizilsin. Günlük hedef ve seri ile çocuklar da okumaya alışır.</p><div class="ph"><img src="img/lib.webp" alt="Ev kütüphanesi ekranı"></div></div>
+    </div>
+    <div class="stk"><div class="ph" id="stkph"><img class="on" src="img/bugun.webp" alt="Bugün ekranı"><img src="img/cal.webp" alt="Takvim ekranı"><img src="img/lists.webp" alt="Listeler ekranı"><img src="img/tasks.webp" alt="Görevler ekranı"><img src="img/lib.webp" alt="Ev kütüphanesi ekranı"><div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></div></div></div>
+   </div>
+  </div></section>
+
+  <!-- BİZE GÖRE -->
+  <section class="sec" style="padding-top:0"><div class="w">
+   <div class="sh"><span class="eyebrow">Bize göre yapıldı</span><h2 class="disp">Türk ailesinin gününe göre.</h2></div>
+   <div class="tr">
+    <div class="tc"><div class="ic"><svg><use href="#i-moon"/></svg></div><h4>Kandil ve bayramlar</h4><p>Hicri tarih, ayın hâli ve yaklaşan mübarek gün. Cuma ve bayramda selam ona göre: <span class="hijri">Hayırlı cumalar</span>.</p></div>
+    <div class="tc"><div class="ic"><svg><use href="#i-sun"/></svg></div><h4>81 ilin havası</h4><p>Şehrini seç ya da konumunu kullan. Konumun telefonda kalır, kimseye gitmez.</p></div>
+    <div class="tc"><div class="ic"><svg><use href="#i-users"/></svg></div><h4>Herkese göre</h4><p>Çocuk yalnızca kendi işini görür. Büyükler için yazı büyütülebilir.</p></div>
+    <div class="tc"><div class="ic"><svg><use href="#i-wifi"/></svg></div><h4>İnternet yokken de</h4><p>Bağlantı gidince çalışmaya devam eder, gelince kendiliğinden eşitler.</p></div>
+   </div>
+  </div></section>
+
+  <!-- GİZLİLİK A -->
+  <section class="pA" id="gizlilik"><div class="w">
+   <div class="lockbig"><svg><use href="#i-lock"/></svg></div>
+   <div>
+    <span class="eyebrow">Gizlilik</span>
+    <h2 class="disp">Ailenizin bilgilerini biz bile okuyamayız.</h2>
+    <p>Bizim Ev uçtan uca kilitlidir. Takviminiz, listeleriniz, mesajlarınız ve fotoğraflarınız telefonunuzda kilitlenir, sunucuya yalnızca okunamaz hâli gider. Anahtar sadece ailenizin telefonlarında durur.</p>
+    <ul>
+     <li><b>Reklam yok</b>Bilgileriniz satılmaz, reklam için kullanılmaz.</li>
+     <li><b>Anahtar sizde</b>Yeni telefona QR kodla geçer. Kâğıda yazılan kurtarma kodu da var.</li>
+     <li><b>Konum telefonda</b>Hava durumu için seçtiğiniz yer hiçbir yere gönderilmez.</li>
+    </ul>
+   </div>
+  </div></section>
+
+  <!-- SSS -->
+  <section class="sec" id="sss"><div class="w">
+   <div class="sh"><span class="eyebrow">Sorular</span><h2 class="disp">Merak edilenler</h2></div>
+   <div class="faq">
+    <details open><summary>Google Play ve App Store'a ne zaman gelecek?</summary><p>Hazırlıklar sürüyor, yakında iki mağazada da olacak. O zamana kadar tarayıcıdan açıp ana ekrana ekleyerek uygulama gibi kullanabilirsiniz.</p></details>
+    <details><summary>Aileyi nasıl eklerim?</summary><p>Aileyi kuran kişi bir kod ya da bağlantı gönderir. Diğerleri "Aile koduyla katıl" deyip girer. Kilitli ailede anahtar QR kodla geçer.</p></details>
+    <details><summary>Verilerimizi kim görebilir?</summary><p>Yalnızca ailenizin telefonları. Bilgiler sunucuda kilitli durur ve anahtarı bizde yoktur.</p></details>
+    <details><summary>İnternet olmadan çalışır mı?</summary><p>Evet. Yaptığınız değişiklikler telefonda bekler, internet gelince herkese gider.</p></details>
+    <details><summary>Denemek için aile kurmam gerekir mi?</summary><p>Hayır. "Önce örnek aileyle dene" deyip hazır bir aileyle bütün ekranları gezebilirsiniz. Değişiklikler yalnızca sizin telefonunuzda kalır.</p></details>
+   </div>
+  </div></section>
+
+  <!-- SON ÇAĞRI -->
+  <section class="final"><div class="w"><div class="card">
+   <div>
+    <h2 class="disp">Evinize bir düzen kurun.</h2>
+    <p>Örnek aileyle bir dakikada gezin, beğenirseniz kendi ailenizi kurun.</p>
+    <div class="ctas"><a class="btn pri" href="https://ensar0-beep.github.io/bizim-ev/" target="_blank" rel="noopener">Tarayıcıda hemen dene <svg><use href="#i-arrow"/></svg></a></div>
+    <div class="stores" data-stores></div>
+   </div>
+   <img class="app" src="img/icon-192.png" alt="Bizim Ev simgesi">
+  </div></div></section>
+
+  <footer><div class="w">
+   <span class="brand"><img src="img/icon-192.png" alt="">Bizim Ev</span>
+   <span>© 2026 Bizim Ev</span>
+   <nav><a href="#gizlilik">Gizlilik</a><a href="#sss">Sorular</a></nav>
+  </div></footer>
+</div>
+<script>
+(function(){
+  var badges='<span class="badge" role="img" aria-label="Yakında Google Play\'de"><span class="soon">Yakında</span><svg><use href="#i-play"/></svg><span><b>Google Play</b></span></span>'+
+    '<span class="badge" role="img" aria-label="Yakında App Store\'da"><span class="soon">Yakında</span><svg><use href="#i-apple"/></svg><span><b>App Store</b></span></span>';
+  document.querySelectorAll('[data-stores]').forEach(function(e){e.innerHTML=badges});
+  var steps=[].slice.call(document.querySelectorAll('.st')),imgs=[].slice.call(document.querySelectorAll('#stkph img')),dots=[].slice.call(document.querySelectorAll('#stkph .dots i'));
+  function setStep(i){steps.forEach(function(s,j){s.classList.toggle('on',j===i)});imgs.forEach(function(m,j){m.classList.toggle('on',j===i)});dots.forEach(function(d,j){d.classList.toggle('on',j===i)})}
+  setStep(0);
+  if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)setStep(+e.target.dataset.i)})},{rootMargin:'-45% 0px -45% 0px'});steps.forEach(function(s){io.observe(s)})}
+})();
+</script>
+</body>
+</html>
