@@ -107,13 +107,13 @@ svg.i.sm{width:1.05rem;height:1.05rem}
 .ilt{flex:none;font-size:.74rem;font-weight:700;border-radius:999px;padding:3px 9px;background:var(--sunk);color:var(--muted)}.ilt.gec{background:var(--danger-soft);color:var(--danger)}.ilt.yak{background:var(--warn-soft);color:var(--warn)}
 h2.sec.gec{color:var(--danger)}h2.sec.yak{color:var(--warn)}
 .ilempty{display:grid;justify-items:center;text-align:center;gap:8px;padding:32px 20px;margin-top:12px;background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow)}.ilempty>.i{width:32px;height:32px;color:#A2412B}.ilempty p{margin:0 0 8px;color:var(--muted);font-size:.92rem;line-height:1.45}
-.ilsh{display:grid;gap:14px}.ilhd{display:flex;gap:14px;align-items:center}.ilhd b{font-size:1.2rem;display:block}.ilhd small{color:var(--muted)}
+.ilq{margin:2px 0 4px}.ilsh{display:grid;gap:14px}.ilhd{display:flex;gap:14px;align-items:center}.ilhd b{font-size:1.2rem;display:block}.ilhd small{color:var(--muted)}.ilrest{display:block;font-size:.92rem;margin:2px 0}
 .ilskt{border-radius:16px;padding:14px;background:var(--sunk);display:grid;gap:2px}.ilskt span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}.ilskt b{font-size:1.4rem;font-family:var(--f-display)}.ilskt small{color:var(--muted)}
 .ilskt.gec{background:var(--danger-soft)}.ilskt.gec b,.ilskt.gec small{color:var(--danger)}.ilskt.yak{background:var(--warn-soft)}.ilskt.yak b{color:var(--warn)}
 .ilsh .row .v{color:var(--muted);text-align:right;max-width:60%}.ilby{margin:-4px 4px 0;font-size:.8rem;color:var(--muted)}
 .ildot{display:inline-block;width:12px;height:12px;border-radius:999px;background:var(--c);margin-right:6px;vertical-align:-1px}.rpi .ildot{margin:0}
 .scan.dm .c1{left:calc(50% - 70px);top:calc(50% - 70px)}.scan.dm .c2{right:calc(50% - 70px);top:calc(50% - 70px)}.scan.dm .c3{left:calc(50% - 70px);bottom:calc(50% - 70px)}.scan.dm .c4{right:calc(50% - 70px);bottom:calc(50% - 70px)}.scan.dm .ray{left:calc(50% - 80px);right:calc(50% - 80px)}
-.ilok{display:flex;align-items:flex-start;gap:8px;padding:12px 14px;border-radius:14px;background:var(--accent-soft);color:var(--accent-ink);font-size:.9rem;line-height:1.4;margin-bottom:10px}.ilok>.i{flex:none;margin-top:2px}.ilok span{flex:1}.ilok .link{flex:none;padding:0;margin:0;font-size:.85rem}
+.ilok{display:flex;align-items:flex-start;gap:8px;padding:12px 14px;border-radius:14px;background:var(--accent-soft);color:var(--accent-ink);font-size:.9rem;line-height:1.4;margin-bottom:10px}.ilok>.i{flex:none;margin-top:2px}.ilok span{flex:1;min-width:0;overflow-wrap:anywhere}.ilok .link{flex:none;padding:0;margin:0;font-size:.85rem}
 #tbar{position:absolute;left:0;right:0;top:0;z-index:6;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .18s,transform .22s}
 #tbar.on{opacity:1;transform:none;pointer-events:auto}
 #tbar .in{background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:saturate(1.8) blur(18px);backdrop-filter:saturate(1.8) blur(18px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 10px) 18px 10px}
@@ -2458,6 +2458,7 @@ function lfPaint(q,r){const el=document.getElementById('lfres');if(!el)return;
 let lfT=0,lfSeq=0;
 document.addEventListener('input',e=>{const t=e.target;
  if(t.id==='lib-q'){UI.lq=t.value;libPaint()}
+ else if(t.id==='il-q'){UI.iq=t.value;ilPaint()}
  else if(t.id==='lf-q'){clearTimeout(lfT);const q=t.value.trim(),n=++lfSeq,el=document.getElementById('lfres');if(!el)return;if(q.length<2){el.innerHTML=lfHint();return}
   el.innerHTML='<p class="bkmsg">Aranıyor…</p>';lfT=setTimeout(async()=>{const r=await bkSearch(q);if(n!==lfSeq)return;UI.lfRes=r||[];lfPaint(q,r)},300)}});
 // Okuma alışkanlığı (Apple Kitaplar hedefi + Duolingo basamakları): günde birkaç dakika, seri ve büyüyen hedef.
@@ -2853,6 +2854,10 @@ const ilSkt=(x,long)=>x.s?(long?MON[+x.s.slice(5,7)-1]:MON[+x.s.slice(5,7)-1].sl
 const ilFor=x=>x.k&&S.members.some(m=>m.id===x.k)?first(M(x.k).name)+' için':'Herkes';
 const ilIc=(x,sz)=>`<span class="ilic${sz?' '+sz:''}" style="--c:${IKAT[x.c][1]}">${I(/sprey|spray/i.test(x.n)?'spray':'pill')}</span>`;
 const ilTag=x=>{const st=ilSt(x);return `<span class="ilt ${st}">${st==='gec'?'Tarihi geçti':!x.s?'Tarihsiz':st==='yak'?ilSkt(x)+' bitiyor':ilSkt(x)}</span>`};
+// Başlıkta yalnız adı: "Parol 500 mg tablet, 20 adet" → "Parol"; mg, ml, biçim ve adet ayrıntıda (ilRest)
+const ILF=/^(\d|%|[\d.,]+(mg|ml|g|mcg|µg|iu|ıu)$|tablet|film|draje|kapsül|kapsul|şurup|surup|süspansiyon|suspansiyon|krem|pomad|merhem|jel|sprey|damla|ampul|flakon|efervesan|çiğneme|ciğneme|oral|toz|granül|saşe|şase|losyon|solüsyon|çözelti|enjeksiyon|fitil|supozituvar|pastil|kaplı|uzatılmış|ağızda|dilaltı|göz|kulak|burun|nazal|topikal|vajinal|rektal|cilt|deri|şampuan|yara|bant|forte|plus)/i;
+function ilSplit(n){const w=String(n).split(' ');let i=1;while(i<w.length&&!ILF.test(w[i]))i++;return [w.slice(0,i).join(' ').replace(/[,;]+$/,''),w.slice(i).join(' ')]}
+const ilShort=x=>ilSplit(x.n)[0],ilRest=x=>ilSplit(x.n)[1];
 const ilSort=a=>a.slice().sort((p,q)=>(p.s||'9999')<(q.s||'9999')?-1:(p.s||'9999')>(q.s||'9999')?1:p.n.localeCompare(q.n,'tr'));
 const ilBad=()=>ILC().filter(x=>ilSt(x)!=='iyi');
 function ilGuess(n){const R=[['ag',/parol|minoset|calpol|nurofen|majezik|apranax|arveles|dolorex|vermidon|termalgin|aspirin|ibuprofen|parasetamol|novalgin|voltaren|dikloron|ağrı|ateş/i],['sg',/aferin|tylol|gripin|theraflu|otrivin|iliadin|sinecod|burun|öksürük|pastil|strepsils|tantum|boğaz|grip/i],['mi',/rennie|gaviscon|talcid|buscopan|nexium|lansor|metpamid|mide|ishal|smecta|enterogermina|prazol/i],['al',/zyrtec|aerius|claritin|xyzal|allerset|telfast|alerji|setirizin|cetirizin|desloratadin/i],['vi',/vitamin|supradyn|pharmaton|magnezyum|omega|demir|devit|d3|b12|çinko|probiyotik/i],['ci',/bepanthol|fucidin|madecassol|krem|pomad|merhem|batikon|yara|jel/i]];
@@ -2879,13 +2884,18 @@ function ilMem(g,n){const m=store.ilg=store.ilg||{};delete m[g];m[g]=n;const k=O
 function ilCard(){const L=ILC(),g=L.filter(x=>ilSt(x)==='gec').length,y=L.filter(x=>ilSt(x)==='yak').length;
  return `<button class="libcard ilcard" data-act="ilGo"><span class="ilbx">${I('pill')}</span><span class="tx"><b>İlaç dolabı</b><small>${L.length?L.length+' ilaç':'Evdeki ilaçları ve son kullanma tarihlerini ekleyin'}${g?` · <em class="r">${g} tarihi geçmiş</em>`:y?` · <em class="o">${y} yakında bitiyor</em>`:''}</small></span>${I('chevR')}</button>`}
 function ilChip(){const b=ilBad();if(!b.length)return '';const g=b.filter(x=>ilSt(x)==='gec').length;return `<button class="hchip ilch" data-act="ilGo">${I('pill','sm')}<span>${g?g+' ilacın tarihi geçmiş':b.length+' ilacın tarihi yaklaşıyor'}</span></button>`}
-const ilRow=x=>`<button class="row ilr" data-act="ilOpen" data-id="${x.id}">${ilIc(x)}<span class="body"><span class="t">${esc(x.n)}</span><span class="m">${IKAT[x.c][0]} · ${ilFor(x)}${x.a>1?' · '+x.a+' kutu':''}</span></span>${ilTag(x)}</button>`;
-function vIlac(){const L=ILC(),g=L.filter(x=>ilSt(x)==='gec'),y=L.filter(x=>ilSt(x)==='yak'),ok=L.filter(x=>ilSt(x)==='iyi');
+const ilRow=x=>`<button class="row ilr" data-act="ilOpen" data-id="${x.id}">${ilIc(x)}<span class="body"><span class="t">${esc(ilShort(x))}</span><span class="m">${IKAT[x.c][0]} · ${ilFor(x)}${x.a>1?' · '+x.a+' kutu':''}</span></span>${ilTag(x)}</button>`;
+const ilHit=(x,q)=>!q||trl(x.n+' '+x.no+' '+IKAT[x.c][0]+' '+ilFor(x)).includes(q);
+function ilList(){const q=trl(UI.iq||'').trim(),L=ILC().filter(x=>ilHit(x,q)),g=L.filter(x=>ilSt(x)==='gec'),y=L.filter(x=>ilSt(x)==='yak'),ok=L.filter(x=>ilSt(x)==='iyi');
+ if(!L.length)return `<p class="bkmsg">“${esc(UI.iq.trim())}” dolapta yok.</p>`;
+ return [['Tarihi geçmiş',g,'gec'],['Yakında bitiyor',y,'yak'],['Dolapta',ok,'iyi']].filter(z=>z[1].length).map(([t,a,c])=>`<div class="sec-h"><h2 class="sec ${c}">${t}</h2><span class="n">${a.length}</span></div><div class="group">${ilSort(a).map(ilRow).join('')}</div>`).join('')}
+const ilPaint=()=>{const r=document.getElementById('ilres');if(r)r.innerHTML=ilList()};
+function vIlac(){const L=ILC(),g=L.filter(x=>ilSt(x)==='gec');
  const head=`<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="family">${I('chevL','sm')}Aile</button><h1>İlaç dolabı</h1><div class="sub">${L.length} ilaç${g.length?` · ${g.length} tarihi geçmiş`:''}</div></div><button class="icon-btn" data-act="ilAdd" aria-label="İlaç ekle">${I('plus')}</button></div>`;
  if(!L.length)return head+`<div class="ilempty">${I('pill')}<b>Dolap henüz boş</b><p>Kutunun üstündeki karekodu okutun; adı ve son kullanma tarihi kendiliğinden gelir. Tarihi yaklaşınca Bugün’de haber verilir.</p><button class="btn primary" data-act="ilAdd">${I('plus','sm')}İlk ilacı ekle</button></div>`;
- return head+[['Tarihi geçmiş',g,'gec'],['Yakında bitiyor',y,'yak'],['Dolapta',ok,'iyi']].filter(z=>z[1].length).map(([t,a,c])=>`<div class="sec-h"><h2 class="sec ${c}">${t}</h2><span class="n">${a.length}</span></div><div class="group">${ilSort(a).map(ilRow).join('')}</div>`).join('')}
+ return head+`<label class="libq ilq">${I('search','sm')}<input id="il-q" type="search" placeholder="${L.length} ilaçta ara" aria-label="İlaçlarda ara" value="${esc(UI.iq||'')}" autocomplete="off"></label><div id="ilres">${ilList()}</div>`}
 function ilSheet(x){const st=ilSt(x),by=x.by&&S.members.some(m=>m.id===x.by)?esc(first(M(x.by).name))+' ekledi · ':'';
- return `<div class="ilsh"><div class="ilhd">${ilIc(x,'lg')}<div><b>${esc(x.n)}</b><small>${IKAT[x.c][0]}</small></div></div>
+ return `<div class="ilsh"><div class="ilhd">${ilIc(x,'lg')}<div><b>${esc(ilShort(x))}</b>${ilRest(x)?`<span class="ilrest">${esc(ilRest(x))}</span>`:''}<small>${IKAT[x.c][0]}</small></div></div>
  <div class="ilskt ${x.s?st:''}"><span>Son kullanma</span><b>${x.s?ilSkt(x,1):'Girilmedi'}</b><small>${!x.s?'Düzenle’ye dokunup ekleyebilirsin':st==='gec'?'Tarihi geçmiş, kullanmayın':st==='yak'?'Bu ayın sonundan sonra kullanmayın':'Kullanılabilir'}</small></div>
  <div class="group"><div class="row"><span class="body"><span class="t">Kimin için</span></span><span class="v">${ilFor(x)}</span></div><div class="row"><span class="body"><span class="t">Kaç kutu</span></span><span class="v">${x.a}</span></div>${x.no?`<div class="row"><span class="body"><span class="t">Not</span></span><span class="v">${esc(x.no)}</span></div>`:''}</div>
  <p class="ilby">${by}${ago(x.at)}</p>
@@ -2897,7 +2907,7 @@ const ilScanBox=()=>`<div class="scan dm"><video id="scv" playsinline muted auto
 function ilForm(x){const ed=!!x;x=x||{a:1};F={il:x.id||'',for:x.k||'ev',ilc:x.c||'',g:x.g||'',seen:{}};
  sheet(ed?'İlacı düzenle':'Yeni ilaç',`${ed?'':`<div id="ilsc">${ilScanBox()}</div>`}<form data-form="ilac" autocomplete="off">
  <div class="field"><label for="il-n">İlacın adı</label><input class="inp" id="il-n" value="${esc(x.n||'')}" placeholder="örn. Parol 500 mg tablet" maxlength="80"><span class="err" id="il-err" hidden>İlacın adını yaz.</span></div>
- <div class="field"><label for="il-s">Son kullanma tarihi</label><input class="inp" id="il-s" type="month" value="${x.s||''}" min="2020-01" max="2060-12"></div>
+ <div class="field"><label for="il-s">Son kullanma tarihi</label><label class="dtp">${I('cal','sm')}<span class="v${x.s?'':' ph'}">${x.s?ilSkt(x,1):'Ay ve yıl seç'}</span><input id="il-s" type="month" value="${x.s||''}" min="2020-01" max="2060-12"></label></div>
  <div class="field"><div id="il-kat">${ilKat()}</div></div>
  <div class="field"><span class="flabel">Kimin için?</span><div class="pgrid" id="it-for">${forChips()}</div></div>
  <details class="more"${x.no||x.a>1?' open':''}><summary>Kutu sayısı ve not ${I('chevD','sm')}</summary>
@@ -2909,7 +2919,7 @@ function ilGot(raw){const r=ilParse(raw),m=document.getElementById('scmsg');
  if(!r){if(m&&!F.seen[raw]){F.seen[raw]=1;m.textContent='Bu, ilacın karekodu değil. Karekod kutunun üstünde, küçük bir kare.';m.hidden=false;setTimeout(()=>{if(m.textContent.startsWith('Bu, ilacın'))m.hidden=true},3500)}return}
  const n=document.getElementById('il-n'),s=document.getElementById('il-s'),b=document.getElementById('ilsc');if(!n||!b||F.ilBusy)return;
  F.ilBusy=1;try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
- F.g=r.g;if(r.s)s.value=r.s;b.innerHTML=`<div class="ilok">${I('check','sm')}<span>Okundu, ilaç aranıyor…</span></div>`;
+ F.g=r.g;if(r.s){s.value=r.s;dtSync(s)}b.innerHTML=`<div class="ilok">${I('check','sm')}<span>Okundu, ilaç aranıyor…</span></div>`;
  let nm=ilName(r.g);
  (nm?Promise.resolve(null):ilDb()).then(db=>{F.ilBusy=0;const h=db&&db.get(r.g.slice(1));
   if(h){nm=h[0];if(!F.ilc&&h[1]){F.ilc=h[1];ilKatPaint()}}
@@ -3216,7 +3226,8 @@ const dTxt=s=>{if(!s)return '';const r=rel(s),d=parse(s);return r===shortD(s)?r:
 const dtBox=(id,type,val,off)=>`<label class="dtp${off?' off':''}">${I(type==='date'?'cal':'clock','sm')}<span class="v${val?'':' ph'}">${type==='date'?dTxt(val):val?hm(val):'Saat seç'}</span><input type="${type}" id="${id}" value="${val}"${off?' disabled':''}></label>`;
 const dtHTML=(p,date,time,off,dl,tl)=>`<div class="two"><div class="field"><label for="${p}-date">${dl}</label>${dtBox(p+'-date','date',date)}</div><div class="field"><label for="${p}-time">${tl}</label>${dtBox(p+'-time','time',time,off)}</div></div>`;
 function dtSync(inp){const l=inp.closest('.dtp');if(!l)return;const v=l.querySelector('.v');
- if(inp.type==='date'){v.textContent=dTxt(inp.value);v.classList.toggle('ph',!inp.value)}else{v.textContent=inp.value?hm(inp.value):'Saat seç';v.classList.toggle('ph',!inp.value)}}
+ if(inp.type==='month'){v.textContent=inp.value?ilSkt({s:inp.value},1):'Ay ve yıl seç';v.classList.toggle('ph',!inp.value)}
+ else if(inp.type==='date'){v.textContent=dTxt(inp.value);v.classList.toggle('ph',!inp.value)}else{v.textContent=inp.value?hm(inp.value):'Saat seç';v.classList.toggle('ph',!inp.value)}}
 // Her kişi seçicide aynı: "Bütün aile" + avatarlar. Bütün aile seçiliyken avatarlar gizlenir, "Kişileri tek tek seç" ile açılır.
 // box: kapsayıcının id'si (fPick ve uçuş onu yeniden çizer), one: tek kişilik seçim ("Kimin için?")
 const allOf=sel=>S.members.length>1&&S.members.every(m=>sel.includes(m.id));
@@ -3649,7 +3660,7 @@ const A={
  libDel:d=>{const b=LIB().find(x=>x.id===d.id);if(!b){close();return}const u=snap();S.books=LIB().filter(x=>x.id!==b.id);S.wcm=(S.wcm||[]).filter(c=>c.w!==b.id);close();render(true);toast(`“${b.t}” silindi`,u)},
  dzSheet:()=>{const k=lsrt();sheet('Sırala',`<div class="dzl" role="radiogroup" aria-label="Dizilim">${Object.entries(DZ).map(([x,[n,s]])=>`<button role="radio" aria-checked="${x===k}" data-act="dzSet" data-v="${x}"><span>${n}<small>${s}</small></span><i class="rb" aria-hidden="true"></i></button>`).join('')}</div>`)},
  dzSet:d=>{if(!DZ[d.v])return;store.prefs.lsrt=d.v;save();close();render(true)},
- ilGo:()=>{close();UI.tab='ilac';toastOff();render();document.getElementById('screen').scrollTop=0},
+ ilGo:()=>{close();UI.tab='ilac';UI.iq='';toastOff();render();document.getElementById('screen').scrollTop=0},
  ilAdd:()=>{if(S)ilForm()},
  ilOpen:d=>{const x=ILC().find(y=>y.id===d.id);if(!x){toast('Bu ilaç başka bir cihazda silinmiş.');return}const ok=x.by===meId()||!isChild();sheet('',ilSheet(x),shTools(['ilEdit',x.id,'edit','Düzenle',ok,PARENT],['ilDel',x.id,'trash','Sil',ok,PARENT,1]))},
  ilEdit:d=>{const x=ILC().find(y=>y.id===d.id);if(x)ilForm(x)},
@@ -3740,7 +3751,7 @@ const FORMS={
   if(F.il){const x=ILC().find(y=>y.id===F.il);if(!x){close();return}Object.assign(x,{n,s,a,no,k,c});msg='Kaydedildi'}
   else{const ex=F.g&&ILC().find(y=>y.g===F.g&&y.s===s&&y.k===k);
    if(ex){ex.a=Math.min(99,ex.a+a);msg=`Dolapta vardı, artık ${ex.a} kutu`}
-   else{ILC().push(Object.assign({id:uid(),n,c,s,k,a,no,by:meId(),at:Date.now()},F.g?{g:F.g}:{}));log(`ilaç dolabına “${n}” ekledi`);msg=`${n} dolaba eklendi`}}
+   else{ILC().push(Object.assign({id:uid(),n,c,s,k,a,no,by:meId(),at:Date.now()},F.g?{g:F.g}:{}));log(`ilaç dolabına “${n}” ekledi`);msg=`${ilSplit(n)[0]} dolaba eklendi`}}
   if(F.g)ilMem(F.g,n);F={};close();render(true);toast(msg,u)},
  create:async()=>{const g=id=>document.getElementById(id);const fam=g('cf-fam').value.trim(),name=g('cf-name').value.trim(),rel=g('cf-rel').value.trim();
   const err=t=>{g('cf-err').textContent=t;g('cf-err').hidden=false};
