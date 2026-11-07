@@ -2459,7 +2459,24 @@ function libBody(){const L=LIB(),me=meId(),f=UI.lf||'all';
 const libPaint=()=>{const r=document.getElementById('libres');if(r)r.innerHTML=libList()};
 // Kütüphane açılınca küçük kapakları arka planda bir kez çek: liste ve ayrıntı beklemeden açılır (SW saklar)
 let cvWarm=0;function cvWarmUp(){if(cvWarm)return;cvWarm=1;let i=0;const L=LIB().filter(b=>b.i),go=()=>{L.slice(i,i+6).forEach(b=>cvPre(b));i+=6;if(i<L.length)setTimeout(go,400)};setTimeout(go,800)}
-function vLib(){cvWarmUp();if((store.libTc||0)<3&&S.books&&S.books.length){S.books.forEach(b=>{if(TRC.test(b.t+' '+b.a))return;const t=tcFix(b.t),a=tcFix(b.a);if(t!==b.t)b.t=t;if(a!==b.a)b.a=a});store.libTc=3;save()}if(store.libTc===3)setTimeout(trRepair,300);return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}">${I('chevL','sm')}${UI.libFrom==='lists'?'İstekler':'Aile'}</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
+// Eski kitaplar (5 türlü dönemden): türü 18 türe göre yeniden tahmin, her telefonda bir kez (store.libK).
+// Konular Google'daki kitap kaydından (kapaktaki kimlik ya da ISBN), yoksa Open Library'den; elle seçilmiş yeni türlere dokunulmaz.
+const KOLD=new Set(['tr','dk','cg','dt','dg']);
+const katT=t=>{t=trl(t);return /şiir/.test(t)?'si':/hikâye|hikaye|öykü|deneme/.test(t)?'oy':/tarih/.test(t)?'ta':/sözlü|ansiklopedi/.test(t)?'ds':/yemek|tarif/.test(t)?'ev':/anılar|hatırat|biyografi/.test(t)?'bi':''};
+let reKatRun=0;
+async function reKat(){if(reKatRun||store.libK===1||store.mode!=='family'||!navigator.onLine)return;reKatRun=1;let n=0;
+ for(const b of LIB().filter(b=>KOLD.has(b.k))){await new Promise(r=>setTimeout(r,350));let cs=[];
+  try{const g=cvGid(b.i||'');if(g){const v=(await bkGet(`https://www.googleapis.com/books/v1/volumes/${g}`)).volumeInfo||{};cs=v.categories||[]}
+   else if(okIsbn(b.isbn||'')){const j=await bkGet(`https://www.googleapis.com/books/v1/volumes?maxResults=1&q=isbn:${b.isbn}`);cs=(j.items&&j.items[0]&&j.items[0].volumeInfo.categories)||[]}}catch(e){}
+  if(!cs.length)try{const j=await bkGet(`https://openlibrary.org/search.json?title=${encodeURIComponent(b.t)}${b.a?'&author='+encodeURIComponent(b.a):''}&limit=1&fields=subject`);cs=(((j.docs||[])[0]||{}).subject||[]).slice(0,15)}catch(e){}
+  if(!navigator.onLine){reKatRun=0;return}
+  cs=cs.map(String);let k=cs.length?katGuess(cs,b.a):'';const kt=katT(b.t);if(kt&&(!k||k==='tr'||k==='dk'||k==='dg'))k=kt;
+  const z=LIB().find(x=>x.id===b.id);if(!z||!KOLD.has(z.k)||!k||k==='dg'||k===z.k)continue;
+  // roman tahmini yalnız "Diğer" ve eski "Düşünce ve tarih"teki kitabı taşır
+  if((k==='tr'||k==='dk')&&z.k!=='dt'&&z.k!=='dg')continue;
+  z.k=k;n++}
+ store.libK=1;save();reKatRun=0;if(n){render(true);toast(`${n} kitabın türü güncellendi`)}}
+function vLib(){cvWarmUp();if((store.libTc||0)<3&&S.books&&S.books.length){S.books.forEach(b=>{if(TRC.test(b.t+' '+b.a))return;const t=tcFix(b.t),a=tcFix(b.a);if(t!==b.t)b.t=t;if(a!==b.a)b.a=a});store.libTc=3;save()}if(store.libTc===3)setTimeout(trRepair,300);setTimeout(reKat,1500);return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}">${I('chevL','sm')}${UI.libFrom==='lists'?'İstekler':'Aile'}</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
 function libCard(){const L=LIB();return `<button class="libcard" data-act="libGo"><span class="st">${L.length?libSort(L).slice(0,4).map(b=>`<i style="--c:${bcol(b)}"></i>`).join(''):`<i style="--c:#8A3B2B"></i><i style="--c:#2E5A8A"></i><i style="--c:#B8662B"></i>`}</span><span class="tx"><b>Ev kütüphanesi</b><small>${L.length?L.length+' kitap':'Evdeki kitaplarınızı ekleyin'}${(o=>` · bugün ${o.v}/${o.g} dk`)(okuNow(meId()))}</small></span>${I('chevR')}</button>`}
 // Kitap ayrıntısı: kapak, kategori, Kim okudu, yorumlar (isteklerdeki sohbet)
 // Kategori: tek satır, dokununca 18 tür açılır (catPick gibi)
