@@ -3062,15 +3062,22 @@ function drwMake(){if(DR)return DR;const ph=document.getElementById('phone'),apw
 function drwOpen(){if(!S||!store.mode)return;drwMake();requestAnimationFrame(()=>{drwSet(1,true);const b=DR&&DR.el.querySelector('.drr');b&&b.focus({preventScroll:true})})}
 function drwClose(now){if(!DR)return;const r=DR;if(now||calm()){drwKill();return}drwSet(0,true);setTimeout(()=>{if(DR===r&&!r.p)drwKill()},420)}
 function drwKill(){if(!DR)return;const apw=document.getElementById('apw');DR.el.remove();DR.cv.remove();['transform','borderRadius','transition'].forEach(k=>apw.style[k]='');apw.classList.remove('dsh');document.getElementById('phone').classList.remove('dpush');DR=null}
+// Parmakla açma/kapama: dokunma olaylarıyla (iPhone'da kaydırma başlayınca pointer olayları iptal olur).
+// Sol 28 px her sayfada; Bugün'de sayfanın her yerinden sağa çekmek de açar (kaydırılan satırlar, hafta şeridi hariç).
 let drwP=null;
-document.addEventListener('pointerdown',e=>{drwP=null;if(e.pointerType==='mouse')return;const ph=document.getElementById('phone');if(!ph||!S||!store.mode)return;const W=ph.offsetWidth*.74;
- if(DR&&DR.p===1&&e.target.closest('.drw-cv'))drwP={x:e.clientX,y:e.clientY,W,o:1,go:0};
- else if(!DR&&e.clientX-ph.getBoundingClientRect().left<18&&!document.querySelector('#layer .sheet,#layer .scrim,.phv,.lpo'))drwP={x:e.clientX,y:e.clientY,W,o:0,go:0}},true);
-document.addEventListener('pointermove',e=>{const g=drwP;if(!g)return;const dx=e.clientX-g.x,dy=e.clientY-g.y;
- if(!g.go){if(Math.abs(dy)>12&&Math.abs(dy)>Math.abs(dx)){drwP=null;return}if(Math.abs(dx)<8)return;g.go=1;if(!g.o)drwMake()}
- drwSet(Math.max(0,Math.min(1,g.o+dx/g.W)),false)},true);
-const drwUp=()=>{const g=drwP;drwP=null;if(!g||!g.go||!DR)return;if(DR.p>(g.o?.7:.35)){drwSet(1,true);const b=DR.el.querySelector('.drr');b&&b.focus({preventScroll:true})}else drwClose()};
-document.addEventListener('pointerup',drwUp,true);document.addEventListener('pointercancel',drwUp,true);
+const drwNo=t=>{for(let x=t;x&&x.id!=='screen';x=x.parentElement){if(x.matches('[data-sw],.strip,.lsw,.rbar,.mdet,input,textarea,select,[contenteditable]'))return 1;
+ const o=getComputedStyle(x).overflowX;if((o==='auto'||o==='scroll')&&x.scrollWidth>x.clientWidth+2)return 1}return 0};
+document.addEventListener('touchstart',e=>{drwP=null;if(e.touches.length!==1)return;const ph=document.getElementById('phone');if(!ph||!S||!store.mode)return;const t=e.touches[0],W=ph.offsetWidth*.74,ex=t.clientX-ph.getBoundingClientRect().left;
+ if(DR){if(DR.p===1&&e.target.closest('.drw-cv'))drwP={x:t.clientX,y:t.clientY,W,o:1,go:0};return}
+ if(document.querySelector('#layer .sheet,#layer .scrim,#layer .apo,.phv,.lpo'))return;
+ if(ex<28||(UI.tab==='today'&&e.target.closest('#screen')&&!drwNo(e.target)))drwP={x:t.clientX,y:t.clientY,W,o:0,go:0,ed:ex<28}},{capture:true,passive:true});
+document.addEventListener('touchmove',e=>{const g=drwP;if(!g)return;const t=e.touches[0];if(!t)return;const dx=t.clientX-g.x,dy=t.clientY-g.y;
+ if(!g.go){if(Math.abs(dx)+Math.abs(dy)<6)return;
+  if(g.o?Math.abs(dx)<Math.abs(dy):(dx<=0||dx<Math.abs(dy)*(g.ed?.7:1.2))){drwP=null;return}
+  g.go=1;g.x=t.clientX;g.y=t.clientY;SW=null;if(!g.o)drwMake()}
+ if(e.cancelable)e.preventDefault();drwSet(Math.max(0,Math.min(1,g.o+dx/g.W)),false)},{capture:true,passive:false});
+const drwUp=()=>{const g=drwP;drwP=null;if(!g||!g.go||!DR)return;if(DR.p>(g.o?.7:.3)){drwSet(1,true);const b=DR.el.querySelector('.drr');b&&b.focus({preventScroll:true})}else drwClose()};
+document.addEventListener('touchend',drwUp,true);document.addEventListener('touchcancel',drwUp,true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&DR)drwClose()});
 // İsteklerde yorum: her isteğin altında (yapılmadan önce de) serbest sohbet. Her yorum ayrı kayıt (wcm/{id} = {w, by, t, at}),
 // böylece iki telefon aynı anda yazınca biri ötekini silmez.
