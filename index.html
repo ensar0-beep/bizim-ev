@@ -592,7 +592,7 @@ body.wishc #screen,body.wishc .nav,body.wishc #layer{--accent:var(--wish);--acce
 .rsvq{color:var(--warn)!important;display:flex!important;align-items:center;gap:4px}.rsvq svg{width:13px;height:13px;flex:none}
 .cr.rsvw .dot{background:none;border:2px dashed var(--c);box-sizing:border-box}
 .lnk{color:var(--accent-ink);font-weight:600;font-size:.875rem;padding:6px 0 0;text-decoration:underline;text-underline-offset:3px;display:block}
-/* Ev kütüphanesi */
+/* Ev Kütüphanesi */
 .libtop{display:grid;gap:10px;margin:12px 0 14px}.libtop>*{min-width:0}
 .libadd{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .qrow{display:flex;gap:8px}
@@ -1075,7 +1075,7 @@ a.btn{text-decoration:none}
 .stabs button{flex:none;padding:10px 0 9px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;display:inline-flex;gap:6px;align-items:baseline}
 .stabs button small{font-size:.75rem;font-weight:600}
 .stabs button[aria-pressed="true"]{color:var(--fg);border-color:var(--accent)}
-/* Okuma alışkanlığı: kütüphane kartı, hafta, basamaklar, seri rozeti */
+/* Okuma Alışkanlığı: kütüphane kartı, hafta, basamaklar, seri rozeti */
 .okc{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:12px 14px 10px;margin:0 0 12px;transition:box-shadow .3s}
 .okc.win{animation:okwin .9s ease-out}
 @media (prefers-reduced-motion:reduce){.okc.win{animation:none}}
@@ -2219,7 +2219,7 @@ function wxBody(){const w=wxPref(),d=wxData();
  <div class="lbl" style="margin-top:14px"><span>Saat saat</span></div><div class="wxh">${d.h.map((x,i)=>`<span class="wh${x.r>=60?' wet':''}"><small>${i?String(x.hr).padStart(2,'0')+'.00':'Şimdi'}</small>${I(wxIc(x.c,night(x.hr))[0],'sm')}<b>${x.t}°</b><em>${x.r>=30?'%'+x.r:''}</em></span>`).join('')}</div>
  <div class="lbl" style="margin-top:14px"><span>Önümüzdeki günler</span></div><div class="wxdl">${d.d.map(x=>`<div class="wd"><span class="dn">${x.n}</span>${I(wxIc(x.c,false)[0],'sm')}<em>${x.r>=30?'%'+x.r:''}</em><span class="lo">${x.lo}°</span><span class="bar"><i style="left:${mx>mn?(x.lo-mn)/(mx-mn)*100:0}%;right:${mx>mn?100-(x.hi-mn)/(mx-mn)*100:0}%"></i></span><span class="hi">${x.hi}°</span></div>`).join('')}</div>`}
 function wxSheet(){const w=wxPref();if(!wxOn()||!w)return wxCitySheet();
- sheet('Hava durumu',`<div id="wxbody">${wxBody()}</div><div class="wxfoot"><button class="wxcity" data-act="wxCity">${I('pin','sm')}${esc(w.n||'Yer')}${I('chevR','sm')}</button></div>
+ sheet('Hava Durumu',`<div id="wxbody">${wxBody()}</div><div class="wxfoot"><button class="wxcity" data-act="wxCity">${I('pin','sm')}${esc(w.n||'Yer')}${I('chevR','sm')}</button></div>
  <p class="note" style="margin:12px 0 0">${I('info','sm')}<span>Veri: Open-Meteo. Dışarı yalnızca yaklaşık bir koordinat gider, adres ya da aile bilgisi gitmez.</span></p>`);wxLoad()}
 function wxCitySheet(){const w=wxPref();
  sheet('Hava durumu yeri',`<div class="wxloc"><span class="wi big">${I('pin')}</span><p><b>Telefonun bulunduğu yer</b></p><p class="note" style="margin:0 0 12px;text-align:left">${I('info','sm')}<span>Konum yalnızca hava durumu için kullanılır ve bu telefonda kalır, ailedekilere gönderilmez. Hava servisine yaklaşık bir koordinat (yaklaşık 1 km duyarlıkta) gider. Her telefon kendi yerinin havasını görür.</span></p></div>
@@ -2340,7 +2340,7 @@ function bindMore(){const m=document.getElementById('cmore');if(!m||!window.Inte
 // Listeler (seçilen: 3 Sekmeli + Listeler sekmesi + Çizgi ikonlar). Üstte Alınacaklar | İsteklerimiz, altında çizgi ikonlu sekmeler.
 const LCOL=['#2B8467','#8B4FB8','#A0692B','#2F6DB5','#C2502F','#B5487A'];
 function itabs(arr,label){return `<div class="wtabs${arr.length>5?' scr':''}" role="tablist" aria-label="${label}">${arr.map(t=>`<button role="tab" data-act="${t.act}" ${t.data} aria-pressed="${t.on}" aria-selected="${t.on}" aria-label="${esc(t.n)}${t.cnt?', '+t.cnt:''}"><span class="ic">${I(t.i)}${t.cnt?`<i>${t.cnt}</i>`:''}</span><span class="tl">${esc(t.n)}</span></button>`).join('')}</div>`}
-// ---------- Ev kütüphanesi ----------
+// ---------- Ev Kütüphanesi ----------
 // books/{id} = {t, a, p, y, k, i, c, isbn, rd[], by, at}: ad, yazar, sayfa, yıl, kategori (LKAT), kapak, sırt rengi, ISBN, okuyanlar.
 // Aile sayfasında kart, ayrı sayfa (UI.tab 'lib'). Raf sırtlarla, kategori kategori bölümlerde; yorumlar isteklerdeki gibi wcm kayıtları (w = kitap id).
 P.scan='<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M17 8v8"/>';
@@ -2545,8 +2545,8 @@ async function reKat(){if(reKatRun||store.libK===1||store.mode!=='family'||!navi
   if((k==='tr'||k==='dk')&&z.k!=='dt'&&z.k!=='dg')continue;
   z.k=k;n++}
  store.libK=1;save();reKatRun=0;if(n){render(true);toast(`${n} kitabın türü güncellendi`)}}
-function vLib(){cvWarmUp();if((store.libTc||0)<3&&S.books&&S.books.length){S.books.forEach(b=>{if(TRC.test(b.t+' '+b.a))return;const t=tcFix(b.t),a=tcFix(b.a);if(t!==b.t)b.t=t;if(a!==b.a)b.a=a});store.libTc=3;save()}if(store.libTc===3)setTimeout(trRepair,300);setTimeout(reKat,1500);return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}">${I('chevL','sm')}${UI.libFrom==='lists'?'İstekler':'Aile'}</button><h1>Ev kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
-function libCard(){const L=LIB();return `<button class="libcard" data-act="libGo"><span class="st">${L.length?libSort(L).slice(0,4).map(b=>`<i style="--c:${bcol(b)}"></i>`).join(''):`<i style="--c:#8A3B2B"></i><i style="--c:#2E5A8A"></i><i style="--c:#B8662B"></i>`}</span><span class="tx"><b>Ev kütüphanesi</b><small>${L.length?L.length+' kitap':'Evdeki kitaplarınızı ekleyin'}${(o=>` · bugün ${o.v}/${o.g} dk`)(okuNow(meId()))}</small></span>${I('chevR')}</button>`}
+function vLib(){cvWarmUp();if((store.libTc||0)<3&&S.books&&S.books.length){S.books.forEach(b=>{if(TRC.test(b.t+' '+b.a))return;const t=tcFix(b.t),a=tcFix(b.a);if(t!==b.t)b.t=t;if(a!==b.a)b.a=a});store.libTc=3;save()}if(store.libTc===3)setTimeout(trRepair,300);setTimeout(reKat,1500);return `<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}">${I('chevL','sm')}${UI.libFrom==='lists'?'İstekler':'Aile'}</button><h1>Ev Kütüphanesi</h1><div class="sub">${LIB().length} kitap</div></div></div>${libBody()}`}
+function libCard(){const L=LIB();return `<button class="libcard" data-act="libGo"><span class="st">${L.length?libSort(L).slice(0,4).map(b=>`<i style="--c:${bcol(b)}"></i>`).join(''):`<i style="--c:#8A3B2B"></i><i style="--c:#2E5A8A"></i><i style="--c:#B8662B"></i>`}</span><span class="tx"><b>Ev Kütüphanesi</b><small>${L.length?L.length+' kitap':'Evdeki kitaplarınızı ekleyin'}${(o=>` · bugün ${o.v}/${o.g} dk`)(okuNow(meId()))}</small></span>${I('chevR')}</button>`}
 // Kitap ayrıntısı: kapak, kategori, Kim okudu, yorumlar (isteklerdeki sohbet)
 // Kategori: tek satır, dokununca 18 tür açılır (catPick gibi)
 function katSheet(k,bk){const cu=!k||!LKAT[k],x=k&&bkOf(k);F={kat:k,kb:bk||'',kc:cu?(x&&x.c)||KPAL[BK().filter(z=>z.u).length%KPAL.length]:''};
@@ -2635,7 +2635,7 @@ document.addEventListener('input',e=>{const t=e.target;
  else if(t.id==='il-q'){UI.iq=t.value;ilPaint()}
  else if(t.id==='lf-q'){clearTimeout(lfT);const q=t.value.trim(),n=++lfSeq,el=document.getElementById('lfres');if(!el)return;if(q.length<2){el.innerHTML=lfHint();return}
   el.innerHTML='<p class="bkmsg">Aranıyor…</p>';lfT=setTimeout(async()=>{const r=await bkSearch(q);if(n!==lfSeq)return;UI.lfRes=r||[];lfPaint(q,r)},300)}});
-// Okuma alışkanlığı (Apple Kitaplar hedefi + Duolingo basamakları): günde birkaç dakika, seri ve büyüyen hedef.
+// Okuma Alışkanlığı (Apple Kitaplar hedefi + Duolingo basamakları): günde birkaç dakika, seri ve büyüyen hedef.
 // okl/{id} = {m, d, dk, g, b, at}: her "Okudum" ayrı kayıt (iki telefon aynı anda yazınca çakışmaz), g o günkü hedef (basamak atlayınca eski günler bozulmasın).
 // okh/{üyeId} = {lv, b, at}: basamak (0-3) ve okunan kitap. Çocukların basamağını yetişkinler seçer.
 const OKUL=[['Filiz','sprout',10,5],['Fidan','leaf',15,10],['Ağaç','tree',20,15],['Çınar','oak',30,20]],OKUAM=[5,10,15,20,30,45,60];
@@ -3020,7 +3020,7 @@ function hmCard(){if(store.mode!=='family'&&store.mode!=='demo')return '';const 
  <div class="hd"><span class="ic">${I('camera')}</span><span><b>${esc(e.title)} nasıldı?</b><small>${rel(d0)}${e.time?' '+hm(e.time):''}${e.loc?' · '+esc(e.loc):''}</small></span></div>
  <p>Ailene bir hatıra bırak: fotoğraf ekle ya da birkaç söz yaz.</p>
  <div class="bt"><button class="btn primary sm" data-act="phPick" data-k="${k}">${I('camera','sm')}Fotoğraf ekle</button><button class="btn soft sm" data-act="hmCm" data-id="${e.id}" data-d="${d}">${I('chat','sm')}Yorum yaz</button></div></div>`}
-// İlaç dolabı (Aile'de kart, UI.tab 'ilac'). ilac/{id} = {n, c, s, k, a, no, g, by, at}: ad, tür (IKAT), son kullanma 'YYYY-MM' (boş olabilir),
+// İlaç Dolabı (Aile'de kart, UI.tab 'ilac'). ilac/{id} = {n, c, s, k, a, no, g, by, at}: ad, tür (IKAT), son kullanma 'YYYY-MM' (boş olabilir),
 // kimin için (üye id, boş = herkes), kutu sayısı, not, GTIN (karekoddan; aynı ilaç bir daha okutulunca ad kendiliğinden gelir).
 // Sayfa tarih sırasıyla: tarihi geçmiş, yakında bitiyor (2 ay), dolapta (Apple Sağlık'ın ilaç listesi gibi). Uyarı selamlama panelinde hap (ilChip).
 const IKAT={ag:['Ağrı ve ateş','#E07A5F'],sg:['Soğuk algınlığı','#3D8EB9'],mi:['Mide','#5E9C80'],al:['Alerji','#A66DB8'],ci:['Cilt ve yara','#D08A1E'],vi:['Vitamin','#4F944F'],dg:['Diğer','#8A8A8A']};
@@ -3065,7 +3065,7 @@ const ilDb=()=>ILDB||(ILDB=fetch('vendor/ilac-adlari.tsv').then(r=>{if(!r.ok)thr
 const ilName=g=>g?(ILC().find(x=>x.g===g)||{}).n||(store.ilg||{})[g]||'':'';
 function ilMem(g,n){const m=store.ilg=store.ilg||{};delete m[g];m[g]=n;const k=Object.keys(m);if(k.length>300)delete m[k[0]];save()}
 function ilCard(){const L=ILC(),g=L.filter(x=>ilSt(x)==='gec').length,y=L.filter(x=>ilSt(x)==='yak').length;
- return `<button class="libcard ilcard" data-act="ilGo"><span class="ilbx">${I('pill')}</span><span class="tx"><b>İlaç dolabı</b><small>${L.length?L.length+' ilaç':'Evdeki ilaçları ve son kullanma tarihlerini ekleyin'}${g?` · <em class="r">${g} tarihi geçmiş</em>`:y?` · <em class="o">${y} yakında bitiyor</em>`:''}</small></span>${I('chevR')}</button>`}
+ return `<button class="libcard ilcard" data-act="ilGo"><span class="ilbx">${I('pill')}</span><span class="tx"><b>İlaç Dolabı</b><small>${L.length?L.length+' ilaç':'Evdeki ilaçları ve son kullanma tarihlerini ekleyin'}${g?` · <em class="r">${g} tarihi geçmiş</em>`:y?` · <em class="o">${y} yakında bitiyor</em>`:''}</small></span>${I('chevR')}</button>`}
 function ilChip(){const b=ilBad();if(!b.length)return '';const g=b.filter(x=>ilSt(x)==='gec').length;return `<button class="hchip ilch" data-act="ilGo">${I('pill','sm')}<span>${g?g+' ilacın tarihi geçmiş':b.length+' ilacın tarihi yaklaşıyor'}</span></button>`}
 const ilRow=x=>`<button class="row ilr" data-act="ilOpen" data-id="${x.id}">${ilIc(x)}<span class="body"><span class="t">${esc(ilShort(x))}</span><span class="m">${IKAT[x.c][0]} · ${ilFor(x)}${x.a>1?' · '+x.a+' kutu':''}</span></span>${ilTag(x)}</button>`;
 const ilHit=(x,q)=>!q||trl(x.n+' '+x.no+' '+IKAT[x.c][0]+' '+ilFor(x)).includes(q);
@@ -3074,7 +3074,7 @@ function ilList(){const q=trl(UI.iq||'').trim(),L=ILC().filter(x=>ilHit(x,q)),g=
  return [['Tarihi geçmiş',g,'gec'],['Yakında bitiyor',y,'yak'],['Dolapta',ok,'iyi']].filter(z=>z[1].length).map(([t,a,c])=>`<div class="sec-h"><h2 class="sec ${c}">${t}</h2><span class="n">${a.length}</span></div><div class="group">${ilSort(a).map(ilRow).join('')}</div>`).join('')}
 const ilPaint=()=>{const r=document.getElementById('ilres');if(r)r.innerHTML=ilList()};
 function vIlac(){const L=ILC(),g=L.filter(x=>ilSt(x)==='gec');
- const head=`<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="family">${I('chevL','sm')}Aile</button><h1>İlaç dolabı</h1><div class="sub">${L.length} ilaç${g.length?` · ${g.length} tarihi geçmiş`:''}</div></div><button class="icon-btn" data-act="ilAdd" aria-label="İlaç ekle">${I('plus')}</button></div>`;
+ const head=`<div class="hdr"><div class="h"><button class="lback" data-act="tab" data-tab="family">${I('chevL','sm')}Aile</button><h1>İlaç Dolabı</h1><div class="sub">${L.length} ilaç${g.length?` · ${g.length} tarihi geçmiş`:''}</div></div><button class="icon-btn" data-act="ilAdd" aria-label="İlaç ekle">${I('plus')}</button></div>`;
  if(!L.length)return head+`<div class="ilempty">${I('pill')}<b>Dolap henüz boş</b><p>Kutunun üstündeki karekodu okutun; adı ve son kullanma tarihi kendiliğinden gelir. Tarihi yaklaşınca Bugün’de haber verilir.</p><button class="btn primary" data-act="ilAdd">${I('plus','sm')}İlk ilacı ekle</button></div>`;
  return head+`<label class="libq ilq">${I('search','sm')}<input id="il-q" type="search" placeholder="${L.length} ilaçta ara" aria-label="İlaçlarda ara" value="${esc(UI.iq||'')}" autocomplete="off"></label><div id="ilres">${ilList()}</div>`}
 function ilSheet(x){const st=ilSt(x),by=x.by&&S.members.some(m=>m.id===x.by)?esc(first(M(x.by).name))+' ekledi · ':'';
@@ -3153,7 +3153,7 @@ function muList(){const q=trl(UI.muq||'').trim(),L=TAR().filter(r=>!q||trl(r.t+'
  if(!L.length)return `<p class="bkmsg">“${esc(UI.muq)}” bulunamadı.</p>`;
  return Object.entries(MUK).map(([k,[n]])=>{const g=L.filter(r=>r.k===k).sort((a,b)=>a.t.localeCompare(b.t,'tr'));return g.length?`<h2 class="sec">${n}</h2><div class="group">${g.map(muRow).join('')}</div>`:''}).join('')}
 const muPaint=()=>{const e=document.getElementById('mures');if(e)e.innerHTML=muList()};
-const MUFR={today:'Bugün',cal:'Takvim',lists:'Listeler',tasks:'Görevler',family:'Aile',lib:'Kütüphane',ilac:'İlaç dolabı',album:'Hatıralar'};
+const MUFR={today:'Bugün',cal:'Takvim',lists:'Listeler',tasks:'Görevler',family:'Aile',lib:'Kütüphane',ilac:'İlaç Dolabı',album:'Hatıralar'};
 // Toplu ekleme (liste yapıştır): her satıra bir yemek; "Çorba:" gibi iki noktayla biten ya da yalnız tür adı olan satır türü belirler, yoksa adından tahmin edilir
 const MUKA={cor:'çorba|çorbalar',pro:'protein|et|etler|ana yemek|et yemekleri',bak:'baklagil|baklagiller',seb:'sebze|sebzeler|salata|salatalar|sebze-salata|sebze salata|sebze ve salata',kar:'karbonhidrat|karbonhidratlar|hamur işi|pilav',tat:'tatlı|tatlılar',kah:'kahvaltı|kahvaltılık',dg:'diğer'};
 const muHead=l=>{const x=trl(l).replace(/[:：]\s*$/,'').trim();return Object.keys(MUKA).find(k=>MUKA[k].split('|').includes(x))||''};
@@ -3251,9 +3251,9 @@ function seedMut(o){const now=Date.now(),D=864e5,t=T();
 document.addEventListener('input',e=>{const t=e.target;if(t.id==='mu-bl'){F.mbt=t.value;muBulkPaint()}else if(t.id==='mu-q'){UI.muq=t.value;muPaint()}else if(t.id==='mu-an'){F.mq=t.value;muAddPaint()}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='mu-an'){e.preventDefault();const q=(F.mq||'').trim();if(!q)return;const M1=TAR().filter(x=>trl(x.t).includes(trl(q))),r=TAR().find(x=>trl(x.t)===trl(q))||(M1.length===1?M1[0]:null);if(r){if(!F.mus.includes(r.id))F.mus.push(r.id);F.mq='';e.target.value='';muAddPaint()}else A.muFree()}});
 // Yan menü (Gmail, Telegram gibi): Bugün'de ≡ düğmesi ya da ekranın sol kenarından sağa çekince açılır.
-// Ev kütüphanesi, İlaç dolabı, Hatıralarımız, Aile, Ayarlar; her satırda kısa durum. #layer içinde, sheet değil.
+// Ev Kütüphanesi, İlaç Dolabı, Hatıralarımız, Aile, Ayarlar; her satırda kısa durum. #layer içinde, sheet değil.
 function drwItems(){const L=LIB(),o=okuNow(meId()),IL=ILC(),g=IL.filter(x=>ilSt(x)==='gec').length,y=IL.filter(x=>ilSt(x)==='yak').length,E=albEvs(),P=E.flatMap(x=>x.p);
- return [['mutGo','Mutfak','fork',muSide(),'#C0582E'],['libGo','Ev kütüphanesi','book',`${L.length} kitap · bugün ${o.v}/${o.g} dk`,'#8A5A2B'],['ilGo','İlaç dolabı','pill',g?`<em>${g} ilacın tarihi geçmiş</em>`:y?`<em class="o">${y} ilacın tarihi yaklaşıyor</em>`:IL.length?`${IL.length} ilaç`:'İlaçlar ve son kullanma tarihleri','#B9502F'],['albGo','Hatıralarımız','camera',P.length?`${E.length} etkinlik · ${P.length} fotoğraf`:'Etkinlik fotoğrafları','#5B6FB5']]}
+ return [['mutGo','Mutfak','fork',muSide(),'#C0582E'],['libGo','Ev Kütüphanesi','book',`${L.length} kitap · bugün ${o.v}/${o.g} dk`,'#8A5A2B'],['ilGo','İlaç Dolabı','pill',g?`<em>${g} ilacın tarihi geçmiş</em>`:y?`<em class="o">${y} ilacın tarihi yaklaşıyor</em>`:IL.length?`${IL.length} ilaç`:'İlaçlar ve son kullanma tarihleri','#B9502F'],['albGo','Hatıralarımız','camera',P.length?`${E.length} etkinlik · ${P.length} fotoğraf`:'Etkinlik fotoğrafları','#5B6FB5']]}
 const drwRow=([a,n,ic,sub,c])=>`<button class="row drr" data-act="drwGo" data-to="${a}" style="--c:${c}"><span class="dri">${I(ic)}</span><span class="body"><span class="t">${n}</span>${sub?`<span class="m">${sub}</span>`:''}</span>${I('chevR','sm')}</button>`;
 // Menü sayfanın altında durur (X, Slack gibi): sayfa (#apw) sağa kayıp küçülür, köşeleri yuvarlanır. Açılış yaylı, satırlar sırayla gelir.
 // Parmağı takip eder: sol kenardan sağa çek (açıkken sayfayı sola çek), yarıyı geçince kendisi tamamlanır.
@@ -3391,8 +3391,8 @@ function tbIn(sc){const t=UI.tab,q=x=>sc.querySelector(x);if(!S||!store.mode)ret
  if(t==='family')return [q('.hdr h1'),`<div class="tbs"><b>Aile</b><span class="tbd"></span><button class="icon-btn" data-act="famSettings" aria-label="Ayarlar">${I('gear')}</button></div>`];
  if(t==='album')return [q('.hdr h1'),`<div class="tbs"><button class="icon-btn" data-act="tab" data-tab="family" aria-label="Geri">${I('chevL')}</button><b>Hatıralarımız</b><span class="tbd">${albEvs().length} etkinlik</span></div>`];
  if(t==='mutfak')return [q('.hdr h1'),`<div class="tbs"><b>Mutfak</b><div class="seg" role="group" aria-label="Görünüm">${muSeg(UI.mt||'hafta')}</div></div>`];
- if(t==='ilac')return [q('.hdr h1'),`<div class="tbs"><button class="icon-btn" data-act="tab" data-tab="family" aria-label="Geri">${I('chevL')}</button><b>İlaç dolabı</b><span class="tbd">${ILC().length} ilaç</span></div>`];
- if(t==='lib')return [q('.hdr h1'),`<div class="tbs"><button class="icon-btn" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}" aria-label="Geri">${I('chevL')}</button><b>Ev kütüphanesi</b><span class="tbd">${LIB().length} kitap</span></div>`];
+ if(t==='ilac')return [q('.hdr h1'),`<div class="tbs"><button class="icon-btn" data-act="tab" data-tab="family" aria-label="Geri">${I('chevL')}</button><b>İlaç Dolabı</b><span class="tbd">${ILC().length} ilaç</span></div>`];
+ if(t==='lib')return [q('.hdr h1'),`<div class="tbs"><button class="icon-btn" data-act="tab" data-tab="${UI.libFrom==='lists'?'lists':'family'}" aria-label="Geri">${I('chevL')}</button><b>Ev Kütüphanesi</b><span class="tbd">${LIB().length} kitap</span></div>`];
  return [null,'']}
 function tbPaint(){const bar=document.getElementById('tbar'),sc=document.getElementById('screen');if(!bar||!sc)return;
  const [h,in_]=tbIn(sc);if(!h){bar.className='';bar.innerHTML='';bar._k='';sc.style.removeProperty('--tbh');return}
@@ -3419,7 +3419,7 @@ function famSettingsHTML(){const {m,demo,np,standalone,ios,sync,sub}=famCtx();
   <div class="setrow"><span><b>Hatırlatmalar</b>${sub(np==='granted'?'Açık. Bildirim şimdilik uygulama açıkken gelir.':np==='denied'?'Bildirimler bu cihazda kapalı. Tarayıcı ayarlarından açabilirsin.':np==='unsupported'?(ios&&!standalone?'iPhone\'da bildirim için önce uygulamayı ana ekrana ekle.':'Bu tarayıcı bildirim desteklemiyor.'):'Etkinlik hatırlatmaları için izin ver.')}</span>${np==='default'?'<button class="btn ghost sm" data-act="askNotify">İzin ver</button>':''}</div></div>
  <div class="setsec">Bu cihaz</div><div class="group">
   <div class="setrow"><span><b>Bu cihazda</b>${sub(esc(m.name))}</span><button class="btn ghost sm" data-act="who">Değiştir</button></div>
-  <div class="setrow"><span><b>Hava durumu</b>${sub(!wxOn()?'Gizli':wxPref()?esc(wxPref().n||'Yer seçildi')+(wxPref().gps?' · konumun':''):'Yer seçilmedi')}</span><button class="btn ghost sm" data-act="wxCity">Değiştir</button></div>
+  <div class="setrow"><span><b>Hava Durumu</b>${sub(!wxOn()?'Gizli':wxPref()?esc(wxPref().n||'Yer seçildi')+(wxPref().gps?' · konumun':''):'Yer seçilmedi')}</span><button class="btn ghost sm" data-act="wxCity">Değiştir</button></div>
   ${demo?'':`<div class="setrow"><span id="lbl-on"><b>Burada olduğumu göster</b>${sub('Uygulama açıkken ailen Bugün ve Listeler’de “şu an burada” görür')}</span><button class="switch" role="switch" aria-labelledby="lbl-on" aria-checked="${!store.prefs.hideOn}" data-act="onToggle"></button></div>`}
   ${standalone?'':`<div class="setrow"><span><b>Telefona yükle</b>${sub(installEvt?'Bizim Ev ana ekranında uygulama gibi açılır.':ios?'Safari\'de Paylaş düğmesine, sonra “Ana Ekrana Ekle”ye dokun.':'Tarayıcı menüsünden “Ana ekrana ekle”yi seç.')}</span>${installEvt?'<button class="btn ghost sm" data-act="install">Yükle</button>':''}</div>`}
   ${demo?'':`<div class="setrow" data-act="syncTap"><span><b>Eşitleme</b>${sub(sync)}</span></div>`}</div>
@@ -4214,7 +4214,7 @@ const FORMS={
  katEdit:()=>{const k=F.kat,n=document.getElementById('ke-n').value.trim().slice(0,40),u=snap(),now=Date.now();
   if(!k){if(!n){toast('Türe bir ad ver');return}if(KATS(1).some(x=>trl(katN(x))===trl(n))){toast('Bu adda bir tür var');return}
    const id=uid();S.bkat=BK();S.bkat.push({id,n,c:F.kc||KPAL[BK().filter(z=>z.u).length%KPAL.length],u:1,at:now});
-   const b=F.kb&&LIB().find(x=>x.id===F.kb);if(b)b.k=id;log(`Ev kütüphanesine “${n}” türünü ekledi`);close();render(true);toast(`“${n}” türü eklendi`,u);if(b)setTimeout(()=>A.libOpen({id:b.id}),60);return}
+   const b=F.kb&&LIB().find(x=>x.id===F.kb);if(b)b.k=id;log(`Ev Kütüphanesine “${n}” türünü ekledi`);close();render(true);toast(`“${n}” türü eklendi`,u);if(b)setTimeout(()=>A.libOpen({id:b.id}),60);return}
   if(!kOk(k))return;const x=bkOf(k);
   if(LKAT[k]){S.bkat=BK().filter(z=>z.id!==k);if(n&&n!==LKAT[k][0])S.bkat.push({id:k,n,at:now})}
   else if(x){if(!n){toast('Türe bir ad ver');return}x.n=n;if(F.kc)x.c=F.kc;x.at=x.at||now}
@@ -4433,7 +4433,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-11-07k',items:[['tag','Kitap türleri','Ev kütüphanesinde türleri artık siz belirleyin: rafların altındaki “Türleri düzenle”den ya da kitabın tür listesindeki “Yeni tür”den ad ve renk vererek yeni tür açın. Raf başlığına dokunarak türün adını değiştirin ya da silin; içindeki kitaplar Diğer’e geçer'],['fork','Mutfak','Yan menüde yeni: ailenin tarif defteri ve haftanın yemekleri. Bir güne birden çok yemek ekleyin, kimin pişireceğini seçin; tarifin malzemeleri tek dokunuşla alınacaklara eklenir. Beğendiğiniz tarifin linkini Paylaş › Bizim Ev ile kaydedebilirsiniz'],['listb','Yan menü','Bugün’de sayfayı sağa çekin ya da ekranın sol kenarındaki ince çubuğa dokunun: sayfa kenara kayar, Ev kütüphanesi, İlaç dolabı ve Hatıralarımız tek dokunuşla açılır. Kapatmak için sayfayı geri itin'],['pill','İlaç dolabı','Aile sayfasında yeni bir kart var: evdeki ilaçlar ve son kullanma tarihleri. Kutunun üstündeki karekodu okutunca ilacın adı ve son kullanma tarihi kendiliğinden gelir. Tarihi geçen ya da iki ay içinde biten ilaç olunca Bugün’ün üstünde küçük bir uyarı çıkar; “Bitti” deyince ilaç alınacaklara eklenir'],['camera','Hatıra hatırlatması','Katıldığın bir etkinlik bitince Bugün’ün üstünde “Nasıldı?” kartı çıkar: oradan fotoğraf ekleyebilir ya da yorum yazabilirsin. Ekleyince ya da kapatınca kaybolur'],['book','Okuma alışkanlığı','Ev kütüphanesinin tepesinde okuma kartı var. Okuduğun gün “Okudum”a dokun, kaç dakika okuduğunu seç. Günlük hedefini tuttukça seri büyür; son 7 günün 5’inde tutturunca Filiz’den Fidan’a, Ağaç’a, Çınar’a geçersin. Çocukların hedefini anne ya da baba seçer'],['camera','Hatıralarımız','Aile sayfasında, Ev kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
+const NEWS={v:'2026-11-07k',items:[['tag','Kitap türleri','Ev Kütüphanesinde türleri artık siz belirleyin: rafların altındaki “Türleri düzenle”den ya da kitabın tür listesindeki “Yeni tür”den ad ve renk vererek yeni tür açın. Raf başlığına dokunarak türün adını değiştirin ya da silin; içindeki kitaplar Diğer’e geçer'],['fork','Mutfak','Yan menüde yeni: ailenin tarif defteri ve haftanın yemekleri. Bir güne birden çok yemek ekleyin, kimin pişireceğini seçin; tarifin malzemeleri tek dokunuşla alınacaklara eklenir. Beğendiğiniz tarifin linkini Paylaş › Bizim Ev ile kaydedebilirsiniz'],['listb','Yan Menü','Bugün’de sayfayı sağa çekin ya da ekranın sol kenarındaki ince çubuğa dokunun: sayfa kenara kayar, Ev Kütüphanesi, İlaç Dolabı ve Hatıralarımız tek dokunuşla açılır. Kapatmak için sayfayı geri itin'],['pill','İlaç Dolabı','Aile sayfasında yeni bir kart var: evdeki ilaçlar ve son kullanma tarihleri. Kutunun üstündeki karekodu okutunca ilacın adı ve son kullanma tarihi kendiliğinden gelir. Tarihi geçen ya da iki ay içinde biten ilaç olunca Bugün’ün üstünde küçük bir uyarı çıkar; “Bitti” deyince ilaç alınacaklara eklenir'],['camera','Hatıra hatırlatması','Katıldığın bir etkinlik bitince Bugün’ün üstünde “Nasıldı?” kartı çıkar: oradan fotoğraf ekleyebilir ya da yorum yazabilirsin. Ekleyince ya da kapatınca kaybolur'],['book','Okuma Alışkanlığı','Ev Kütüphanesinin tepesinde okuma kartı var. Okuduğun gün “Okudum”a dokun, kaç dakika okuduğunu seç. Günlük hedefini tuttukça seri büyür; son 7 günün 5’inde tutturunca Filiz’den Fidan’a, Ağaç’a, Çınar’a geçersin. Çocukların hedefini anne ya da baba seçer'],['camera','Hatıralarımız','Aile sayfasında, Ev Kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik Hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava Durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
@@ -4482,7 +4482,7 @@ function lockCard(){if(store.mode!=='family'||!can('member.manage'))return '';co
 function lockRow(){if(store.mode!=='family')return '';const k=kRec();
  if(k&&k.st==='on')return `<button class="lkrow on" data-act="lockInfo">${I('lock')}<span class="tx"><b>Uçtan uca kilitli</b><small>Sadece ailen görebilir</small></span>${I('chevR','sm')}</button>`;
  if(!can('member.manage')||(!k&&!lkAvail()))return '';
- return `<button class="lkrow" data-act="${k?(k.st==='undo'?'lockUndo':'lockResume'):'lockStart'}">${I('lock')}<span class="tx"><b>Uçtan uca kilit</b><small>${k?'Yarım kaldı · devam etmek için dokun':'Kapalı · açmak için dokun'}</small></span>${I('chevR','sm')}</button>`}
+ return `<button class="lkrow" data-act="${k?(k.st==='undo'?'lockUndo':'lockResume'):'lockStart'}">${I('lock')}<span class="tx"><b>Uçtan Uca Kilit</b><small>${k?'Yarım kaldı · devam etmek için dokun':'Kapalı · açmak için dokun'}</small></span>${I('chevR','sm')}</button>`}
 // Anahtarı olmayan telefon: tek ekran
 function vKeyless(){const k=kRec()||{},mig=k.st!=='on';
  return `<div class="keyless"><div class="bigic">${I('key')}</div>
@@ -4540,7 +4540,7 @@ function ydDl(){const y=UI.yd;if(!y)return;const a=document.createElement('a'),u
 const ydBtn=()=>UI.yd?`<button class="link" style="justify-content:center;width:100%;margin-top:8px" data-act="ydDl">${I('paper','sm')}Yedeği dosya olarak indir</button>`:'';
 
 /* Kilitleme ilerlemesi */
-const LKG=[['Etkinlikler',['events','rsv']],['Görevler',['tasks']],['Listeler ve alınacaklar',['lists','items','freq']],['İstekler ve yorumlar',['wishes','wcm']],['Kütüphane',['books','bkat','okl','okh']],['İlaç dolabı',['ilac']],['Mutfak',['tarif','mplan']],['Aile, mesajlar ve geçmiş',['members','msgs','activity','meta','ann']]];
+const LKG=[['Etkinlikler',['events','rsv']],['Görevler',['tasks']],['Listeler ve alınacaklar',['lists','items','freq']],['İstekler ve yorumlar',['wishes','wcm']],['Kütüphane',['books','bkat','okl','okh']],['İlaç Dolabı',['ilac']],['Mutfak',['tarif','mplan']],['Aile, mesajlar ve geçmiş',['members','msgs','activity','meta','ann']]];
 const LK={g:[]};
 function lkProg(undo){LK.g=[{n:undo?'Kilit kaldırma başladı':'Yedek kaydedildi',a:1,b:1,s:2},...LKG.map(([n])=>({n,a:0,b:0,s:0})),{n:'Aile fotoğrafları',a:0,b:0,s:0},{n:'Etkinlik fotoğrafları',a:0,b:0,s:0}];
  sheet(undo?'Kilit kaldırılıyor':'Kilitleniyor',`<p>${undo?'Her kayıt açılıp yeniden yazılıyor.':'Her kayıt kilitlenip geri okunuyor ve aslıyla karşılaştırılıyor.'}</p><div class="group" id="lkpg">${lkPgHTML()}</div>${lkNote('Uygulama kapanırsa ya da internet giderse kaldığı yerden devam eder. Hiçbir kayıt kaybolmaz.')}`)}
@@ -4700,7 +4700,7 @@ FORMS.muF=()=>{const g=id=>document.getElementById(id),t=g('mu-t').value.trim().
 Object.assign(A,{
  // Gizli açma: Eşitleme satırına art arda 5 kez dokunmak kilidi bu telefonda açar (ana ekrandaki uygulamaya ?kilit=1 verilemiyor)
  syncTap:()=>{const t=Date.now();UI.stc=(UI.stc&&t-UI.stt<2500?UI.stc:0)+1;UI.stt=t;if(UI.stc<5||store.mode!=='family')return;UI.stc=0;
-  store.prefs.lkOn=!store.prefs.lkOn;save();toast(store.prefs.lkOn?'Uçtan uca kilit bu telefonda açıldı':'Uçtan uca kilit bu telefonda gizlendi');render(true)},
+  store.prefs.lkOn=!store.prefs.lkOn;save();toast(store.prefs.lkOn?'Uçtan Uca Kilit bu telefonda açıldı':'Uçtan Uca Kilit bu telefonda gizlendi');render(true)},
  lockLater:()=>{store.prefs.lkLater=Date.now()+14*864e5;render(true)},
  lockStart:()=>{if(!can('member.manage'))return;sheet('Aileni kilitle',`<p>Kilitledikten sonra takvimini, listelerini, görevlerini ve fotoğraflarını sadece bu ailenin telefonları görebilir. Google da, uygulamayı yapan kişi de göremez.</p>
   <ol class="lkol"><li><b>Yedek alınır.</b><span>Ailenin bütün verisi önce bu telefona kaydedilir.</span></li><li><b>Kurtarma kodunu yazarsın.</b><span>Bütün telefonlar kaybolursa veriyi bu kod açar.</span></li><li><b>Diğer telefonlar anahtarı alır.</b><span>Ailendeki diğer telefonlar anahtarı senden alır.</span></li></ol>
