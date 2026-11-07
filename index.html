@@ -1096,7 +1096,7 @@ a.btn{text-decoration:none}
 @media (max-width:360px){.okgo{padding:0 10px;font-size:.82rem}.okt{gap:10px}.okx b{font-size:.95rem}.okbt{display:none}}
 .sheet{max-height:min(92%,calc(100% - env(safe-area-inset-top,0px) - 16px))}
 /* iPhone: şeffaf durum çubuğu; saatin altı üst şerit (#tbar) gibi buzlu cam */
-.stsh{display:none}html.iosa .stsh{display:block;position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:saturate(1.8) blur(18px);backdrop-filter:saturate(1.8) blur(18px);pointer-events:none;z-index:7}
+.stsh{display:none}html.iosa .stsh{display:block;position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:saturate(1.8) blur(18px);backdrop-filter:saturate(1.8) blur(18px);pointer-events:none;z-index:7;transition:opacity .3s}.phone.dpush .stsh{opacity:0}
 /* Okuma kartı tek satır; liste görünümü; basılı tutunca kapak */
 .okc:not(.on){padding:10px 12px}
 .okv{flex:none;width:28px;height:36px;margin-left:-8px;display:grid;place-items:center;color:var(--muted)}.okv .i{width:16px;height:16px}
