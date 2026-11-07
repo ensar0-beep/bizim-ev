@@ -1153,6 +1153,35 @@ a.btn{text-decoration:none}
 .lpo.on .lpt{opacity:1;transform:none}.lpo.off .lpt{opacity:0;transition-delay:0s}
 .lpt b{font-size:1.05rem;text-shadow:0 1px 4px rgba(0,0,0,.4)}.lpt small{opacity:.9;text-shadow:0 1px 4px rgba(0,0,0,.4)}.lpt .btn{margin-top:10px}
 @media (prefers-reduced-motion:reduce){.lpk,.lpb,.lpt{transition:opacity .2s}}
+
+.nwv{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;background:rgba(20,16,10,.45);opacity:0;transition:opacity .25s}
+.nwv.on{opacity:1}.nwv.out{opacity:0}
+.nwc{position:relative;display:flex;flex-direction:column;background:var(--surface);color:var(--fg);overflow:hidden;width:min(92vw,400px);max-height:min(88vh,720px);border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,.3);transform:translateY(16px) scale(.97);transition:transform .45s cubic-bezier(.2,1.2,.35,1)}
+.nwv.on .nwc{transform:none}
+.nwx{position:absolute;top:10px;right:10px;z-index:3;background:color-mix(in srgb,var(--surface) 70%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:999px}
+.nwt{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;flex:1;min-height:0;overscroll-behavior:contain}
+.nwt::-webkit-scrollbar{display:none}
+.nws{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;display:flex;flex-direction:column;overflow-y:auto;min-height:0}
+.nwvis{flex:none;height:min(44vh,330px);display:flex;align-items:flex-end;justify-content:center;background:linear-gradient(160deg,color-mix(in srgb,var(--c) 30%,var(--surface)),color-mix(in srgb,var(--c) 12%,var(--surface)));overflow:hidden;position:relative}
+.nwph{width:58%;max-width:210px;aspect-ratio:360/576;border-radius:22px 22px 0 0;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.22),0 0 0 6px color-mix(in srgb,#111 88%,transparent);margin-bottom:-6px;transform:translateY(24px);transition:transform .6s cubic-bezier(.2,1.2,.35,1) .1s;background:var(--bg)}
+.nwph img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.nwv.on .nwph{transform:none}
+.nwil{align-self:center;width:112px;height:112px;border-radius:34px;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,color-mix(in srgb,var(--c) 75%,#fff),var(--c));box-shadow:0 18px 40px color-mix(in srgb,var(--c) 45%,transparent)}
+.nwil svg{width:54px;height:54px}
+.nwtx{padding:18px 22px 8px}.nwtx small{color:var(--c);font-weight:700;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase}.nwtx h2{margin:4px 0 8px;font-size:1.35rem}.nwtx p{margin:0;color:var(--muted);line-height:1.5;font-size:.93rem}
+.nwgo{align-self:flex-start;margin:6px 22px 4px;color:var(--c)}
+.nwdots{display:flex;gap:6px;justify-content:center;padding:10px 0 2px}.nwdots i{width:7px;height:7px;border-radius:9px;background:var(--line);transition:width .25s,background .25s}.nwdots i.on{width:20px;background:var(--fg)}
+.nwb{padding:10px 18px calc(16px + env(safe-area-inset-bottom,0px))}
+/* B: tam ekran hikâye */
+.nwv.v-B{background:#000}.v-B .nwc{width:100%;height:100%;max-height:none;border-radius:0;background:#14110d;color:#fff;transform:scale(.96)}
+.v-B .nws{background:linear-gradient(180deg,color-mix(in srgb,var(--c) 70%,#000),#14110d 70%)}
+.v-B .nwvis{flex:1;height:auto;background:none;padding-top:calc(env(safe-area-inset-top,0px) + 50px);align-items:center}
+.v-B .nwph{width:62%;max-width:250px;border-radius:24px;margin:0;transform:scale(.9)}.v-B .nwtx p{color:rgba(255,255,255,.75)}.v-B .nwtx small{color:#fff;opacity:.7}.v-B .nwgo{background:rgba(255,255,255,.15);color:#fff}
+.nwbars{position:absolute;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);display:flex;gap:4px;z-index:3}.nwbars i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.3);overflow:hidden}.nwbars i b{display:block;height:100%;width:0;background:#fff;transition:width .3s}.nwbars i.d b,.nwbars i.on b{width:100%}
+.v-B .nwx{top:calc(env(safe-area-inset-top,0px) + 22px);background:rgba(255,255,255,.15);color:#fff}
+/* C: alttan pencere */
+.nwv.v-C{align-items:flex-end}.v-C .nwc{width:100%;max-width:520px;border-radius:28px 28px 0 0;transform:translateY(100%);transition:transform .5s cubic-bezier(.2,1.1,.35,1)}.v-C.on .nwc{transform:none}.v-C .nwvis{height:min(38vh,280px)}
+@media (prefers-reduced-motion:reduce){.nwc,.nwph,.nwv{transition:none!important}}
 </style>
 </head>
 <body>
@@ -1979,10 +2008,12 @@ const nvSnap=()=>({tab:UI.tab,tkb:UI.tkb,lmode:UI.lmode,shop:UI.shop,list:UI.lis
 function nvTrack(){if(!store.mode||!S){NV.st=[];NV.k='';return}const k=nvKey();
  if(NV.k&&k!==NV.k&&!NV.back){const top=NV.st[NV.st.length-1];if(top&&top.k===k)NV.st.pop();else{NV.st.push(Object.assign(NV.v,{y:(document.getElementById('screen')||{}).scrollTop||0,k:NV.k}));if(NV.st.length>30)NV.st.shift()}}
  NV.k=k;NV.v=nvSnap()}
-const nvLayer=()=>{const sh=document.querySelector('#layer .sheet');return !!(document.querySelector('.phv')||LP.on||document.querySelector('#apo.on')||DR&&DR.p>0||sh&&!sh._closing)};
+const nvLayer=()=>{const sh=document.querySelector('#layer .sheet');return !!(NW||document.getElementById('popov')||document.querySelector('.phv')||LP.on||document.querySelector('#apo.on')||DR&&DR.p>0||sh&&!sh._closing)};
 // kalan geri adımı: açık katman + sayfa yığını + (en alttaki sayfa Bugün değilse) Bugün'e bir adım
 const backN=()=>{if(!store.mode||!S)return 0;const L=NV.st.length,last=L?NV.st[0].tab:UI.tab;return (nvLayer()?1:0)+L+(last!=='today'?1:0)};
 function goBack(){
+ if(NW){nwClose();return}
+ if(document.getElementById('popov')){popClose();return}
  const ph=document.querySelector('.phv');if(ph){ph.remove();return}
  if(LP.on){lpHide();return}
  if(document.querySelector('#apo.on')){acilClose();return}
@@ -3280,8 +3311,8 @@ function drwMake(){if(DR)return DR;const ph=document.getElementById('phone'),apw
  ph.classList.add('dpush');stbar();ph.insertBefore(d,ph.firstChild);apw.appendChild(cv);DR={el:d,cv,p:0};drwSet(0,false);d.offsetWidth;return DR}
 // Kenar tutamacı ana sayfalarda görünür; ilk kez Bugün açılınca sayfa bir kez aralanıp menünün kenarını gösterir (store.drwH).
 function drwHint(){const h=document.querySelector('.drwh'),ok=!!(S&&store.mode)&&['today','cal','lists','tasks'].includes(UI.tab);if(h)h.hidden=!ok;
- if(!ok||UI.tab!=='today'||store.drwH||DR||document.getElementById('popov'))return;store.drwH=1;save();if(calm())return;
- setTimeout(()=>{if(DR||UI.tab!=='today'||document.querySelector('#layer .sheet,#layer .scrim,#layer .apo,#popov')){store.drwH=0;return}const r=drwMake();r.el.classList.add('on');
+ if(!ok||UI.tab!=='today'||store.drwH||DR||document.getElementById('popov')||document.getElementById('nwv'))return;store.drwH=1;save();if(calm())return;
+ setTimeout(()=>{if(DR||UI.tab!=='today'||document.querySelector('#layer .sheet,#layer .scrim,#layer .apo,#popov,#nwv')){store.drwH=0;return}const r=drwMake();r.el.classList.add('on');
   requestAnimationFrame(()=>{drwSet(.18,true);setTimeout(()=>{if(DR===r&&!drwP){drwSet(0,true);setTimeout(()=>{if(DR===r&&!r.p)drwKill()},450)}},750)})},900)}
 function drwOpen(){if(!S||!store.mode)return;drwMake();requestAnimationFrame(()=>{drwSet(1,true);DR&&DR.el.focus({preventScroll:true})})}
 function drwClose(now){if(!DR)return;const r=DR;if(now||calm()){drwKill();return}drwSet(0,true);setTimeout(()=>{if(DR===r&&!r.p)drwKill()},420)}
@@ -3739,6 +3770,10 @@ function addItemTo(list,raw){raw=raw.trim();if(!raw)return null;
 /* ---------- Eylemler ---------- */
 const A={
  popX:()=>popClose(),
+ nwX:()=>nwClose(),
+ nwNext:()=>nwTo(NW?NW.i+1:0),
+ nwGo:d=>{const x=NW&&NW.list[+d.i];if(!x)return;const act=(NWX[x[1]]||[x[3]])[0];nwClose(true);close();
+  if(act.startsWith('tab:')){if(DR)drwKill();A.tab({tab:act.slice(4)})}else if(act==='avMe')A.avPick({id:meId()});else if(A[act]){A.tab({tab:'today'});setTimeout(()=>A[act]({},document.querySelector('.acp')),act==='drwOpen'?350:0)}},
  popTasks:()=>{popClose();A.tab({tab:'tasks'})},
  tab:d=>{UI.tab=d.tab;UI.wrHold=false;UI.dcKeep.clear();toastOff();render()},
  close:()=>close(),
@@ -3807,7 +3842,7 @@ const A={
   sheet('Gelişmeler',(nw.length?`<div class="lbl"><span>Yeni</span></div><div class="group bgrp">${bellRows(nw,s,0)}</div>`:'')+(old.length?`<div class="lbl"><span>Daha önce</span></div><div class="group bgrp">${bellRows(old,s,nw.length)}</div>`:'')
    +(L.length?'':`<div class="empty"><b>Şimdilik yeni bir şey yok</b>Biri sana görev verince, isteklere yazınca ya da senin için bir şey ekleyince burada görünür.</div>`));
   store.bell[meId()]=Date.now();save();const b=document.querySelector('.bellb em');if(b)b.remove()},
- newsOpen:()=>{newsMark();sheet('Yenilikler',`<div class="popl">${NEWS.items.map(newsRow).join('')}</div>`)},
+ newsOpen:()=>{close();setTimeout(()=>nwShow(NEWS.items),60)},
  bellGo:d=>{const x=(UI.bellL||[])[+d.i];if(!x)return;closeNow();
   if(x.act==='bellMsg'){if(UI.tab!=='today')A.tab({tab:'today'});return}
   if(x.act==='openItem'){const i=S.items.find(y=>y.id===x.id);if(i){UI.tab='lists';UI.lmode='buy';UI.shop=null;UI.list=i.list;render()}}
@@ -4440,7 +4475,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-11-07k',items:[['tag','Kitap türleri','Ev Kütüphanesinde türleri artık siz belirleyin: rafların altındaki “Türleri düzenle”den ya da kitabın tür listesindeki “Yeni tür”den ad ve renk vererek yeni tür açın. Raf başlığına dokunarak türün adını değiştirin ya da silin; içindeki kitaplar Diğer’e geçer'],['fork','Mutfak','Yan menüde yeni: ailenin tarif defteri ve haftanın yemekleri. Bir güne birden çok yemek ekleyin, kimin pişireceğini seçin; tarifin malzemeleri tek dokunuşla alınacaklara eklenir. Beğendiğiniz tarifin linkini Paylaş › Bizim Ev ile kaydedebilirsiniz'],['listb','Yan Menü','Bugün’de sayfayı sağa çekin ya da ekranın sol kenarındaki ince çubuğa dokunun: sayfa kenara kayar, Ev Kütüphanesi, İlaç Dolabı ve Hatıralarımız tek dokunuşla açılır. Kapatmak için sayfayı geri itin'],['pill','İlaç Dolabı','Aile sayfasında yeni bir kart var: evdeki ilaçlar ve son kullanma tarihleri. Kutunun üstündeki karekodu okutunca ilacın adı ve son kullanma tarihi kendiliğinden gelir. Tarihi geçen ya da iki ay içinde biten ilaç olunca Bugün’ün üstünde küçük bir uyarı çıkar; “Bitti” deyince ilaç alınacaklara eklenir'],['camera','Hatıra hatırlatması','Katıldığın bir etkinlik bitince Bugün’ün üstünde “Nasıldı?” kartı çıkar: oradan fotoğraf ekleyebilir ya da yorum yazabilirsin. Ekleyince ya da kapatınca kaybolur'],['book','Okuma Alışkanlığı','Ev Kütüphanesinin tepesinde okuma kartı var. Okuduğun gün “Okudum”a dokun, kaç dakika okuduğunu seç. Günlük hedefini tuttukça seri büyür; son 7 günün 5’inde tutturunca Filiz’den Fidan’a, Ağaç’a, Çınar’a geçersin. Çocukların hedefini anne ya da baba seçer'],['camera','Hatıralarımız','Aile sayfasında, Ev Kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik Hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava Durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
+const NEWS={v:'2026-11-07n',items:[['gift','Yenilikler','Uygulama güncellenince yenilikler artık tam ekran, tek tek ve ekran resimleriyle gelir. Sağa dokununca sonraki, sola dokununca önceki açılır; “Göster” sizi o ekrana götürür. Gördüğünüz yenilik bir daha çıkmaz; hepsi zildeki “Uygulamada yenilikler”de durur'],['tag','Kitap türleri','Ev Kütüphanesinde türleri artık siz belirleyin: rafların altındaki “Türleri düzenle”den ya da kitabın tür listesindeki “Yeni tür”den ad ve renk vererek yeni tür açın. Raf başlığına dokunarak türün adını değiştirin ya da silin; içindeki kitaplar Diğer’e geçer'],['fork','Mutfak','Yan menüde yeni: ailenin tarif defteri ve haftanın yemekleri. Bir güne birden çok yemek ekleyin, kimin pişireceğini seçin; tarifin malzemeleri tek dokunuşla alınacaklara eklenir. Beğendiğiniz tarifin linkini Paylaş › Bizim Ev ile kaydedebilirsiniz'],['listb','Yan Menü','Bugün’de sayfayı sağa çekin ya da ekranın sol kenarındaki ince çubuğa dokunun: sayfa kenara kayar, Ev Kütüphanesi, İlaç Dolabı ve Hatıralarımız tek dokunuşla açılır. Kapatmak için sayfayı geri itin'],['pill','İlaç Dolabı','Aile sayfasında yeni bir kart var: evdeki ilaçlar ve son kullanma tarihleri. Kutunun üstündeki karekodu okutunca ilacın adı ve son kullanma tarihi kendiliğinden gelir. Tarihi geçen ya da iki ay içinde biten ilaç olunca Bugün’ün üstünde küçük bir uyarı çıkar; “Bitti” deyince ilaç alınacaklara eklenir'],['camera','Hatıra hatırlatması','Katıldığın bir etkinlik bitince Bugün’ün üstünde “Nasıldı?” kartı çıkar: oradan fotoğraf ekleyebilir ya da yorum yazabilirsin. Ekleyince ya da kapatınca kaybolur'],['book','Okuma Alışkanlığı','Ev Kütüphanesinin tepesinde okuma kartı var. Okuduğun gün “Okudum”a dokun, kaç dakika okuduğunu seç. Günlük hedefini tuttukça seri büyür; son 7 günün 5’inde tutturunca Filiz’den Fidan’a, Ağaç’a, Çınar’a geçersin. Çocukların hedefini anne ya da baba seçer'],['camera','Hatıralarımız','Aile sayfasında, Ev Kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik Hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava Durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
@@ -4458,6 +4493,29 @@ function popClose(){const e=document.getElementById('popov');if(e)e.remove()}
 // Yenilikler sade: yalnız bu telefonun görmediği maddeler, en fazla 3 başlık; açıklama başlığa dokununca açılır (store.newsSeen = görülen başlıklar)
 const newsNew=()=>{const seen=store.newsSeen||[];return NEWS.items.filter(x=>!seen.includes(x[1]))};
 const newsMark=()=>{store.newsSeen=[...new Set([...NEWS.items.map(x=>x[1]),...(store.newsSeen||[])])].slice(0,80);save()};
+// Yenilikler kaydırmalı pencere (2026-11-07): her yenilik bir sayfa; ekranın küçük resmi (img/yeni/*.webp, örnek aileden) ya da büyük simge,
+// başlık, açıklama, "Göster" o ekrana götürür. Görülen sayfa store.newsSeen'e yazılır, bir daha açılışta çıkmaz.
+const NWO={v:'B',g:'A'};
+const NWX={'Kitap türleri':['libGo','turler'],'Mutfak':['mutGo','mutfak'],'Yan Menü':['drwOpen','yanmenu'],'İlaç Dolabı':['ilGo','ilac'],'Hatıra hatırlatması':['tab:today','hatirlatma'],'Okuma Alışkanlığı':['libGo','okuma'],'Hatıralarımız':['albGo','album'],'Avatar fotoğrafı':['avMe','avatar'],'Etkinlik Hatıraları':['tab:cal','etkinlik'],'Görevler':['tab:tasks','gorevler'],'Hava Durumu':['wxOpen','hava'],'Acil alınacaklar':['tab:lists','acil']};
+const NWC=['#2F6DB5','#B8662B','#3E6B4C','#9A3F6B','#4B3E8A','#2B6A73','#8A3B2B','#6E4B2B'];
+var NW=null;
+function nwShow(list){if(!list.length)return;nwClose(true);const v=NWO.v,el=document.createElement('div');el.className='nwv v-'+v;el.id='nwv';
+ const sl=list.map((x,i)=>{const [ic,t,m]=x,[act,img]=NWX[t]||[x[3]||'',x[4]||''],c=NWC[i%NWC.length];
+  const vis=NWO.g==='A'&&img?`<span class="nwph"><img src="img/yeni/${img}.webp" alt="" loading="${i<2?'eager':'lazy'}" decoding="async"></span>`:`<span class="nwil">${I(ic)}</span>`;
+  return `<section class="nws" style="--c:${c}" aria-roledescription="sayfa" aria-label="${i+1} / ${list.length}"><div class="nwvis">${vis}</div><div class="nwtx"><small>Yeni${list.length>1?` · ${i+1}/${list.length}`:''}</small><h2>${t}</h2><p>${m}</p></div>${act?`<button class="btn soft nwgo" data-act="nwGo" data-i="${i}">${I('chevR','sm')}Göster</button>`:''}</section>`}).join('');
+ const dots=list.length>1?`<div class="nwdots">${list.map((_,i)=>`<i${i?'':' class="on"'}></i>`).join('')}</div>`:'';
+ el.innerHTML=`<div class="nwc" role="dialog" aria-modal="true" aria-label="Yenilikler">${v==='B'?`<div class="nwbars">${list.map(()=>'<i><b></b></i>').join('')}</div>`:''}<button class="icon-btn nwx" data-act="nwX" aria-label="Kapat">${I('x')}</button><div class="nwt">${sl}</div>${v==='B'?'':dots}<div class="nwb"><button class="btn primary block" data-act="nwNext">${list.length>1?'Sonraki':'Tamam'}</button></div></div>`;
+ el.addEventListener('click',e=>{if(e.target===el)nwClose()});document.body.appendChild(el);NW={el,list,i:0,seen:new Set()};
+ const t=el.querySelector('.nwt');t.addEventListener('scroll',()=>{const i=Math.round(t.scrollLeft/t.clientWidth);if(i!==NW.i){NW.i=i;nwPaint()}},{passive:true});
+ if(v==='B')t.addEventListener('click',e=>{if(e.target.closest('button'))return;const r=t.getBoundingClientRect();nwTo(NW.i+(e.clientX-r.left<r.width/3?-1:1))});
+ nwPaint();requestAnimationFrame(()=>el.classList.add('on'))}
+function nwPaint(){if(!NW)return;const {el,list,i}=NW;NW.seen.add(list[i][1]);
+ el.querySelectorAll('.nwdots i').forEach((d,k)=>d.classList.toggle('on',k===i));el.querySelectorAll('.nwbars i').forEach((d,k)=>d.className=k<i?'d':k===i?'on':'');
+ const b=el.querySelector('[data-act="nwNext"]');if(b)b.textContent=i<list.length-1?'Sonraki':'Tamam';
+ store.newsSeen=[...new Set([...NW.seen,...(store.newsSeen||[])])].slice(0,80);save()}
+function nwTo(i){if(!NW)return;if(i>=NW.list.length){nwClose();return}i=Math.max(0,i);const t=NW.el.querySelector('.nwt');t.scrollTo({left:i*t.clientWidth,behavior:calm()?'auto':'smooth'});}
+function nwClose(now){const e=document.getElementById('nwv');NW=null;if(!e)return;if(now||calm()){e.remove();return}e.classList.remove('on');e.classList.add('out');setTimeout(()=>e.remove(),260)}
+document.addEventListener('keydown',e=>{if(!NW)return;if(e.key==='Escape')nwClose();if(e.key==='ArrowRight')nwTo(NW.i+1);if(e.key==='ArrowLeft')nwTo(NW.i-1)});
 const newsRow=([i,t,m])=>`<details class="popd"><summary><span class="popdot">${I(i,'sm')}</span><b>${t}</b>${I('chevD','sm')}</summary><small>${m}</small></details>`;
 // Aile verisi sunucudan gelene kadar bekler (çevrimdışıysa en fazla ~15 sn); açık bir pencere varsa sonra yeniden dener
 function popCheck(n=0){if(UI.popped||store.mode!=='family'||document.hidden)return;
@@ -4465,8 +4523,7 @@ function popCheck(n=0){if(UI.popped||store.mode!=='family'||document.hidden)retu
  const since=store.seen;store.seen=Date.now();save();
  if(since){const n=awayNotes(since);if(n.length){UI.popped=true;const more=n.length>4?`<p class="popn">ve ${n.length-4} şey daha</p>`:'';
   popShow('bell','var(--accent)','Sen yokken',`<div class="popl">${n.slice(0,4).map(([w,t,m])=>popRow(av(w,'sm'),t,m)).join('')}</div>${more}`,`<button class="btn ghost" data-act="popX">Tamam</button><button class="btn primary" data-act="popTasks">Görevlere git</button>`);return}}
- if(store.news!==NEWS.v){store.news=NEWS.v;save();let nw=newsNew();if(!store.newsSeen)nw=nw.slice(0,3);if(!nw.length)return;UI.popped=true;newsMark();
-  popShow('gift','#2F6DB5',nw.length>1?nw.length+' yenilik':'Yenilik',`<div class="popl">${nw.slice(0,3).map(newsRow).join('')}</div>${nw.length>3?`<p class="popn">ve ${nw.length-3} yenilik daha, zil › Uygulamada yenilikler</p>`:''}`,`<button class="btn primary block" data-act="popX">Tamam</button>`)}}
+ if(store.news!==NEWS.v){store.news=NEWS.v;save();const nw=newsNew();if(!nw.length)return;UI.popped=true;nwShow(nw)}}
 /* ---------- Uçtan uca kilit: ekranlar ----------
    Yönetici kilitler (yedek → kurtarma kodu → kayıtlar tek tek kilitlenip geri okunarak doğrulanır →
    fotoğraflar → st 'on'). Diğer telefonlar anahtarı QR, bağlantı ya da kurtarma koduyla alır.
