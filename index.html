@@ -127,7 +127,7 @@ h2.sec.gec{color:var(--danger)}h2.sec.yak{color:var(--warn)}
 .mnote{margin-top:12px}
 .mbx{gap:12px}.mck{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:7px;border:2px solid var(--line)}.mbx[aria-pressed="true"] .mck{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#fff)}.mbx[aria-pressed="false"] .t{color:var(--muted);text-decoration:line-through}
 #mu-lp{margin-bottom:12px}
-.mdl .row .ok{visibility:hidden}.mdl .row[aria-pressed="true"] .ok{visibility:visible;color:var(--accent)}.mdl .mtl{width:36px;height:36px}.mdl .mtl .i{width:19px;height:19px}.mdl{margin-top:10px}
+.mdl .row .ok{visibility:hidden}.mdl .row[aria-pressed="true"] .ok{visibility:visible;color:var(--accent)}.mdl .mtl{width:36px;height:36px}.mdl .mtl .i{width:19px;height:19px}.mdl{margin-top:10px}.mdl .lbl{margin-top:14px}.mdl>.group+.group{margin-top:8px}
 .mfree{gap:10px;color:var(--accent);font-weight:600}.mfree .m{color:var(--muted);font-weight:500;font-size:.82rem}
 .musub{display:flex;align-items:center;gap:6px;margin:0 2px 12px;color:var(--muted);font-weight:600;font-size:.9rem}
 .mtod{margin:0 0 12px;border-radius:16px;background:var(--surface);box-shadow:var(--shadow);gap:12px}.mtod .m{font-size:.75rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}.mtod.e{color:var(--muted);font-weight:600}.mtod.e em{font-style:normal;color:var(--accent)}.mtod.e>.i:first-child{color:#C0582E}
@@ -3237,11 +3237,12 @@ function muBuyH(){const n=F.mb.filter(x=>x.on).length;return `${S.lists.length>1
 const muBuyRe=()=>{F.mb.forEach(x=>{x.had=muHad(x.x);});const b=document.querySelector('.sheet .sb');if(b)b.innerHTML=muBuyH()};
 const muHad=x=>S.items.some(i=>!i.done&&i.list===F.mbl&&trl(i.name)===trl(x));
 // Yeni yemek: tarif ara/seç (birden çok), tarifi olmayan yemek adıyla da eklenir; kim pişirecek
-function muAddL(){const q=trl(F.mq||'').trim(),L=TAR().filter(r=>!q||trl(r.t).includes(q)).sort((a,b)=>(F.mus.includes(b.id)-F.mus.includes(a.id))||a.t.localeCompare(b.t,'tr'));
- const ex=q&&(TAR().some(r=>trl(r.t)===q)||F.mun.some(n=>trl(n)===q));
- return F.mun.map((n,i)=>`<button type="button" class="row" data-act="muFreeX" data-i="${i}" aria-pressed="true">${muTile(null)}<span class="body t">${esc(n)}</span><span class="ok">${I('check')}</span></button>`).join('')
-  +L.slice(0,q?30:60).map(r=>`<button type="button" class="row" data-act="muAddR" data-id="${r.id}" aria-pressed="${F.mus.includes(r.id)}">${muTile(r)}<span class="body t">${esc(r.t)}</span><span class="ok">${I('check')}</span></button>`).join('')
-  +(q&&!ex?`<button type="button" class="row mfree" data-act="muFree">${I('plus','sm')}<span class="body t">“${esc(F.mq.trim())}” ekle</span><span class="m">tarifsiz</span></button>`:'')
+function muAddL(){const q=trl(F.mq||'').trim(),L=TAR().filter(r=>!q||trl(r.t).includes(q));
+ const ex=q&&(TAR().some(r=>trl(r.t)===q)||F.mun.some(n=>trl(n)===q)),gr=h=>h?`<div class="group">${h}</div>`:'';
+ // Tarifler türlerine göre gruplanır (Tarifler sekmesindeki sırayla); seçilen satır yerinde kalır, yalnız işaretlenir
+ return gr(F.mun.map((n,i)=>`<button type="button" class="row" data-act="muFreeX" data-i="${i}" aria-pressed="true">${muTile(null)}<span class="body t">${esc(n)}</span><span class="ok">${I('check')}</span></button>`).join('')
+  +(q&&!ex?`<button type="button" class="row mfree" data-act="muFree">${I('plus','sm')}<span class="body t">“${esc(F.mq.trim())}” ekle</span><span class="m">tarifsiz</span></button>`:''))
+  +Object.entries(MUK).map(([k,[n]])=>{const g=L.filter(r=>r.k===k).sort((a,b)=>a.t.localeCompare(b.t,'tr'));return g.length?`<div class="lbl"><span>${n}</span></div>`+gr(g.map(r=>`<button type="button" class="row" data-act="muAddR" data-id="${r.id}" aria-pressed="${F.mus.includes(r.id)}">${muTile(r)}<span class="body t">${esc(r.t)}</span><span class="ok">${I('check')}</span></button>`).join('')):''}).join('')
   +(!q&&!TAR().length&&!F.mun.length?`<p class="bkmsg">Tarif defteri boş. Yemeğin adını yazıp ekleyebilirsin.</p>`:'')}
 function muAddPaint(){const e=document.getElementById('mual');if(e)e.innerHTML=muAddL();const n=F.mus.length+F.mun.length,b=document.getElementById('muago');if(b){b.disabled=!n;b.textContent=n>1?n+' yemeği ekle':'Yemeği ekle'}}
 // Bugün'de "Bu akşam": bugünün yemekleri tek satırda, pişirecekler sağda
@@ -4743,7 +4744,7 @@ Object.assign(A,{
   X.forEach(x=>{const it=addItemTo(L.id,x.x);if(it)it.note=[x.q,r?r.t:''].filter(Boolean).join(' · ').slice(0,200)});close();render(true);toast(`${X.length} malzeme ${L.name} listesine eklendi`,u)},
  muAdd:d=>{const day=okDate(d.d)?d.d:T();F={md:day,mus:[],mun:[],mq:'',mw:''};
   sheet('Yeni yemek',`<p class="musub">${I('cal','sm')}${dHeadTxt(day)}</p><label class="libq">${I('search','sm')}<input id="mu-an" type="search" placeholder="${TAR().length?'Tarif ara ya da yemeğin adını yaz':'Yemeğin adını yaz'}" autocomplete="off" maxlength="80"></label>
-  <div class="group mdl" id="mual">${muAddL()}</div><div class="lbl" style="margin-top:16px"><span>Kim pişirecek?</span></div><div class="pgrid" id="mu-w">${faceGrid('muAddW',[])}</div>
+  <div class="mdl" id="mual">${muAddL()}</div><div class="lbl" style="margin-top:16px"><span>Kim pişirecek?</span></div><div class="pgrid" id="mu-w">${faceGrid('muAddW',[])}</div>
   <button type="button" class="btn primary block" style="margin-top:16px" data-act="muAddGo" id="muago" disabled>Yemeği ekle</button>`)},
  muAddR:d=>{F.mus=F.mus.includes(d.id)?F.mus.filter(x=>x!==d.id):[...F.mus,d.id];muAddPaint()},
  muFree:()=>{const n=(F.mq||'').trim().slice(0,80);if(!n)return;F.mun.push(up(n[0])+n.slice(1));F.mq='';const i=document.getElementById('mu-an');if(i)i.value='';muAddPaint()},
