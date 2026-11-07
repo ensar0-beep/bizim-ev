@@ -97,6 +97,16 @@
             ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
           }
         },
+        "tarif": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
+        "mplan": {
+          "$id": {
+            ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
+          }
+        },
         "ann": {
           ".validate": "!root.child('families').child($code).child('k').exists() || root.child('families').child($code).child('k/st').val() === 'undo' || (newData.isString() && newData.val().beginsWith('e1.'))"
         },
