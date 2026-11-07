@@ -1968,11 +1968,34 @@ function trackStrip(){const st=document.getElementById('strip');if(!st)return;
  const sc=document.getElementById('screen'),end=sc&&sc.scrollTop+sc.clientHeight>=sc.scrollHeight-4;
  const day=UI.sel&&(UI.sel>=cur.dataset.from&&UI.sel<=cur.dataset.to||end&&UI.sel>cur.dataset.to)?UI.sel:cur.dataset.from;
  if(st.dataset.mode==='week'&&monday(day)!==st.dataset.start)updStrip(monday(day),day);else markStrip(day)}
-// Android geri tuşu: Bugün dışındaki bir sekmede tek bir geçmiş kaydı tutulur; geri basınca Bugün'e dönülür, Bugün'de basınca uygulama kapanır.
-function syncBack(){const st=history.state&&history.state.bz;
- if(store.mode&&S&&UI.tab!=='today'){if(!st)history.pushState({bz:1},'')}
- else if(st)history.back()}
-window.addEventListener('popstate',()=>{if(document.querySelector('.sheet'))close();if(UI.tab!=='today'){UI.tab='today';render()}});
+// Android geri tuşu (Instagram, Gmail gibi): önce en üstteki katman kapanır (fotoğraf, büyüyen kitap, acil balonu, yan menü, çekmece),
+// sonra bir önceki sayfaya dönülür (sekme, Yapılanlar, İstekler/Alınacaklar, Market modu, Kütüphane, Mutfak…), kaydırma yeri de geri gelir.
+// Geri gidilecek bir şey kaldıkça geçmişte tek bir {bz:1} kaydı tutulur; Bugün'de ve yığın boşken geri, uygulamayı kapatır.
+const NV={st:[],k:'',v:null,back:0,self:0};
+const nvKey=()=>[UI.tab,UI.tab==='tasks'&&UI.tkb==='dn'?'dn':'',UI.tab==='lists'?(UI.shop?'shop':UI.lmode||'buy'):'',UI.tab==='mutfak'?UI.mt||'hafta':''].join('|');
+const nvSnap=()=>({tab:UI.tab,tkb:UI.tkb,lmode:UI.lmode,shop:UI.shop,list:UI.list,mt:UI.mt,y:(document.getElementById('screen')||{}).scrollTop||0});
+// render() başında çağrılır: sayfa değiştiyse eski sayfa yığına girer (yığının üstündekine geri gelindiyse o çıkar)
+function nvTrack(){if(!store.mode||!S){NV.st=[];NV.k='';return}const k=nvKey();
+ if(NV.k&&k!==NV.k&&!NV.back){const top=NV.st[NV.st.length-1];if(top&&top.k===k)NV.st.pop();else{NV.st.push(Object.assign(NV.v,{y:(document.getElementById('screen')||{}).scrollTop||0,k:NV.k}));if(NV.st.length>30)NV.st.shift()}}
+ NV.k=k;NV.v=nvSnap()}
+const nvLayer=()=>document.querySelector('.phv')||LP.on||document.querySelector('#apo.on')||DR||document.querySelector('#layer .sheet');
+const canBack=()=>!!(store.mode&&S&&(nvLayer()||NV.st.length||UI.tab!=='today'));
+function goBack(){
+ const ph=document.querySelector('.phv');if(ph){ph.remove();return}
+ if(LP.on){lpHide();return}
+ if(document.querySelector('#apo.on')){acilClose();return}
+ if(DR){drwClose();return}
+ if(document.querySelector('#layer .sheet')){close();return}
+ if(!store.mode||!S)return;
+ const v=NV.st.pop()||{tab:'today',y:0};NV.back=1;toastOff();
+ Object.assign(UI,{tab:v.tab,tkb:v.tkb,lmode:v.lmode,shop:v.shop,list:v.list&&S.lists.some(l=>l.id===v.list)?v.list:UI.list,mt:v.mt});
+ try{render()}finally{NV.back=0}const sc=document.getElementById('screen');if(sc){sc.style.scrollBehavior='auto';sc.scrollTop=v.y||0;sc.style.scrollBehavior='';tbPaint()}}
+function syncBack(){if(NV.self)return;const st=history.state&&history.state.bz;
+ if(canBack()){if(!st)history.pushState({bz:1},'')}
+ else if(st){NV.self=1;history.back()}}
+window.addEventListener('popstate',()=>{if(NV.self){NV.self=0;syncBack();return}goBack();setTimeout(syncBack,0)});
+// katman açılıp kapanınca (çekmece, yan menü, fotoğraf…) geçmiş kaydı da güncellenir
+{let q=0;new MutationObserver(()=>{if(q)return;q=1;queueMicrotask(()=>{q=0;syncBack()})}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']})}
 function afterRender(){drwHint();tbPaint();phLoad(3e5);if(UI.tab==='today')wxLoad();document.getElementById('screen').classList.toggle('tsw',UI.tab==='lists'&&!UI.shop);rtInit();trackStrip();bindWheel();bindMore();if(UI.pending){const d=UI.pending;UI.pending=null;setTimeout(()=>scrollToDay(d),40)}}
 const emptyBox=(title,text,btn)=>`<div class="empty"><b>${title}</b>${text}${btn||''}</div>`;
 
@@ -3453,6 +3476,7 @@ const inviteCard=()=>store.mode==='family'&&S.members.length<2&&can('member.mana
 
 const TABS=[['today','Bugün','today'],['cal','Takvim','cal'],['lists','Listeler','board'],['tasks','Görevler','tasks'],['family','Aile','users']];
 function render(keepScroll){
+ nvTrack();
  const sc=document.getElementById('screen'),nav=document.getElementById('nav'),y=sc.scrollTop;
  const ae=document.activeElement,keep=ae&&sc.contains(ae)&&ae.id&&'value' in ae?{id:ae.id,v:ae.value,s:ae.selectionStart}:null;
  let html;
