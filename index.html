@@ -2417,6 +2417,8 @@ const kOf=b=>kOk(b.k)?b.k:'dg';
 const katN=k=>{const x=bkOf(k);return x&&x.n?x.n:LKAT[k]?LKAT[k][0]:'Diğer'};
 const katC=k=>LKAT[k]?LKAT[k][1]:(bkOf(k)||{}).c||'#625B52',katI=k=>LKAT[k]?LKAT[k][2]:'tag';
 // sıra: varsayılanlar (kaldırılmamış), sonra ailenin türleri (eklenme sırası), en sonda Diğer; dt yalnız içinde kitap varsa
+// eski "Düşünce ve tarih" (dt): içinde kitap varsa ya da aile adını değiştirdiyse her listede görünür
+const dtOn=()=>LIB().some(b=>b.k==='dt')||!!(bkOf('dt')||{}).n;
 const KATS=dt=>[...Object.keys(LKAT).filter(k=>k!=='dg'&&(k!=='dt'||dt)&&kOk(k)),...BK().filter(z=>z.u).sort((a,b)=>a.at-b.at).map(z=>z.id),'dg'];
 const trl=x=>String(x||'').toLocaleLowerCase('tr');
 const okIsbn=v=>{if(!/^97[89]\d{10}$/.test(v))return false;let s=0;for(let i=0;i<12;i++)s+=+v[i]*(i%2?3:1);return (10-s%10)%10===+v[12]};
@@ -2522,7 +2524,7 @@ function libList(){const a=libFilter(),f=UI.lf||'all',w=f==='rd'?' okuduğun':f=
  const top=f!=='all'||UI.lq?`<div class="lcnt">${a.length}${w} kitap</div>`:'';
  if(!a.length)return top+`<div class="group lempty">${UI.lq?'Bu adla kitap yok. Eklemek için “Adla ara”ya dokun.':f==='rd'?'Okuduğun kitapları, kitaba dokunup “Kim okudu”dan kendini seçerek işaretle.':'Okumadığın kitap kalmadı.'}</div>`;
  if(UI.lq)return top+books(a);
- return top+KATS(a.some(b=>b.k==='dt')).map(k=>{const g=a.filter(b=>kOf(b)===k),c=katC(k);return g.length?`<section class="lsec"><button class="lsh" data-act="katEdit" data-v="${k}" aria-label="${esc(katN(k))}, ${g.length} kitap. Düzenle"${lock(!isChild(),PARENT)}><span class="kd" style="--c:${c}"></span><b>${esc(katN(k))}</b><em>${g.length}</em>${isChild()?'':I('edit','sm')}</button>${books(g)}</section>`:''}).join('')+(!isChild()?`<button class="katm" data-act="katList">${I('tag','sm')}Türleri düzenle</button>`:'')}
+ return top+KATS(dtOn()||a.some(b=>b.k==='dt')).map(k=>{const g=a.filter(b=>kOf(b)===k),c=katC(k);return g.length?`<section class="lsec"><button class="lsh" data-act="katEdit" data-v="${k}" aria-label="${esc(katN(k))}, ${g.length} kitap. Düzenle"${lock(!isChild(),PARENT)}><span class="kd" style="--c:${c}"></span><b>${esc(katN(k))}</b><em>${g.length}</em>${isChild()?'':I('edit','sm')}</button>${books(g)}</section>`:''}).join('')+(!isChild()?`<button class="katm" data-act="katList">${I('tag','sm')}Türleri düzenle</button>`:'')}
 function libBody(){const L=LIB(),me=meId(),f=UI.lf||'all';
  const btn=`<div class="libadd"><button class="btn primary" data-act="libScan">${I('scan','sm')}Barkod tara</button><button class="btn soft" data-act="libFind">${I('search','sm')}Adla ara</button></div>`;
  if(!L.length)return `<div class="libtop">${okuCard()}${btn}</div>${emptyBox('Kitaplığınız boş','Kitabın arkasındaki barkodu okut ya da adıyla ara. Kapak, yazar ve sayfa sayısı kendiliğinden gelir.')}`;
@@ -2564,7 +2566,7 @@ function katGone(k,to){const u=snap(),nm=katN(k),L=LIB().filter(b=>kOf(b)===k);L
  if(LKAT[k]){const x=bkOf(k);if(x){x.x=1;x.at=Date.now()}else{S.bkat=BK();S.bkat.push({id:k,x:1,at:Date.now()})}}else S.bkat=BK().filter(z=>z.id!==k);
  close();render(true);toast(L.length?`“${nm}” silindi, ${L.length} kitap ${katN(to)} türüne geçti`:`“${nm}” silindi`,u)}
 function lkPick(b,own){const bk=kOf(b),lk=lock(own,PARENT);
- return `<div class="group rpick lkp"><button type="button" class="row rph" data-act="libKatTog" data-id="${b.id}" aria-expanded="${!!F.lkOpen}"${lk}><span class="body t">Kategori</span><span class="rpv"><span class="kdot" style="--c:${katC(bk)}">${I(katI(bk),'sm')}</span>${esc(katN(bk))}</span>${I('chevD','sm')}</button>${F.lkOpen?KATS(b.k==='dt').map(k=>`<button type="button" class="row" data-act="libKat" data-id="${b.id}" data-v="${k}" aria-pressed="${k===bk}"><span class="rpi kdot" style="--c:${katC(k)}">${I(katI(k))}</span><span class="body t">${esc(katN(k))}</span><span class="ok">${I('check')}</span></button>`).join('')+(!isChild()?`<button type="button" class="row katn" data-act="katNew" data-id="${b.id}"><span class="rpi">${I('plus')}</span><span class="body t">Yeni tür</span></button>`:''):''}</div>`}
+ return `<div class="group rpick lkp"><button type="button" class="row rph" data-act="libKatTog" data-id="${b.id}" aria-expanded="${!!F.lkOpen}"${lk}><span class="body t">Kategori</span><span class="rpv"><span class="kdot" style="--c:${katC(bk)}">${I(katI(bk),'sm')}</span>${esc(katN(bk))}</span>${I('chevD','sm')}</button>${F.lkOpen?KATS(dtOn()).map(k=>`<button type="button" class="row" data-act="libKat" data-id="${b.id}" data-v="${k}" aria-pressed="${k===bk}"><span class="rpi kdot" style="--c:${katC(k)}">${I(katI(k))}</span><span class="body t">${esc(katN(k))}</span><span class="ok">${I('check')}</span></button>`).join('')+(!isChild()?`<button type="button" class="row katn" data-act="katNew" data-id="${b.id}"><span class="rpi">${I('plus')}</span><span class="body t">Yeni tür</span></button>`:''):''}</div>`}
 function libSheet(b){const own=b.by===meId()||!isChild(),meta=[b.p?b.p+' sayfa':'',b.y].filter(Boolean).join(' · ');
  const kat=`<div id="lkat">${lkPick(b,own)}</div>`;
  const rd=`<div class="lbl" style="margin-top:16px"><span>Kim okudu</span></div><div class="pgrid">${ordMe().map(m=>`<button class="pp${m.role==='child'?' kid':''}" data-act="libRead" data-id="${b.id}" data-m="${m.id}" aria-pressed="${b.rd.includes(m.id)}"${lock(m.id===meId(),'Herkes yalnızca kendini işaretler.')}>${av(m.id)}<span class="ck">${I('check','sm')}</span>${esc(first(m.name))}</button>`).join('')}</div>`;
@@ -4014,7 +4016,7 @@ const A={
   <button class="btn primary block">Kaydet</button></form>`)},
  katEdit:d=>{if(!kOk(d.v)||isChild())return;katSheet(d.v)},
  katNew:d=>{if(isChild())return;katSheet('',d.id||'')},
- katList:()=>{if(isChild())return;const L=LIB();sheet('Türler',`<button class="btn soft block" style="margin-bottom:14px" data-act="katNew">${I('plus','sm')}Yeni tür</button><div class="group">${KATS(L.some(b=>b.k==='dt')).map(k=>{const n=L.filter(b=>kOf(b)===k).length;return `<button class="row" data-act="katEdit" data-v="${k}"><span class="rpi kdot" style="--c:${katC(k)}">${I(katI(k))}</span><span class="body t">${esc(katN(k))}</span><span class="v">${n||''}</span>${I('chevR','sm')}</button>`}).join('')}</div>`)},
+ katList:()=>{if(isChild())return;const L=LIB();sheet('Türler',`<button class="btn soft block" style="margin-bottom:14px" data-act="katNew">${I('plus','sm')}Yeni tür</button><div class="group">${KATS(dtOn()||L.some(b=>b.k==='dt')).map(k=>{const n=L.filter(b=>kOf(b)===k).length;return `<button class="row" data-act="katEdit" data-v="${k}"><span class="rpi kdot" style="--c:${katC(k)}">${I(katI(k))}</span><span class="body t">${esc(katN(k))}</span><span class="v">${n||''}</span>${I('chevR','sm')}</button>`}).join('')}</div>`)},
  katCol:d=>{F.kc=d.v;document.querySelectorAll('#kcol button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===d.v))},
  katDel:()=>{const k=F.kat;if(k&&k!=='dg')katGone(k,'dg')},
  albGo:()=>{UI.tab='album';UI.albM=null;toastOff();phLoad(15e3);render()},
