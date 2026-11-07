@@ -3060,7 +3060,7 @@ function drwSet(p,anim){if(!DR)return;const apw=document.getElementById('apw'),d
 function drwMake(){if(DR)return DR;const ph=document.getElementById('phone'),apw=document.getElementById('apw');closeNow();
  const d=document.createElement('aside');d.className='drw';d.setAttribute('role','dialog');d.setAttribute('aria-label','Menü');d.innerHTML=drwHTML();
  const cv=document.createElement('div');cv.className='drw-cv';cv.dataset.act='drwX';cv.setAttribute('aria-label','Menüyü kapat');
- ph.classList.add('dpush');ph.insertBefore(d,ph.firstChild);apw.appendChild(cv);DR={el:d,cv,p:0};drwSet(0,false);d.offsetWidth;return DR}
+ ph.classList.add('dpush');stbar();ph.insertBefore(d,ph.firstChild);apw.appendChild(cv);DR={el:d,cv,p:0};drwSet(0,false);d.offsetWidth;return DR}
 // Kenar tutamacı ana sayfalarda görünür; ilk kez Bugün açılınca sayfa bir kez aralanıp menünün kenarını gösterir (store.drwH).
 function drwHint(){const h=document.querySelector('.drwh'),ok=!!(S&&store.mode)&&['today','cal','lists','tasks'].includes(UI.tab);if(h)h.hidden=!ok;
  if(!ok||UI.tab!=='today'||store.drwH||DR)return;store.drwH=1;save();if(calm())return;
@@ -3068,7 +3068,7 @@ function drwHint(){const h=document.querySelector('.drwh'),ok=!!(S&&store.mode)&
   requestAnimationFrame(()=>{drwSet(.18,true);setTimeout(()=>{if(DR===r&&!drwP){drwSet(0,true);setTimeout(()=>{if(DR===r&&!r.p)drwKill()},450)}},750)})},900)}
 function drwOpen(){if(!S||!store.mode)return;drwMake();requestAnimationFrame(()=>{drwSet(1,true);const b=DR&&DR.el.querySelector('.drr');b&&b.focus({preventScroll:true})})}
 function drwClose(now){if(!DR)return;const r=DR;if(now||calm()){drwKill();return}drwSet(0,true);setTimeout(()=>{if(DR===r&&!r.p)drwKill()},420)}
-function drwKill(){if(!DR)return;const apw=document.getElementById('apw');DR.el.remove();DR.cv.remove();['transform','borderRadius','transition'].forEach(k=>apw.style[k]='');apw.classList.remove('dsh');document.getElementById('phone').classList.remove('dpush');DR=null}
+function drwKill(){if(!DR)return;const apw=document.getElementById('apw');DR.el.remove();DR.cv.remove();['transform','borderRadius','transition'].forEach(k=>apw.style[k]='');apw.classList.remove('dsh');document.getElementById('phone').classList.remove('dpush');DR=null;stbar()}
 // Parmakla açma/kapama: dokunma olaylarıyla (iPhone'da kaydırma başlayınca pointer olayları iptal olur).
 // Sol 28 px her sayfada; Bugün'de sayfanın her yerinden sağa çekmek de açar (kaydırılan satırlar, hafta şeridi hariç).
 let drwP=null;
@@ -3305,6 +3305,7 @@ let stC='',stP=null;if(IOS&&navigator.standalone)document.documentElement.classL
 const rgbOf=c=>{stP=stP||document.body.appendChild(Object.assign(document.createElement('i'),{hidden:true}));stP.style.color='';stP.style.color=c;const m=getComputedStyle(stP).color.match(/[\d.]+/g)||[0,0,0];return m.map(Number)};
 function stbar(){if(!IOS||!document.body)return;const L=document.getElementById('layer');let [r,g,b]=rgbOf(getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#FAF8F5');
  if(document.querySelector('.phv'))r=g=b=0;
+ else if(document.querySelector('.phone.dpush')){const [ar,ag,ab]=rgbOf(getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#2E6A51');r=r+(ar-r)*.16;g=g+(ag-g)*.16;b=b+(ab-b)*.16}
  else{const o=L&&L.querySelector('.scrim')||document.querySelector('.popov.on,.apo.on');if(o){const [sr,sg,sb,sa=1]=getComputedStyle(o).backgroundColor.match(/[\d.]+/g).map(Number);r=r+(sr-r)*sa;g=g+(sg-g)*sa;b=b+(sb-b)*sa}}
  const c='#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');if(c===stC)return;stC=c;
  document.querySelectorAll('meta[name="theme-color"]').forEach((x,i)=>{if(i)x.remove();else{x.removeAttribute('media');x.content=c}})}
