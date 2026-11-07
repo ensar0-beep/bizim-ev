@@ -116,14 +116,21 @@ h2.sec.gec{color:var(--danger)}h2.sec.yak{color:var(--warn)}
 .ilok{display:flex;align-items:flex-start;gap:8px;padding:12px 14px;border-radius:14px;background:var(--accent-soft);color:var(--accent-ink);font-size:.9rem;line-height:1.4;margin-bottom:10px}.ilok>.i{flex:none;margin-top:2px}.ilok span{flex:1;min-width:0;overflow-wrap:anywhere}.ilok .link{flex:none;padding:0;margin:0;font-size:.85rem}
 
 .drwb{margin:-10px 2px -10px -10px;width:38px;height:38px;color:var(--muted)}
-.drw-s{position:absolute;inset:0;background:var(--scrim);z-index:40;opacity:0;transition:opacity .22s}.drw-s.on{opacity:1}
-.drw{position:absolute;top:0;bottom:0;left:0;width:84%;max-width:340px;background:var(--bg);z-index:41;padding:calc(env(safe-area-inset-top,0px) + 22px) 14px 24px;transform:translateX(-102%);transition:transform .22s ease-out;overflow:auto;overscroll-behavior:contain;box-shadow:8px 0 30px rgba(0,0,0,.18)}
-.drw.on{transform:none}
-.drh{display:flex;align-items:center;gap:12px;margin:0 0 14px 4px}.drh>div{flex:1;min-width:0}.drh b{display:block;font-family:var(--f-display);font-size:1.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.drh small{color:var(--muted)}
-.drl{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 6px 6px}
+#apw{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);transform-origin:0 50%;overflow:hidden;z-index:1}
+#apw.dsh{box-shadow:0 20px 60px rgba(0,0,0,.28)}
+.phone.dpush{background:var(--sunk)}
+.drw-cv{position:absolute;inset:0;z-index:60}
+.drw{position:absolute;inset:0;z-index:0;background:linear-gradient(170deg,color-mix(in srgb,var(--accent) 16%,var(--bg)),var(--bg) 70%);padding:calc(env(safe-area-inset-top,0px) + 40px) 22px 24px;overflow:auto;overscroll-behavior:contain;will-change:transform}
+.drw>*{width:72%}
+.drw .group{background:none;box-shadow:none;border:0}.drw .drr{border:0;padding-left:0}.drw .drr+.drr{border-top:0}.drw .drr>.i:last-child{display:none}
+.drh{display:flex;align-items:center;gap:12px;margin:0 0 14px}.drh .drav{flex:none}.drh>div{flex:1;min-width:0}.drh b{display:block;font-family:var(--f-display);font-size:1.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.drh small{color:var(--muted)}
+.drl{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
 .drr{gap:12px}.drr .m em{font-style:normal;font-weight:700;color:var(--danger)}.drr .m em.o{color:var(--warn)}
-.dri{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c);flex:none}
-@media (prefers-reduced-motion:reduce){.drw,.drw-s{transition:none}}
+.dri{width:40px;height:40px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c);flex:none}
+.drw .drr,.drw .drh{opacity:0}
+.drw.on .drr{animation:drIn .5s cubic-bezier(.2,1.3,.35,1) both;animation-delay:calc(var(--i)*40ms + 90ms)}.drw.on .drh{animation:drIn .5s cubic-bezier(.2,1.3,.35,1) both}
+@keyframes drIn{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.drw .drr,.drw .drh{animation:none!important;opacity:1}}
 #tbar{position:absolute;left:0;right:0;top:0;z-index:6;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .18s,transform .22s}
 #tbar.on{opacity:1;transform:none;pointer-events:auto}
 #tbar .in{background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:saturate(1.8) blur(18px);backdrop-filter:saturate(1.8) blur(18px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 10px) 18px 10px}
@@ -1118,9 +1125,9 @@ a.btn{text-decoration:none}
 <div class="stage">
   <div class="phone" id="phone">
     <div class="netbar" id="netbar" role="status" hidden></div>
-    <main class="screen" id="screen" tabindex="-1"></main>
+    <div id="apw"><main class="screen" id="screen" tabindex="-1"></main>
     <div id="tbar"></div>
-    <nav class="nav" id="nav" aria-label="Ana menü"></nav>
+    <nav class="nav" id="nav" aria-label="Ana menü"></nav></div>
     <div id="layer"></div><div class="stsh" aria-hidden="true"></div>
     <div id="toastwrap" aria-live="polite"></div>
   </div>
@@ -3019,20 +3026,35 @@ function seedIl(o){const now=Date.now(),ym=k=>{const d=parse(T());d.setDate(1);d
 function drwItems(){const L=LIB(),o=okuNow(meId()),IL=ILC(),g=IL.filter(x=>ilSt(x)==='gec').length,y=IL.filter(x=>ilSt(x)==='yak').length,E=albEvs(),P=E.flatMap(x=>x.p);
  return [['libGo','Ev kütüphanesi','book',`${L.length} kitap · bugün ${o.v}/${o.g} dk`,'#8A5A2B'],['ilGo','İlaç dolabı','pill',g?`<em>${g} ilacın tarihi geçmiş</em>`:y?`<em class="o">${y} ilacın tarihi yaklaşıyor</em>`:IL.length?`${IL.length} ilaç`:'İlaçlar ve son kullanma tarihleri','#B9502F'],['albGo','Hatıralarımız','camera',P.length?`${E.length} etkinlik · ${P.length} fotoğraf`:'Etkinlik fotoğrafları','#5B6FB5']]}
 const drwRow=([a,n,ic,sub,c])=>`<button class="row drr" data-act="drwGo" data-to="${a}" style="--c:${c}"><span class="dri">${I(ic)}</span><span class="body"><span class="t">${n}</span>${sub?`<span class="m">${sub}</span>`:''}</span>${I('chevR','sm')}</button>`;
-function drwOpen(){if(!S||!store.mode||document.querySelector('.drw'))return;const m=M(meId()),L=document.getElementById('layer');closeNow();
- L.innerHTML=`<div class="drw-s" data-act="drwX"></div><aside class="drw" role="dialog" aria-modal="true" aria-label="Menü"><div class="drh">${av(m.id,'md')}<div><b>${esc(S.meta&&S.meta.name||'Ailemiz')}</b><small>${esc(first(m.name))}</small></div><button class="icon-btn" data-act="drwX" aria-label="Kapat">${I('x')}</button></div>
- <div class="drl">Evimiz</div><div class="group">${drwItems().map(drwRow).join('')}</div>
- <div class="drl">Uygulama</div><div class="group">${[['drwFam','Aile','users','','#2E6A51'],['famSettings','Ayarlar','gear','','#625B52']].map(drwRow).join('')}</div></aside>`;
- const d=L.querySelector('.drw');requestAnimationFrame(()=>{L.querySelector('.drw-s').classList.add('on');d.classList.add('on')});setTimeout(()=>{const b=d.querySelector('.drr');b&&b.focus({preventScroll:true})},230)}
-function drwClose(now){const L=document.getElementById('layer'),d=L.querySelector('.drw');if(!d)return;
- if(now||calm()){L.innerHTML='';return}d.classList.remove('on');L.querySelector('.drw-s').classList.remove('on');setTimeout(()=>{if(L.querySelector('.drw:not(.on)'))L.innerHTML=''},230)}
-// Sol kenardan sağa çekme (ilk 18 px) menüyü açar; açıkken sola çekmek kapatır
+// Menü sayfanın altında durur (X, Slack gibi): sayfa (#apw) sağa kayıp küçülür, köşeleri yuvarlanır. Açılış yaylı, satırlar sırayla gelir.
+// Parmağı takip eder: sol kenardan sağa çek (açıkken sayfayı sola çek), yarıyı geçince kendisi tamamlanır.
+let DR=null;
+function drwHTML(){const m=M(meId()),hr=new Date().getHours(),n=[0];
+ const rows=a=>a.map(x=>drwRow(x).replace('style="--c:',`style="--i:${n[0]++};--c:`)).join('');
+ return `<div class="drh"><span class="drav">${av(m.id,'md')}</span><div><b>${esc(S.meta&&S.meta.name||'Ailemiz')}</b><small>${esc(first(m.name))} · ${hr<5?'İyi geceler':hr<12?'Günaydın':hr<18?'İyi günler':'İyi akşamlar'}</small></div></div>
+ <div class="drl">Evimiz</div><div class="group">${rows(drwItems())}</div><div class="drl">Uygulama</div><div class="group">${rows([['drwFam','Aile','users','','#2E6A51'],['famSettings','Ayarlar','gear','','#625B52']])}</div>`}
+function drwSet(p,anim){if(!DR)return;const apw=document.getElementById('apw'),d=DR.el,on=p>DR.p;DR.p=p;
+ const t=!anim||calm()?'none':on?'560ms cubic-bezier(.2,1.28,.35,1)':'380ms cubic-bezier(.32,.72,0,1)';
+ apw.style.transition=d.style.transition=t==='none'?'none':`transform ${t},border-radius ${t},opacity 300ms ease`;
+ apw.style.transform=`translateX(${p*74}%) scale(${1-p*.14})`;apw.style.borderRadius=p?'30px':'';apw.classList.toggle('dsh',p>0);
+ d.style.opacity=.35+p*.65;d.style.transform=`translateX(${(p-1)*14}%)`;if(p>.5)d.classList.add('on');DR.cv.style.pointerEvents=p>0?'auto':'none'}
+function drwMake(){if(DR)return DR;const ph=document.getElementById('phone'),apw=document.getElementById('apw');closeNow();
+ const d=document.createElement('aside');d.className='drw';d.setAttribute('role','dialog');d.setAttribute('aria-label','Menü');d.innerHTML=drwHTML();
+ const cv=document.createElement('div');cv.className='drw-cv';cv.dataset.act='drwX';cv.setAttribute('aria-label','Menüyü kapat');
+ ph.classList.add('dpush');ph.insertBefore(d,ph.firstChild);apw.appendChild(cv);DR={el:d,cv,p:0};drwSet(0,false);d.offsetWidth;return DR}
+function drwOpen(){if(!S||!store.mode)return;drwMake();requestAnimationFrame(()=>{drwSet(1,true);const b=DR&&DR.el.querySelector('.drr');b&&b.focus({preventScroll:true})})}
+function drwClose(now){if(!DR)return;const r=DR;if(now||calm()){drwKill();return}drwSet(0,true);setTimeout(()=>{if(DR===r&&!r.p)drwKill()},420)}
+function drwKill(){if(!DR)return;const apw=document.getElementById('apw');DR.el.remove();DR.cv.remove();['transform','borderRadius','transition'].forEach(k=>apw.style[k]='');apw.classList.remove('dsh');document.getElementById('phone').classList.remove('dpush');DR=null}
 let drwP=null;
-document.addEventListener('pointerdown',e=>{const d=document.querySelector('.drw.on');drwP=e.pointerType!=='mouse'&&(d?e.target.closest('.drw'):e.clientX<18&&!document.querySelector('#layer .sheet,#layer .scrim'))?{x:e.clientX,y:e.clientY,o:!!d}:null},true);
-document.addEventListener('pointermove',e=>{if(!drwP)return;const dx=e.clientX-drwP.x,dy=Math.abs(e.clientY-drwP.y);if(dy>40){drwP=null;return}
- if(!drwP.o&&dx>50&&dx>dy*1.5){drwP=null;drwOpen()}else if(drwP.o&&dx<-60&&-dx>dy*1.5){drwP=null;drwClose()}},true);
-document.addEventListener('pointerup',()=>{drwP=null},true);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.drw'))drwClose()});
+document.addEventListener('pointerdown',e=>{drwP=null;if(e.pointerType==='mouse')return;const ph=document.getElementById('phone');if(!ph||!S||!store.mode)return;const W=ph.offsetWidth*.74;
+ if(DR&&DR.p===1&&e.target.closest('.drw-cv'))drwP={x:e.clientX,y:e.clientY,W,o:1,go:0};
+ else if(!DR&&e.clientX-ph.getBoundingClientRect().left<18&&!document.querySelector('#layer .sheet,#layer .scrim,.phv,.lpo'))drwP={x:e.clientX,y:e.clientY,W,o:0,go:0}},true);
+document.addEventListener('pointermove',e=>{const g=drwP;if(!g)return;const dx=e.clientX-g.x,dy=e.clientY-g.y;
+ if(!g.go){if(Math.abs(dy)>12&&Math.abs(dy)>Math.abs(dx)){drwP=null;return}if(Math.abs(dx)<8)return;g.go=1;if(!g.o)drwMake()}
+ drwSet(Math.max(0,Math.min(1,g.o+dx/g.W)),false)},true);
+const drwUp=()=>{const g=drwP;drwP=null;if(!g||!g.go||!DR)return;if(DR.p>(g.o?.7:.35)){drwSet(1,true);const b=DR.el.querySelector('.drr');b&&b.focus({preventScroll:true})}else drwClose()};
+document.addEventListener('pointerup',drwUp,true);document.addEventListener('pointercancel',drwUp,true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&DR)drwClose()});
 // İsteklerde yorum: her isteğin altında (yapılmadan önce de) serbest sohbet. Her yorum ayrı kayıt (wcm/{id} = {w, by, t, at}),
 // böylece iki telefon aynı anda yazınca biri ötekini silmez.
 const cmOf=w=>(S.wcm||[]).filter(c=>c.w===w.id&&c.by&&c.t).sort((a,b)=>a.at-b.at);
@@ -3777,7 +3799,7 @@ const A={
  ilRescan:()=>{const b=document.getElementById('ilsc');if(!b)return;F.seen={};F.ilBusy=0;b.innerHTML=ilScanBox();scStart('il')},
  drwOpen:()=>drwOpen(),
  drwX:()=>drwClose(),
- drwGo:d=>{drwClose(1);if(d.to==='drwFam'){UI.wsel=meId();A.tab({tab:'family'});document.getElementById('screen').scrollTop=0}else A[d.to]&&A[d.to]({})},
+ drwGo:d=>{if(d.to==='drwFam'){UI.wsel=meId();A.tab({tab:'family'});document.getElementById('screen').scrollTop=0}else A[d.to]&&A[d.to]({});drwClose()},
  libScan:()=>{if(!S)return;F={scan:0,seen:{}};
   sheet('Barkod tara',`<div class="scan"><video id="scv" playsinline muted autoplay aria-hidden="true"></video><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><span class="ray"></span><p class="scmsg" id="scmsg">Kamera açılıyor…</p><button type="button" class="sctorch" id="sctorch" aria-pressed="false" aria-label="El feneri" hidden>${I('bolt')}</button></div>
   <p class="note" style="margin:10px 0 6px">${I('info','sm')}<span>Kitabın arkasındaki barkodu çerçeveye getir, bir karış uzakta tut. Arka arkaya okutabilirsin, her biri hemen eklenir.</span></p>
