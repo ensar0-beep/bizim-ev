@@ -519,7 +519,7 @@ h2.sec .qty{font-weight:700}
 .popic{width:64px;height:64px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c) 15%,var(--surface));color:var(--c)}.popic .i{width:30px;height:30px}
 .popl{display:grid;gap:10px;text-align:left;margin:10px 0 4px}.popr{display:flex;align-items:center;gap:10px}.popr>span{display:flex;flex-direction:column;min-width:0}.popr b{font-size:.92rem;font-weight:600}.popr small{color:var(--muted);font-size:.82rem;overflow-wrap:anywhere}
 .popdot{width:34px;height:34px;border-radius:999px;background:var(--sunk);display:flex;align-items:center;justify-content:center;flex:none;color:var(--fg)}
-.popn{color:var(--muted);font-size:.86rem;margin:6px 0 0}
+.popn{color:var(--muted);font-size:.86rem;margin:6px 0 0}.popd summary{display:flex;align-items:center;gap:10px;list-style:none;cursor:pointer;min-height:40px}.popd summary::-webkit-details-marker{display:none}.popd summary b{flex:1;font-size:.95rem;font-weight:600}.popd summary>.i:last-child{color:var(--muted);transition:transform .2s}.popd[open] summary>.i:last-child{transform:rotate(180deg)}.popd small{display:block;color:var(--muted);font-size:.86rem;line-height:1.45;margin:4px 0 4px 44px;overflow-wrap:anywhere}
 .popb{display:flex;gap:8px;margin-top:16px}.popb .btn{flex:1}
 @media (prefers-reduced-motion:reduce){.popov,.popc{transition:none}}
 .donebar{display:flex;align-items:center;justify-content:space-between;margin-top:22px}
@@ -3278,8 +3278,8 @@ function drwMake(){if(DR)return DR;const ph=document.getElementById('phone'),apw
  ph.classList.add('dpush');stbar();ph.insertBefore(d,ph.firstChild);apw.appendChild(cv);DR={el:d,cv,p:0};drwSet(0,false);d.offsetWidth;return DR}
 // Kenar tutamacı ana sayfalarda görünür; ilk kez Bugün açılınca sayfa bir kez aralanıp menünün kenarını gösterir (store.drwH).
 function drwHint(){const h=document.querySelector('.drwh'),ok=!!(S&&store.mode)&&['today','cal','lists','tasks'].includes(UI.tab);if(h)h.hidden=!ok;
- if(!ok||UI.tab!=='today'||store.drwH||DR)return;store.drwH=1;save();if(calm())return;
- setTimeout(()=>{if(DR||UI.tab!=='today'||document.querySelector('#layer .sheet,#layer .scrim,#layer .apo'))return;const r=drwMake();r.el.classList.add('on');
+ if(!ok||UI.tab!=='today'||store.drwH||DR||document.getElementById('popov'))return;store.drwH=1;save();if(calm())return;
+ setTimeout(()=>{if(DR||UI.tab!=='today'||document.querySelector('#layer .sheet,#layer .scrim,#layer .apo,#popov')){store.drwH=0;return}const r=drwMake();r.el.classList.add('on');
   requestAnimationFrame(()=>{drwSet(.18,true);setTimeout(()=>{if(DR===r&&!drwP){drwSet(0,true);setTimeout(()=>{if(DR===r&&!r.p)drwKill()},450)}},750)})},900)}
 function drwOpen(){if(!S||!store.mode)return;drwMake();requestAnimationFrame(()=>{drwSet(1,true);DR&&DR.el.focus({preventScroll:true})})}
 function drwClose(now){if(!DR)return;const r=DR;if(now||calm()){drwKill();return}drwSet(0,true);setTimeout(()=>{if(DR===r&&!r.p)drwKill()},420)}
@@ -3805,7 +3805,7 @@ const A={
   sheet('Gelişmeler',(nw.length?`<div class="lbl"><span>Yeni</span></div><div class="group bgrp">${bellRows(nw,s,0)}</div>`:'')+(old.length?`<div class="lbl"><span>Daha önce</span></div><div class="group bgrp">${bellRows(old,s,nw.length)}</div>`:'')
    +(L.length?'':`<div class="empty"><b>Şimdilik yeni bir şey yok</b>Biri sana görev verince, isteklere yazınca ya da senin için bir şey ekleyince burada görünür.</div>`));
   store.bell[meId()]=Date.now();save();const b=document.querySelector('.bellb em');if(b)b.remove()},
- newsOpen:()=>sheet('Yenilikler',`<div class="popl">${NEWS.items.map(([i,t,m])=>popRow(`<span class="popdot">${I(i,'sm')}</span>`,t,m)).join('')}</div>`),
+ newsOpen:()=>{newsMark();sheet('Yenilikler',`<div class="popl">${NEWS.items.map(newsRow).join('')}</div>`)},
  bellGo:d=>{const x=(UI.bellL||[])[+d.i];if(!x)return;closeNow();
   if(x.act==='bellMsg'){if(UI.tab!=='today')A.tab({tab:'today'});return}
   if(x.act==='openItem'){const i=S.items.find(y=>y.id===x.id);if(i){UI.tab='lists';UI.lmode='buy';UI.shop=null;UI.list=i.list;render()}}
@@ -4453,14 +4453,18 @@ function popShow(ic,c,t,body,btns){popClose();const el=document.createElement('d
  el.innerHTML=`<div class="popc" role="dialog" aria-modal="true" aria-labelledby="pop-t"><span class="popic" style="--c:${c}">${I(ic)}</span><h2 id="pop-t">${t}</h2>${body}<div class="popb">${btns}</div></div>`;
  el.addEventListener('click',e=>{if(e.target===el)popClose()});document.body.appendChild(el);requestAnimationFrame(()=>el.classList.add('on'))}
 function popClose(){const e=document.getElementById('popov');if(e)e.remove()}
+// Yenilikler sade: yalnız bu telefonun görmediği maddeler, en fazla 3 başlık; açıklama başlığa dokununca açılır (store.newsSeen = görülen başlıklar)
+const newsNew=()=>{const seen=store.newsSeen||[];return NEWS.items.filter(x=>!seen.includes(x[1]))};
+const newsMark=()=>{store.newsSeen=[...new Set([...NEWS.items.map(x=>x[1]),...(store.newsSeen||[])])].slice(0,80);save()};
+const newsRow=([i,t,m])=>`<details class="popd"><summary><span class="popdot">${I(i,'sm')}</span><b>${t}</b>${I('chevD','sm')}</summary><small>${m}</small></details>`;
 // Aile verisi sunucudan gelene kadar bekler (çevrimdışıysa en fazla ~15 sn); açık bir pencere varsa sonra yeniden dener
 function popCheck(n=0){if(UI.popped||store.mode!=='family'||document.hidden)return;
- if((!UI.synced&&n<10)||!S||document.querySelector('.sheet')){if(n<40)setTimeout(()=>popCheck(n+1),1500);return}
+ if((!UI.synced&&n<10)||!S||document.querySelector('.sheet')||DR){if(n<40)setTimeout(()=>popCheck(n+1),1500);return}
  const since=store.seen;store.seen=Date.now();save();
  if(since){const n=awayNotes(since);if(n.length){UI.popped=true;const more=n.length>4?`<p class="popn">ve ${n.length-4} şey daha</p>`:'';
   popShow('bell','var(--accent)','Sen yokken',`<div class="popl">${n.slice(0,4).map(([w,t,m])=>popRow(av(w,'sm'),t,m)).join('')}</div>${more}`,`<button class="btn ghost" data-act="popX">Tamam</button><button class="btn primary" data-act="popTasks">Görevlere git</button>`);return}}
- if(store.news!==NEWS.v){UI.popped=true;store.news=NEWS.v;save();
-  popShow('gift','#2F6DB5','Yenilikler',`<div class="popl">${NEWS.items.map(([i,t,m])=>popRow(`<span class="popdot">${I(i,'sm')}</span>`,t,m)).join('')}</div>`,`<button class="btn primary block" data-act="popX">Anladım</button>`)}}
+ if(store.news!==NEWS.v){store.news=NEWS.v;save();let nw=newsNew();if(!store.newsSeen)nw=nw.slice(0,3);if(!nw.length)return;UI.popped=true;newsMark();
+  popShow('gift','#2F6DB5',nw.length>1?nw.length+' yenilik':'Yenilik',`<div class="popl">${nw.slice(0,3).map(newsRow).join('')}</div>${nw.length>3?`<p class="popn">ve ${nw.length-3} yenilik daha, zil › Uygulamada yenilikler</p>`:''}`,`<button class="btn primary block" data-act="popX">Tamam</button>`)}}
 /* ---------- Uçtan uca kilit: ekranlar ----------
    Yönetici kilitler (yedek → kurtarma kodu → kayıtlar tek tek kilitlenip geri okunarak doğrulanır →
    fotoğraflar → st 'on'). Diğer telefonlar anahtarı QR, bağlantı ya da kurtarma koduyla alır.
