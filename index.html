@@ -122,7 +122,7 @@ h2.sec.gec{color:var(--danger)}h2.sec.yak{color:var(--warn)}
 #apw.dsh{box-shadow:0 20px 60px rgba(0,0,0,.28)}
 .phone.dpush{background:var(--sunk)}
 .drw-cv{position:absolute;inset:0;z-index:60}
-.drw{position:absolute;inset:0;z-index:0;background:linear-gradient(170deg,color-mix(in srgb,var(--accent) 16%,var(--bg)),var(--bg) 70%);padding:calc(env(safe-area-inset-top,0px) + 40px) 22px 24px;overflow:auto;overscroll-behavior:contain;will-change:transform}
+.drw:focus{outline:none}.drw{position:absolute;inset:0;z-index:0;background:linear-gradient(170deg,color-mix(in srgb,var(--accent) 16%,var(--bg)),var(--bg) 70%);padding:calc(env(safe-area-inset-top,0px) + 40px) 22px 24px;overflow:auto;overscroll-behavior:contain;will-change:transform}
 .drw>*{width:72%}
 .drw .group{background:none;box-shadow:none;border:0}.drw .drr{border:0;padding-left:0}.drw .drr+.drr{border-top:0}.drw .drr>.i:last-child{display:none}
 .drh{display:flex;align-items:center;gap:12px;margin:0 0 14px}.drh .drav{flex:none}.drh>div{flex:1;min-width:0}.drh b{display:block;font-family:var(--f-display);font-size:1.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.drh small{color:var(--muted)}
@@ -3058,7 +3058,7 @@ function drwSet(p,anim){if(!DR)return;const apw=document.getElementById('apw'),d
  apw.style.transform=`translateX(${p*74}%) scale(${1-p*.14})`;apw.style.borderRadius=p?'30px':'';apw.classList.toggle('dsh',p>0);
  d.style.opacity=.35+p*.65;d.style.transform=`translateX(${(p-1)*14}%)`;if(p>.5)d.classList.add('on');DR.cv.style.pointerEvents=p>0?'auto':'none'}
 function drwMake(){if(DR)return DR;const ph=document.getElementById('phone'),apw=document.getElementById('apw');closeNow();
- const d=document.createElement('aside');d.className='drw';d.setAttribute('role','dialog');d.setAttribute('aria-label','Menü');d.innerHTML=drwHTML();
+ const d=document.createElement('aside');d.className='drw';d.setAttribute('role','dialog');d.setAttribute('aria-label','Menü');d.tabIndex=-1;d.innerHTML=drwHTML();
  const cv=document.createElement('div');cv.className='drw-cv';cv.dataset.act='drwX';cv.setAttribute('aria-label','Menüyü kapat');
  ph.classList.add('dpush');stbar();ph.insertBefore(d,ph.firstChild);apw.appendChild(cv);DR={el:d,cv,p:0};drwSet(0,false);d.offsetWidth;return DR}
 // Kenar tutamacı ana sayfalarda görünür; ilk kez Bugün açılınca sayfa bir kez aralanıp menünün kenarını gösterir (store.drwH).
@@ -3066,7 +3066,7 @@ function drwHint(){const h=document.querySelector('.drwh'),ok=!!(S&&store.mode)&
  if(!ok||UI.tab!=='today'||store.drwH||DR)return;store.drwH=1;save();if(calm())return;
  setTimeout(()=>{if(DR||UI.tab!=='today'||document.querySelector('#layer .sheet,#layer .scrim,#layer .apo'))return;const r=drwMake();r.el.classList.add('on');
   requestAnimationFrame(()=>{drwSet(.18,true);setTimeout(()=>{if(DR===r&&!drwP){drwSet(0,true);setTimeout(()=>{if(DR===r&&!r.p)drwKill()},450)}},750)})},900)}
-function drwOpen(){if(!S||!store.mode)return;drwMake();requestAnimationFrame(()=>{drwSet(1,true);const b=DR&&DR.el.querySelector('.drr');b&&b.focus({preventScroll:true})})}
+function drwOpen(){if(!S||!store.mode)return;drwMake();requestAnimationFrame(()=>{drwSet(1,true);DR&&DR.el.focus({preventScroll:true})})}
 function drwClose(now){if(!DR)return;const r=DR;if(now||calm()){drwKill();return}drwSet(0,true);setTimeout(()=>{if(DR===r&&!r.p)drwKill()},420)}
 function drwKill(){if(!DR)return;const apw=document.getElementById('apw');DR.el.remove();DR.cv.remove();['transform','borderRadius','transition'].forEach(k=>apw.style[k]='');apw.classList.remove('dsh');document.getElementById('phone').classList.remove('dpush');DR=null;stbar()}
 // Parmakla açma/kapama: dokunma olaylarıyla (iPhone'da kaydırma başlayınca pointer olayları iptal olur).
@@ -3083,7 +3083,7 @@ document.addEventListener('touchmove',e=>{const g=drwP;if(!g)return;const t=e.to
   if(g.o?Math.abs(dx)<Math.abs(dy):(dx<=0||dx<Math.abs(dy)*(g.ed?.7:1.2))){drwP=null;return}
   g.go=1;g.x=t.clientX;g.y=t.clientY;SW=null;if(!g.o)drwMake()}
  if(e.cancelable)e.preventDefault();drwSet(Math.max(0,Math.min(1,g.o+dx/g.W)),false)},{capture:true,passive:false});
-const drwUp=()=>{const g=drwP;drwP=null;if(!g||!g.go||!DR)return;if(DR.p>(g.o?.7:.3)){drwSet(1,true);const b=DR.el.querySelector('.drr');b&&b.focus({preventScroll:true})}else drwClose()};
+const drwUp=()=>{const g=drwP;drwP=null;if(!g||!g.go||!DR)return;if(DR.p>(g.o?.7:.3)){drwSet(1,true);DR.el.focus({preventScroll:true})}else drwClose()};
 document.addEventListener('touchend',drwUp,true);document.addEventListener('touchcancel',drwUp,true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&DR)drwClose()});
 // İsteklerde yorum: her isteğin altında (yapılmadan önce de) serbest sohbet. Her yorum ayrı kayıt (wcm/{id} = {w, by, t, at}),
