@@ -1182,6 +1182,33 @@ a.btn{text-decoration:none}
 /* C: alttan pencere */
 .nwv.v-C{align-items:flex-end}.v-C .nwc{width:100%;max-width:520px;border-radius:28px 28px 0 0;transform:translateY(100%);transition:transform .5s cubic-bezier(.2,1.1,.35,1)}.v-C.on .nwc{transform:none}.v-C .nwvis{height:min(38vh,280px)}
 @media (prefers-reduced-motion:reduce){.nwc,.nwph,.nwv{transition:none!important}}
+/* Kişiselleştir */
+.kplink{display:flex;align-items:center;justify-content:center;gap:6px;margin:18px auto 6px;padding:8px 14px;min-height:40px;border-radius:999px;color:var(--muted);font-weight:600;font-size:.86rem}
+.kplink .i{width:16px;height:16px}
+.kpr .dri,.kprow .dri{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);flex:none}
+.kpr .dri .i,.kprow .dri .i{width:19px;height:19px}
+.kprow{gap:10px;justify-content:flex-start;background:var(--surface)}
+.kpn{flex:1;display:flex;flex-direction:column;min-width:0}.kpn small{color:var(--muted);font-size:.8rem;line-height:1.3}
+.kpi{width:30px;height:30px;border-radius:50%;background:var(--sunk);display:grid;place-items:center;color:var(--muted);flex:none}
+.kpg{width:28px;height:40px;display:grid;place-items:center;color:var(--muted);cursor:grab;touch-action:none;flex:none;margin-left:-6px}
+.kpdrag{position:relative;z-index:2;box-shadow:0 8px 24px rgba(0,0,0,.18);border-radius:12px;background:var(--surface)}
+.kprow.fix{opacity:.75}
+.kpad{width:32px;height:32px;border-radius:50%;flex:none;font:700 1.15rem/1 var(--f-body,system-ui);color:#fff;background:#2E8A4F}
+.kpad.rm{background:#C8443A}.kpad:disabled{opacity:.3}
+.kpseg{display:flex;margin:0 0 12px}
+.kpnav{display:flex;align-items:flex-end;justify-content:space-around;background:var(--surface);border-radius:18px;box-shadow:var(--shadow);padding:10px 4px 8px;margin-bottom:4px}
+.kpnb{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);min-width:0;flex:1}
+.kpnb small{font-size:.68rem;font-weight:600;white-space:nowrap}.kpnb.on{color:var(--accent)}
+.kpnp{width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--on-accent,#fff);display:grid;place-items:center;flex:none}
+.kpcmp{display:flex;gap:18px;justify-content:center;margin-top:16px}
+.kpcmp figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.8rem;color:var(--muted)}
+.kpmini{width:70px;height:110px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);padding:6px;display:flex;flex-direction:column;gap:5px;box-sizing:border-box}
+.kpmini i{display:block;height:9px;border-radius:3px;background:var(--line)}
+.kpmini i.pn{height:34px;background:color-mix(in srgb,var(--accent) 30%,var(--line));padding:5px;display:flex;flex-direction:column;gap:3px;box-sizing:border-box}
+.kpmini i.pn u{display:block;height:5px;width:70%;border-radius:2px;background:var(--surface)}.kpmini i.pn u.s{width:45%;opacity:.7}.kpmini i.pn u.s2{width:30%;opacity:.5}
+.kpmini.sd i.pn{height:20px}
+.kptab .lback,.kptab #tbar .tbs>.icon-btn:first-child{display:none}
+.kpsade .drr .m,.kpsade .th .st{display:none}
 </style>
 </head>
 <body>
@@ -2285,17 +2312,11 @@ function todayHead(){const m=me(),d=new Date(),h=d.getHours(),hj=hnum(d),x=holy(
  const n=x?null:nextHoly(),ch=x?`<span class="hchip on">✦ <span>Bugün ${x[0]}</span></span>`:n&&n.n?`<span class="hchip">✦ <span>${n.n} · ${n.i===1?'yarın':n.i+' gün kaldı'}</span></span>`:'';
  const stars=sk==='e'||sk==='n'?[[75,12],[95,20],[88,8],[78,86],[96,78]].map(([a,b])=>`<i class="st" style="left:${a}%;top:${b}%"></i>`).join(''):'';
  const hjt=hj?`<div class="hj">${hj.d} ${HAY[hj.m-1]} ${hj.y} · ${phaseN(hj.d).replace(' ','&nbsp;')}</div>`:'',mb=hj?`<button class="mbtn" data-act="moonInfo" data-d="${hj.d}" aria-label="Ay: ${phaseN(hj.d)}">${moonSVG(hj.d)}</button>`:'';
- const pa=msgStrip();
- return `<div class="th thx thn sky-${sk}"><div class="r1"><div class="ov">${long(T())}<span id="wxs">${wxChip()}</span></div></div><div class="thbtn">${bellBtn()}<button class="icon-btn" data-act="myProfile" aria-label="Aile">${av(m.id)}</button></div>
- <div class="panel${pa?' wa':''}"${hj?'':' style="padding-right:16px"'}>${stars}<h1>${selam(h,x,hj,d.getDay()===5)}</h1>${hjt}${acilChip()}${ilChip()}${ch}${mb}</div>${pa}</div>`}
-function vToday(){
- const child=isChild();
- return `${todayHead()}${onHereHTML()}
- ${hmCard()}${muToday()}${rsvCards()}${demoBar()}${inviteCard()}${lockCard()}
- ${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>${starsHTML()}`:''}
- <div class="lbl"><span>Sıradaki</span></div>${nextHTML({mine:child,filter:[]})}
- ${homeAgenda()}
- <div class="lbl"><span>Evde</span></div>${homeRows()}`}
+ const pa=kpX('mesaj',msgStrip());
+ return `<div class="th thx thn sky-${sk}"><div class="r1"><div class="ov">${long(T())}${kpX('hava',`<span id="wxs">${wxChip()}</span>`)}</div></div><div class="thbtn">${bellBtn()}<button class="icon-btn" data-act="myProfile" aria-label="Aile">${av(m.id)}</button></div>
+ <div class="panel${pa?' wa':''}"${hj?'':' style="padding-right:16px"'}>${stars}<h1>${selam(h,x,hj,d.getDay()===5)}</h1>${kpX('hicri',hjt)}${kpX('acil',acilChip()+(kpSec('ilac')?ilChip():''))}${kpX('gun',ch)}${kpX('hicri',mb)}</div>${pa}</div>`}
+// Bölümlerin açık/kapalı ve sırası kişinin ayarından (kpToday)
+function vToday(){return kpToday(isChild())}
 
 // Takvimde kimin takvimi: Bütün aile (süzgeç yok) ya da seçilen kişiler; formlardaki avatar ızgarası
 function calFilterHTML(){const f=UI.filter,ck=`<span class="ck">${I('check','sm')}</span>`;
@@ -2739,6 +2760,69 @@ function seedOku(o){const t=T(),now=Date.now(),D=864e5,H=36e5,r=s=>{const x=Math
    else dk=i===0&&m!=='zeynep'?0:q<pr?Math.floor(g*.6+z*g*1.2):0;
    if(dk)o.okl.push({id:'r'+(now-i*D).toString(36)+m.slice(0,2),m,d,dk,g,...(b?{b}:{}),at:now-i*D-2*H})}});
  return o}
+// Kişiselleştir (user picked A A B A B from mock TM7whcJCftRr2Tv3zytXva, 2026-11-09). Personal choices stay on this phone in store.prefs.kp;
+// only the admins' "Bütün aile" switches are shared, in meta.off = {ilac:1, …} (meta is a whole record: sealed with the rest when the family is locked).
+const KPH=[['hava','Hava durumu','Tarihin yanında','compass'],['acil','Acil ve ilaç hapları','Selamlama panelinde','alert'],['gun','Kandil ve bayram hapı','Yaklaşan mübarek gün','sparkle'],['hicri','Hicrî tarih ve ay','Selamlamanın altında','moon'],['mesaj','Aile mesajları','Panelin altında, sırayla','chat']];
+const KPB=[['burada','Şu an burada','Uygulamada olanlar','users'],['hatira','Hatıra kartı','Biten etkinlik için fotoğraf ve yorum','camera'],['aksam','Bu akşam','Mutfak’taki yemek planı','fork'],['sira','Sıradaki','Bir sonraki etkinlik','clock'],['ajanda','Günler','Bu hafta, gün gün','cal'],['evde','Evde','Alınacaklar ve istekler','home']];
+const KPS={mutfak:['Mutfak','fork','#C0582E','mutGo'],lib:['Ev Kütüphanesi','book','#8A5A2B','libGo'],ilac:['İlaç Dolabı','pill','#B9502F','ilGo'],album:['Hatıralarımız','camera','#5B6FB5','albGo']};
+const KPT=[['cal','Takvim','cal'],['lists','Listeler','board'],['tasks','Görevler','tasks'],['mutfak','Mutfak','fork'],['lib','Kitaplık','book'],['ilac','İlaçlar','pill'],['album','Hatıralar','camera'],['family','Aile','users']];
+const KPD=['cal','lists','tasks'];
+function KP(){const p=store.prefs;let k=p.kp;if(!k||typeof k!=='object')k=p.kp={};
+ if(!k.on||typeof k.on!=='object')k.on={};if(!k.me||typeof k.me!=='object')k.me={};
+ const o=Array.isArray(k.ord)?k.ord.filter((x,i,a)=>KPB.some(b=>b[0]===x)&&a.indexOf(x)===i):[];k.ord=[...o,...KPB.map(b=>b[0]).filter(x=>!o.includes(x))];
+ k.tabs=Array.isArray(k.tabs)?k.tabs.filter((x,i,a)=>KPT.some(t=>t[0]===x)&&a.indexOf(x)===i).slice(0,3):KPD.slice();if(!k.tabs.length)k.tabs=KPD.slice();return k}
+const kpOn=k=>KP().on[k]!==false;
+const kpFamOff=k=>!!(S&&S.meta&&S.meta.off&&typeof S.meta.off==='object'&&S.meta.off[k]===1);
+const kpSec=k=>!k||!KPS[k]||!kpFamOff(k)&&KP().me[k]!==false;
+const kpSade=()=>!!KP().sade;
+const kpCnt=()=>[...KPH,...KPB].filter(x=>kpOn(x[0])).length;
+const kpTabs=()=>[['today','Bugün','today'],...KP().tabs.filter(kpSec).map(k=>KPT.find(x=>x[0]===k))];
+const kpNavAct=k=>KPS[k]?`data-act="${KPS[k][3]}"`:`data-act="tab" data-tab="${k}"`;
+function kpApply(r){r.classList.toggle('kpsade',kpSade());document.body.classList.toggle('kptab',!!KPS[UI.tab]&&KP().tabs.includes(UI.tab))}
+// Panel parçası: kapalıysa (ya da sade görünümde süsse) hiç çizilmez
+const kpX=(k,h)=>kpOn(k)&&!(kpSade()&&{hicri:1,gun:1,mesaj:1}[k])?h:'';
+function kpToday(child){const sade=kpSade(),sOff={burada:1,hatira:1,aksam:1};
+ const part={burada:()=>onHereHTML(),hatira:()=>hmCard(),aksam:()=>kpSec('mutfak')?muToday():'',sira:()=>`<div class="lbl"><span>Sıradaki</span></div>${nextHTML({mine:child,filter:[]})}`,ajanda:()=>homeAgenda(),evde:()=>`<div class="lbl"><span>Evde</span></div>${homeRows()}`};
+ // Plan soruları ve uyarılar her zaman görünür: ilk asıl bölümün (Sıradaki, Günler, Evde) önünde
+ const fixed=`${rsvCards()}${demoBar()}${inviteCard()}${lockCard()}${child?`<div class="child-hint">${I('user','sm')}Sadece sana ait görevleri ve etkinlikleri görüyorsun.</div>${starsHTML()}`:''}`;
+ let fx=0;const body=KP().ord.filter(k=>kpOn(k)&&!(sade&&sOff[k])).map(k=>{const h=part[k]();if(!fx&&{sira:1,ajanda:1,evde:1}[k]){fx=1;return fixed+h}return h}).join('')+(fx?'':fixed);
+ return `${todayHead()}${body}<button class="kplink" data-act="kpEditToday">${I('sliders','sm')}Bugün’ü düzenle</button>`}
+const kpSw=(on,act,k,dis,lb)=>`<button class="switch" role="switch" aria-checked="${on}" data-act="${act}" data-k="${k}"${lb?` aria-label="${lb}"`:''}${dis?' disabled':''}></button>`;
+function kpSetRows(){const t=kpTabs().slice(1).map(x=>x[1]).join(', '),secs=Object.keys(KPS).filter(kpSec).length,n=kpCnt(),all=KPH.length+KPB.length;
+ const row=(a,ic,c,nm,s)=>`<button class="row kpr" data-act="${a}" style="--c:${c}"><span class="dri">${I(ic)}</span><span class="body"><span class="t">${nm}</span><span class="m">${s}</span></span>${I('chevR','sm')}</button>`;
+ return `<div class="group">${row('kpEditToday','today','#2E6A51','Bugün ekranı',n===all?'Hepsi açık':`${all} parçadan ${n} tanesi açık`)}${row('kpMenu','grid','#3D7FA8','Alt menü',esc(t))}${row('kpSecs','homeheart','#C0582E','Bölümler',`${secs} bölüm açık`)}${row('kpLook','sliders','#625B52','Görünüm',kpSade()?'Sade':'Olağan')}</div>`}
+const kpSetGroup=()=>`<div class="setsec">Kişiselleştir</div>${kpSetRows()}`;
+function kpListH(){const r=([k,n,s,ic],drag)=>`<div class="setrow kprow" data-k="${k}">${drag?`<span class="kpg" aria-hidden="true">${I('grip','sm')}</span>`:''}<span class="kpi">${I(ic,'sm')}</span><span class="kpn"><b>${n}</b><small>${s}</small></span>${kpSw(kpOn(k),'kpTog',k,0,n)}</div>`;
+ return `<div class="setsec">Üst panel</div><div class="group">${KPH.map(x=>r(x)).join('')}</div>
+ <div class="setsec">Sayfa · tutup sürükle</div><div class="group" id="kpl">${KP().ord.map(k=>r(KPB.find(x=>x[0]===k),1)).join('')}</div>
+ <p class="note" style="margin:12px 4px 0">${I('info','sm')}<span>Plan soruları ve önemli uyarılar her zaman görünür. Bu ayar yalnız bu telefonda.</span></p>
+ <button class="kplink" data-act="kpReset">${I('refresh','sm')}Varsayılana dön</button>`}
+function kpMenuH(){const T=KP().tabs.filter(kpSec),rest=KPT.filter(x=>!T.includes(x[0])&&kpSec(x[0])),tb=kpTabs();
+ const nb=([k,n,ic])=>`<span class="kpnb${k==='today'?' on':''}">${I(ic)}<small>${n}</small></span>`;
+ const one=(x,inn)=>`<div class="setrow kprow" data-k="${x[0]}">${inn?`<span class="kpg" aria-hidden="true">${I('grip','sm')}</span>`:''}<span class="kpi">${I(x[2],'sm')}</span><span class="kpn"><b>${x[1]}</b></span><button class="kpad${inn?' rm':''}" data-act="kpTab" data-k="${x[0]}" aria-label="${x[1]}: ${inn?'menüden çıkar':'menüye ekle'}"${!inn&&T.length>=3?' disabled':''}>${inn?'−':'+'}</button></div>`;
+ return `<div class="kpnav" aria-hidden="true">${tb.slice(0,2).map(nb).join('')}<span class="kpnp">${I('plus')}</span>${tb.slice(2).map(nb).join('')}</div>
+ <div class="setsec">Menüde · tutup sürükle</div><div class="group"><div class="setrow kprow fix"><span class="kpi">${I('today','sm')}</span><span class="kpn"><b>Bugün</b><small>Her zaman başta</small></span></div><div id="kpm">${T.map(k=>one(KPT.find(x=>x[0]===k),1)).join('')}</div></div>
+ <div class="setsec">Eklenebilir${T.length>=3?' · menü dolu, önce birini çıkar':''}</div><div class="group">${rest.map(x=>one(x)).join('')}</div>
+ <p class="note" style="margin:12px 4px 0">${I('info','sm')}<span>Menüde Bugün ile birlikte dört sekme ve ortada + durur. Menüde olmayanlar yan menüde ve Aile’de kalır. Bu ayar yalnız bu telefonda.</span></p>
+ <button class="kplink" data-act="kpTabReset">${I('refresh','sm')}Varsayılana dön</button>`}
+function kpSecH(){const p=KP(),adm=can('member.manage'),fam=adm&&F.kpsv==='fam';
+ const seg=adm?`<div class="seg kpseg">${[['me','Benim için'],['fam','Bütün aile']].map(([v,n])=>`<button type="button" data-act="kpSv" data-v="${v}" aria-pressed="${(F.kpsv||'me')===v}">${n}</button>`).join('')}</div>`:'';
+ const rows=Object.entries(KPS).map(([k,[n,ic,c]])=>{const fo=kpFamOff(k);return `<div class="setrow kprow"><span class="dri" style="--c:${c}">${I(ic)}</span><span class="kpn"><b>${n}</b><small>${fam?(fo?'Ailede kimse görmüyor':'Ailede herkes görebilir'):fo?'Yönetici ailece kapattı':p.me[k]===false?'Gizli: menülerde ve Bugün’de görünmez':'Yan menüde ve Aile’de'}</small></span>${fam?kpSw(!fo,'kpFam',k,0,n):kpSw(!fo&&p.me[k]!==false,'kpMe',k,fo,n)}</div>`}).join('');
+ return `${seg}<div class="group">${rows}</div><p class="note" style="margin:12px 4px 0">${I('info','sm')}<span>${fam?'Kapatılan bölüm ailedeki herkesin telefonundan kalkar. Kayıtlar silinmez, açınca geri gelir.':'Gizlediğin bölüm yalnız bu telefondan kalkar. Kayıtlar silinmez, ailen görmeye devam eder.'}</span></p>`}
+const kpLookH=()=>`<div class="group"><div class="setrow"><span class="kpn" id="kp-sd"><b>Sade görünüm</b><small>Hicrî tarih, ay, kandil hapı ve aile mesajları gizlenir; Bugün’de Şu an burada, Hatıra ve Bu akşam kalkar; yan menüde ikinci satırlar kapanır</small></span><button class="switch" role="switch" aria-labelledby="kp-sd" aria-checked="${kpSade()}" data-act="kpSade"></button></div></div>
+ <div class="kpcmp" aria-hidden="true"><figure><span class="kpmini"><i class="pn"><u></u><u class="s"></u><u class="s2"></u></i><i></i><i></i><i></i></span><figcaption>Olağan</figcaption></figure><figure><span class="kpmini sd"><i class="pn"><u></u></i><i></i><i></i></span><figcaption>Sade</figcaption></figure></div>
+ <p class="note" style="margin:12px 4px 0">${I('info','sm')}<span>Yalnız bu telefonda. Büyük yazı ve tema Ayarlar’da.</span></p>`;
+const kpRe=()=>{const b=document.getElementById('kpsb');if(!b)return;b.innerHTML=F.kpv==='list'?kpListH():F.kpv==='menu'?kpMenuH():F.kpv==='sec'?kpSecH():F.kpv==='set'?kpSetRows():kpLookH()};
+const kpSh=(v,t)=>{F={kpv:v,kpsv:'me'};sheet(t,`<div id="kpsb"></div>`);kpRe()};
+// Sürükleyerek sırala: tutamaçtan tut, satır parmağın geçtiği yere taşınır; bırakınca sıra kaydedilir.
+let KDG=null;
+document.addEventListener('pointerdown',e=>{const g=e.target.closest&&e.target.closest('.kpg');if(!g)return;const it=g.closest('[data-k]'),box=it&&it.parentElement;if(!box)return;e.preventDefault();e.stopPropagation();KDG={it,box,y:e.clientY,m:0};it.classList.add('kpdrag');try{g.setPointerCapture(e.pointerId)}catch(x){}},true);
+document.addEventListener('pointermove',e=>{if(!KDG)return;e.preventDefault();KDG.m=1;const L=[...KDG.box.children].filter(x=>x!==KDG.it&&x.dataset.k);let b=null;for(const x of L){const r=x.getBoundingClientRect();if(e.clientY<r.top+r.height/2){b=x;break}}
+ if(b){if(KDG.it.nextElementSibling!==b)KDG.box.insertBefore(KDG.it,b)}else if(KDG.box.lastElementChild!==KDG.it)KDG.box.appendChild(KDG.it)},{passive:false});
+const kpDrop=()=>{if(!KDG)return;const {it,box}=KDG;KDG=null;it.classList.remove('kpdrag');const o=[...box.children].map(x=>x.dataset.k).filter(Boolean);
+ const p=KP();if(box.id==='kpm')p.tabs=[...o,...p.tabs.filter(x=>!o.includes(x))].slice(0,3);else if(box.id==='kpl')p.ord=o;else return;save();render(true);kpRe()};
+document.addEventListener('pointerup',kpDrop);document.addEventListener('pointercancel',kpDrop);
+
 function seedLib(o){const now=Date.now(),D=864e5,H=36e5,by=['ayse','mehmet','fatma','zeynep'];
  const L=[['Simyacı','Paulo Coelho',188,1988,'dk',['ayse','zeynep']],['Suç ve Ceza','Fyodor Dostoyevski',687,1866,'dk',['mehmet']],['Tutunamayanlar','Oğuz Atay',724,1972,'tr',['mehmet']],['İnce Memed','Yaşar Kemal',436,1955,'tr',['fatma','mehmet']],
   ['Çalıkuşu','Reşat Nuri Güntekin',544,1922,'tr',['fatma','ayse']],['Saatleri Ayarlama Enstitüsü','Ahmet Hamdi Tanpınar',382,1961,'tr',['mehmet']],['Beyaz Diş','Jack London',264,1906,'cg',['can','zeynep']],['Define Adası','Robert Louis Stevenson',240,1883,'cg',['can']],
@@ -2867,7 +2951,7 @@ function vWishes(){
   <span class="tot" aria-label="Ailenin toplamı ${rSum(w)} puan"><b>${rSum(w)}</b>puan</span>${rbarHTML(w.id,rOf(w)[me0]||0)}</div>`;
  return lTop(true)+itabs(Object.entries(WTAB).map(([k,[i,n]])=>({act:'wt',data:`data-v="${k}"`,on:f===k,i,n,cnt:cnt(k)})),'Tür')
  +(pend.length?`<div class="group" style="margin-top:12px">${pend.map(row).join('')}</div>`:`<div class="group" style="margin-top:12px">${emptyBox(f==='all'?'Henüz istek yok':'Bu türde istek yok','Gezmek, okumak, izlemek ya da yemek istediğiniz bir şeyi ekleyin.',`<br><button class="btn soft sm" data-act="newWish">${I('plus','sm')}İstek ekle</button>`)}</div>`)
- +(f==='kitap'?libCard():'')+memCover(done,f)}
+ +(f==='kitap'&&kpSec('lib')?libCard():'')+memCover(done,f)}
 // Yaptıklarımız: listenin altında bir kapak kartı (Apple Fotoğraflar Anılar gibi); dokununca hatıra defteri ayrı pencerede
 // açılır: ay ay zaman çizgisi (Day One gibi), solda gün, ortada türün simgesiyle çizgi, sağda anı kartı.
 function memCover(done,f){if(!done.length)return '';const last=done[0];
@@ -3291,7 +3375,8 @@ document.addEventListener('input',e=>{const t=e.target;if(t.id==='mu-bl'){F.mbt=
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='mu-an'){e.preventDefault();const q=(F.mq||'').trim();if(!q)return;const M1=TAR().filter(x=>trl(x.t).includes(trl(q))),r=TAR().find(x=>trl(x.t)===trl(q))||(M1.length===1?M1[0]:null);if(r){if(!F.mus.includes(r.id))F.mus.push(r.id);F.mq='';e.target.value='';muAddPaint()}else A.muFree()}});
 // Yan menü (Gmail, Telegram gibi): Bugün'de ≡ düğmesi ya da ekranın sol kenarından sağa çekince açılır.
 // Ev Kütüphanesi, İlaç Dolabı, Hatıralarımız, Aile, Ayarlar; her satırda kısa durum. #layer içinde, sheet değil.
-function drwItems(){const L=LIB(),o=okuNow(meId()),IL=ILC(),g=IL.filter(x=>ilSt(x)==='gec').length,y=IL.filter(x=>ilSt(x)==='yak').length,E=albEvs(),P=E.flatMap(x=>x.p);
+function drwItems(){return drwItems0().filter(x=>kpSec({mutGo:'mutfak',libGo:'lib',ilGo:'ilac',albGo:'album'}[x[0]]))}
+function drwItems0(){const L=LIB(),o=okuNow(meId()),IL=ILC(),g=IL.filter(x=>ilSt(x)==='gec').length,y=IL.filter(x=>ilSt(x)==='yak').length,E=albEvs(),P=E.flatMap(x=>x.p);
  return [['mutGo','Mutfak','fork',muSide(),'#C0582E'],['libGo','Ev Kütüphanesi','book',`${L.length} kitap · bugün ${o.v}/${o.g} dk`,'#8A5A2B'],['ilGo','İlaç Dolabı','pill',g?`<em>${g} ilacın tarihi geçmiş</em>`:y?`<em class="o">${y} ilacın tarihi yaklaşıyor</em>`:IL.length?`${IL.length} ilaç`:'İlaçlar ve son kullanma tarihleri','#B9502F'],['albGo','Hatıralarımız','camera',P.length?`${E.length} etkinlik · ${P.length} fotoğraf`:'Etkinlik fotoğrafları','#5B6FB5']]}
 const drwRow=([a,n,ic,sub,c])=>`<button class="row drr" data-act="drwGo" data-to="${a}" style="--c:${c}"><span class="dri">${I(ic)}</span><span class="body"><span class="t">${n}</span>${sub?`<span class="m">${sub}</span>`:''}</span>${I('chevR','sm')}</button>`;
 // Menü sayfanın altında durur (X, Slack gibi): sayfa (#apw) sağa kayıp küçülür, köşeleri yuvarlanır. Açılış yaylı, satırlar sırayla gelir.
@@ -3300,7 +3385,7 @@ let DR=null;
 function drwHTML(){const m=M(meId()),hr=new Date().getHours(),n=[0];
  const rows=a=>a.map(x=>drwRow(x).replace('style="--c:',`style="--i:${n[0]++};--c:`)).join('');
  return `<div class="drh"><span class="drav">${av(m.id,'md')}</span><div><b>${esc(S.meta&&S.meta.name||'Ailemiz')}</b><small>${esc(first(m.name))} · ${hr<5?'İyi geceler':hr<12?'Günaydın':hr<18?'İyi günler':'İyi akşamlar'}</small></div></div>
- <div class="drl">Evimiz</div><div class="group">${rows(drwItems())}</div><div class="drl">Uygulama</div><div class="group">${rows([['drwFam','Aile','users','','#2E6A51'],['famSettings','Ayarlar','gear','','#625B52']])}</div>`}
+ <div class="drl">Evimiz</div><div class="group">${rows(drwItems())}</div><div class="drl">Uygulama</div><div class="group">${rows([['drwFam','Aile','users','','#2E6A51'],['kpSet','Kişiselleştir','sliders','','#3D7FA8'],['famSettings','Ayarlar','gear','','#625B52']])}</div>`}
 function drwSet(p,anim){if(!DR)return;const apw=document.getElementById('apw'),d=DR.el,on=p>DR.p;DR.p=p;
  const t=!anim||calm()?'none':on?'560ms cubic-bezier(.2,1.28,.35,1)':'380ms cubic-bezier(.32,.72,0,1)';
  apw.style.transition=d.style.transition=t==='none'?'none':`transform ${t},border-radius ${t},opacity 300ms ease`;
@@ -3451,7 +3536,7 @@ function famCtx(){const np='Notification' in window?Notification.permission:'uns
  return {m:me(),adm:can('member.manage'),demo:store.mode==='demo',np,standalone,ios,sync,sub:t=>`<br><span style="color:var(--muted);font-size:.875rem">${t}</span>`}}
 const feedHTML=k=>`<div class="group feed">${S.activity.length?S.activity.slice(0,k).map(a=>`<div class="row">${av(a.who,'xs')}<span class="body"><span style="display:block"><b>${esc(M(a.who).name)}</b> ${esc(a.text)}</span><span class="m">${ago(a.at)}</span></span></div>`).join(''):emptyBox('Henüz değişiklik yok','Ailenden biri bir şey eklediğinde burada görünür.')}</div>`;
 function famSettingsHTML(){const {m,demo,np,standalone,ios,sync,sub}=famCtx();
- return `<div class="setsec">Görünüm</div><div class="group">
+ return `${kpSetGroup()}<div class="setsec">Görünüm</div><div class="group">
   <div class="setrow"><span id="lbl-big"><b>Büyük yazı</b>${sub('Sadece bu cihazda')}</span><button class="switch" role="switch" aria-labelledby="lbl-big" aria-checked="${!!store.prefs.big}" data-act="bigToggle"></button></div>
   <div class="setrow" style="flex-wrap:wrap"><b>Tema</b><div class="seg" style="flex:1;min-width:220px">${themeSeg()}</div></div></div>
  <div class="setsec">Bildirimler</div><div class="group">
@@ -3502,7 +3587,7 @@ function vFamily(){const {m,adm}=famCtx(),ord=ordMe();if(!ord.some(x=>x.id===UI.
  <div class="wheel" id="wheel" aria-label="Aile üyeleri, sağa sola kaydır">${[0,1,2].map(c=>ord.map(x=>card(x,c)).join('')).join('')}</div>
  <div class="wdots" aria-hidden="true">${ord.map(x=>`<i style="--c:${x.color}"${x.id===UI.wsel?' class="on"':''}></i>`).join('')}</div>
  <div id="wsel">${wselHTML(UI.wsel)}</div>
- ${libCard()}${albCard()}${ilCard()}
+ ${kpSec('lib')?libCard():''}${kpSec('album')?albCard():''}${kpSec('ilac')?ilCard():''}
  ${lockRow()}
  ${adm?`<button class="invlink" data-act="famInvite">${I('plus','sm')}Aileye birini ekle</button>`:''}
  <div class="sec-h"><h2 class="sec">Son değişiklikler</h2>${S.activity.length>3?`<button class="link" data-act="famFeed">Tümü ${I('chevR','sm')}</button>`:''}</div>
@@ -3541,16 +3626,16 @@ function render(keepScroll){
  else if(UI.err){html=vError(UI.err);nav.hidden=true}
  else if(needKey()){html=vKeyless();nav.hidden=true}
  else if(!S){html=vLoading();nav.hidden=false}
- else{html=({today:vToday,cal:vCal,lists:vLists,tasks:vTasks,family:vFamily,lib:vLib,album:vAlb,ilac:vIlac,mutfak:vMut}[UI.tab]||vToday)();nav.hidden=false}
+ else{if(KPS[UI.tab]&&!kpSec(UI.tab))UI.tab='today';html=({today:vToday,cal:vCal,lists:vLists,tasks:vTasks,family:vFamily,lib:vLib,album:vAlb,ilac:vIlac,mutfak:vMut}[UI.tab]||vToday)();nav.hidden=false}
  sc.innerHTML=html;cmRefresh();document.body.classList.toggle('wishc',!!S&&UI.tab==='lists'&&!UI.shop&&UI.lmode==='wish');
  const ss=document.getElementById('setsheet');if(ss&&S)ss.innerHTML=famSettingsHTML();
  sc.scrollTop=keepScroll?y:0;
  if(keep){const el=document.getElementById(keep.id);if(el){el.value=keep.v;el.focus();try{el.setSelectionRange(keep.s,keep.s)}catch(e){}}}
- if(!nav.hidden){const btn=([k,n,i])=>{const badge=k==='lists'&&S?S.items.filter(x=>!x.done).length:0;return `<button data-act="tab" data-tab="${k}"${UI.tab===k?' aria-current="page"':''}><span class="pill">${I(i)}</span>${n}${badge?`<span class="sr">, ${badge} bekleyen</span>`:''}</button>`},tb=TABS.filter(t=>t[0]!=='family');
+ if(!nav.hidden){const btn=([k,n,i])=>{const badge=k==='lists'&&S?S.items.filter(x=>!x.done).length:0;return `<button ${kpNavAct(k)}${UI.tab===k?' aria-current="page"':''}><span class="pill">${I(i)}</span>${n}${badge?`<span class="sr">, ${badge} bekleyen</span>`:''}</button>`},tb=kpTabs();
   nav.innerHTML=tb.slice(0,2).map(btn).join('')+`<button class="navadd" data-act="navAdd" aria-label="Ekle"><span>${I('plus')}</span></button>`+tb.slice(2).map(btn).join('')}
  applyPrefs();commit();renderNet();afterRender();syncBack();
 }
-function applyPrefs(){const r=document.documentElement;const t=store.prefs.theme;if(t==='light'||t==='dark')r.dataset.theme=t;else delete r.dataset.theme;r.classList.toggle('big',!!store.prefs.big);stbar()}
+function applyPrefs(){const r=document.documentElement;const t=store.prefs.theme;if(t==='light'||t==='dark')r.dataset.theme=t;else delete r.dataset.theme;r.classList.toggle('big',!!store.prefs.big);kpApply(r);stbar()}
 // iPhone'da üstteki saat/ahize şeridi theme-color'dan boyanır: uygulama içi tema, açılan pencerenin karartması ve tam ekran fotoğrafla birlikte değişsin. Android'e dokunmaz (alt sistem çubuğu ayarı bozulmasın).
 let stC='',stP=null;if(IOS&&navigator.standalone)document.documentElement.classList.add('iosa');
 const rgbOf=c=>{stP=stP||document.body.appendChild(Object.assign(document.createElement('i'),{hidden:true}));stP.style.color='';stP.style.color=c;const m=getComputedStyle(stP).color.match(/[\d.]+/g)||[0,0,0];return m.map(Number)};
@@ -4476,7 +4561,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  1) Sen yokken: bu telefon kapalıyken sana verilen görevler, eklendiğin etkinlikler, panoya yazılanlar (Slack "sen yokken" gibi)
  2) Yenilikler: güncellemeden sonra bir kez. Yeni sürümde NEWS.v'yi değiştir.
  store.seen = bu cihazın uygulamayı en son bıraktığı an; ilk açılışta yalnızca kaydedilir. Kayıt zamanı uid()'den okunur. */
-const NEWS={v:'2026-11-07n',items:[['gift','Yenilikler','Uygulama güncellenince yenilikler artık tam ekran, tek tek ve ekran resimleriyle gelir. Sağa dokununca sonraki, sola dokununca önceki açılır; “Göster” sizi o ekrana götürür. Gördüğünüz yenilik bir daha çıkmaz; hepsi zildeki “Uygulamada yenilikler”de durur'],['tag','Kitap türleri','Ev Kütüphanesinde türleri artık siz belirleyin: rafların altındaki “Türleri düzenle”den ya da kitabın tür listesindeki “Yeni tür”den ad ve renk vererek yeni tür açın. Raf başlığına dokunarak türün adını değiştirin ya da silin; içindeki kitaplar Diğer’e geçer'],['fork','Mutfak','Yan menüde yeni: ailenin tarif defteri ve haftanın yemekleri. Bir güne birden çok yemek ekleyin, kimin pişireceğini seçin; tarifin malzemeleri tek dokunuşla alınacaklara eklenir. Beğendiğiniz tarifin linkini Paylaş › Bizim Ev ile kaydedebilirsiniz'],['listb','Yan Menü','Bugün’de sayfayı sağa çekin ya da ekranın sol kenarındaki ince çubuğa dokunun: sayfa kenara kayar, Ev Kütüphanesi, İlaç Dolabı ve Hatıralarımız tek dokunuşla açılır. Kapatmak için sayfayı geri itin'],['pill','İlaç Dolabı','Aile sayfasında yeni bir kart var: evdeki ilaçlar ve son kullanma tarihleri. Kutunun üstündeki karekodu okutunca ilacın adı ve son kullanma tarihi kendiliğinden gelir. Tarihi geçen ya da iki ay içinde biten ilaç olunca Bugün’ün üstünde küçük bir uyarı çıkar; “Bitti” deyince ilaç alınacaklara eklenir'],['camera','Hatıra hatırlatması','Katıldığın bir etkinlik bitince Bugün’ün üstünde “Nasıldı?” kartı çıkar: oradan fotoğraf ekleyebilir ya da yorum yazabilirsin. Ekleyince ya da kapatınca kaybolur'],['book','Okuma Alışkanlığı','Ev Kütüphanesinin tepesinde okuma kartı var. Okuduğun gün “Okudum”a dokun, kaç dakika okuduğunu seç. Günlük hedefini tuttukça seri büyür; son 7 günün 5’inde tutturunca Filiz’den Fidan’a, Ağaç’a, Çınar’a geçersin. Çocukların hedefini anne ya da baba seçer'],['camera','Hatıralarımız','Aile sayfasında, Ev Kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik Hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava Durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
+const NEWS={v:'2026-11-09k',items:[['sliders','Kişiselleştir','Uygulamayı kendinize göre sadeleştirin. Bugün’ün en altındaki “Bugün’ü düzenle”den bölümleri açıp kapatın, tutup sürükleyerek sıralayın. Alt menüye Mutfak ya da Kitaplık gibi sekmeler alın, kullanmadığınız bölümleri gizleyin, isterseniz Sade görünümü açın. Hepsi yan menüde ve Ayarlar’da “Kişiselleştir”de; yalnız sizin telefonunuzda geçerli'],['gift','Yenilikler','Uygulama güncellenince yenilikler artık tam ekran, tek tek ve ekran resimleriyle gelir. Sağa dokununca sonraki, sola dokununca önceki açılır; “Göster” sizi o ekrana götürür. Gördüğünüz yenilik bir daha çıkmaz; hepsi zildeki “Uygulamada yenilikler”de durur'],['tag','Kitap türleri','Ev Kütüphanesinde türleri artık siz belirleyin: rafların altındaki “Türleri düzenle”den ya da kitabın tür listesindeki “Yeni tür”den ad ve renk vererek yeni tür açın. Raf başlığına dokunarak türün adını değiştirin ya da silin; içindeki kitaplar Diğer’e geçer'],['fork','Mutfak','Yan menüde yeni: ailenin tarif defteri ve haftanın yemekleri. Bir güne birden çok yemek ekleyin, kimin pişireceğini seçin; tarifin malzemeleri tek dokunuşla alınacaklara eklenir. Beğendiğiniz tarifin linkini Paylaş › Bizim Ev ile kaydedebilirsiniz'],['listb','Yan Menü','Bugün’de sayfayı sağa çekin ya da ekranın sol kenarındaki ince çubuğa dokunun: sayfa kenara kayar, Ev Kütüphanesi, İlaç Dolabı ve Hatıralarımız tek dokunuşla açılır. Kapatmak için sayfayı geri itin'],['pill','İlaç Dolabı','Aile sayfasında yeni bir kart var: evdeki ilaçlar ve son kullanma tarihleri. Kutunun üstündeki karekodu okutunca ilacın adı ve son kullanma tarihi kendiliğinden gelir. Tarihi geçen ya da iki ay içinde biten ilaç olunca Bugün’ün üstünde küçük bir uyarı çıkar; “Bitti” deyince ilaç alınacaklara eklenir'],['camera','Hatıra hatırlatması','Katıldığın bir etkinlik bitince Bugün’ün üstünde “Nasıldı?” kartı çıkar: oradan fotoğraf ekleyebilir ya da yorum yazabilirsin. Ekleyince ya da kapatınca kaybolur'],['book','Okuma Alışkanlığı','Ev Kütüphanesinin tepesinde okuma kartı var. Okuduğun gün “Okudum”a dokun, kaç dakika okuduğunu seç. Günlük hedefini tuttukça seri büyür; son 7 günün 5’inde tutturunca Filiz’den Fidan’a, Ağaç’a, Çınar’a geçersin. Çocukların hedefini anne ya da baba seçer'],['camera','Hatıralarımız','Aile sayfasında, Ev Kütüphanesinin altında yeni bir kart var. Fotoğraf eklediğiniz etkinlikler ay ay orada toplanır; üstteki ay kartına dokununca o ayınkiler kalır, satıra dokununca etkinlik açılır'],['users','Avatar fotoğrafı','Avatar penceresinin tepesindeki avatarına dokun, telefonundan bir fotoğraf seç ya da çek, daire içinde kaydırıp yakınlaştır. Fotoğraf yalnız ailene görünür'],['camera','Etkinlik Hatıraları','Her etkinliğin ayrıntısında artık sohbet var. Etkinlik bitince hatıra fotoğrafı da eklenir; ailedeki herkes görür, Takvim satırında küçük hali durur'],['tasks','Görevler','Aşağı kayınca başlık ve sekmeler üstte kalır. Yapılanlar artık sağ üstteki düğmeyle açılan ayrı bir sayfa'],['wcsun','Hava Durumu','Bugün’de tarihin yanında hava simgesi ve derece var. Dokununca saat saat ve 5 günlük hava açılır. Yer, telefonun konumundan ya da seçtiğin şehirden gelir; yalnızca bu telefonda kalır'],['flag','Acil alınacaklar','Acil bir alınacak varsa selamlama panelinde kırmızı bir hap görünür, dokununca Alınacaklar açılır']]};
 const idAt=id=>{const n=parseInt(String(id).slice(0,-5),36);return n>1.7e12&&n<Date.now()+864e5?n:0};
 function awayNotes(since){const me=meId(),out=[],nm=x=>esc(first(M(x).name));
  S.tasks.forEach(t=>{if(!t.done&&isFor(t,me)&&t.by&&t.by!==me&&idAt(t.id)>since)out.push([t.by,`${nm(t.by)} sana bir görev verdi`,`${esc(t.title)} · ${rel(t.due)}${t.time?' '+hm(t.time):''}`,idAt(t.id)])});
@@ -4497,7 +4582,7 @@ const newsMark=()=>{store.newsSeen=[...new Set([...NEWS.items.map(x=>x[1]),...(s
 // Yenilikler kaydırmalı pencere (2026-11-07): her yenilik bir sayfa; ekranın küçük resmi (img/yeni/*.webp, örnek aileden) ya da büyük simge,
 // başlık, açıklama, "Göster" o ekrana götürür. Görülen sayfa store.newsSeen'e yazılır, bir daha açılışta çıkmaz.
 const NWO={v:'B',g:'A'};
-const NWX={'Kitap türleri':['libGo','turler'],'Mutfak':['mutGo','mutfak'],'Yan Menü':['drwOpen','yanmenu'],'İlaç Dolabı':['ilGo','ilac'],'Hatıra hatırlatması':['tab:today','hatirlatma'],'Okuma Alışkanlığı':['libGo','okuma'],'Hatıralarımız':['albGo','album'],'Avatar fotoğrafı':['avMe','avatar'],'Etkinlik Hatıraları':['tab:cal','etkinlik'],'Görevler':['tab:tasks','gorevler'],'Hava Durumu':['wxOpen','hava'],'Acil alınacaklar':['tab:lists','acil']};
+const NWX={'Kişiselleştir':['kpEditToday','kisisel'],'Kitap türleri':['libGo','turler'],'Mutfak':['mutGo','mutfak'],'Yan Menü':['drwOpen','yanmenu'],'İlaç Dolabı':['ilGo','ilac'],'Hatıra hatırlatması':['tab:today','hatirlatma'],'Okuma Alışkanlığı':['libGo','okuma'],'Hatıralarımız':['albGo','album'],'Avatar fotoğrafı':['avMe','avatar'],'Etkinlik Hatıraları':['tab:cal','etkinlik'],'Görevler':['tab:tasks','gorevler'],'Hava Durumu':['wxOpen','hava'],'Acil alınacaklar':['tab:lists','acil']};
 const NWC=['#2F6DB5','#B8662B','#3E6B4C','#9A3F6B','#4B3E8A','#2B6A73','#8A3B2B','#6E4B2B'];
 var NW=null;
 function nwShow(list){if(!list.length)return;nwClose(true);const v=NWO.v,el=document.createElement('div');el.className='nwv v-'+v;el.id='nwv';
@@ -4766,6 +4851,23 @@ FORMS.muF=()=>{const g=id=>document.getElementById(id),t=g('mu-t').value.trim().
  const v={t:up(t[0])+t.slice(1),k:MUK[F.mk]?F.mk:'dg',dk:num(g('mu-dk').value,1440),s:num(g('mu-s').value,50),m:ln(g('mu-m').value,60,120,/^\s*[-•*–]\s*/),y:ln(g('mu-y').value,40,500,/^\s*(\d+[.)]|[-•*–])\s*/),l:muOk(l)?l:''};
  let r=F.muE&&muR(F.muE);if(r){Object.assign(r,v);if(!r.l)delete r.l;close();render(true);toast('Tarif kaydedildi');return}
  r=Object.assign({id:uid(),by:meId(),at:Date.now()},v);if(!r.l)delete r.l;TAR().push(r);log(`${r.t} tarifini ekledi`);close();UI.mt='tarif';render(true);toast(`“${r.t}” tariflere eklendi`)};
+Object.assign(A,{
+ kpSet:()=>kpSh('set','Kişiselleştir'),
+ kpEditToday:()=>kpSh('list','Bugün ekranı'),
+ kpTog:d=>{if(!KPH.concat(KPB).some(x=>x[0]===d.k))return;KP().on[d.k]=!kpOn(d.k);if(KP().on[d.k])delete KP().on[d.k];save();render(true);kpRe()},
+ kpReset:()=>{const p=KP();p.on={};p.ord=KPB.map(x=>x[0]);save();render(true);kpRe()},
+ kpMenu:()=>kpSh('menu','Alt menü'),
+ kpTab:d=>{const p=KP(),i=p.tabs.indexOf(d.k);if(!KPT.some(x=>x[0]===d.k))return;if(i>=0){if(p.tabs.filter(kpSec).length<2)return toast('Menüde en az bir sekme kalmalı');p.tabs.splice(i,1)}else{if(p.tabs.filter(kpSec).length>=3)return;p.tabs=p.tabs.filter(kpSec);p.tabs.push(d.k)}save();render(true);kpRe()},
+ kpTabReset:()=>{KP().tabs=KPD.slice();save();render(true);kpRe()},
+ kpSecs:()=>kpSh('sec','Bölümler'),
+ kpSv:d=>{F.kpsv=d.v==='fam'?'fam':'me';kpRe()},
+ kpMe:d=>{if(!KPS[d.k]||kpFamOff(d.k))return;const p=KP();if(p.me[d.k]===false)delete p.me[d.k];else p.me[d.k]=false;save();render(true);kpRe()},
+ kpFam:d=>{if(!KPS[d.k]||!can('member.manage'))return;const off=Object.assign({},S.meta.off&&typeof S.meta.off==='object'?S.meta.off:{}),was=off[d.k]===1;
+  if(was)delete off[d.k];else off[d.k]=1;S.meta=Object.assign({},S.meta,{off});if(!Object.keys(off).length){const m=Object.assign({},S.meta);delete m.off;S.meta=m}
+  log(`${KPS[d.k][0]} bölümünü ailece ${was?'açtı':'kapattı'}`);render(true);kpRe()},
+ kpLook:()=>kpSh('look','Görünüm'),
+ kpSade:()=>{const p=KP();p.sade=!p.sade;save();render(true);kpRe()},
+});
 Object.assign(A,{
  // Gizli açma: Eşitleme satırına art arda 5 kez dokunmak kilidi bu telefonda açar (ana ekrandaki uygulamaya ?kilit=1 verilemiyor)
  syncTap:()=>{const t=Date.now();UI.stc=(UI.stc&&t-UI.stt<2500?UI.stc:0)+1;UI.stt=t;if(UI.stc<5||store.mode!=='family')return;UI.stc=0;
