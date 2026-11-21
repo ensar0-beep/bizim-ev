@@ -3910,10 +3910,10 @@ const A={
   <div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" id="ad-btn" data-act="accDelGo">Hesabımı sil</button></div>`)},
  accDelTog:(d,el)=>{F.amem=!F.amem;el.setAttribute('aria-checked',F.amem)},
  accDelGo:async()=>{const b=document.getElementById('ad-btn'),er=document.getElementById('ad-err');if(b){b.disabled=true;b.textContent='Siliniyor…'}
-  const C=store.code,mid=store.me,u=myUid();
+  const C=store.code,mid=store.me,u=myUid(),back=syncStop();
   try{if(F.amem)for(const p of ['/members/','/msgs/','/okh/'])await fbSend(C,'PUT',null,p+mid);
    await fbSend(C,'PUT',null,'/on/'+mid).catch(()=>{});if(u){await fbSend(C,'PUT',null,'/ver/'+u).catch(()=>{});await fbSend(C,'PUT',null,'/uids/'+u)}}
-  catch(e){if(b){b.disabled=false;b.textContent='Hesabımı sil'}if(er){er.textContent='Silinemedi. İnternet bağlantını kontrol edip yeniden dene.';er.hidden=false}return}
+  catch(e){back();if(b){b.disabled=false;b.textContent='Hesabımı sil'}if(er){er.textContent='Silinemedi. İnternet bağlantını kontrol edip yeniden dene.';er.hidden=false}return}
   await authDel();await wipeLocal()},
  famDelAsk:()=>{if(store.mode!=='family'||me().role!=='admin')return;
   if(kBusy()){sheet('Şu an silinemez','<p>Uçtan Uca Kilit işlemi sürüyor. Bitince yeniden dene.</p><div class="actions"><button class="btn ghost" data-act="close">Tamam</button></div>');return}
@@ -4764,13 +4764,15 @@ async function wipeLocal(){WIPED=true;if(es){es.close();es=null}
  location.replace(location.pathname)}
 // Anonim Firebase kimliğini sunucudan siler
 async function authDel(){if(!FB_KEY)return;try{const t=await authTok();if(t)await jpost(`https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${FB_KEY}`,{idToken:t})}catch(e){}}
+// Silmeden önce eşitlemeyi durdurur: kuyruktaki bir yazma ya da beat silinen kaydı geri yazmasın
+function syncStop(){if(es){es.close();es=null}clearTimeout(retryT);clearTimeout(beatT);const o={mode:store.mode,pending:store.pending};store.pending={};store.mode=null;return ()=>{store.mode=o.mode;store.pending=o.pending;connect();beat()}}
 const kBusy=()=>{const k=kRec();return !!(k&&(k.st==='migrating'||k.st==='undo'))};
 const adminN=()=>S.members.filter(m=>m.role==='admin').length;
 // Aileyi sunucudan siler: önce fotoğraflar ve avatarlar (kuralları aileye bakar), en son aile
-async function famDelRun(){const C=store.code;toast('Aile siliniyor…');
+async function famDelRun(){const C=store.code,back=syncStop();toast('Aile siliniyor…');
  try{const t=await authTok();for(const p of ['photos/'+C,'avatars/'+C]){const r=await fetch(dbUrl(p,t),{method:'DELETE'});if(!r.ok)throw new Error('HTTP '+r.status)}
-  if(es){es.close();es=null}await fbSend(C,'PUT',null,'')}
- catch(e){toast('Aile silinemedi. İnternet bağlantını kontrol edip yeniden dene.');connect();return}
+  await fbSend(C,'PUT',null,'')}
+ catch(e){back();toast('Aile silinemedi. İnternet bağlantını kontrol edip yeniden dene.');return}
  await authDel();await wipeLocal()}
 
 /* Kilitleme ilerlemesi */
