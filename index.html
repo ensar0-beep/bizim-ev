@@ -102,6 +102,7 @@ svg.i.sm{width:1.05rem;height:1.05rem}
 .ilcard .ilbx{width:46px;height:46px;border-radius:14px;background:linear-gradient(160deg,#F4D9D2,#E9B7AA);color:#A2412B;display:flex;align-items:center;justify-content:center;flex:none}
 .ilcard small em{font-style:normal;font-weight:700}.ilcard small em.r{color:var(--danger)}.ilcard small em.o{color:var(--warn)}
 .ilch{background:var(--danger-soft);color:var(--danger)}
+.dlist{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}.dlist li{display:flex;gap:10px;align-items:flex-start}.dlist .x,.dlist .k{flex:none;width:24px;height:24px;border-radius:999px;display:grid;place-items:center}.dlist .x{background:var(--danger-soft);color:var(--danger)}.dlist .k{background:var(--accent-soft);color:var(--accent)}
 .ilic{width:40px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c);display:flex;align-items:center;justify-content:center;flex:none}.ilic.lg{width:56px;height:56px;border-radius:16px}
 .ilr{gap:12px}.ilr .body{min-width:0;flex:1}.ilr .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .ilt{flex:none;font-size:.74rem;font-weight:700;border-radius:999px;padding:3px 9px;background:var(--sunk);color:var(--muted)}.ilt.gec{background:var(--danger-soft);color:var(--danger)}.ilt.yak{background:var(--warn-soft);color:var(--warn)}
@@ -1503,7 +1504,8 @@ store=Object.assign({mode:null,code:null,me:null,R:null,pending:{},demo:null,dem
 let S=null,baseC={};
 const UI={shop:null,shopAt:0,joinFor:null,joinShown:false,tab:'today',cal:'month',calDate:T(),agStart:T(),agN:21,sel:null,mAll:false,pending:null,filter:[],tf:'all',list:null,doneOpen:false,dpo:{},lmode:'buy',wt:'all',net:'online',err:null};
 UI.dcKeep=new Set();
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){try{store.av={};store.avi={};localStorage.setItem(KEY,JSON.stringify(store))}catch(x){}}};
+let WIPED=false;
+const save=()=>{if(WIPED)return;try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){try{store.av={};store.avi={};localStorage.setItem(KEY,JSON.stringify(store))}catch(x){}}};
 const meId=()=>store.mode==='demo'?store.demoMe:store.me;
 const M=id=>(S&&S.members.find(m=>m.id===id))||{id,name:'Eski üye',color:'#8A8178',role:'adult',rel:''};
 const me=()=>M(meId());
@@ -3547,8 +3549,13 @@ function famSettingsHTML(){const {m,demo,np,standalone,ios,sync,sub}=famCtx();
   ${demo?'':`<div class="setrow"><span id="lbl-on"><b>Burada olduğumu göster</b>${sub('Uygulama açıkken ailen Bugün ve Listeler’de “şu an burada” görür')}</span><button class="switch" role="switch" aria-labelledby="lbl-on" aria-checked="${!store.prefs.hideOn}" data-act="onToggle"></button></div>`}
   ${standalone?'':`<div class="setrow"><span><b>Telefona yükle</b>${sub(installEvt?'Bizim Ev ana ekranında uygulama gibi açılır.':ios?'Safari\'de Paylaş düğmesine, sonra “Ana Ekrana Ekle”ye dokun.':'Tarayıcı menüsünden “Ana ekrana ekle”yi seç.')}</span>${installEvt?'<button class="btn ghost sm" data-act="install">Yükle</button>':''}</div>`}
   ${demo?'':`<div class="setrow" data-act="syncTap"><span><b>Eşitleme</b>${sub(sync)}</span></div>`}</div>
- <div class="group" style="margin-top:16px">
-  <div class="setrow"><span><b>${demo?'Örnek aileden çık':'Bu cihazdan çık'}</b>${sub(demo?'Kendi aileni kurmak ya da bir aileye katılmak için.':'Ailenin bilgileri silinmez, kodla tekrar girebilirsin.')}</span><button class="btn danger sm" data-act="leaveAsk">${demo?'Örnek aileden çık':'Çık'}</button></div></div>`}
+ ${demo?`<div class="group" style="margin-top:16px">
+  <div class="setrow"><span><b>Örnek aileden çık</b>${sub('Kendi aileni kurmak ya da bir aileye katılmak için.')}</span><button class="btn danger sm" data-act="leaveAsk">Örnek aileden çık</button></div></div>`:`<div class="setsec">Hesap ve veriler</div><div class="group">
+  <div class="setrow"><span><b>Verilerimi indir</b>${sub('Okunabilir bir sayfa olarak, bu telefona')}</span><button class="btn ghost sm" data-act="dxSheet">İndir</button></div>
+  <a class="setrow" href="gizlilik.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><span><b>Gizlilik politikası</b>${sub('Hangi bilgiyi neden tutuyoruz')}</span>${I('chevR','sm')}</a>
+  <div class="setrow"><span><b>Bu cihazdan çık</b>${sub('Ailenin bilgileri silinmez, kodla tekrar girebilirsin.')}</span><button class="btn ghost sm" data-act="leaveAsk">Çık</button></div>
+  <div class="setrow"><span><b style="color:var(--danger)">Hesabımı ve verilerimi sil</b>${sub('Bu telefon aileden çıkarılır, kimliğin silinir.')}</span><button class="btn danger sm" data-act="accDelAsk">Sil</button></div>
+  ${m.role==='admin'?`<div class="setrow"><span><b style="color:var(--danger)">Aileyi sil</b>${sub(kBusy()?'Kilit işlemi bitince silinebilir.':'Bütün aile herkes için silinir. Yalnız yönetici.')}</span><button class="btn danger sm" data-act="famDelAsk"${kBusy()?' disabled':''}>Sil</button></div>`:''}</div>`}`}
 function famInviteHTML(){const {adm,demo}=famCtx();return `<div class="invite">${adm?`<div class="flabel">Aile kodu</div><div class="code" id="fam-code">${demo?'ÖRNE-KKOD':fmtCode(store.code)}</div>
   <div style="color:var(--muted);font-size:.9rem;margin-top:4px">${demo?'Örnek ailede davet çalışmaz. Kendi aileni kurduğunda burada gerçek kodun yazar.':'Bizim Ev\'i açan kişi “Aile koduyla katıl” deyip bu kodu yazar. Bağlantıyı gönderirsen kod kendiliğinden dolar.'}</div>
   <div class="row2"><button class="btn primary sm" data-act="share">${I('link','sm')}Davet gönder</button><button class="btn soft sm" data-act="copyCode">${I('copy','sm')}Kodu kopyala</button></div>`
@@ -3608,7 +3615,7 @@ const themeSeg=()=>[['system','Sistem'],['light','Açık'],['dark','Koyu']].map(
 
 function vLoading(){const b=(h,w,mt)=>`<div class="sk" style="height:${h}px;width:${w||'100%'};margin-top:${mt||10}px"></div>`;
  return `<div aria-busy="true" aria-label="Yükleniyor">${b(34,'70%',6)}${b(18,'45%',8)}${b(86,'',22)}<div class="qa">${b(84,'',0)}${b(84,'',0)}${b(84,'',0)}</div>${b(22,'30%',28)}${b(64)}${b(64,'',2)}${b(22,'40%',28)}${b(64)}${b(64,'',2)}${b(64,'',2)}</div>`}
-const vError=k=>`<div class="state-err"><div class="ic">${I('alert')}</div><h1 style="font-size:1.4rem">${k==='denied'?'Bu aileye erişilemiyor':'Bu aile bulunamadı'}</h1><p class="sub" style="max-width:32ch;margin:8px auto 18px">${k==='denied'?'Sunucu bu aileyi açmaya izin vermedi.':'Aile silinmiş ya da kod yanlış kaydedilmiş olabilir.'} Bu cihazdan çıkıp kodla yeniden katılabilirsin.</p><button class="btn primary" data-act="leave">Bu cihazdan çık</button></div>`;
+const vError=k=>`<div class="state-err"><div class="ic">${I('alert')}</div><h1 style="font-size:1.4rem">${k==='denied'?'Bu aileye erişilemiyor':'Bu aile bulunamadı'}</h1><p class="sub" style="max-width:32ch;margin:8px auto 18px">${k==='denied'?'Sunucu bu aileyi açmaya izin vermedi.':'Aile silinmiş ya da kod yanlış kaydedilmiş olabilir.'} Bu cihazdan çıkıp kodla yeniden katılabilirsin.</p><button class="btn primary" data-act="${k==='missing'?'leaveGone':'leave'}">Bu cihazdan çık</button></div>`;
 function vWelcome(){return `<div class="welcome">
  <div><img class="logo" src="./icons/icon-192.png" alt="" width="76" height="76"><h1>Bizim Ev</h1><p class="lead">Ailenin takvimi, görevleri ve listeleri tek yerde. Herkes kendi telefonundan görür, ekler, işaretler.</p></div>
  <div class="acts"><button class="btn primary" data-act="createSheet">${I('home','sm')}Yeni aile oluştur</button><button class="btn soft" data-act="joinSheet">${I('users','sm')}Aile koduyla katıl</button><button class="link" style="justify-content:center" data-act="startDemo">Önce örnek aileyle dene</button></div>
@@ -3890,6 +3897,36 @@ const A={
  leave:()=>{if(es){es.close();es=null}beatOff();
   if(FB_KEY&&store.mode==='family'&&store.code){fbSend(store.code,'PUT',null,'/uids/'+myUid()).catch(()=>{});fbSend(store.code,'PUT',null,'/ver/'+myUid()).catch(()=>{})}
   Object.assign(store,{mode:null,code:null,me:null,R:null,pending:{},fk:null,rc:null,D:{}});KS.ok=null;KS.src='';S=null;UI.err=null;close();render()},
+ // Hesap ve veriler
+ dxSheet:()=>sheet('Verilerini indir',`<p>Ailenin bu telefonda açılabilen bütün kayıtları tek bir dosyada iner: tarayıcıda okunabilir bir sayfa ve içinde aynı verinin makinenin okuyacağı hâli. Fotoğraflar dosyaya girmez.</p><p class="note">${I('info','sm')}<span>Dosya şifresizdir. Kilitli ailede bile okunabilir hâlde iner; güvenli bir yerde sakla, kimseyle paylaşma.</span></p><div class="actions"><button class="btn primary" data-act="dxGo">${I('paper','sm')}Dosyayı kaydet</button></div>`),
+ dxGo:async()=>{if(!S)return;try{if(await dxSave())toast('Dosya hazır')}catch(e){toast('Dosya hazırlanamadı')}},
+ accDelAsk:()=>{if(store.mode!=='family')return;const m=me(),others=S.members.filter(x=>x.id!==m.id);
+  if(!others.length){sheet('Ailede yalnız sen varsın','<p>Hesabını silmek için aileyi silmen yeterli: Ayarlar › Hesap ve veriler › Aileyi sil.</p><div class="actions"><button class="btn ghost" data-act="close">Tamam</button></div>');return}
+  if(m.role==='admin'&&adminN()<2){sheet('Önce başka bir yönetici seç','<p>Ailenin tek yöneticisi sensin. Hesabını silmeden önce Aile sayfasından başka birini yönetici yap; yoksa kimse yeni üye ekleyemez.</p><div class="actions"><button class="btn ghost" data-act="close">Tamam</button></div>');return}
+  F.amem=true;const n=Object.keys(store.pending).length;
+  sheet('Hesabın ve verilerin silinsin mi?',`<ul class="dlist"><li><span class="x">${I('x','sm')}</span><span>Bu telefon aileden çıkarılır; anahtarı, kopyası ve yedeği silinir.</span></li><li><span class="x">${I('x','sm')}</span><span>Burada olma bilgin ve cihaz kimliğin silinir.</span></li><li><span class="k">${I('check','sm')}</span><span>Eklediğin etkinlikler, görevler ve listeler ailede kalır.</span></li></ul>
+  <div class="setrow" style="background:var(--sunk);border-radius:14px;margin-top:12px"><span id="lbl-amem"><b>Üye kaydım da silinsin</b><br><span style="color:var(--muted);font-size:.875rem">Adın, fotoğrafın ve mesajın aileden kalkar.</span></span><button class="switch" role="switch" aria-labelledby="lbl-amem" aria-checked="true" data-act="accDelTog"></button></div>
+  ${n?`<p class="err">${n} değişiklik henüz gönderilmedi; bunlar da silinir.</p>`:''}<p class="err" id="ad-err" hidden></p>
+  <div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" id="ad-btn" data-act="accDelGo">Hesabımı sil</button></div>`)},
+ accDelTog:(d,el)=>{F.amem=!F.amem;el.setAttribute('aria-checked',F.amem)},
+ accDelGo:async()=>{const b=document.getElementById('ad-btn'),er=document.getElementById('ad-err');if(b){b.disabled=true;b.textContent='Siliniyor…'}
+  const C=store.code,mid=store.me,u=myUid();
+  try{if(F.amem)for(const p of ['/members/','/msgs/','/okh/'])await fbSend(C,'PUT',null,p+mid);
+   await fbSend(C,'PUT',null,'/on/'+mid).catch(()=>{});if(u){await fbSend(C,'PUT',null,'/ver/'+u).catch(()=>{});await fbSend(C,'PUT',null,'/uids/'+u)}}
+  catch(e){if(b){b.disabled=false;b.textContent='Hesabımı sil'}if(er){er.textContent='Silinemedi. İnternet bağlantını kontrol edip yeniden dene.';er.hidden=false}return}
+  await authDel();await wipeLocal()},
+ famDelAsk:()=>{if(store.mode!=='family'||me().role!=='admin')return;
+  if(kBusy()){sheet('Şu an silinemez','<p>Uçtan Uca Kilit işlemi sürüyor. Bitince yeniden dene.</p><div class="actions"><button class="btn ghost" data-act="close">Tamam</button></div>');return}
+  sheet(`“${esc(S.meta.name||'Aile')}” silinsin mi?`,`<p>Ailenin bütün kayıtları, fotoğrafları ve üyeleri herkes için silinir. Bu geri alınamaz.</p>
+  <button class="row rph" style="width:100%;margin:12px 0;background:var(--sunk);border-radius:14px" data-act="dxGo">${I('paper','sm')}<span class="body"><b>Önce yedeği kaydet</b><br><span style="color:var(--muted);font-size:.875rem">Verilerimi indir dosyası. Şifresizdir, güvenli bir yerde sakla.</span></span></button>
+  <div class="field"><label class="flabel" for="fd-name">Onaylamak için ailenin adını yaz</label><input id="fd-name" autocomplete="off" placeholder="${esc(S.meta.name||'')}"></div><p class="err" id="fd-err" hidden></p>
+  <div class="actions"><button class="btn ghost" data-act="close">Vazgeç</button><button class="btn danger" data-act="famDelGo">Aileyi sil</button></div>
+  <p class="note">${I('info','sm')}<span>Bastıktan sonra 10 saniye “Geri al” çıkar, sonra silinir.</span></p>`)},
+ famDelGo:()=>{const i=document.getElementById('fd-name'),er=document.getElementById('fd-err');
+  if(!i||low(i.value.trim())!==low(String(S.meta.name||'').trim())){if(er){er.textContent='Ad tutmuyor. Ailenin adını aynen yaz.';er.hidden=false}return}
+  close();let off=false;const t=setTimeout(()=>{if(!off)famDelRun()},10000);
+  toast('Aile 10 saniye içinde silinecek',()=>{off=true;clearTimeout(t);toast('Silme iptal edildi')});clearTimeout(tt);tt=setTimeout(()=>{const w=document.getElementById('toastwrap');if(w)w.innerHTML='';toast.undo=null},10000)},
+ leaveGone:async()=>{await authDel();await wipeLocal()},
  // Kişi, tema, ayarlar
  who:()=>sheet('Bu cihazda kim var?',`<p class="note" style="margin:0 0 12px">${I('info','sm')}<span>Ortak kullanılan bir tablet gibi cihazlarda kişiler arasında geçebilirsin.</span></p><div class="people">${ordMe().map(m=>`<button data-act="asUser" data-id="${m.id}" aria-pressed="${meId()===m.id}">${av(m.id)}<span><b>${esc(m.name)}</b><small>${ROLES[m.role]}${m.rel?' · '+esc(m.rel):''}</small></span></button>`).join('')}</div>`),
  asUser:d=>{if(store.mode==='demo'){store.demoMe=d.id;store.prefs.big=!!M(d.id).big}else{if(d.id!==store.me)beatOff();store.me=d.id;beat()}UI.tf=isChild()?'mine':'all';close();render();toast(`Artık ${M(d.id).name} olarak bakıyorsun`)},
@@ -4692,6 +4729,49 @@ async function ydTake(code){const t=await authTok(),[fam,av]=await Promise.all([
 function ydDl(){const y=UI.yd;if(!y)return;const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify(y)],{type:'application/json'}));
  a.href=u;a.download=`bizim-ev-yedek-${y.code}-${iso(new Date(y.at))}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
 const ydBtn=()=>UI.yd?`<button class="link" style="justify-content:center;width:100%;margin-top:8px" data-act="ydDl">${I('paper','sm')}Yedeği dosya olarak indir</button>`:'';
+
+/* Hesap ve veriler (mağazaların şartı): verilerimi indir, hesabımı sil, aileyi sil.
+   İndirme telefonda, çözülmüş S'den yapılır; düz metin hiçbir yere gönderilmez. Silme sırası: önce üyeye ait kayıtlar,
+   en son uids (kurallar yazmayı uids'e bakarak açar). Aile silinirken photos → avatars → families sırası şart. */
+const dxEsc=s=>esc(String(s==null?'':s));
+function dxData(){const o={uygulama:'Bizim Ev',tarih:new Date().toISOString(),aile:clone(S.meta||{})};for(const c of COLS)o[c]=clone(S[c]||[]);return o}
+function dxHTML(d){const name=dxEsc((d.aile&&d.aile.name)||'Bizim Ev'),M2=id=>{const m=(d.members||[]).find(x=>x.id===id);return m?m.name:''};
+ const sec=(t,rows)=>rows.length?`<h2>${t} <small>${rows.length}</small></h2><ul>${rows.join('')}</ul>`:'';
+ const by=(a,k)=>[...a].sort((x,y)=>String(x[k]||'').localeCompare(String(y[k]||'')));
+ const body=[
+  sec('Üyeler',(d.members||[]).map(m=>`<li><b>${dxEsc(m.name)}</b> <span>${dxEsc(m.rel||'')} · ${dxEsc(ROLES[m.role]||m.role)}</span></li>`)),
+  sec('Takvim',by(d.events||[],'date').map(e=>`<li><b>${dxEsc(e.title)}</b> <span>${dxEsc(e.date)}${e.end?' – '+dxEsc(e.end):''}${e.time?' '+dxEsc(e.time):''}${e.loc?' · '+dxEsc(e.loc):''}</span></li>`)),
+  sec('Görevler',by(d.tasks||[],'due').map(t=>`<li><b>${dxEsc(t.title)}</b> <span>${dxEsc(t.due)}${t.assignee?' · '+dxEsc(M2(t.assignee)):''}${t.done?' · yapıldı':''}</span></li>`)),
+  ...(d.lists||[]).map(l=>sec('Liste: '+dxEsc(l.name),(d.items||[]).filter(i=>i.list===l.id).map(i=>`<li><b>${dxEsc(i.name)}</b> <span>${i.done?'alındı':'alınacak'}${i.note?' · '+dxEsc(i.note):''}</span></li>`))),
+  sec('İstekler',(d.wishes||[]).map(w=>`<li><b>${dxEsc(w.title)}</b> <span>${dxEsc(w.type||'')}${w.done?' · yapıldı':''}${w.note?' · '+dxEsc(w.note):''}</span></li>`)),
+  sec('Ev Kütüphanesi',by(d.books||[],'t').map(b=>`<li><b>${dxEsc(b.t)}</b> <span>${dxEsc(b.a)}</span></li>`)),
+  sec('İlaç Dolabı',(d.ilac||[]).map(x=>`<li><b>${dxEsc(x.n)}</b> <span>${x.s?'SKT '+dxEsc(x.s):''}</span></li>`)),
+  sec('Tarifler',by(d.tarif||[],'t').map(x=>`<li><b>${dxEsc(x.t)}</b> <span>${(x.m||[]).length} malzeme</span></li>`)),
+  sec('Yorumlar',by(d.wcm||[],'at').map(x=>`<li><b>${dxEsc(M2(x.by))}</b> <span>${dxEsc(x.t)}</span></li>`))
+ ].join('');
+ const json=JSON.stringify(d).replace(/</g,'\\u003c');
+ return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${name} · Bizim Ev verileri</title>
+<style>body{font:15px/1.5 system-ui,sans-serif;max-width:760px;margin:0 auto;padding:24px 16px;color:#22201D;background:#FAF8F5}h1{margin:0 0 4px}h2{margin:28px 0 6px;font-size:17px}h2 small{color:#625B52;font-weight:400}ul{padding-left:18px;margin:0}li{margin:3px 0}li span{color:#625B52}.n{color:#625B52;font-size:13px}</style></head>
+<body><h1>${name}</h1><p class="n">Bizim Ev'den ${dxEsc(new Date(d.tarih).toLocaleString('tr-TR'))} tarihinde indirildi. Bu dosya şifresizdir; güvenli bir yerde sakla. Bütün kayıtlar makinenin okuyacağı biçimde aşağıdaki "bizim-ev-veri" bloğunda da var.</p>${body}
+<script type="application/json" id="bizim-ev-veri">${json}<\/script></body></html>`}
+async function dxSave(){const d=dxData(),f=`bizim-ev-${iso(new Date())}.html`,blob=new Blob([dxHTML(d)],{type:'text/html'});
+ try{const file=new File([blob],f,{type:'text/html'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Bizim Ev verileri'});return true}}catch(e){if(e&&e.name==='AbortError')return false}
+ const a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=f;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);return true}
+// Bu telefondaki her şeyi siler ve uygulamayı baştan açar (aile kaydı, anahtar, önbellek, yedek, fotoğraflar)
+async function wipeLocal(){WIPED=true;if(es){es.close();es=null}
+ try{localStorage.removeItem(KEY)}catch(e){}
+ await Promise.all(['bizim-ev-yedek','bizim-ev-foto'].map(n=>new Promise(ok=>{try{const r=indexedDB.deleteDatabase(n);r.onsuccess=r.onerror=r.onblocked=()=>ok()}catch(e){ok()}})));
+ location.replace(location.pathname)}
+// Anonim Firebase kimliğini sunucudan siler
+async function authDel(){if(!FB_KEY)return;try{const t=await authTok();if(t)await jpost(`https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${FB_KEY}`,{idToken:t})}catch(e){}}
+const kBusy=()=>{const k=kRec();return !!(k&&(k.st==='migrating'||k.st==='undo'))};
+const adminN=()=>S.members.filter(m=>m.role==='admin').length;
+// Aileyi sunucudan siler: önce fotoğraflar ve avatarlar (kuralları aileye bakar), en son aile
+async function famDelRun(){const C=store.code;toast('Aile siliniyor…');
+ try{const t=await authTok();for(const p of ['photos/'+C,'avatars/'+C]){const r=await fetch(dbUrl(p,t),{method:'DELETE'});if(!r.ok)throw new Error('HTTP '+r.status)}
+  if(es){es.close();es=null}await fbSend(C,'PUT',null,'')}
+ catch(e){toast('Aile silinemedi. İnternet bağlantını kontrol edip yeniden dene.');connect();return}
+ await authDel();await wipeLocal()}
 
 /* Kilitleme ilerlemesi */
 const LKG=[['Etkinlikler',['events','rsv']],['Görevler',['tasks']],['Listeler ve alınacaklar',['lists','items','freq']],['İstekler ve yorumlar',['wishes','wcm']],['Kütüphane',['books','bkat','okl','okh']],['İlaç Dolabı',['ilac']],['Mutfak',['tarif','mplan']],['Aile, mesajlar ve geçmiş',['members','msgs','activity','meta','ann']]];
