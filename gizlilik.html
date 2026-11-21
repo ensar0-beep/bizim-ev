@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bizim Ev · Gizlilik</title>
+<meta name="description" content="Bizim Ev gizlilik politikası ve KVKK aydınlatma metni">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#FAF8F5;--fg:#211E19;--mut:#6B645A;--line:#E7E2DA;--acc:#2E6A51;--card:#FFFFFF}
+@media (prefers-color-scheme:dark){:root{--bg:#171512;--fg:#F2EEE8;--mut:#A59D92;--line:#2F2B26;--acc:#7CC3A0;--card:#211E19}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:680px;margin:0 auto;padding:calc(24px + env(safe-area-inset-top)) 16px 48px}
+h1{font-size:28px;line-height:1.2;margin:8px 0 4px}
+h2{font-size:18px;margin:32px 0 8px}
+p,li{color:var(--fg)}
+.mut{color:var(--mut);font-size:14px}
+ul{padding-left:20px}
+li{margin:4px 0}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:16px 0}
+a{color:var(--acc)}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<p class="mut">Bizim Ev</p>
+<h1>Gizlilik politikası ve KVKK aydınlatma metni</h1>
+<p class="mut">Son güncelleme: 21 Kasım 2026</p>
+
+<div class="box">
+<strong>Kısaca:</strong> Bizim Ev'de reklam, istatistik ya da izleme kodu yok. Verinizi satmıyoruz ve kimseyle paylaşmıyoruz. Ailenizin bilgileri yalnızca sizin ailenize kayıtlı telefonlarda açılır. Uçtan uca kilidi açık ailelerin verisini biz de, Google da okuyamaz.
+</div>
+
+<h2>1. Veri sorumlusu</h2>
+<p>Bizim Ev'i yayımlayan: <strong>[AD SOYAD]</strong>. İletişim: <a href="mailto:[E-POSTA]">[E-POSTA]</a>. Bu metindeki her soru ve başvuru için bu adrese yazabilirsiniz.</p>
+
+<h2>2. Hangi bilgileri tutuyoruz?</h2>
+<table>
+<tr><th>Bilgi</th><th>Nerede durur</th><th>Neden</th></tr>
+<tr><td>Ailenizin yazdıkları: üyelerin adları ve rolleri, takvim, görevler, listeler, istekler, yorumlar, mesajlar, kitaplar, ilaçlar, tarifler</td><td>Firebase Realtime Database (Google, ABD)</td><td>Ailenizdeki telefonların aynı bilgiyi görmesi için</td></tr>
+<tr><td>Yüklediğiniz fotoğraflar (profil ve etkinlik fotoğrafları)</td><td>Firebase Realtime Database (Google, ABD)</td><td>Aynı nedenle</td></tr>
+<tr><td>Cihaz kimliği: her telefon için rastgele oluşturulan anonim bir numara</td><td>Firebase Authentication (Google, ABD)</td><td>Ailenizin verisini yalnızca ailenize kayıtlı telefonlara açmak için</td></tr>
+<tr><td>"Şu an burada" sinyali: uygulamanın açık olduğu son dakika</td><td>Firebase, ailenizin altında</td><td>Aile üyelerine kimin uygulamada olduğunu göstermek için. Ayarlardan kapatılabilir.</td></tr>
+</table>
+<p>Ad soyad, e-posta, telefon numarası ya da kimlik bilgisi istemiyoruz. Hesap açmak için yalnızca bir aile kodu yeterli.</p>
+
+<h2>3. Telefonunuzdan hiç çıkmayanlar</h2>
+<ul>
+<li><strong>Konumunuz:</strong> hava durumu için seçtiğiniz yer ya da konum yalnızca telefonunuzda saklanır, bize gönderilmez.</li>
+<li><strong>Uçtan uca kilit anahtarı ve kurtarma kodu:</strong> yalnızca ailenizin telefonlarında ve sizin kâğıdınızda durur.</li>
+<li><strong>Uygulama ayarlarınız</strong> (görünüm, sıralama, kişiselleştirme).</li>
+</ul>
+
+<h2>4. Uçtan uca kilit</h2>
+<p>Aile yöneticisi Uçtan Uca Kilit'i açtığında ailenin her kaydı ve fotoğrafı, telefondan çıkmadan önce AES-256 ile şifrelenir. Sunucuda yalnızca okunamayan şifreli metin durur. Anahtar sunucuya hiç gönderilmez; bu yüzden ne biz ne de Google bu verileri okuyabilir. Bütün telefonlar ve kurtarma kodu kaybolursa veri geri açılamaz.</p>
+
+<h2>5. Başka hizmetlere giden istekler</h2>
+<p>Bazı özellikler, siz kullandığınızda ilgili hizmete doğrudan istek gönderir. Bu isteklerde aile bilginiz gitmez; yalnızca aşağıdaki bilgi gider:</p>
+<ul>
+<li><strong>Open-Meteo</strong> (hava durumu): yuvarlanmış koordinat (yaklaşık 1 km).</li>
+<li><strong>Google Books ve Open Library</strong> (kitap arama ve kapaklar): aradığınız kitap adı ya da barkod numarası.</li>
+<li><strong>Google Fonts</strong> (yazı tipleri): uygulamanın açıldığı bilgisi.</li>
+<li><strong>Google Haritalar, Hepsiburada, tarif siteleri:</strong> yalnızca bir bağlantıya dokunduğunuzda o site açılır.</li>
+</ul>
+<p>Bu hizmetler, standart internet isteğinin parçası olan IP adresinizi görebilir.</p>
+
+<h2>6. Ne kadar saklıyoruz?</h2>
+<p>Bilgiler, siz ya da aileniz silene kadar durur. Bazı kayıtlar kendiliğinden temizlenir: 30 günden eski yemek planları, 400 günden eski okuma kayıtları, 2,5 dakikadan eski "şu an burada" sinyalleri.</p>
+
+<h2>7. Silme</h2>
+<ul>
+<li><strong>Tek bir kayıt:</strong> uygulamada ilgili kaydı açıp silebilirsiniz.</li>
+<li><strong>Hesabınız:</strong> Ayarlar › Hesabımı ve verilerimi sil. Telefonunuz aileden çıkarılır, üye kaydınız ve size ait veriler silinir.</li>
+<li><strong>Bütün aile:</strong> aile yöneticisi aynı yerden ailenin bütün verisini silebilir.</li>
+<li>Uygulamaya ulaşamıyorsanız <a href="mailto:[E-POSTA]">[E-POSTA]</a> adresine aile kodunuzla yazın; 30 gün içinde sileriz.</li>
+</ul>
+
+<h2>8. Çocuklar</h2>
+<p>Çocuk hesaplarını yalnızca ailenin yetişkinleri ekler. Çocuktan e-posta, telefon ya da konum istemiyoruz.</p>
+
+<h2>9. KVKK kapsamındaki haklarınız</h2>
+<p>6698 sayılı Kişisel Verilerin Korunması Kanunu'nun 11. maddesi uyarınca verilerinizin işlenip işlenmediğini öğrenme, bilgi isteme, düzeltilmesini ya da silinmesini isteme, itiraz etme ve zararın giderilmesini talep etme haklarınız vardır. Başvurularınızı <a href="mailto:[E-POSTA]">[E-POSTA]</a> adresine iletebilirsiniz.</p>
+<p><strong>İşleme amacı ve hukuki sebep:</strong> veriler, aile düzenleyici hizmetinin sunulması amacıyla, sözleşmenin kurulması ve ifası (KVKK m.5/2-c) kapsamında işlenir. <strong>Yurt dışına aktarım:</strong> veriler Google'ın ABD'deki sunucularında barındırılır; uygulamayı kullanarak bu aktarıma açık rıza vermiş olursunuz (KVKK m.9).</p>
+
+<h2>10. Değişiklikler</h2>
+<p>Bu metni değiştirirsek tarihini güncelleriz ve uygulamanın "Yenilikler" bölümünde duyururuz.</p>
+</main>
+</body>
+</html>
