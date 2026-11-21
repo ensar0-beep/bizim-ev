@@ -33,10 +33,10 @@ jobs:
           name: bizim-ev-deneme-apk
           path: magaza/android/app/build/outputs/apk/debug/*.apk
 
-  # Play Console'a yüklenecek imzalı paket: Actions sekmesinden elle başlatılır.
+  # Play Console'a yüklenecek imzalı paket: elle ya da commit mesajında [play] varsa çalışır.
   # Tek gizli değer gerekir (Settings → Secrets → Actions): BIZIMEV_IMZA. Anahtar depoda bu şifreyle kilitli durur (magaza/imza).
   play-paketi:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[play]')
     runs-on: ubuntu-latest
     defaults:
       run:
