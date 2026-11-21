@@ -1,0 +1,12 @@
+{
+  "appId": "com.bizimev.app",
+  "appName": "Bizim Ev",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#FFFFFF"
+  },
+  "ios": {
+    "backgroundColor": "#FFFFFF",
+    "contentInset": "never"
+  }
+}

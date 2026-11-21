@@ -4554,7 +4554,7 @@ window.addEventListener('pagehide',()=>beatOff());
 window.addEventListener('pageshow',e=>{if(e.persisted&&store.mode==='family'){ensureUid().then(connect);flush()}});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;if(UI.tab==='family'&&S)render(true)});
 setInterval(checkReminders,30000);
-if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').then(r=>{swReg=r}).catch(()=>{});
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')&&!window.Capacitor)navigator.serviceWorker.register('./sw.js').then(r=>{swReg=r}).catch(()=>{});
 
 
 /* ---------- Açılış kartı: her açılışta en fazla biri ----------

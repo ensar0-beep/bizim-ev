@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Bizim Ev</string>
+    <string name="title_activity_main">Bizim Ev</string>
+    <string name="package_name">com.bizimev.app</string>
+    <string name="custom_url_scheme">com.bizimev.app</string>
+</resources>
