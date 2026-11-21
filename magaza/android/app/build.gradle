@@ -7,8 +7,9 @@ android {
         applicationId "com.bizimev.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        // Her mağaza yüklemesinde artmalı: bulutta GitHub çalıştırma numarasından gelir
+        versionCode((System.getenv("BIZIMEV_VCODE") ?: "1") as int)
+        versionName System.getenv("BIZIMEV_VNAME") ?: "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,8 +17,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Yükleme anahtarı depoda DEĞİL: bulutta GitHub gizli değerlerinden dosyaya yazılır
+    signingConfigs {
+        release {
+            def ks = System.getenv("BIZIMEV_KS_FILE")
+            if (ks) {
+                storeFile file(ks)
+                storePassword System.getenv("BIZIMEV_KS_PASS")
+                keyAlias System.getenv("BIZIMEV_KEY_ALIAS")
+                keyPassword System.getenv("BIZIMEV_KEY_PASS")
+            }
+        }
+    }
     buildTypes {
         release {
+            if (System.getenv("BIZIMEV_KS_FILE")) signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

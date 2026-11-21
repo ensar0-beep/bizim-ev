@@ -32,3 +32,45 @@ jobs:
         with:
           name: bizim-ev-deneme-apk
           path: magaza/android/app/build/outputs/apk/debug/*.apk
+
+  # Play Console'a yüklenecek imzalı paket: Actions sekmesinden elle başlatılır.
+  # Tek gizli değer gerekir (Settings → Secrets → Actions): BIZIMEV_IMZA. Anahtar depoda bu şifreyle kilitli durur (magaza/imza).
+  play-paketi:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: magaza
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: magaza/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npm run android
+      - name: Yükleme anahtarının kilidini aç
+        env:
+          IMZA: ${{ secrets.BIZIMEV_IMZA }}
+        run: |
+          test -n "$IMZA" || { echo "BIZIMEV_IMZA gizli değeri yok"; exit 1; }
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$IMZA" -d -o "$RUNNER_TEMP/yukleme.jks" imza/yukleme.jks.gpg
+      - name: İmzalı paket (AAB) derle
+        working-directory: magaza/android
+        env:
+          BIZIMEV_KS_FILE: ${{ runner.temp }}/yukleme.jks
+          BIZIMEV_KS_PASS: ${{ secrets.BIZIMEV_IMZA }}
+          BIZIMEV_KEY_ALIAS: bizimev
+          BIZIMEV_KEY_PASS: ${{ secrets.BIZIMEV_IMZA }}
+          BIZIMEV_VCODE: ${{ github.run_number }}
+          BIZIMEV_VNAME: 1.0.${{ github.run_number }}
+        run: ./gradlew bundleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bizim-ev-play-aab
+          path: magaza/android/app/build/outputs/bundle/release/*.aab
